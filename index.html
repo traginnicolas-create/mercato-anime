@@ -9281,18 +9281,19 @@ setInterval(voxRender, 2000);
 .tcsh.q0{--qc:#c9a36a}.tcsh.q2{--qc:#f2c230}
 /* ---- version Légende : la plus rare. Carte vivante, sur le modèle des cartes de visite Légende (prisme, aura, double image, particules, inclinaison) ---- */
 .tccine.yZ{--yc:#d5b3ff}
-.tc.f-Z{border:2px solid transparent;background:linear-gradient(#0b0a0e,#0b0a0e) padding-box,linear-gradient(120deg,#ff5a8a,#fff275,#6ee7a8,#5ac8fa,#b07cff,#ff5a8a) border-box;background-size:auto,300% 300%;box-shadow:0 0 34px rgba(176,124,255,.6);transform:perspective(650px) rotateX(var(--vx,0deg)) rotateY(var(--vy,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.tc.f-Z{border:2px solid transparent;background:linear-gradient(#090614,#090614) padding-box,linear-gradient(120deg,#ff5a8a,#fff275,#6ee7a8,#5ac8fa,#b07cff,#ff5a8a) border-box;background-size:auto,300% 300%;box-shadow:0 0 34px rgba(176,124,255,.6);transform:perspective(650px) rotateX(var(--vx,0deg)) rotateY(var(--vy,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 .tc.f-Z.live{transition:transform .08s linear;box-shadow:0 0 54px rgba(255,122,184,.85),0 18px 40px rgba(0,0,0,.6)}
 .tc.f-Z > .aur,.tc.f-Z > .bolt,.tc.f-Z > .glare,.tc.f-Z > img.g{position:absolute}
-.tc.f-Z > .aur{inset:-40%;z-index:0;pointer-events:none;background:conic-gradient(from 0deg at 50% 46%,transparent 0 20deg,rgba(255,90,138,.55) 40deg,transparent 70deg,rgba(90,200,250,.55) 130deg,transparent 170deg,rgba(255,242,117,.45) 230deg,transparent 280deg,rgba(176,124,255,.6) 320deg,transparent 360deg);filter:blur(12px);mix-blend-mode:screen;opacity:.42;-webkit-mask-image:radial-gradient(ellipse at 50% 40%,transparent 30%,#000 75%);mask-image:radial-gradient(ellipse at 50% 40%,transparent 30%,#000 75%)}
-.tc.f-Z > img{transform:translate3d(calc(var(--mx,0) * -7px),calc(var(--my,0) * -5px),0) scale(1.12);transform-origin:50% 20%;filter:saturate(1.15) contrast(1.05)}
-.tc.f-Z > img.g{inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%;z-index:0;mix-blend-mode:screen;opacity:.22;filter:hue-rotate(90deg) saturate(1.7);transform:translate3d(calc(var(--mx,0) * 9px - 4px),calc(var(--my,0) * 6px + 2px),0) scale(1.12);transform-origin:50% 20%}
+.tc.f-Z > .aur{inset:-40%;z-index:0;pointer-events:none;background:conic-gradient(from 0deg at 50% 46%,transparent 0 20deg,rgba(255,90,138,.55) 40deg,transparent 70deg,rgba(90,200,250,.55) 130deg,transparent 170deg,rgba(255,242,117,.45) 230deg,transparent 280deg,rgba(176,124,255,.6) 320deg,transparent 360deg);filter:blur(12px);mix-blend-mode:screen;opacity:.3;-webkit-mask-image:radial-gradient(ellipse at 50% 40%,transparent 30%,#000 75%);mask-image:radial-gradient(ellipse at 50% 40%,transparent 30%,#000 75%)}
+.tc.f-Z > img{transform:translate3d(calc(var(--mx,0) * -7px),calc(var(--my,0) * -5px),0) scale(1.12);transform-origin:50% 20%;filter:saturate(1.25) contrast(1.22) brightness(.86)}
+.tc.f-Z > img.g{inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%;z-index:0;mix-blend-mode:screen;opacity:.12;filter:hue-rotate(90deg) saturate(1.7);transform:translate3d(calc(var(--mx,0) * 9px - 4px),calc(var(--my,0) * 6px + 2px),0) scale(1.12);transform-origin:50% 20%}
 .tc.f-Z > .bolt{right:8%;top:-4%;bottom:38%;width:20%;z-index:1;pointer-events:none;background:linear-gradient(180deg,#fff,#d5b3ff);clip-path:polygon(52% 0,66% 0,44% 40%,72% 40%,26% 100%,46% 54%,20% 54%);opacity:0;filter:drop-shadow(0 0 8px #d5b3ff)}
 .tc.f-Z > .bolt.two{right:auto;left:8%;transform:scaleX(-1)}
 .tc.f-Z > .glare{inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at calc(50% + var(--mx,0) * 50%) calc(50% + var(--my,0) * 50%),rgba(255,255,255,.5),transparent 44%);mix-blend-mode:overlay;opacity:0;transition:opacity .3s}
 .tc.f-Z.live > .glare{opacity:1}
-.tc.f-Z .fx{opacity:1;background:radial-gradient(circle,#fff 0 1px,transparent 2px),radial-gradient(circle,#ffb3d9 0 1.2px,transparent 2.4px),radial-gradient(circle,#9be7ff 0 1px,transparent 2px),linear-gradient(112deg,transparent 36%,rgba(255,255,255,.42) 50%,transparent 64%);background-size:46px 58px,70px 44px,94px 76px,280% 100%;mix-blend-mode:screen}
-.tc.f-Z::after{background:linear-gradient(180deg,rgba(11,10,14,.5) 0,transparent 16%,transparent 62%,rgba(11,10,14,.95) 96%)}
+.tc.f-Z .fx{opacity:.85;z-index:2;background:radial-gradient(circle,#fff 0 .9px,transparent 1.8px),radial-gradient(circle,#ffb3d9 0 1.1px,transparent 2.2px),radial-gradient(circle,#9be7ff 0 .9px,transparent 1.8px),linear-gradient(112deg,transparent 40%,rgba(213,179,255,.22) 50%,transparent 60%);background-size:86px 108px,130px 84px,174px 136px,280% 100%;mix-blend-mode:screen;-webkit-mask-image:radial-gradient(ellipse 60% 52% at 50% 38%,transparent 40%,#000 80%);mask-image:radial-gradient(ellipse 60% 52% at 50% 38%,transparent 40%,#000 80%)}
+/* teintes nuit violette, comme la carte de visite Légende et le sachet Divin : le personnage reste net au centre, les bords plongent dans la nébuleuse */
+.tc.f-Z::after{background:radial-gradient(ellipse 66% 58% at 50% 38%,transparent 42%,rgba(58,22,120,.62) 74%,rgba(9,6,20,.94) 100%),radial-gradient(ellipse 60% 30% at 82% 92%,rgba(194,24,122,.5),transparent 70%),radial-gradient(ellipse 50% 26% at 12% 10%,rgba(90,42,208,.55),transparent 70%),linear-gradient(180deg,rgba(9,6,20,.55) 0,transparent 16%,transparent 60%,rgba(9,6,20,.97) 96%)}
 .tc.f-Z .nm{background:linear-gradient(100deg,#ffd1e6,#fff,#bfe9ff,#e3d1ff,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 6px #000)}
 .tc.f-Z .tp b{color:#0b0a0e;background:linear-gradient(100deg,#ffd1e6,#bfe9ff,#e3d1ff);border-radius:3px;padding:0 4px}
 .tc.f-Z .fn{background:linear-gradient(100deg,#ffd1e6,#bfe9ff,#e3d1ff)}
@@ -9304,7 +9305,26 @@ setInterval(voxRender, 2000);
   .tc.f-Z > img.g{animation:tczghost 2.8s steps(1) infinite}
   .tc.f-Z .nm{animation:vttext 4s linear infinite}
 }
-@keyframes tczghost{0%,84%,100%{opacity:.22}86%{opacity:.75}90%{opacity:.45}}
+@keyframes tczghost{0%,84%,100%{opacity:.12}86%{opacity:.6}90%{opacity:.3}}
+/* ---- cartes « objet » : gris acier, bandeau de type, fenêtre d'illustration, encadré de texte ---- */
+.tc.ob{container-type:inline-size;border:1.5px solid color-mix(in srgb,var(--rc) 75%,#6c7686);background:linear-gradient(160deg,#3a3f4a,#22252c 46%,#2e323b);padding:0;gap:0}
+.tc.ob::after{background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(255,255,255,.03) 5px 6px);box-shadow:inset 0 0 0 3px #1a1c21,inset 0 0 0 4px color-mix(in srgb,var(--rc) 55%,transparent)}
+.tc.ob > *{position:relative;z-index:1}
+.tc.ob .oh{display:flex;justify-content:space-between;align-items:center;gap:4px;margin:5.5cqw 6cqw 0;font-family:var(--mono);font-size:max(6.5px,5.2cqw);letter-spacing:.06em}
+.tc.ob .oh b{font-weight:500;text-transform:uppercase;background:var(--rc);color:#0e0d12;border-radius:3px;padding:.15em .6em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc.ob .oh i{font-style:normal;color:#aeb4c0}
+.tc.ob .on{display:block;margin:2.5cqw 6cqw 2.5cqw;font-family:var(--title);font-weight:900;font-size:max(8.5px,7.6cqw);line-height:1.08;letter-spacing:-.01em;color:#fff;text-align:left;min-height:1.08em;overflow-wrap:anywhere}
+.tc.ob .ow{display:block;margin:0 6cqw;aspect-ratio:16/11;flex:none;border-radius:2.5cqw;overflow:hidden;background:#0b0a0e;box-shadow:0 0 0 1.2cqw #cfd6e0,0 0 0 1.8cqw #1a1c21,inset 0 0 12px rgba(0,0,0,.6)}
+.tc.ob .ow img{position:static;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.tc.ob .od{display:block;flex:1;margin:4.5cqw 6cqw 0;padding:3cqw 3.6cqw;border-radius:2cqw;background:rgba(232,234,240,.92);color:#1a1c21;font-size:max(6px,4.7cqw);line-height:1.28;text-align:left;overflow:hidden}
+.tc.ob .od em{display:block;margin-top:1.6cqw;font-style:normal;font-family:var(--mono);font-size:.86em;color:#4a5260}
+.tc.ob .of{display:flex;align-items:center;gap:4px;margin:2.5cqw 6cqw 4.5cqw;font-family:var(--mono);font-size:max(6px,4.6cqw);color:#aeb4c0}
+.tc.ob .of b{margin-left:auto;font-weight:500;text-transform:uppercase;color:var(--rc)}
+.tc.ob.no .ow img{filter:grayscale(1) blur(7px) brightness(.45)}.tc.ob.no .od{background:rgba(232,234,240,.25);color:#aeb4c0}
+.tc.ob.r-L,.tc.ob.r-M{box-shadow:0 0 22px color-mix(in srgb,var(--rc) 35%,transparent)}
+.tc.ob.r-L::before,.tc.ob.r-M::before{z-index:2}
+.tc.ob .nw{top:auto;bottom:22%;left:6cqw}.tc.ob .x{top:auto;bottom:22%;right:6cqw}
+@container (max-width:150px){.tc.ob .od em{display:none}}
 </style>
 <script>
 /* =====================================================================
@@ -9335,6 +9355,50 @@ const TC_FINMUL = [1, 1.4, 2.2, 4];   // les finitions sortent plus souvent dans
 // transformations (rareté « Éveil ») : cartes à part, tirées des images de formes déjà présentes dans le jeu (Dragon Ball seulement pour l'instant)
 const TC_FORMS = ["Son Goku (Super Saiyan)", "Son Goku (Super Saiyan 3)", "Son Goku (Super Saiyan 4)", "Son Goku (Super Saiyan Blue)", "Son Goku (Ultra Instinct)", "Vegeta (Super Saiyan)", "Vegeta (Super Saiyan 4)", "Vegeta (Super Saiyan Blue)", "Vegeta (Ultra Ego)",
   "Son Gohan (Super Saiyan 2)", "Son Gohan (Ultime)", "Son Gohan (Beast)", "Piccolo (Orange)", "Trunks (Super Saiyan)", "Trunks (Rage)", "Gogeta (Super Saiyan 4)", "Gogeta (Super Saiyan Blue)", "Vegeto (Super Saiyan Blue)", "Cell (super parfait)", "Freezer (forme parfaite)", "Gotenks (Super Saiyan 3)"];
+// cartes « objet » : les objets, armes, fruits, navires et invocations les plus célèbres des trois œuvres (rien d'inventé).
+// [clé de l'image, univers, nom, rareté, type, porteur, description]
+const TC_OBJ = [
+  ["Enma", "op", "Enma", "M", "Sabre", "Kozuki Oden, puis Zoro", "L'un des 21 Grands Sabres. Il aspire le haki de son porteur, et c'est l'une des rares lames à avoir blessé Kaido."],
+  ["Yoru", "op", "Yoru", "M", "Sabre noir", "Dracule Mihawk", "La lame noire du plus grand épéiste du monde, l'un des 12 Sabres Suprêmes."],
+  ["Murakumogiri", "op", "Murakumogiri", "M", "Naginata", "Edward Newgate", "Le naginata de Barbe Blanche, l'un des 12 Sabres Suprêmes."],
+  ["Ace--Sword-", "op", "Ace", "M", "Sabre", "Gol D. Roger", "Le sabre du Roi des pirates, l'un des 12 Sabres Suprêmes."],
+  ["Straw-Hat", "op", "Chapeau de paille", "M", "Trésor", "Roger, Shanks, puis Luffy", "Le chapeau de Roger, confié à Shanks, puis par Shanks à Luffy."],
+  ["Gomu-Gomu-no-Mi", "op", "Gomu Gomu no Mi", "M", "Fruit du démon", "Monkey D. Luffy", "Le fruit mangé par Luffy. Son vrai nom : Hito Hito no Mi, modèle Nika, un Zoan mythique."],
+  ["Gura-Gura-no-Mi", "op", "Gura Gura no Mi", "M", "Fruit du démon", "Barbe Blanche, puis Barbe Noire", "Le fruit des séismes, réputé capable de détruire le monde."],
+  ["Wado-Ichimonji", "op", "Wadô Ichimonji", "L", "Sabre", "Roronoa Zoro", "L'un des 21 Grands Sabres. Le sabre de Kuina, que Zoro porte depuis son enfance."],
+  ["Shusui", "op", "Shûsui", "L", "Sabre noir", "Ryuma, puis Zoro", "Lame noire du samouraï Ryuma, trésor national du pays de Wano, l'un des 21 Grands Sabres."],
+  ["Gryphon", "op", "Gryphon", "L", "Sabre", "Shanks", "Le sabre de Shanks le Roux."],
+  ["Mera-Mera-no-Mi", "op", "Mera Mera no Mi", "L", "Fruit du démon", "Ace, puis Sabo", "Le Logia du feu, mangé par Ace puis par Sabo."],
+  ["Ope-Ope-no-Mi", "op", "Ope Ope no Mi", "L", "Fruit du démon", "Trafalgar Law", "Le « fruit ultime » : il peut offrir la jeunesse éternelle, au prix de la vie de son utilisateur."],
+  ["Yami-Yami-no-Mi", "op", "Yami Yami no Mi", "L", "Fruit du démon", "Marshall D. Teach", "Le Logia des ténèbres, qui annule les pouvoirs des autres fruits."],
+  ["Thousand-Sunny", "op", "Thousand Sunny", "L", "Navire", "Équipage du Chapeau de paille", "Le second navire de l'équipage, construit par Franky en bois d'Adam."],
+  ["Poneglyph", "op", "Ponéglyphe", "L", "Stèle", "", "Stèle indestructible gravée d'une écriture ancienne. Quatre d'entre elles mènent à Laugh Tale."],
+  ["Sandai-Kitetsu", "op", "Sandai Kitetsu", "E", "Sabre maudit", "Roronoa Zoro", "Sabre maudit de la lignée Kitetsu. Zoro a mis son bras en jeu pour prouver que sa chance était plus forte que la malédiction."],
+  ["Going-Merry", "op", "Vogue Merry", "E", "Navire", "Équipage du Chapeau de paille", "Le premier navire de l'équipage, offert par Kaya."],
+  ["Clima-Tact", "op", "Clima-Tact", "R", "Arme", "Nami", "Le bâton météo de Nami, conçu par Usopp."],
+  ["Kabuto", "op", "Kabuto", "R", "Arme", "Usopp", "Le lance-pierre géant d'Usopp."],
+  ["Vivre-Card", "op", "Vivre Card", "P", "Objet", "", "Papier fait à partir d'un ongle : il pointe vers son propriétaire et se consume quand sa vie faiblit."],
+  ["Log-Pose", "op", "Log Pose", "P", "Objet", "", "La boussole spéciale indispensable pour naviguer sur Grand Line."],
+  ["Den-Den-Mushi", "op", "Escargophone", "C", "Objet", "", "Un escargot qui sert de téléphone."],
+  ["Dragon-Ball--object-", "db", "Dragon Balls", "M", "Trésor", "", "Les sept boules de cristal. Réunies, elles permettent d'invoquer Shenron."],
+  ["Shenron", "db", "Shenron", "M", "Invocation", "", "Le dragon sacré de la Terre, qui exauce les vœux de celui qui réunit les sept Dragon Balls."],
+  ["Potara", "db", "Potaras", "M", "Objet divin", "Les Kaio Shin", "Boucles d'oreilles des Kaio Shin : deux êtres qui en portent une chacun fusionnent."],
+  ["Power-Pole", "db", "Nyoibô, le bâton magique", "L", "Arme", "Son Goku", "Un bâton qui s'allonge à volonté, hérité de son grand-père Son Gohan."],
+  ["Flying-Nimbus", "db", "Kinto-un, le nuage magique", "L", "Monture", "Son Goku", "Nuage volant offert par Tortue Géniale. Seuls les cœurs purs peuvent monter dessus."],
+  ["Z-Sword", "db", "Épée Z", "L", "Épée", "Son Gohan", "L'épée légendaire du monde des Kaio Shin, dans laquelle était scellé le Doyen des Kaio Shin."],
+  ["Time-Machine", "db", "Machine à voyager dans le temps", "L", "Machine", "Trunks", "Construite par la Bulma du futur pour changer le cours de l'histoire."],
+  ["Senzu-Bean", "db", "Senzu", "E", "Objet", "Maître Karin", "Un haricot magique qui rend toutes ses forces à celui qui le mange."],
+  ["Dragon-Radar", "db", "Dragon Radar", "E", "Machine", "Bulma", "Le radar inventé par Bulma pour localiser les Dragon Balls."],
+  ["Capsule", "db", "Capsules Hoi-Poi", "R", "Objet", "Capsule Corporation", "Un véhicule ou une maison entière tient dans une capsule."],
+  ["Scouter", "db", "Scouter", "R", "Machine", "Armée de Freezer", "L'appareil qui mesure la puissance de combat."],
+  ["Gunbai", "na", "Gunbai", "M", "Arme", "Madara Uchiha", "L'éventail de guerre des Uchiha, porté par Madara puis par Obito."],
+  ["Sword-of-Totsuka", "na", "Épée de Totsuka", "M", "Arme spirituelle", "Itachi Uchiha", "La lame du Susanoo d'Itachi, qui scelle ce qu'elle transperce."],
+  ["Yata-Mirror", "na", "Miroir de Yata", "M", "Arme spirituelle", "Itachi Uchiha", "Le bouclier du Susanoo d'Itachi, qui renvoie toutes les attaques."],
+  ["Samehada", "na", "Samehada", "L", "Épée", "Kisame, puis Killer B", "L'une des sept épées de Kiri. Vivante, elle dévore le chakra."],
+  ["Flying-Thunder-God-Kunai", "na", "Kunai du Hiraishin", "L", "Arme", "Minato Namikaze", "Kunai à trois pointes marqué du sceau de téléportation de Minato."],
+  ["Kubikirib-ch-", "na", "Kubikiribôchô", "E", "Épée", "Zabuza Momochi", "Le « hachoir » de Zabuza, l'une des sept épées de Kiri. Elle se répare avec le fer du sang."],
+  ["Scroll-of-Seals", "na", "Rouleau des techniques interdites", "E", "Rouleau", "Village de Konoha", "Le rouleau scellé par le Premier Hokage. Naruto y apprend le Multi-clonage."],
+  ["Forehead-Protector", "na", "Bandeau frontal", "P", "Objet", "", "Le bandeau gravé du symbole du village, porté par les ninjas."]];
 const TC_XRATE = [2.5, 4, 8, 18];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
 const TC_ORDER = ["C", "P", "R", "E", "L", "M", "X"];
 // part de chaque rareté dans un univers (du plus rare au plus commun) : le reste est Commune
@@ -9376,6 +9440,7 @@ function tcCards(){
     for (const c of list){ const f = c.pop === "S" ? "E" : c.pop === "A" ? "R" : "C"; if (TC_ORDER.indexOf(c.r) < TC_ORDER.indexOf(f)) c.r = f; }
     TC_ALL.push(...list);
   }
+  for (const [k, u, n, r, t, own, d] of TC_OBJ) TC_ALL.push({id: u + ":obj:" + k, u, n, p: 0, no: ++no, pop: "", r, obj: {t, own, d}, get i(){ try { return window.__MA.TCOBJ[u][k] || ""; } catch { return ""; } }});
   try { for (const n of TC_FORMS){ const e = (GUESS.db || []).find(x => x.n === n), b = n.replace(/ \(.*$/, ""), base = TC_ALL.find(c => c.u === "db" && c.n === b);
     if (e && e.i) TC_ALL.push({id: "db:" + n, u: "db", n, i: e.i, p: base ? base.p : 95, no: ++no, pop: "", r: "X", base: b}); } } catch {}
   return TC_ALL;
@@ -9532,7 +9597,7 @@ const tcArt = (c, f) => f === "W" ? [...tcAlt(c)].reverse()[0] || c.i : (f in TC
 function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 4 && r <= 5 || (c.pop === "S" && r >= 3), v = ["", "H"];
   if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[1]) v.push("S"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
 const tcBestFin = (s, c) => ["Z", "G", "S", "W", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
-const tcCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
+const tcCard = (c, o = {}) => c.obj ? tcObjCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
 // sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
@@ -9571,6 +9636,11 @@ function tcEmblem(kind, c, d){
 }
 const TC_BKC = {C: ["#b9b4c0", "#1b1a20"], P: ["#6fdc9f", "#0e2018"], R: ["#6db6ff", "#0c1a2e"], E: ["#c39bff", "#1a1030"], L: ["#f7c64a", "#12163a"], M: ["#ff6a48", "#2a0d10"], X: ["#8fe9ff", "#0a1c2a"]};
 const tcBack = (r, o = {}) => `<${o.btn ? "button" : "div"} class="tcbk r-${r} ${o.cls || ""}" ${o.attr || ""} style="--bc:${TC_BKC[r][0]};--bd:${TC_BKC[r][1]};${o.style || ""}">${tcEmblem(TC_EMB[r], TC_BKC[r][0], TC_BKC[r][1])}</${o.btn ? "button" : "div"}>`;
+// carte « objet » : bandeau de type, illustration dans une fenêtre, encadré de texte (sur le modèle des cartes Objet et Dresseur)
+const tcObjCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc ob r-${c.r} u-${c.u} ${o.f === "H" ? "f-H" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}>
+  <span class="oh"><b>${esc(c.obj.t)}</b><i>#${String(c.no).padStart(3, "0")}</i></span><span class="on">${o.no ? "???" : esc(c.n)}</span>
+  <span class="ow">${c.i ? `<img src="${c.i}" alt="" loading="lazy">` : ""}</span><span class="od">${o.no ? "Objet encore inconnu." : esc(c.obj.d)}${!o.no && c.obj.own ? `<em>${esc(c.obj.own)}</em>` : ""}</span>
+  <span class="of"><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f === "H" ? `<em class="fn">HOLO</em>` : ""}<b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></span><span class="fx" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
 const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="br">HANKO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="stk">判</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
 function tcHome(s){
   const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
@@ -9684,9 +9754,9 @@ function tcRender(){
 }
 // fiche du personnage (dos de la carte)
 function tcSheet(c, s){
-  const fin = s.fin[c.id] || {}, src = DATA[c.u].find(x => x.n === (c.base || c.n)), bio = src ? (infoHTML(c.u, src) || "") : "";
+  const fin = s.fin[c.id] || {}, src = c.obj ? null : DATA[c.u].find(x => x.n === (c.base || c.n)), bio = c.obj ? `<p>${esc(c.obj.d)}</p>${c.obj.own ? `<p class="small" style="margin-top:6px">Porteur : ${esc(c.obj.own)}</p>` : ""}` : src ? (infoHTML(c.u, src) || "") : "";
   return `<div class="tcfiche r-${c.r}"><div class="fh"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][0]}</b></div><h3>${esc(c.n)}</h3>
-    <dl><dt>Univers</dt><dd>${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</dd><dt>Niveau</dt><dd>${c.p}/100</dd><dt>Popularité</dt><dd>${c.pop === "S" ? "Tête d'affiche" : c.pop === "A" ? "Très aimé" : c.base ? "Transformation de " + esc(c.base) : "Classique"}</dd><dt>Exemplaires</dt><dd>${s.own[c.id] || 0}</dd>
+    <dl><dt>Univers</dt><dd>${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</dd><dt>${c.obj ? "Type" : "Niveau"}</dt><dd>${c.obj ? esc(c.obj.t) : c.p + "/100"}</dd><dt>Popularité</dt><dd>${c.obj ? "Objet célèbre" : c.pop === "S" ? "Tête d'affiche" : c.pop === "A" ? "Très aimé" : c.base ? "Transformation de " + esc(c.base) : "Classique"}</dd><dt>Exemplaires</dt><dd>${s.own[c.id] || 0}</dd>
     <dt>Versions</dt><dd>${Object.keys(TC_FIN).filter(k => tcVersOf(c).includes(k)).map(k => `<em class="${fin[k] ? "on" : ""}">${TC_FIN[k][1]}</em>`).join("")}</dd></dl>
     ${c.base ? `<p class="small">Forme de ${esc(c.base)}. Les cartes Éveil ne sortent qu'à la place de la carte garantie d'un booster.</p>` : ""}<div class="bio">${bio}</div></div>`;
 }
@@ -9721,7 +9791,7 @@ function tcCine(c, o = {}){
       <div class="tun" aria-hidden="true"><i class="floor"></i><i class="ceil"></i><i class="beam b1"></i><i class="beam b2"></i></div>
       ${sty === "M" || sty === "X" || sty === "Z" ? `<div class="bolts" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "S" ? `<div class="pans" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "G" ? `<div class="rain" aria-hidden="true"></div>` : ""}
       <div class="clue c1"><span class="kj">${TC_PACKS[c.u][1]}</span><b>${TC_PACKS[c.u][0]}</b></div>
-      <div class="clue c2"><b>${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][1] : ""}</b><span>Niveau ${c.p}</span></div>
+      <div class="clue c2"><b>${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][1] : ""}</b><span>${c.obj ? esc(c.obj.t) : "Niveau " + c.p}</span></div>
       <div class="hero" aria-hidden="true"><img src="${img}" alt=""></div>
       <div class="fl"></div><div class="rays"></div>${myth ? `<div class="rays two"></div>` : ""}<div class="ring"></div>${myth ? `<div class="ring two"></div>` : ""}
       <div class="sp">${Array.from({length: myth ? 46 : 28}, (_, k) => `<i style="--a:${Math.round(Math.random() * 360)}deg;--d:${30 + Math.round(Math.random() * 46)}vmin;--t:${(.7 + Math.random() * 1.1).toFixed(2)}s;--w:${(Math.random() * .5).toFixed(2)}s"></i>`).join("")}</div>
@@ -10057,7 +10127,7 @@ async function frHost(){
   room.on("ftrade", m => { const d = m.data; if (m.sameTab || d?.to !== me.id) return; frAsk(room, d); });
 }
 // une carte de l'échange, avec sa rareté écrite en clair
-const frSide = (c, note) => `<div class="frside r-${c.r}">${tcCard(c)}<b>${TC_R[c.r][0]}</b><small>${TC_PACKS[c.u][0]} · niveau ${c.p}${note ? "<br>" + note : ""}</small></div>`;
+const frSide = (c, note) => `<div class="frside r-${c.r}">${tcCard(c)}<b>${TC_R[c.r][0]}</b><small>${TC_PACKS[c.u][0]} · ${c.obj ? c.obj.t : "niveau " + c.p}${note ? "<br>" + note : ""}</small></div>`;
 // proposition d'échange reçue : je donne `want` (un de mes doublons) et je reçois `give`
 function frAsk(room, d){
   const all = tcCards(), a = all.find(c => c.no === d.give), b = all.find(c => c.no === d.want), M = $("#modal"); if (!a || !b) return;
