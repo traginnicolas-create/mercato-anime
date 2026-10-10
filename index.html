@@ -9507,6 +9507,8 @@ setInterval(voxRender, 2000);
 .tcopen.gs .tcback.hot{animation:tchot 1s ease-in-out 1.3s infinite}
 .tcopen.gs .tcflip{animation:none}
 .tcopen.gs .tcburst{animation:tcglow 1.2s ease-out both}
+/* la rangée de cartes doit occuper toute la largeur : sans colonne explicite, la grille centrée la réduisait à zéro (dos de cartes invisibles) */
+.tcopen .mid{grid-template-columns:minmax(0,1fr);align-content:safe center}
 </style>
 <script>
 /* =====================================================================
