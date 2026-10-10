@@ -9110,11 +9110,19 @@ const tcKey = (u, t) => u + ":" + t, tcParse = k => { const [u, t] = String(k).s
 const tcPrice = (u, t) => Math.round(TC_T[t].price * (u === "mix" ? 1 : 1.2) / 10) * 10;
 const tcName = k => { const {u, t} = tcParse(k); return TC_PACKS[u][0] + (t ? " " + TC_T[t].n : ""); };
 const tcLvlNeed = l => 75 * l * (l + 1), tcLvl = xp => { let l = 0; while (xp >= tcLvlNeed(l + 1)) l++; return l; };
+// sceau de la sauvegarde : une empreinte calculée sur son contenu. Si quelqu'un modifie la sauvegarde à la main (outils du navigateur),
+// l'empreinte ne correspond plus : la collection est marquée « modifiée », ses échanges sont bloqués et les amis le voient.
+// Ce n'est pas inviolable (tout tourne sur l'appareil du joueur) : seul un serveur qui garde les collections le serait.
+function tcSig(o){ const t = JSON.stringify({...o, sig: undefined}) + [TC_KEY, "札", 244, "印"].join("~"); let a = 0xdeadbeef ^ t.length, b = 0x41c6ce57 ^ t.length;
+  for (let i = 0; i < t.length; i++){ const ch = t.charCodeAt(i); a = Math.imul(a ^ ch, 2654435761); b = Math.imul(b ^ ch, 1597334677); }
+  a = Math.imul(a ^ (a >>> 16), 2246822507) ^ Math.imul(b ^ (b >>> 13), 3266489909); b = Math.imul(b ^ (b >>> 16), 2246822507) ^ Math.imul(a ^ (a >>> 13), 3266489909);
+  return (4294967296 * (2097151 & b) + (a >>> 0)).toString(36); }
 function tcLoad(){
-  const s = lsGet(TC_KEY, null) || {own: {}, packs: {"mix:0": 3}, gems: 0, pity: {M: 0, L: 0}, free: {n: TC_FREE.max, t: Date.now()}, opened: 0};
+  const raw = lsGet(TC_KEY, null), bad = !!raw && (raw.sig ? raw.sig !== tcSig(raw) : !!raw.signed);
+  const s = raw || {own: {}, packs: {"mix:0": 3}, gems: 0, pity: {M: 0, L: 0}, free: {n: TC_FREE.max, t: Date.now()}, opened: 0};
   // anciennes sauvegardes : un seul niveau de booster par univers
   for (const k of Object.keys(s.packs)) if (!k.includes(":")){ if (s.packs[k] > 0) s.packs[k + ":0"] = (s.packs[k + ":0"] || 0) + s.packs[k]; delete s.packs[k]; }
-  s.xp = s.xp || 0; s.streak = s.streak || 0; s.fin = s.fin || {};
+  s.xp = s.xp || 0; s.streak = s.streak || 0; s.fin = s.fin || {}; if (bad) s.taint = true; delete s.sig;
   // boosters gratuits : un de plus toutes les 8 heures, deux en réserve au maximum
   if (s.free.n < TC_FREE.max){ const k = Math.floor((Date.now() - s.free.t) / TC_FREE.every); if (k > 0){ s.free.n = Math.min(TC_FREE.max, s.free.n + k); s.free.t = s.free.n >= TC_FREE.max ? Date.now() : s.free.t + k * TC_FREE.every; } }
   if (!s.day || s.day.d !== tcDay()) s.day = {d: tcDay(), play: 0, win: 0, open: 0, neu: 0, modes: [], unis: [], claimed: [], bonus: false, vp: 0};
@@ -9122,7 +9130,7 @@ function tcLoad(){
   if (!s.login || s.login.d !== tcDay()) s.login = {d: tcDay(), n: s.login && s.login.d === tcDay(-1) ? s.login.n + 1 : 1, got: false};
   return s;
 }
-const tcSave = s => { lsSet(TC_KEY, s); tcHome(s); };
+const tcSave = s => { delete s.sig; s.signed = 1; lsSet(TC_KEY, {...s, sig: tcSig(s)}); tcHome(s); };
 // doublons d'une carte : on garde un exemplaire de chaque finition obtenue (et un normal s'il y en a)
 function tcDups(s, c){ const fin = s.fin[c.id] || {}, nf = Object.values(fin).reduce((a, b) => a + b, 0), n0 = Math.max(0, (s.own[c.id] || 0) - nf); let n = Math.max(0, n0 - 1), g = n * TC_R[c.r][1];
   for (const k in fin){ const e = Math.max(0, fin[k] - 1); n += e; g += e * TC_R[c.r][1] * TC_FIN[k][3]; } return {n, g}; }
@@ -9260,7 +9268,7 @@ function tcRender(){
   } else if (TC_TAB === "album"){
     const f = TC_F, list = all.filter(c => (f.u === "all" || c.u === f.u) && (f.r === "all" || c.r === f.r) && (!f.own || s.own[c.id]));
     const gain = all.reduce((a, c) => a + tcDups(s, c).g, 0), fins = all.reduce((a, c) => a + Object.keys(s.fin[c.id] || {}).length, 0);
-    html += `<div class="tcbars">${["op", "db", "na"].map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
+    html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}<div class="tcbars">${["op", "db", "na"].map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
       <p class="small" style="margin:-4px 0 12px">Finitions obtenues (Holo, AR, SAR, UR) : <b>${fins}</b>/${all.length * 4}. Touche une carte pour la regarder en 3D et lire sa fiche.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
       <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}<button class="${f.own ? "sel" : ""}" id="tcOwn">Obtenues</button></div>
       <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes</button>${[...TC_ORDER].reverse().filter(r => all.some(c => c.r === r)).map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${all.filter(c => c.r === r && s.own[c.id]).length}/${all.filter(c => c.r === r).length}</button>`).join("")}</div>
@@ -9281,6 +9289,7 @@ function tcRender(){
   document.querySelectorAll("[data-tcsu]").forEach(b => b.onclick = () => { TC_SHOP.u = b.dataset.tcsu; tcRender(); });
   document.querySelectorAll("[data-tcu]").forEach(b => b.onclick = () => { TC_F.u = b.dataset.tcu; tcRender(); });
   document.querySelectorAll("[data-tcr]").forEach(b => b.onclick = () => { TC_F.r = b.dataset.tcr; tcRender(); });
+  $("#tcWipe") && ($("#tcWipe").onclick = () => { if ($("#tcWipe").dataset.sure){ try { localStorage.removeItem(TC_KEY); } catch {} tcRender(); } else { $("#tcWipe").dataset.sure = 1; $("#tcWipe").textContent = "Confirmer : tout effacer"; } });
   $("#tcOwn") && ($("#tcOwn").onclick = () => { TC_F.own = !TC_F.own; tcRender(); });
   $("#tcOpen") && ($("#tcOpen").onclick = () => { const s = tcLoad(), k = TC_PICK; let real = k;
     if (k === "free"){ if (s.free.n <= 0) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n--; real = "mix:0"; } else { if (!(s.packs[k] > 0)) return; s.packs[k]--; }
@@ -9390,6 +9399,15 @@ try { tcHome(); } catch {}
 .frtrade{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
 @media (max-width:520px){.frtrade{grid-template-columns:1fr}}
 .frtrade select{width:100%}
+.frdeal{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;margin:12px 0 16px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0b0a0e}
+.frdeal .sw{font-size:26px;color:var(--accent);padding-top:22px}
+.frside{display:grid;justify-items:center;gap:5px;text-align:center}
+.frside .tc{width:100%;max-width:170px}
+.frside b{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--rc)}
+.frside small{color:var(--muted);font-size:12px;line-height:1.4}
+.frpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px}
+.frpick .tc{opacity:.6;transition:opacity .15s,transform .15s}
+.frpick .tc.pick{opacity:1;outline:2px solid var(--text);outline-offset:1px;transform:translateY(-2px)}
 .frinv{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:4px;font-size:13px;color:var(--muted)}
 .frinv button{border-radius:999px;padding:7px 13px;font-size:13px}
 </style>
@@ -9409,7 +9427,7 @@ const frRoom = id => "ami-" + id.toLowerCase().normalize("NFD").replace(/[^a-z0-
 const frList = () => lsGet(FR_KEY, []);
 // rejoindre un salon sans déranger le salon de la partie en cours (le vocal suit p2pRoom.current)
 async function frJoin(name, host){ const cur = p2pRoom.current; try { return await NET.room.join(name, host); } finally { if (NET.p2p) p2pRoom.current = cur; } }
-const frTradeable = s => tcCards().filter(c => (s.own[c.id] || 0) - Object.values(s.fin[c.id] || {}).reduce((a, b) => a + b, 0) >= 2).map(c => c.no);
+const frTradeable = s => s.taint ? [] : tcCards().filter(c => (s.own[c.id] || 0) - Object.values(s.fin[c.id] || {}).reduce((a, b) => a + b, 0) >= 2).map(c => c.no);
 
 // ma fiche publique : ce qu'un ami voit de moi
 function frCard(){
@@ -9421,7 +9439,7 @@ function frCard(){
   const top = all.filter(c => s.own[c.id]).sort((a, b) => s.own[b.id] - s.own[a.id])[0];
   return {id: me.id, since: profGet().since, lv: tcLvl(s.xp), g: h.length, w: tot.w, l: tot.l, d: tot.d, best,
     modes: Object.entries(S).sort((a, b) => b[1].n - a[1].n).slice(0, 3).map(([k, x]) => [k, x.n]), rec: rec.slice(0, 15),
-    top: top ? [top.no, s.own[top.id]] : null, own: all.filter(c => s.own[c.id]).map(c => [c.no, tcBestFin(s, c)]), tr: frTradeable(s), n: all.length};
+    top: top ? [top.no, s.own[top.id]] : null, own: all.filter(c => s.own[c.id]).map(c => [c.no, tcBestFin(s, c)]), tr: frTradeable(s), n: all.length, v: !s.taint};
 }
 function frToast(txt, label, fn){
   document.querySelector(".tctoast")?.remove();
@@ -9438,12 +9456,15 @@ async function frHost(){
     frToast(`${d.from} t'invite à une partie (${d.code})`, "Rejoindre", () => { show("home"); const c = $("#qjCode"), n = $("#qjName"); c.value = d.code; if (!n.value) n.value = me.name; $("#qjGo").click(); }); });
   room.on("ftrade", m => { const d = m.data; if (m.sameTab || d?.to !== me.id) return; frAsk(room, d); });
 }
+// une carte de l'échange, avec sa rareté écrite en clair
+const frSide = (c, note) => `<div class="frside r-${c.r}">${tcCard(c)}<b>${TC_R[c.r][0]}</b><small>${TC_PACKS[c.u][0]} · niveau ${c.p}${note ? "<br>" + note : ""}</small></div>`;
 // proposition d'échange reçue : je donne `want` (un de mes doublons) et je reçois `give`
 function frAsk(room, d){
   const all = tcCards(), a = all.find(c => c.no === d.give), b = all.find(c => c.no === d.want), M = $("#modal"); if (!a || !b) return;
+  const s0 = tcLoad();
   const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }, answer = ok => room.emit("ftres", {to: d.from, k: d.k, ok}).catch(() => {});
-  M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>Échange proposé</h2><button class="ghost" id="frNo">✕ Refuser</button></div><p class="muted" style="margin-bottom:12px"><b>${esc(d.from)}</b> te donne la carte de gauche contre ton doublon de droite.</p>
-    <div class="frtrade"><div><label class="f">Tu reçois</label>${tcCard(a)}</div><div><label class="f">Tu donnes</label>${tcCard(b)}</div></div><div class="row"><button class="primary" id="frYes">Accepter l'échange</button></div></div>`;
+  M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>Échange proposé</h2><button class="ghost" id="frNo">✕ Refuser</button></div><p class="muted" style="margin-bottom:12px"><b>${esc(d.from)}</b> te propose cet échange.</p>
+    <div class="frdeal"><div><label class="f">Tu donnes</label>${frSide(b, "il t'en restera " + ((s0.own[b.id] || 1) - 1))}</div><span class="sw" aria-hidden="true">⇄</span><div><label class="f">Tu reçois</label>${frSide(a, s0.own[a.id] ? "tu l'as déjà" : "nouvelle carte pour toi")}</div></div><div class="row"><button class="primary" id="frYes">Accepter l'échange</button></div></div>`;
   M.classList.remove("hidden"); SFX.play("pop");
   $("#frNo").onclick = () => { answer(false); close(); };
   $("#frYes").onclick = () => { const s = tcLoad(); if (!frTradeable(s).includes(b.no)){ answer(false); close(); return; }
@@ -9501,12 +9522,24 @@ async function frView(id){
       <div class="frstats"><div><b>${c.g}</b><span>Parties</span></div><div><b style="color:var(--ok)">${c.w}</b><span>Victoires</span></div><div><b style="color:var(--danger)">${c.l}</b><span>Défaites</span></div><div><b>${ratio}</b><span>Ratio V/D</span></div><div><b>${c.best}</b><span>Meilleure série</span></div></div>
       <p class="small">${c.modes.length ? "Jeux les plus joués : " + c.modes.map(([k, n]) => `<b style="color:var(--text)">${esc(k)}</b> (${n})`).join(" · ") : "Aucune partie enregistrée."}${top ? ` · Carte la plus tirée : <b style="color:var(--text)">${esc(top.n)}</b> (×${c.top[1]})` : ""}</p>
       ${c.rec.length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><div class="frrec">${c.rec.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(String(v))}</span>`).join("")}</div>` : ""}
-      <div class="tierh" style="--tc:var(--accent)">Collection <small>${c.own.length}/${c.n} cartes</small></div>
+      <div class="tierh" style="--tc:var(--accent)">Collection <small>${c.own.length}/${c.n} cartes · ${c.v === false ? "modifiée à la main, non vérifiée" : "vérifiée ✔"}</small></div>
       <div class="tcchips">${[...TC_ORDER].reverse().map(r => `<button class="r-${r}" disabled>${TC_R[r][0]} ${by(r)}</button>`).join("")}</div>
       <details><summary class="small" style="cursor:pointer;margin:6px 0 10px">Voir ses ${c.own.length} cartes</summary><div class="tcgrid">${c.own.map(([n, fin]) => { const x = all.find(y => y.no === n); return x ? tcCard(x, {f: fin}) : ""; }).join("")}</div></details>
       <div class="tierh" style="--tc:var(--accent)">Échange</div>
-      ${!live ? `<p class="muted">Ton ami doit être en ligne pour échanger.</p>` : !mine.length || !his.length ? `<p class="muted">Un échange porte sur des doublons : ${!mine.length ? "tu n'en as pas" : "ton ami n'en a pas"} pour l'instant.</p>`
-        : `<p class="small">Un doublon contre un doublon. Ton ami doit accepter sur son écran.</p><div class="frtrade"><div><label class="f" for="frGive">Tu donnes</label><select id="frGive">${mine.map(x => `<option value="${x.no}">${esc(x.n)} · ${TC_R[x.r][0]}</option>`).join("")}</select></div><div><label class="f" for="frWant">Tu demandes</label><select id="frWant">${his.map(x => `<option value="${x.no}">${esc(x.n)} · ${TC_R[x.r][0]}${s.own[x.id] ? "" : " · nouvelle"}</option>`).join("")}</select></div></div><div class="row"><button class="primary" id="frSend">Proposer l'échange</button></div><div class="err" id="frTErr"></div>`}</div>`;
+      ${!live ? `<p class="muted">Ton ami doit être en ligne pour échanger.</p>` : c.v === false || s.taint ? `<p class="muted">Échange bloqué : ${s.taint ? "ta collection" : "sa collection"} a été modifiée en dehors du jeu.</p>` : !mine.length || !his.length ? `<p class="muted">Un échange porte sur des doublons : ${!mine.length ? "tu n'en as pas" : "ton ami n'en a pas"} pour l'instant.</p>`
+        : `<p class="small">Un doublon contre un doublon. Choisis une carte de chaque côté : ton ami verra les deux cartes et devra accepter sur son écran.</p>
+          <div class="frdeal"><div><label class="f">Tu donnes</label><div id="frG"></div></div><span class="sw" aria-hidden="true">⇄</span><div><label class="f">Tu reçois</label><div id="frW"></div></div></div>
+          <input type="hidden" id="frGive" value="${mine[0].no}"><input type="hidden" id="frWant" value="${his[0].no}">
+          <label class="f">Tes doublons</label><div class="frpick" id="frMine">${mine.map(x => tcCard(x, {btn: true, x: s.own[x.id]})).join("")}</div>
+          <label class="f" style="margin-top:12px">Les doublons de ${esc(f.name)}</label><div class="frpick" id="frHis">${his.map(x => tcCard(x, {btn: true, isNew: !s.own[x.id]})).join("")}</div>
+          <div class="row" style="margin-top:14px"><button class="primary" id="frSend">Proposer l'échange</button></div><div class="err" id="frTErr"></div>`}</div>`;
+    // aperçu des deux cartes de l'échange, mis à jour à chaque choix
+    const deal = () => { if (!$("#frG")) return; const a = all.find(x => x.no === +$("#frGive").value), b = all.find(x => x.no === +$("#frWant").value);
+      $("#frG").innerHTML = frSide(a, "il t'en restera " + ((s.own[a.id] || 1) - 1)); $("#frW").innerHTML = frSide(b, s.own[b.id] ? "tu l'as déjà" : "nouvelle carte pour toi");
+      document.querySelectorAll("#frMine .tc").forEach(e => e.classList.toggle("pick", e.dataset.tc === a.id)); document.querySelectorAll("#frHis .tc").forEach(e => e.classList.toggle("pick", e.dataset.tc === b.id)); };
+    document.querySelectorAll("#frMine .tc").forEach(e => e.onclick = () => { $("#frGive").value = all.find(x => x.id === e.dataset.tc).no; deal(); SFX.play("pop"); });
+    document.querySelectorAll("#frHis .tc").forEach(e => e.onclick = () => { $("#frWant").value = all.find(x => x.id === e.dataset.tc).no; deal(); SFX.play("pop"); });
+    deal();
     $("#frBack").onclick = () => frShow();
     $("#frSend") && ($("#frSend").onclick = () => { const me = frMe(), give = +$("#frGive").value, want = +$("#frWant").value, k = Math.random().toString(36).slice(2, 8), a = all.find(x => x.no === give), b = all.find(x => x.no === want), room = FR.conn; if (!room) return;
       $("#frSend").disabled = true; $("#frTErr").textContent = "Proposition envoyée, en attente de sa réponse…"; let done = false;
