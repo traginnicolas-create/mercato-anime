@@ -9210,10 +9210,11 @@ setInterval(voxRender, 2000);
 @keyframes tcsink{to{transform:translateY(46%);opacity:0}}
 /* ---- SAR « encre rouge » : estampe noir et rouge sur papier washi, kanji au pinceau, feuille d'or, nom vertical ---- */
 .tc.tc.f-S{border:1.5px solid #c9a24a;background:#16090b;box-shadow:0 0 26px rgba(200,16,46,.45)}
-.tc.tc.f-S > img{top:0;height:100%;object-position:50% 6%;filter:grayscale(1) contrast(1.7) brightness(1.02);transform:scale(1.08);transform-origin:50% 18%}
-.tc.tc.f-S > .sc{inset:0;z-index:0;-webkit-mask-image:none;mask-image:none;mix-blend-mode:multiply;animation:none;background:linear-gradient(165deg,#ff3347 0,#d1122c 45%,#7c0014 100%)}
+.tc.tc.f-S > img{top:0;height:100%;object-position:50% 6%;filter:grayscale(1) contrast(1.55) brightness(.96);transform:scale(1.08);transform-origin:50% 18%}
+.tc.tc.f-S > .sc{inset:0;z-index:0;-webkit-mask-image:none;mask-image:none;mix-blend-mode:color;animation:none;background:linear-gradient(165deg,#ff2a40 0,#e0102c 50%,#b00020 100%)}
+
 .tc.tc.f-S .fx{opacity:1;z-index:1;animation:none!important;mix-blend-mode:normal!important;background:repeating-linear-gradient(8deg,transparent 0 5px,rgba(255,232,190,.07) 5px 5.6px),repeating-linear-gradient(97deg,transparent 0 9px,rgba(0,0,0,.1) 9px 9.5px),radial-gradient(circle at 18% 22%,rgba(244,214,130,.75) 0 .8px,transparent 1.6px),radial-gradient(circle at 72% 64%,rgba(244,214,130,.65) 0 1px,transparent 1.8px),radial-gradient(circle at 44% 86%,rgba(244,214,130,.55) 0 .7px,transparent 1.5px),linear-gradient(118deg,transparent 38%,rgba(255,226,150,.34) 50%,transparent 62%)!important;background-size:auto,auto,97px 113px,131px 89px,71px 149px,280% 100%!important}
-.tc.tc.f-S::after{background:linear-gradient(180deg,rgba(10,4,5,.5) 0,transparent 16%,transparent 66%,rgba(10,4,5,.94) 97%);box-shadow:inset 0 0 0 4px #16090b,inset 0 0 0 5px rgba(201,162,74,.75)}
+.tc.tc.f-S::after{mix-blend-mode:multiply;background:radial-gradient(ellipse 80% 72% at 50% 38%,#ff8f99 0,#f0566a 55%,#8a0018 100%);box-shadow:inset 0 0 0 4px #16090b,inset 0 0 0 5px rgba(201,162,74,.75)}
 .tc.tc.f-S > .vk{position:absolute;right:5%;top:9%;left:auto;z-index:1;writing-mode:horizontal-tb;font-family:var(--brand);font-weight:900;font-size:min(40cqw,96px);line-height:1;color:rgba(246,226,174,.22);-webkit-text-stroke:0;pointer-events:none}
 .tc.tc.f-S > .vn{position:absolute;left:7%;top:12%;z-index:2;writing-mode:vertical-rl;font-family:var(--title);font-weight:900;font-size:11.5px;letter-spacing:.14em;color:#f6e2ae;text-shadow:0 2px 8px #000;max-height:66%;overflow:hidden}
 .tc.f-S{container-type:inline-size}
@@ -9242,6 +9243,42 @@ setInterval(voxRender, 2000);
 @media (prefers-reduced-motion:no-preference){.tc.f-W .fx{animation:tcwanted 3.4s linear infinite}.tc.f-W > .wt{animation:tcwfoil 3.4s linear infinite}}
 @keyframes tcwfoil{from{background-position:120% 0}to{background-position:-120% 0}}
 @keyframes tcwanted{from{background-position:130% 0,0 0,0 0,0 0}to{background-position:-130% 0,0 0,0 0,300% 0}}
+/* ---- sachets : un habillage par niveau (choix de l'utilisateur : kraft, nacre et vagues, rouge et or, nébuleuse) ---- */
+.pouch.pouch{--ink:color-mix(in srgb,var(--pc) 62%,#5a1200)}
+/* Classique : papier kraft et tampon à la couleur de l'univers */
+.pouch.pouch.t0{background:radial-gradient(circle at 30% 18%,rgba(255,255,255,.34),transparent 58%),#c9a36a;box-shadow:0 14px 30px rgba(0,0,0,.55),inset 0 0 0 1px rgba(90,60,20,.35)}
+.pouch.pouch.t0 .sh{background:repeating-linear-gradient(8deg,transparent 0 5px,rgba(90,60,20,.1) 5px 5.6px),repeating-linear-gradient(97deg,transparent 0 9px,rgba(255,250,225,.1) 9px 9.5px);mix-blend-mode:normal;animation:none}
+.pouch.pouch.t0 .kj{color:var(--ink);font-size:44cqw;text-shadow:none}
+.pouch.pouch.t0 .kj::before{content:"";position:absolute;left:50%;top:50%;width:60cqw;height:60cqw;transform:translate(-50%,-50%) rotate(-7deg);border:3.2cqw solid var(--ink);border-radius:9cqw;opacity:.92}
+.pouch.pouch.t0 .br,.pouch.pouch.t0 .nm{color:#3a2a14}
+/* Argent : nacre et vagues seigaiha */
+.pouch.pouch.t1{background:linear-gradient(160deg,#fbfaf6,#e9e6de);box-shadow:0 14px 30px rgba(0,0,0,.55),0 0 22px rgba(223,229,238,.3),inset 0 0 0 1px rgba(255,255,255,.7)}
+.pouch.pouch.t1 .sh{background:repeating-radial-gradient(circle at 50% 122%,transparent 0 7.5cqw,color-mix(in srgb,var(--pc) 26%,#8c96a8) 7.5cqw 8.5cqw);-webkit-mask-image:linear-gradient(0deg,#000 18%,transparent 80%);mask-image:linear-gradient(0deg,#000 18%,transparent 80%);mix-blend-mode:normal;opacity:.7;animation:none}
+.pouch.pouch.t1 .kj{background:linear-gradient(160deg,#5c6676,#eef2f7 46%,#5c6676);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 1px 0 rgba(255,255,255,.8))}
+.pouch.pouch.t1 .br,.pouch.pouch.t1 .nm{color:#4a5260}
+.pouch.pouch.t1 .tb{background:#4a5260;color:#f3f1ec}
+/* Or : rouge de fête, croisillons et cercle d'or */
+.pouch.pouch.t2{background:linear-gradient(170deg,#d7142f,#860016);box-shadow:0 14px 30px rgba(0,0,0,.55),0 0 28px rgba(242,194,48,.4),inset 0 0 0 1px rgba(248,220,122,.6)}
+.pouch.pouch.t2 .sh{background:radial-gradient(circle at 50% 50%,transparent 0 30cqw,#f2c230 30.6cqw 32.4cqw,transparent 33cqw),repeating-linear-gradient(45deg,transparent 0 5.6cqw,rgba(242,194,48,.16) 5.6cqw 6.2cqw),repeating-linear-gradient(-45deg,transparent 0 5.6cqw,rgba(242,194,48,.16) 5.6cqw 6.2cqw),linear-gradient(115deg,transparent 34%,rgba(255,236,160,.4) 48%,transparent 60%);background-size:auto,auto,auto,260% 100%;mix-blend-mode:normal}
+.pouch.pouch.t2 .kj{background:linear-gradient(170deg,#fff3c2,#f2c230 52%,#b97a0a);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;font-size:44cqw;filter:drop-shadow(0 2px 3px rgba(60,0,8,.6))}
+.pouch.pouch.t2 .br,.pouch.pouch.t2 .nm{color:#f8dc7a}
+.pouch.pouch.t2 .tb{background:#f2c230;color:#5a0010}
+/* Divin : nébuleuse, étoiles, kanji lumineux à la couleur de l'univers */
+.pouch.pouch.t3{background:radial-gradient(ellipse at 28% 24%,#5a2ad0,transparent 56%),radial-gradient(ellipse at 76% 70%,#c2187a,transparent 52%),radial-gradient(ellipse at 60% 20%,color-mix(in srgb,var(--pc) 55%,transparent),transparent 40%),#090614;background-size:auto;animation:none;box-shadow:0 14px 30px rgba(0,0,0,.55),0 0 36px rgba(176,124,255,.65),inset 0 0 0 1px rgba(213,179,255,.6)}
+.pouch.pouch.t3 .sh{background:radial-gradient(circle at 20% 30%,#fff 0 .8cqw,transparent 1.3cqw),radial-gradient(circle at 70% 18%,#fff 0 1cqw,transparent 1.5cqw),radial-gradient(circle at 44% 76%,#fff 0 .8cqw,transparent 1.3cqw),radial-gradient(circle at 86% 58%,#bfe9ff 0 1.1cqw,transparent 1.6cqw),radial-gradient(circle at 12% 84%,#fff 0 .7cqw,transparent 1.2cqw);background-size:41cqw 45cqw,55cqw 47cqw,31cqw 65cqw,75cqw 59cqw,47cqw 35cqw;mix-blend-mode:normal}
+.pouch.pouch.t3 .kj{color:#fff;text-shadow:0 0 5cqw color-mix(in srgb,var(--pc) 70%,#b07cff),0 0 16cqw #ff5a8a}
+.pouch.pouch.t3 .br{color:#d5b3ff}.pouch.pouch.t3 .nm{color:#fff}
+.pouch.pouch.t3 .tb{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+.pouch.pouch.t3::before,.pouch.pouch.t3::after{background:repeating-linear-gradient(90deg,rgba(0,0,0,.4) 0 3px,rgba(213,179,255,.35) 3px 6px)}
+@media (prefers-reduced-motion:no-preference){.pouch.pouch.t3 .sh{animation:pkstars 3.2s ease-in-out infinite alternate}.pouch.pouch.t2 .sh{animation:pkgold 3s linear infinite}}
+@keyframes pkstars{from{opacity:.45}to{opacity:1}}
+@keyframes pkgold{from{background-position:0 0,0 0,0 0,130% 0}to{background-position:0 0,0 0,0 0,-130% 0}}
+/* fonds de la page et de l'ouverture accordés au niveau */
+.tchero.t0{background:radial-gradient(ellipse 60% 90% at 16% 50%,rgba(201,163,106,.28),transparent 70%),var(--panel)}
+.tchero.t1{background:radial-gradient(ellipse 60% 90% at 16% 50%,rgba(233,236,242,.22),transparent 70%),var(--panel)}
+.tchero.t2{background:radial-gradient(ellipse 60% 90% at 16% 50%,rgba(215,20,47,.34),transparent 70%),var(--panel)}
+.tcopen.t2 .aura{background:radial-gradient(circle,rgba(215,20,47,.6),rgba(242,194,48,.25) 40%,transparent 64%)}
+.tcsh.q0{--qc:#c9a36a}.tcsh.q2{--qc:#f2c230}
 </style>
 <script>
 /* =====================================================================
