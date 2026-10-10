@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Hanko</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='hlg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233fe0a8'/%3E%3Cstop offset='1' stop-color='%23c9f26b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z' fill='url(%23hlg)'/%3E%3Cpath d='M50 12l32.9 19v38L50 88 17.1 69V31z' fill='%230c1312'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Cpath d='M27 60l46-21v10L27 70z' fill='%233fe0a8'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Rye&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Shippori+Mincho+B1:wght@800&family=Rye&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Mise en page : une colonne large et calme. Fond d'encre presque noir, texte papier, un seul rouge-orangé pour agir (boutons en pilule),
+  /* Mise en page : une colonne large et calme. Identité « Encre et jade » (choisie par l'utilisateur le 13 oct. 2026, pour ne plus ressembler à Kyara) : fond d'encre vert-noir, texte papier, un seul vert jade pour agir (boutons en pilule), logo en hexagone taillé avec un H. --M reste le rouge des cartes Mythiques : les cartes et leurs raretés ne changent pas.
      l'or réservé aux raretés. Titres larges, petites étiquettes en chasse fixe doublées d'un kanji, chiffres en chasse fixe. */
   color-scheme:dark;
-  --bg:#0e0d12; --panel:#15141a; --panel2:#1b1a22; --line:#27252f; --text:#edeae4; --muted:#8a8590;
-  --accent:#ff5a36; --accent2:#c93a22; --ok:#3fbf7f; --danger:#ff4d4d; --gold:#f5c518;
+  --bg:#080d0c; --panel:#0e1614; --panel2:#131d1b; --line:#20302c; --text:#eaf3ef; --muted:#8aa098;
+  --accent:#3fe0a8; --accent2:#17a57a; --accent3:#c9f26b; --ok:#a6e35a; --danger:#ff4d4d; --gold:#f5c518;
   --M:#ff5a36; --L:#f5c518; --E:#b072ff; --R:#4d9bff; --C:#b5b1bb;
   --title:"Unbounded","Zen Kaku Gothic New",system-ui,sans-serif;     /* grands titres, nom du jeu */
   --disp:"Barlow Condensed","Arial Narrow",Impact,sans-serif;         /* titres serrés et gros chiffres à l'intérieur des jeux */
@@ -32,14 +33,14 @@ h1{font-size:clamp(26px,5.4vw,44px);line-height:1.02;color:var(--text);text-tran
 h2{font-size:clamp(18px,3.2vw,23px);font-weight:700;line-height:1.2;color:var(--text)}
 .muted{color:var(--muted)}
 button{font:inherit;cursor:pointer;border-radius:12px;padding:12px 18px;font-weight:700;background:var(--panel2);color:var(--text);border:1px solid var(--line);transition:transform .08s,background .15s,border-color .15s,box-shadow .2s}
-button:hover:not(:disabled){border-color:#3a3742;background:#211f2a}
+button:hover:not(:disabled){border-color:#2f463f;background:#182522}
 button:active:not(:disabled){transform:translateY(1px)}
 button:focus-visible,a:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 button:disabled{opacity:.38;cursor:not-allowed}
-button.primary{background:var(--accent);color:#0e0d12;border-color:transparent;font-weight:700;border-radius:999px;padding:12px 22px;box-shadow:0 0 34px color-mix(in srgb,var(--accent) 30%,transparent)}
+button.primary{background:var(--accent);color:#03140e;border-color:transparent;font-weight:700;border-radius:999px;padding:12px 22px;box-shadow:0 0 34px color-mix(in srgb,var(--accent) 30%,transparent)}
 button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 86%,#fff);border-color:transparent;box-shadow:0 0 44px color-mix(in srgb,var(--accent) 45%,transparent)}
 button.primary:disabled{box-shadow:none}
-button.red{background:var(--accent2);color:#fff;border-color:transparent}
+button.red{background:var(--danger);color:#fff;border-color:transparent}
 button.ghost{background:transparent;border-radius:999px}
 input{font:inherit;background:#0b0a0e;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;font-size:16px;font-weight:700}
 input::placeholder{color:#5a5662;font-weight:500}
@@ -213,6 +214,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
 /* ---- accueil ---- */
 .sitebar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:18px;padding:14px 0;margin-bottom:8px;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .logo{display:flex;align-items:center;gap:10px;font-family:var(--title);font-weight:900;font-size:17px;letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap}
+.hlogo{flex:none;width:34px;height:34px}
 .seal{flex:none;width:30px;height:30px;display:grid;place-items:center;background:var(--accent);color:#0e0d12;font-family:var(--brand);font-weight:900;font-size:18px;line-height:1;border-radius:8px}
 .sitenav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
 .sitenav a{color:#b7b2bd;text-decoration:none;font-weight:700;font-size:14.5px;padding:8px 12px;border-radius:999px;white-space:nowrap}
@@ -293,7 +295,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
 <!-- ACCUEIL -->
 <section id="home">
   <div class="sitebar">
-    <div class="logo"><div class="seal" aria-hidden="true">判</div><span>Hanko</span></div>
+    <div class="logo"><svg class="hlogo" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="hlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fe0a8"/><stop offset="1" stop-color="#c9f26b"/></linearGradient></defs><path d="M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z" fill="url(#hlg)"/><path d="M50 12l32.9 19v38L50 88 17.1 69V31z" fill="#0c1312"/><rect x="31" y="28" width="11" height="44" rx="2.5" fill="url(#hlg)"/><rect x="58" y="28" width="11" height="44" rx="2.5" fill="url(#hlg)"/><path d="M27 60l46-21v10L27 70z" fill="#3fe0a8"/></svg><span>Hanko</span></div>
     <nav class="sitenav" aria-label="Familles de jeux"><a href="#cat1">Affrontement</a><a href="#cat2">Connaissance</a><a href="#cat3">Complicité</a><a href="#cat4">Voix</a><a href="#joinBox">Rejoindre</a></nav>
   </div>
   <div class="feature">
@@ -813,7 +815,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <li>La partie se termine quand les <b>deux équipes ont 5 personnages</b>. Le vainqueur est désigné par un <b>combat 5 contre 5</b> : niveau individuel, pouvoirs, haki, techniques et affrontements favorables comptent, pas la somme des points.</li>
     </ul>
   </div>
-  <footer class="sitefoot"><span>Hanko · 判子</span><span>Jeu de fans, sans lien avec les ayants droit des œuvres citées.</span></footer>
+  <footer class="sitefoot"><span>Hanko</span><span>Jeu de fans, sans lien avec les ayants droit des œuvres citées.</span></footer>
 </section>
 
 <!-- SALON EN LIGNE -->
@@ -2860,7 +2862,7 @@ select{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(
 .clues b{color:var(--accent)}
 .votes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
 .role{font-family:var(--disp);font-size:34px;letter-spacing:1px}
-.role.civil{color:var(--ok)} .role.under{color:var(--accent2)} .role.white{color:var(--text)}
+.role.civil{color:var(--ok)} .role.under{color:var(--danger)} .role.white{color:var(--text)}
 .ucend{display:grid;gap:6px;margin:12px 0}
 .ucend div{display:flex;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:8px 12px;font-size:14px}
 .pairs{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:520px;margin:12px auto}
@@ -8652,7 +8654,12 @@ pcInit();
 .vox.on{border-color:var(--ok)}
 .vox button{padding:8px 12px;border-radius:22px;font-size:14px}
 .vox .st{font-size:12.5px;color:var(--muted);padding:0 4px;max-width:46vw}
-@media (max-width:640px){.vox{bottom:66px}}
+/* téléphone : la pastille du vocal devient une barre posée tout en bas, et la page garde la place dessous : elle ne recouvre plus « Quitter la partie » ni aucun bouton */
+@media (max-width:640px){
+  .vox{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:none;justify-content:space-between;border-radius:18px}
+  body:has(#home:not(.hidden)) .vox{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  body:has(.vox:not(.hidden)) .wrap{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+}
 </style>
 <script>
 /* =====================================================================
@@ -9414,7 +9421,7 @@ setInterval(voxRender, 2000);
 .tcopen .otop b i{font-style:normal;font-family:var(--brand);color:var(--accent);margin-right:8px}
 .tcopen .otop .ost{justify-self:end;display:flex;gap:6px}
 .tcopen .otop .ost span{font-family:var(--mono);font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(11,10,14,.6);white-space:nowrap}
-.tcopen .owm{position:absolute;right:-.06em;bottom:-.24em;font-family:var(--brand);font-weight:900;font-size:min(70vw,560px);line-height:1;color:rgba(255,90,54,.045);pointer-events:none;z-index:0}
+.tcopen .owm{position:absolute;right:-.06em;bottom:-.24em;font-family:var(--brand);font-weight:900;font-size:min(70vw,560px);line-height:1;color:color-mix(in srgb,var(--accent) 5%,transparent);pointer-events:none;z-index:0}
 .tcopen h2,.tcopen .mid,.tcopen .bot{position:relative;z-index:1}
 .tcopen.res h2{font-size:clamp(26px,7vw,54px);letter-spacing:-.03em;margin-top:6px}
 .tcopen .osum{color:#c9c5ce;font-size:15px;text-align:center}
@@ -9540,6 +9547,18 @@ setInterval(voxRender, 2000);
 .tccele b u{display:inline-block;text-decoration:none}
 .tccele small{font-family:var(--mono);font-size:clamp(12px,3.4vw,15px);letter-spacing:.14em;text-transform:uppercase;color:var(--cc)}
 @media (prefers-reduced-motion:no-preference){.tccele{animation:pop .25s ease-out both}}
+/* ---- sachet nouvelle génération (.px) : tout le design vient de l'image dessinée par tcPouchTex ; ici seulement le cadrage et le relief ---- */
+.pouch.pouch.pouch.px{background-size:100% 100%;background-position:center;background-repeat:no-repeat;background-color:#0c1312;border-radius:7px}
+.pouch.px > :not(.vol){display:none}
+.pouch.pouch.pouch.px::before,.pouch.pouch.pouch.px::after{display:none}
+.pouch.px .vol{background:radial-gradient(ellipse 62% 38% at 46% 50%,rgba(255,255,255,.12),transparent 72%),linear-gradient(90deg,rgba(0,0,0,.42),rgba(0,0,0,.05) 7%,rgba(255,255,255,.2) 13%,transparent 27%,transparent 72%,rgba(0,0,0,.16) 88%,rgba(0,0,0,.5)),linear-gradient(180deg,transparent 6.6%,rgba(0,0,0,.4) 7.2%,rgba(255,255,255,.26) 8.4%,transparent 14%,transparent 86%,rgba(0,0,0,.24) 91.8%,rgba(255,255,255,.2) 92.8%,transparent 93.6%),linear-gradient(104deg,transparent 22%,rgba(255,255,255,.1) 23%,transparent 26.5%,transparent 61%,rgba(0,0,0,.12) 62%,rgba(255,255,255,.08) 63.2%,transparent 66%)}
+.pouch.px.t1 .vol::after{opacity:.3}
+.tcopen .tcrow .tc.zoom{cursor:zoom-in}
+.tcopen .ozoom{color:var(--muted);text-align:center;margin:0}
+.tcview{z-index:120}
+/* Holo au repos : moins laiteux (la bande claire mangeait le visage sur les images pâles) */
+.tc.tc.f-H .fx{opacity:.3;filter:brightness(.42) contrast(1.3) saturate(1.2)}
+:is(.tc.hl,.vcard.live .tc).f-H .fx{opacity:.55}
 </style>
 <script>
 /* =====================================================================
@@ -9807,6 +9826,7 @@ function tcOnGame(mode, players, o){
 { const base = histAdd; histAdd = function(id, mode, players, result, o = {}){ const known = lsGet(HIST_KEY, []).some(x => x.id === id); base(id, mode, players, result, o); if (!known) try { tcOnGame(String(mode), players || [], o); } catch {} }; }
 
 // ---- missions du jour : trois par jour, les mêmes pour tout le monde ce jour-là ----
+const TC_DAYN = 5;   // missions tirées chaque jour dans la liste
 const TC_MIS = [
   {k: "play2", t: "Termine 2 parties", g: 2, v: d => d.play, rw: {g: 40}},
   {k: "win1", t: "Gagne 1 partie", g: 1, v: d => d.win, rw: {p: "mix:0"}},
@@ -9815,23 +9835,32 @@ const TC_MIS = [
   {k: "win2", t: "Gagne 2 parties", g: 2, v: d => d.win, rw: {p: "mix:1"}},
   {k: "new1", t: "Obtiens 1 nouvelle carte", g: 1, v: d => d.neu, rw: {g: 30}},
   {k: "uni", t: "", g: 1, v: (d, u) => d.unis.includes(u) ? 1 : 0, rw: {p: "uni"}},
-  {k: "play4", t: "Termine 4 parties", g: 4, v: d => d.play, rw: {p: "mix:0"}}];
+  {k: "play4", t: "Termine 4 parties", g: 4, v: d => d.play, rw: {p: "mix:0"}},
+  {k: "open3", t: "Ouvre 3 boosters", g: 3, v: d => d.open, rw: {g: 50}},
+  {k: "open5", t: "Ouvre 5 boosters", g: 5, v: d => d.open, rw: {g: 80}},
+  {k: "play6", t: "Termine 6 parties", g: 6, v: d => d.play, rw: {g: 90}},
+  {k: "modes3", t: "Joue à 3 jeux différents", g: 3, v: d => d.modes.length, rw: {g: 80}},
+  {k: "new3", t: "Obtiens 3 nouvelles cartes", g: 3, v: d => d.neu, rw: {g: 60}},
+  {k: "win3", t: "Gagne 3 parties", g: 3, v: d => d.win, rw: {g: 120}},
+  {k: "unis2", t: "Joue dans 2 univers différents", g: 2, v: d => d.unis.length, rw: {g: 60}}];
 function tcMissions(s){
   let h = 0; for (const ch of s.day.d) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   const u = ["op", "db", "na"][h % 3], idx = TC_MIS.map((_, i) => i), out = [];
-  for (let k = 0; k < 3; k++){ h = (h * 1103515245 + 12345) >>> 0; out.push(TC_MIS[idx.splice(h % idx.length, 1)[0]]); }
+  for (let k = 0; k < TC_DAYN; k++){ h = (h * 1103515245 + 12345) >>> 0; out.push(TC_MIS[idx.splice(h % idx.length, 1)[0]]); }
   return out.map(m => ({...m, t: m.k === "uni" ? `Termine une partie dans l'univers ${TC_PACKS[u][0]}` : m.t, cur: Math.min(m.g, m.v(s.day, u)), rw: m.rw.p === "uni" ? {p: tcKey(u, 0)} : m.rw}));
 }
 // missions de la semaine (du lundi au dimanche), plus longues et mieux payées
 const tcWeekKey = () => Math.floor((Date.now() / 864e5 + 3) / 7);
-const TC_WK = [{k: "wplay", t: "Termine 20 parties", g: 20, v: w => w.play, rw: {p: "mix:1"}}, {k: "wwin", t: "Gagne 10 parties", g: 10, v: w => w.win, rw: {p: "mix:2"}}, {k: "wopen", t: "Ouvre 15 boosters", g: 15, v: w => w.open, rw: {g: 200}}, {k: "wnew", t: "Obtiens 20 nouvelles cartes", g: 20, v: w => w.neu, rw: {g: 150}}];
-const tcWeek = s => { if (!s.week || s.week.k !== tcWeekKey()) s.week = {k: tcWeekKey(), play: 0, win: 0, open: 0, neu: 0, claimed: []}; return s.week; };
+const TC_WK = [{k: "wplay", t: "Termine 20 parties", g: 20, v: w => w.play, rw: {p: "mix:1"}}, {k: "wwin", t: "Gagne 10 parties", g: 10, v: w => w.win, rw: {p: "mix:2"}}, {k: "wopen", t: "Ouvre 15 boosters", g: 15, v: w => w.open, rw: {g: 200}}, {k: "wnew", t: "Obtiens 20 nouvelles cartes", g: 20, v: w => w.neu, rw: {g: 150}},
+  {k: "wdays", t: "Connecte-toi 5 jours dans la semaine", g: 5, v: w => (w.days || []).length, rw: {p: "mix:1"}}, {k: "wplay40", t: "Termine 40 parties", g: 40, v: w => w.play, rw: {g: 400}}, {k: "wwin20", t: "Gagne 20 parties", g: 20, v: w => w.win, rw: {g: 500}}, {k: "wopen40", t: "Ouvre 40 boosters", g: 40, v: w => w.open, rw: {p: "mix:1"}}];
+const tcWeek = s => { if (!s.week || s.week.k !== tcWeekKey()) s.week = {k: tcWeekKey(), play: 0, win: 0, open: 0, neu: 0, days: [], claimed: []}; s.week.days = s.week.days || []; if (!s.week.days.includes(tcDay())) s.week.days.push(tcDay()); return s.week; };
 // missions du mois : difficiles, très bien payées (booster Divin, gros lots d'éclats)
 const TC_MO = [{k: "mwin", t: "Gagne 60 parties", g: 60, v: m => m.win, rw: {p: "mix:3"}}, {k: "mdays", t: "Connecte-toi 25 jours dans le mois", g: 25, v: m => m.days.length, rw: {p: "mix:3"}}, {k: "mopen", t: "Ouvre 100 boosters", g: 100, v: m => m.open, rw: {g: 1500}},
-  {k: "mnew", t: "Obtiens 80 nouvelles cartes", g: 80, v: m => m.neu, rw: {p: "mix:2"}}, {k: "mplay", t: "Termine 150 parties", g: 150, v: m => m.play, rw: {g: 1000}}];
+  {k: "mnew", t: "Obtiens 80 nouvelles cartes", g: 80, v: m => m.neu, rw: {p: "mix:2"}}, {k: "mplay", t: "Termine 150 parties", g: 150, v: m => m.play, rw: {g: 1000}},
+  {k: "mdays15", t: "Connecte-toi 15 jours dans le mois", g: 15, v: m => m.days.length, rw: {p: "mix:2"}}, {k: "mopen250", t: "Ouvre 250 boosters", g: 250, v: m => m.open, rw: {p: "mix:3"}}, {k: "mwin120", t: "Gagne 120 parties", g: 120, v: m => m.win, rw: {g: 3000}}];
 const tcMonth = s => { const k = tcDay().slice(0, 7); if (!s.month || s.month.k !== k) s.month = {k, play: 0, win: 0, open: 0, neu: 0, days: [], claimed: []}; if (!s.month.days.includes(tcDay())) s.month.days.push(tcDay()); return s.month; };
 // où aller pour accomplir une mission
-function tcGo(k){ if (k === "mdays") return; if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
+function tcGo(k){ if (/days/.test(k)) return; if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
 const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + tcName(rw.p);
 // cadeau de connexion : éclats chaque jour, booster Argent tous les 3 jours, Or le 7e jour de chaque semaine de série
 const TC_LOGIN_PACKS = 2;   // boosters Classique offerts chaque jour avec le cadeau de connexion, en plus de la récompense du jour
@@ -9912,7 +9941,7 @@ const tcLuxCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc lx r-${
   <span class="lh"><span>#${String(c.no).padStart(3, "0")} · ${TC_R[c.r][0]}${o.f === "H" ? " · Holo" : ""}</span><i class="sl" aria-hidden="true">${c.r === "X" ? "覚" : c.r === "M" ? "神" : "伝"}</i></span>
   <span class="ln">${o.no ? "???" : esc(c.n)}</span>
   <span class="ls"><span>NIV <b>${o.no ? "??" : c.p}</b></span><span><span class="kj">${TC_PACKS[c.u][1]}</span> ${TC_PACKS[c.u][0]}</span><span>RANG <b>${o.no ? "?" : c.pop || "B"}</b></span></span><span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
-const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="vol" aria-hidden="true"></span><span class="br">HANKO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="stk">判</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
+const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch px t${t}" style="--pc:${TC_PACKS[u][2]};background-image:url(${tcPouchImg(key)})"><span class="vol" aria-hidden="true"></span></div>`; };
 function tcHome(s){
   const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
   const n = tcStock(s), own = Object.keys(s.own).length, todo = tcMissions(s).filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1);
@@ -9977,13 +10006,13 @@ function tcRender(){
     const now = new Date(), inT = d => { const h = Math.max(0, (d - now) / 36e5); return h >= 48 ? "encore " + Math.ceil(h / 24) + " jours" : h >= 1 ? "encore " + Math.floor(h) + " h" : "encore " + Math.ceil(h * 60) + " min"; };
     const tDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tWk = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((8 - now.getDay()) % 7 || 7)), tMo = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const sec = (t, kj, n, when) => `<div class="tcsec"><h3>${t}<i>${kj}</i></h3><em>${n}</em><span>${when}</span></div>`;
-    html += `<div class="tcmhead"><div><span>À réclamer</span><b>${claim}</b></div><div><span>Série de connexion</span><b>Jour ${s.login.n}</b></div><div><span>Faites aujourd'hui</span><b>${left(mis)}/3</b></div><button class="primary" id="tcClaimAll" ${claim ? "" : "disabled"}>Tout réclamer</button></div>
+    html += `<div class="tcmhead"><div><span>À réclamer</span><b>${claim}</b></div><div><span>Série de connexion</span><b>Jour ${s.login.n}</b></div><div><span>Faites aujourd'hui</span><b>${left(mis)}/${mis.length}</b></div><button class="primary" id="tcClaimAll" ${claim ? "" : "disabled"}>Tout réclamer</button></div>
       ${sec("Connexion", "連続", "Jour " + s.login.n, "nouveau cadeau · " + inT(tDay))}
       <div class="tcweek">${nx.map(n => { const r = tcLoginRw(n); return `<div class="${n < s.login.n || (n === s.login.n && s.login.got) ? "ok" : n === s.login.n ? "now" : ""}"><small>J${n}</small><b>${r.g ? r.g + " ◆" : TC_T[tcParse(r.p).t].k}</b></div>`; }).join("")}</div>
       <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour : ${TC_LOGIN_PACKS} boosters Classique, plus la récompense du jour (booster Argent 銀 tous les 3 jours, booster Or 金 le 7e). Un jour manqué remet la série à 1.</p>
-      ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/3", inT(tDay))}
+      ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/" + mis.length, inT(tDay))}
       <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
-        <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : les trois missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / 3 * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/3</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
+        <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : toutes les missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / mis.length * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/${mis.length}</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
       ${sec("Hebdomadaires", "週間", dn(wks, wk.claimed) + "/" + wks.length, inT(tWk))}
       <p class="tcsecp">Plus longues, mieux payées. Elles repartent de zéro chaque lundi.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}</div>
       ${sec("Mensuelles", "月間", dn(mos, mo.claimed) + "/" + mos.length, inT(tMo))}
@@ -10124,7 +10153,7 @@ function tcLibs(){ if (tcLibs.done) return; tcLibs.done = true;
   [["gsap", "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"], ["confetti", "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"], ["THREE", "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"], ["qrcode", "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"]].forEach(([g, src]) => { if (window[g]) return; const sc = document.createElement("script"); sc.src = src; sc.async = true; if (g === "gsap") sc.onload = () => { try { gsap.ticker.lagSmoothing(0); } catch {} };   // sans ce réglage, GSAP ralentit ses animations quand l'affichage saccade : elles doivent suivre l'horloge réelle
     document.head.appendChild(sc); }); }
 // gerbe de particules ; lvl 0 = petite, 1 = Épique ou version rare, 2 = Légendaire, 3 = Mythique et au-dessus
-const TC_BOOM = [["#ffffff", "#c9a36a", "#ff5a36"], ["#b07cff", "#e3d1ff", "#ffffff"], ["#f7c64a", "#fff3c2", "#ffffff", "#ff9d2e"], ["#ff5a8a", "#ffb347", "#fff275", "#6ee7a8", "#5ac8fa", "#b07cff"]];
+const TC_BOOM = [["#ffffff", "#c9f26b", "#3fe0a8"], ["#b07cff", "#e3d1ff", "#ffffff"], ["#f7c64a", "#fff3c2", "#ffffff", "#ff9d2e"], ["#ff5a8a", "#ffb347", "#fff275", "#6ee7a8", "#5ac8fa", "#b07cff"]];
 function tcBoom(lvl, el){ if (!window.confetti || tcCalm()) return; const r = el && el.getBoundingClientRect(), o = r ? {x: (r.left + r.width / 2) / innerWidth, y: (r.top + r.height / 2) / innerHeight} : {x: .5, y: .5};
   const base = {origin: o, colors: TC_BOOM[lvl], zIndex: 9999, disableForReducedMotion: true};
   confetti({...base, particleCount: [18, 45, 90, 140][lvl], spread: [55, 75, 100, 130][lvl], startVelocity: [22, 30, 40, 48][lvl], scalar: [.7, .85, 1, 1.1][lvl], ticks: [90, 140, 200, 260][lvl]});
@@ -10133,30 +10162,59 @@ function tcBoom(lvl, el){ if (!window.confetti || tcCalm()) return; const r = el
 // ---- sachet en vraie 3D (three.js), sur l'écran d'ouverture seulement ----
 // La face du sachet est redessinée sur un canvas (mêmes couleurs que le sachet CSS), plaquée sur un coussin bombé éclairé.
 // Le sachet CSS reste dessous, invisible : il garde le clic et reprend la main à la déchirure. Trop lent ou pas de WebGL : on le réaffiche.
-function tcPouchTex(key, back){ const {u, t} = tcParse(key), pc = TC_PACKS[u][2], W = 520, H = 760, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
-  const css = getComputedStyle(document.documentElement), F = k => css.getPropertyValue(k).trim() || "sans-serif", mix = (a, b, p) => { const h = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)), A = h(a), B = h(b); return "rgb(" + A.map((v, i) => Math.round(v * p + B[i] * (1 - p))).join(",") + ")"; };
+// Dessin d'un sachet (refonte du 13 oct. 2026 : épuré, quatre matières, grand kanji en mincho, nom en Unbounded). Ce canvas est la seule source du design :
+// il sert de texture au sachet 3D et, converti en image, de fond au sachet CSS (tcPouchImg). Classique = encre et vagues, Argent = nacre, Or = laque noire et disque d'or, Divin = aurore.
+const TC_KJF = '"Shippori Mincho B1","Zen Kaku Gothic New","Hiragino Mincho ProN",serif';
+function tcPouchTex(key, back){ const {u, t} = tcParse(key), pc0 = TC_PACKS[u][2], pc = /^#[0-9a-f]{6}$/i.test(pc0) ? pc0 : "#3fe0a8", W = 520, H = 760, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
+  const css = getComputedStyle(document.documentElement), F = k => css.getPropertyValue(k).trim() || "sans-serif", rgb = (c, al) => `rgba(${[1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)).join(",")},${al})`;
   const lin = (x0, y0, x1, y1, st) => { const g = x.createLinearGradient(x0, y0, x1, y1); st.forEach(([o, c]) => g.addColorStop(o, c)); return g; }, rad = (cx, cy, r, st) => { const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); st.forEach(([o, c]) => g.addColorStop(o, c)); return g; };
-  const ink = [mix(pc.length === 7 ? pc : "#ff5a36", "#5a1200", .62), "#5c6676", "#f2c230", "#ffffff"][t], txt = ["#3a2a14", "#4a5260", "#f8dc7a", "#ffffff"][t];
-  // fond
-  if (t === 0){ x.fillStyle = "#c9a36a"; x.fillRect(0, 0, W, H); x.fillStyle = rad(W * .3, H * .18, W * .8, [[0, "rgba(255,255,255,.34)"], [1, "rgba(255,255,255,0)"]]); x.fillRect(0, 0, W, H); x.strokeStyle = "rgba(90,60,20,.12)"; x.lineWidth = 1; for (let y = 0; y < H; y += 6){ x.beginPath(); x.moveTo(0, y); x.lineTo(W, y + 40); x.stroke(); } }
-  else if (t === 1){ x.fillStyle = lin(0, 0, W, H, [[0, "#fbfaf6"], [1, "#e3dfd5"]]); x.fillRect(0, 0, W, H); x.strokeStyle = mix(pc.length === 7 ? pc : "#8c96a8", "#8c96a8", .26); x.lineWidth = 5; for (let r = 40; r < H; r += 42){ x.globalAlpha = Math.max(0, .75 - r / H); x.beginPath(); x.arc(W / 2, H * 1.22, r, 0, 7); x.stroke(); } x.globalAlpha = 1; }
-  else if (t === 2){ x.fillStyle = lin(0, 0, 0, H, [[0, "#d7142f"], [1, "#860016"]]); x.fillRect(0, 0, W, H); x.strokeStyle = "rgba(242,194,48,.2)"; x.lineWidth = 2; for (let k = -H; k < W + H; k += 30){ x.beginPath(); x.moveTo(k, 0); x.lineTo(k + H, H); x.stroke(); x.beginPath(); x.moveTo(k, H); x.lineTo(k + H, 0); x.stroke(); } x.strokeStyle = "#f2c230"; x.lineWidth = 9; x.beginPath(); x.arc(W / 2, H / 2, W * .31, 0, 7); x.stroke(); }
-  else { x.fillStyle = "#090614"; x.fillRect(0, 0, W, H); [[.28, .24, "#5a2ad0"], [.76, .7, "#c2187a"], [.6, .2, pc.length === 7 ? pc : "#5ac8fa"]].forEach(([a, b, c]) => { x.fillStyle = rad(W * a, H * b, W * .6, [[0, c], [1, "rgba(9,6,20,0)"]]); x.globalAlpha = .8; x.fillRect(0, 0, W, H); }); x.globalAlpha = 1; x.fillStyle = "#fff"; for (let k = 0; k < 70; k++){ const r = (Math.sin(k * 91.7) * .5 + .5) * 2.2 + .4; x.globalAlpha = .4 + (Math.sin(k * 13.3) * .5 + .5) * .6; x.beginPath(); x.arc((Math.sin(k * 37.1) * .5 + .5) * W, (Math.sin(k * 59.9) * .5 + .5) * H, r, 0, 7); x.fill(); } x.globalAlpha = 1; }
-  // soudures crantées en haut et en bas
-  [[0, H * .09], [H * .91, H]].forEach(([a, b]) => { for (let k = 0; k < W; k += 12){ x.fillStyle = t === 3 ? "rgba(0,0,0,.4)" : "rgba(0,0,0,.28)"; x.fillRect(k, a, 6, b - a); x.fillStyle = t === 3 ? "rgba(213,179,255,.35)" : "rgba(255,255,255,.2)"; x.fillRect(k + 6, a, 6, b - a); } x.fillStyle = "rgba(0,0,0,.4)"; x.fillRect(0, a === 0 ? b - 3 : a, W, 3); });
+  const rnd = k => Math.sin(k * 127.1 + 311.7) * 43758.5453 % 1, R = k => Math.abs(rnd(k));
+  const spaced = (txt, cx, y, gap) => { const ws = [...txt].map(ch => x.measureText(ch).width), tot = ws.reduce((a, b) => a + b, 0) + gap * (txt.length - 1); let px = cx - tot / 2; x.textAlign = "left"; [...txt].forEach((ch, i) => { x.fillText(ch, px, y); px += ws[i] + gap; }); x.textAlign = "center"; };
+  const hex = (cx, cy, r) => { x.beginPath(); for (let k = 0; k < 6; k++){ const a = Math.PI / 3 * k - Math.PI / 2; x[k ? "lineTo" : "moveTo"](cx + r * Math.cos(a), cy + r * Math.sin(a)); } x.closePath(); };
+  const logo = (cx, cy, r, fill, inner) => { x.fillStyle = fill; hex(cx, cy, r); x.fill(); x.fillStyle = inner; hex(cx, cy, r * .8); x.fill(); x.fillStyle = fill; const s = r / 47; x.fillRect(cx - 19 * s, cy - 22 * s, 11 * s, 44 * s); x.fillRect(cx + 8 * s, cy - 22 * s, 11 * s, 44 * s); x.beginPath(); x.moveTo(cx - 23 * s, cy + 10 * s); x.lineTo(cx + 23 * s, cy - 11 * s); x.lineTo(cx + 23 * s, cy - 1 * s); x.lineTo(cx - 23 * s, cy + 20 * s); x.closePath(); x.fill(); };
+  // ---- matière ----
+  let ink, txt, inner;
+  if (t === 0){ x.fillStyle = lin(0, 0, W, H, [[0, "#1b2825"], [1, "#0a100f"]]); x.fillRect(0, 0, W, H); x.strokeStyle = rgb(pc, .15); x.lineWidth = 1.3;
+    for (let row = 0, y = 40; y < H + 40; y += 26, row++) for (let cx = (row % 2 ? 0 : 26); cx < W + 52; cx += 52) [26, 18, 10].forEach(r => { x.beginPath(); x.arc(cx, y, r, Math.PI, 0); x.stroke(); });
+    x.fillStyle = rad(W * .5, H * .46, W * .7, [[0, rgb(pc, .2)], [1, rgb(pc, 0)]]); x.fillRect(0, 0, W, H); ink = pc; txt = "#eaf3ef"; inner = "#0f1716"; }
+  else if (t === 1){ x.fillStyle = lin(0, 0, W, H, [[0, "#f8f9fb"], [1, "#cfd6df"]]); x.fillRect(0, 0, W, H); [[.22, .2, "rgba(255,186,220,.42)"], [.82, .68, "rgba(160,208,255,.48)"], [.66, .12, "rgba(170,240,214,.38)"], [.18, .86, "rgba(214,190,255,.36)"]].forEach(([a, b, c]) => { x.fillStyle = rad(W * a, H * b, W * .55, [[0, c], [1, "rgba(255,255,255,0)"]]); x.fillRect(0, 0, W, H); });
+    x.strokeStyle = "rgba(60,72,92,.07)"; x.lineWidth = 1; for (let k = -H; k < W; k += 9){ x.beginPath(); x.moveTo(k, 0); x.lineTo(k + H * .6, H); x.stroke(); } ink = "#18212c"; txt = "#18212c"; inner = "#eef1f5"; }
+  else if (t === 2){ x.fillStyle = "#0a0806"; x.fillRect(0, 0, W, H); x.fillStyle = rad(W * .5, H * .47, W * .8, [[0, "#2c1e0d"], [1, "rgba(10,8,6,0)"]]); x.fillRect(0, 0, W, H);
+    for (let k = 0; k < 150; k++){ x.fillStyle = `rgba(240,199,90,${.15 + R(k) * .5})`; x.beginPath(); x.arc(R(k + 300) * W, R(k + 600) * H, R(k + 900) * 1.6 + .4, 0, 7); x.fill(); }
+    x.strokeStyle = "#e8b84a"; x.lineWidth = 2; x.strokeRect(24, H * .07 + 18, W - 48, H * .86 - 36); x.lineWidth = .8; x.strokeRect(32, H * .07 + 26, W - 64, H * .86 - 52);
+    ink = "#140d04"; txt = lin(0, 0, W, 0, [[0, "#e8b84a"], [.5, "#fff3c2"], [1, "#e8b84a"]]); inner = "#0a0806"; }
+  else { x.fillStyle = "#05050d"; x.fillRect(0, 0, W, H); x.globalCompositeOperation = "screen"; [[.18, .24, "#3fe0a8", .62, .75], [.84, .44, "#7b5cff", .6, .7], [.38, .88, "#ff4fd8", .4, .6], [.92, .08, "#3fd8ff", .45, .5], [.5, .5, pc, .22, .6]].forEach(([a, b, c, al, r]) => { x.fillStyle = rad(W * a, H * b, W * r, [[0, rgb(c, al)], [1, rgb(c, 0)]]); x.fillRect(0, 0, W, H); });
+    for (let k = 0; k < 6; k++){ const y0 = H * (.12 + k * .14); x.strokeStyle = rgb(["#3fe0a8", "#7b5cff", "#ff4fd8"][k % 3], .16); x.lineWidth = 26; x.beginPath(); x.moveTo(-20, y0); x.bezierCurveTo(W * .3, y0 - 90, W * .6, y0 + 110, W + 20, y0 - 30); x.stroke(); }
+    x.globalCompositeOperation = "source-over"; x.fillStyle = "#fff"; for (let k = 0; k < 110; k++){ x.globalAlpha = .25 + R(k) * .75; x.beginPath(); x.arc(R(k + 200) * W, R(k + 500) * H, R(k + 800) * 1.7 + .3, 0, 7); x.fill(); } x.globalAlpha = 1; ink = "#ffffff"; txt = "#ffffff"; inner = "#0b0a18"; }
+  // ---- soudures : fines cannelures ton sur ton ----
+  [[0, H * .07], [H * .93, H]].forEach(([a, b]) => { x.fillStyle = t === 1 ? "rgba(24,33,44,.1)" : "rgba(0,0,0,.34)"; x.fillRect(0, a, W, b - a); for (let k = 0; k < W; k += 8){ x.fillStyle = t === 1 ? "rgba(255,255,255,.7)" : "rgba(255,255,255,.13)"; x.fillRect(k, a, 3, b - a); } x.fillStyle = t === 1 ? "rgba(24,33,44,.35)" : t === 2 ? "#e8b84a" : rgb(t === 0 ? pc : "#ffffff", .5); x.fillRect(0, a === 0 ? b - 2 : a, W, 2); });
   x.textAlign = "center"; x.textBaseline = "middle";
-  if (back){ x.globalAlpha = .22; x.fillStyle = txt; x.font = `900 ${W * .5}px ${F("--brand")}`; x.fillText("判", W / 2, H / 2); x.globalAlpha = 1; return cv; }
-  x.fillStyle = txt; x.font = `500 ${W * .058}px ${F("--mono")}`; x.fillText("H A N K O", W / 2, H * .15);
-  if (t){ const lab = TC_T[t].k + " " + TC_T[t].n.toUpperCase(); x.font = `500 ${W * .056}px ${F("--mono")}`; const w = x.measureText(lab).width + W * .1, h = W * .1, y = H * .225; x.fillStyle = ["", "#4a5260", "#f2c230", "rgba(255,255,255,.16)"][t]; x.beginPath(); x.roundRect(W / 2 - w / 2, y - h / 2, w, h, h / 2); x.fill(); x.fillStyle = ["", "#f3f1ec", "#5a0010", "#fff"][t]; x.fillText(lab, W / 2, y + 2); }
-  if (t === 0){ x.save(); x.translate(W / 2, H * .5); x.rotate(-7 * Math.PI / 180); x.strokeStyle = ink; x.lineWidth = W * .032; x.beginPath(); x.roundRect(-W * .3, -W * .3, W * .6, W * .6, W * .09); x.stroke(); x.restore(); }
-  if (t === 3){ x.shadowColor = "#ff5a8a"; x.shadowBlur = 50; }
-  x.fillStyle = t === 1 ? lin(W * .3, H * .35, W * .7, H * .65, [[0, "#5c6676"], [.46, "#eef2f7"], [1, "#5c6676"]]) : t === 2 ? lin(0, H * .36, 0, H * .64, [[0, "#fff3c2"], [.52, "#f2c230"], [1, "#b97a0a"]]) : ink;
-  x.font = `900 ${W * (t === 1 || t === 3 ? .54 : .44)}px ${F("--brand")}`; x.fillText(TC_PACKS[u][1], W / 2, H * .5 + W * .02); x.shadowBlur = 0;
-  x.fillStyle = t === 0 || t === 1 ? "#0e0d12" : txt; x.font = `900 ${W * .078}px ${F("--title")}`; x.fillText(TC_PACKS[u][0], W / 2, H * .83); x.font = `500 ${W * .05}px ${F("--mono")}`; x.globalAlpha = .75; x.fillText("5  C A R T E S", W / 2, H * .876); x.globalAlpha = 1;
-  // pastille 判
-  x.save(); x.translate(W * .83, H * .7); x.rotate(-12 * Math.PI / 180); x.fillStyle = rad(-W * .03, -W * .03, W * .13, [[0, "#fff"], [.6, "#c7ceda"], [1, "#8f9aab"]]); x.shadowColor = "rgba(0,0,0,.5)"; x.shadowBlur = 8; x.beginPath(); x.arc(0, 0, W * .1, 0, 7); x.fill(); x.shadowBlur = 0; x.fillStyle = "#0b0a0e"; x.font = `900 ${W * .11}px ${F("--brand")}`; x.fillText("判", 0, W * .008); x.restore();
+  const mark = t === 0 ? lin(0, 0, W, H, [[0, pc], [1, "#ffffff"]]) : t === 1 ? "#18212c" : t === 2 ? txt : lin(0, 0, W, 0, [[0, "#3fe0a8"], [.5, "#ffffff"], [1, "#c7a6ff"]]);
+  if (back){ x.globalAlpha = .9; logo(W / 2, H * .47, W * .2, mark, inner); x.globalAlpha = 1; x.fillStyle = txt; x.font = `800 ${W * .06}px ${F("--title")}`; spaced("HANKO", W / 2, H * .68, W * .03); return cv; }
+  // ---- en-tête : logo et marque ----
+  logo(W / 2, H * .15, W * .058, mark, inner); x.fillStyle = txt; x.font = `800 ${W * .042}px ${F("--title")}`; spaced("HANKO", W / 2, H * .215, W * .022);
+  // ---- cœur : cercle ouvert (ou disque d'or) et grand kanji ----
+  const KY = H * .49;
+  if (t === 2){ x.fillStyle = rad(W * .44, KY - W * .1, W * .5, [[0, "#fff6cf"], [.4, "#f0c75a"], [1, "#a9741a"]]); x.shadowColor = "rgba(240,199,90,.55)"; x.shadowBlur = 40; x.beginPath(); x.arc(W / 2, KY, W * .31, 0, 7); x.fill(); x.shadowBlur = 0; }
+  else { x.strokeStyle = t === 1 ? lin(0, KY - W * .36, W, KY + W * .36, [[0, "#7f8b9d"], [.5, "#ffffff"], [1, "#7f8b9d"]]) : t === 3 ? lin(0, 0, W, H, [[0, "#3fe0a8"], [.5, "#ffffff"], [1, "#ff4fd8"]]) : rgb(pc, .6); x.lineWidth = t === 1 ? 5 : 3.5; x.lineCap = "round"; x.beginPath(); x.arc(W / 2, KY, W * .35, Math.PI * -.32, Math.PI * 1.42); x.stroke(); x.lineWidth = 1.2; x.globalAlpha = .5; x.beginPath(); x.arc(W / 2, KY, W * .385, Math.PI * .1, Math.PI * 1.75); x.stroke(); x.globalAlpha = 1; }
+  if (t === 3){ x.shadowColor = rgb(pc, .9); x.shadowBlur = 46; } if (t === 0){ x.shadowColor = rgb(pc, .45); x.shadowBlur = 30; }
+  x.fillStyle = ink; x.font = `800 ${W * (t === 2 ? .46 : .5)}px ${TC_KJF}`; x.fillText(TC_PACKS[u][1], W / 2, KY + W * .025); x.shadowBlur = 0;
+  // ---- mentions verticales ----
+  x.fillStyle = txt; x.globalAlpha = t === 2 ? .8 : .5; x.font = `500 ${W * .027}px ${F("--mono")}`;
+  x.save(); x.translate(W * .925, KY); x.rotate(Math.PI / 2); spaced("ÉDITION " + TC_T[t].n.toUpperCase() + "  ·  5 CARTES", 0, 0, W * .012); x.restore();
+  x.save(); x.translate(W * .075, KY); x.rotate(-Math.PI / 2); spaced("CARTES À COLLECTIONNER", 0, 0, W * .012); x.restore(); x.globalAlpha = 1;
+  // ---- pied : nom de l'univers, filet, niveau ----
+  const nm = TC_PACKS[u][0].toUpperCase(); let fs = W * .092; x.font = `900 ${fs}px ${F("--title")}`; while (x.measureText(nm).width > W * .78 && fs > 20){ fs -= 2; x.font = `900 ${fs}px ${F("--title")}`; }
+  x.fillStyle = txt; x.fillText(nm, W / 2, H * .795);
+  x.fillStyle = t === 1 ? "rgba(24,33,44,.5)" : t === 2 ? "#e8b84a" : rgb(t === 0 ? pc : "#ffffff", .7); x.fillRect(W * .3, H * .842, W * .4, 1.5); x.save(); x.translate(W / 2, H * .8425); x.rotate(Math.PI / 4); x.fillRect(-5, -5, 10, 10); x.restore();
+  x.fillStyle = txt; x.font = `500 ${W * .036}px ${F("--mono")}`; spaced((TC_T[t].k ? TC_T[t].k + " " : "") + TC_T[t].n.toUpperCase(), W / 2, H * .878, W * .02);
   return cv; }
-function tcPouchGL(O, key){ const T = window.THREE, wrap = O.querySelector(".tearw"), p = wrap && wrap.querySelector(".pouch"); if (!T || !p || tcCalm() || !CanvasRenderingContext2D.prototype.roundRect) return null;
+// image du sachet pour l'affichage CSS, gardée en mémoire ; redessinée une fois quand les polices (Unbounded, Shippori Mincho) sont arrivées
+const TC_PIMG = new Map(); let TC_PFONT = false;
+function tcPouchImg(key){ const ok = !document.fonts || (document.fonts.check('800 40px "Shippori Mincho B1"', "海龍忍混") && document.fonts.check('900 40px Unbounded'));
+  if (!ok && !TC_PFONT){ TC_PFONT = true; Promise.all([document.fonts.load('800 40px "Shippori Mincho B1"', "海龍忍混"), document.fonts.load('900 40px Unbounded', "HANKO"), document.fonts.load('500 20px "JetBrains Mono"', "A")]).then(() => { TC_PIMG.clear(); try { if (!$("#tcg").classList.contains("hidden") && !document.querySelector(".tcopen,.tcview,.tccine")) tcRender(); } catch {} }).catch(() => {}); }
+  if (!TC_PIMG.has(key)){ try { TC_PIMG.set(key, tcPouchTex(key, false).toDataURL("image/jpeg", .9)); } catch { return ""; } } return TC_PIMG.get(key); }
+function tcPouchGL(O, key){ const T = window.THREE, wrap = O.querySelector(".tearw"), p = wrap && wrap.querySelector(".pouch"); if (!T || !p || tcCalm()) return null;
   let rd; try { rd = new T.WebGLRenderer({alpha: true, antialias: true, powerPreference: "high-performance"}); } catch { return null; }
   const {t} = tcParse(key), cv = rd.domElement, K = 1.6; cv.className = "pkgl"; cv.setAttribute("aria-hidden", "true"); wrap.appendChild(cv); wrap.classList.add("gl");
   const size = () => { const r = p.getBoundingClientRect(), w = r.width * K, h = r.height * K; rd.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); rd.setSize(w, h, false); }; size(); rd.outputEncoding = T.sRGBEncoding;
@@ -10203,7 +10261,7 @@ function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "K" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1;
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">判</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">H</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const G = !calm && window.gsap, lvlOf = c => c.r === "M" || c.r === "X" || c.f === "G" || c.f === "Z" ? 3 : c.r === "L" || c.f === "K" || c.f === "S" || c.f === "W" ? 2 : TC_ORDER.indexOf(c.r) === 3 || c.f ? 1 : 0;
   const GL = tcPouchGL(O, key); if (!calm) setTimeout(() => tcSnd("rustle"), 420);
@@ -10216,6 +10274,7 @@ function tcOpening(key, got){
     const gain = got.filter(c => !c.isNew && !c.newFin).reduce((a, c) => a + TC_R[c.r][1] * (c.f ? TC_FIN[c.f][3] : 1), 0), have = (s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0), price = tcPrice(u, t);
     O.classList.add("res"); O.querySelector("h2").textContent = tcName(key);
     const row = mid.querySelector(".tcrow"); if (row && got.length <= 5){ row.classList.add("tcfan"); [...row.children].forEach((el, k) => { el.classList.remove("tcflip", "tcburst"); el.style.setProperty("--k", k === last ? 0 : k < 2 ? k - 2 : k - 1); el.style.order = k === last ? 3 : k < 2 ? k + 1 : k + 2; if (k === last) el.classList.add("best"); }); }
+    { const rw = mid.querySelector(".tcrow"); if (rw){ [...rw.children].forEach((el, k) => { if (!got[k]) return; el.classList.add("zoom"); el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", "Voir " + got[k].n + " en grand"); const go = () => tcView(got[k], got[k].f || ""); el.onclick = go; el.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }); rw.insertAdjacentHTML("afterend", `<p class="small ozoom">Touche une carte pour la voir en grand, l'incliner, la retourner et lire sa fiche.</p>`); } }
     if ((got.secs || []).length) mid.insertAdjacentHTML("afterbegin", `<p class="osec" style="--sc:${TC_SECRET.find(x => x[0] === got.secs[0])[4]}">${got.secs.map(k => { const sx = TC_SECRET.find(x => x[0] === k); return `<i>${sx[2]}</i>Booster ${sx[1]} : ${sx[5]}`; }).join(" · ")}</p>`);
     mid.insertAdjacentHTML("afterbegin", `<p class="osum">${[nw && nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : ""), nf && nf + " nouvelle" + (nf > 1 ? "s" : "") + " version" + (nf > 1 ? "s" : ""), dup && dup + " doublon" + (dup > 1 ? "s" : "") + " (+" + gain + " ◆ si recyclé" + (dup > 1 ? "s" : "") + ")"].filter(Boolean).join(", ")}</p><p class="obest">Meilleure carte : ${esc(got[last].n)}</p>`);
     mid.insertAdjacentHTML("beforeend", `<span class="oxn">×${got.packs || 1}</span><p class="tcxp">+${got.xp} XP${got.ups.map(([l, tt]) => ` · <b>Niveau ${l} : booster ${TC_T[tt].n} offert</b>`).join("")}</p>`);
@@ -10685,7 +10744,7 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
 /* barre du haut dans une partie : le nom du jeu à gauche, « Quitter » à droite, collée en haut */
 section:not(#home):not(#game) > .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 0 16px;padding:12px 0;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .topbar h1{font-size:clamp(15px,3.6vw,20px);letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
-.topbar h1::before{content:"判";display:inline-grid;place-items:center;width:26px;height:26px;margin-right:10px;vertical-align:-5px;background:var(--accent);color:#0e0d12;font-family:var(--brand);font-weight:900;font-size:15px;border-radius:7px;letter-spacing:0}
+.topbar h1::before{content:"";display:inline-block;width:26px;height:26px;margin-right:10px;vertical-align:-6px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='hlg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233fe0a8'/%3E%3Cstop offset='1' stop-color='%23c9f26b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z' fill='url(%23hlg)'/%3E%3Cpath d='M50 12l32.9 19v38L50 88 17.1 69V31z' fill='%230c1312'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Cpath d='M27 60l46-21v10L27 70z' fill='%233fe0a8'/%3E%3C/svg%3E") center/contain no-repeat}
 .topbar button{flex:none;border-radius:999px;padding:8px 14px;font-size:13.5px}
 /* panneaux, titres et textes */
 .panel h2{margin-bottom:6px}
