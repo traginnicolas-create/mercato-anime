@@ -1011,7 +1011,7 @@ $("#quit").onclick = () => {
 };
 
 const readOpts = () => ({order: $("#optOrder").checked, anim: $("#optAnim").checked, events: $("#optEvents").checked, jokers: $("#optJokers").checked});
-function show(id){ if (id !== "gs" && typeof gsStop === "function") gsStop(); ["home","lobby","game","end","uc","gs","tp","pm","jg","nt","fx","el","rl","wh","bt","mm","pc"].forEach(s => $("#"+s).classList.toggle("hidden", s !== id)); window.scrollTo(0,0); if (typeof renderEmojiBar === "function") renderEmojiBar(); }
+function show(id){ if (id !== "gs" && typeof gsStop === "function") gsStop(); ["home","lobby","game","end","uc","gs","tp","pm","jg","nt","fx","el","rl","wh","bt","mm","pc","tcg"].forEach(s => $("#"+s).classList.toggle("hidden", s !== id)); window.scrollTo(0,0); if (typeof renderEmojiBar === "function") renderEmojiBar(); }
 
 /* ---------- Moteur (tourne en local, ou chez l'hôte en ligne) ---------- */
 function newGame(u, mode, n1, n2, opts){
@@ -8781,6 +8781,304 @@ setInterval(voxRender, 2000);
 </script>
 
 <style>
+/* ---- cartes à collectionner ---- */
+#tcg{--rc:#8f8a97}
+.tctabs{display:flex;gap:8px;margin:0 0 16px;overflow-x:auto;scrollbar-width:none}
+.tctabs button{flex:none;border-radius:999px;padding:9px 16px;font-size:14px;background:var(--panel);border:1px solid var(--line)}
+.tctabs button.sel{background:var(--accent);border-color:var(--accent);color:#0e0d12}
+.tctabs button small{font-family:var(--mono);margin-left:6px;opacity:.8}
+.tcstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.tcstats div{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:11px 12px}
+.tcstats b{display:block;font-family:var(--mono);font-weight:500;font-size:clamp(16px,4.4vw,22px);letter-spacing:-.02em}
+.tcstats span{font-family:var(--mono);font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+@media (max-width:520px){.tcstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* raretés */
+.r-C{--rc:#8f8a97}.r-P{--rc:#5fbf8f}.r-R{--rc:#5aa9ff}.r-E{--rc:#b07cff}.r-L{--rc:#f5b53a}.r-M{--rc:#ff5a36}
+/* sachet de booster */
+.tcpacks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+@media (max-width:640px){.tcpacks{gap:8px}.tcpk .lb{font-size:11.5px}}
+.tcpk{position:relative;padding:0;border:0;background:none;display:grid;justify-items:center;gap:8px;border-radius:14px}
+.pouch{container-type:inline-size;position:relative;width:100%;max-width:170px;aspect-ratio:13/19;border-radius:8px;overflow:hidden;background:linear-gradient(155deg,color-mix(in srgb,var(--pc) 92%,#fff) 0,var(--pc) 34%,color-mix(in srgb,var(--pc) 55%,#000) 100%);box-shadow:0 14px 30px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.18);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.pouch::before,.pouch::after{content:"";position:absolute;left:0;right:0;height:9%;background:repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 3px,rgba(255,255,255,.2) 3px 6px);z-index:2}
+.pouch::before{top:0;border-bottom:1px solid rgba(0,0,0,.35)}.pouch::after{bottom:0;border-top:1px solid rgba(0,0,0,.35)}
+.pouch .sh{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.34) 46%,transparent 58%),repeating-linear-gradient(115deg,transparent 0 16px,rgba(0,0,0,.07) 16px 17px);mix-blend-mode:soft-light}
+.pouch .kj{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--brand);font-weight:900;font-size:54cqw;line-height:1;color:rgba(14,13,18,.86);text-shadow:0 2px 0 rgba(255,255,255,.25)}
+.pouch .br{position:absolute;top:13%;left:0;right:0;text-align:center;font-family:var(--mono);font-size:max(7px,5.6cqw);letter-spacing:.3em;color:rgba(14,13,18,.8);font-weight:500}
+.pouch .nm{position:absolute;bottom:13%;left:6px;right:6px;text-align:center;font-family:var(--title);font-weight:900;font-size:max(8px,7.6cqw);letter-spacing:-.01em;line-height:1.1;color:#0e0d12}
+.pouch .nm small{display:block;font-family:var(--mono);font-weight:500;font-size:max(6px,5cqw);letter-spacing:1.5px;margin-top:3px;opacity:.75}
+.tcpk:hover .pouch{transform:translateY(-5px) rotate(-1.5deg)}
+.tcpk.sel .pouch{box-shadow:0 0 0 2px var(--text),0 0 44px color-mix(in srgb,var(--pc) 55%,transparent)}
+.tcpk .cnt{position:absolute;top:-6px;right:6%;z-index:3;min-width:26px;height:26px;padding:0 7px;display:grid;place-items:center;border-radius:999px;background:var(--text);color:#0e0d12;font-family:var(--mono);font-size:13px;font-weight:500}
+.tcpk .lb{font-size:13px;font-weight:700}
+.tcodds{display:grid;gap:6px;margin:12px 0}
+.tcodds div{display:grid;grid-template-columns:96px 1fr 58px;gap:10px;align-items:center;font-size:13.5px}
+.tcodds i{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;display:block}
+.tcodds i u{display:block;height:100%;background:var(--rc);border-radius:4px}
+.tcodds b{font-family:var(--mono);font-weight:500;text-align:right}
+.tcodds span{color:var(--rc);font-weight:700}
+/* carte */
+.tcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+@media (max-width:520px){.tcgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
+.tc{position:relative;display:flex;flex-direction:column;padding:0;text-align:left;border-radius:12px;overflow:hidden;background:#0b0a0e;border:1.5px solid color-mix(in srgb,var(--rc) 70%,transparent);aspect-ratio:5/7.4;min-width:0}
+.tc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+.tc::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,10,14,.72) 0,transparent 22%,transparent 52%,rgba(11,10,14,.95) 86%)}
+.tc > *:not(img){position:relative;z-index:1}
+.tc .tp{display:flex;justify-content:space-between;gap:4px;padding:6px 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.5px}
+.tc .tp b{color:var(--rc);font-weight:500;text-transform:uppercase}
+.tc .nm{margin-top:auto;padding:0 8px;font-family:var(--title);font-weight:900;font-size:12px;line-height:1.12;letter-spacing:-.01em;overflow-wrap:anywhere}
+.tc .ft{display:flex;justify-content:space-between;gap:4px;padding:4px 8px 7px;font-family:var(--mono);font-size:9px;letter-spacing:.4px;color:#b7b2bd}
+.tc .x{position:absolute;right:6px;top:24px;z-index:2;font-family:var(--mono);font-size:10.5px;background:rgba(11,10,14,.82);border:1px solid var(--line);border-radius:999px;padding:1px 7px}
+.tc.r-L,.tc.r-M{border-color:var(--rc);box-shadow:0 0 22px color-mix(in srgb,var(--rc) 30%,transparent)}
+.tc.r-L::before,.tc.r-M::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.22) 45%,color-mix(in srgb,var(--rc) 40%,transparent) 55%,transparent 70%);background-size:250% 100%;mix-blend-mode:screen}
+@media (prefers-reduced-motion:no-preference){.tc.r-L::before,.tc.r-M::before{animation:tcholo 3.4s linear infinite}}
+@keyframes tcholo{from{background-position:120% 0}to{background-position:-130% 0}}
+.tc.no{border-style:dashed;border-color:var(--line)}
+.tc.no img{filter:grayscale(1) blur(7px) brightness(.5);opacity:.7;transform:scale(1.15)}
+.tc.no .nm{color:var(--muted)}
+.tc.new .nw{position:absolute;left:6px;top:24px;z-index:2;font-family:var(--brand);font-weight:900;font-size:12px;background:var(--accent);color:#0e0d12;border-radius:6px;padding:2px 6px}
+.tcbars{display:grid;gap:8px;margin-bottom:14px}
+.tcbars div{display:grid;grid-template-columns:104px 1fr 62px;gap:10px;align-items:center;font-size:13.5px}
+.tcbars i{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;display:block}
+.tcbars i u{display:block;height:100%;background:var(--accent);border-radius:4px}
+.tcbars b{font-family:var(--mono);font-weight:500;text-align:right;font-size:12.5px}
+.tcchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tcchips button{border-radius:999px;padding:7px 12px;font-size:12.5px;background:var(--panel);border:1px solid var(--line)}
+.tcchips button.sel{border-color:var(--rc,var(--accent));color:var(--rc,var(--accent));box-shadow:inset 0 0 0 1px var(--rc,var(--accent))}
+/* missions */
+.tcms{display:grid;gap:10px}
+.tcm{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;border:1px solid var(--line);border-radius:14px;background:#0b0a0e;padding:13px 14px}
+.tcm b{font-size:15px}
+.tcm small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.tcm i{grid-column:1 / -1;height:6px;border-radius:3px;background:var(--panel2);overflow:hidden;display:block}
+.tcm i u{display:block;height:100%;background:var(--accent)}
+.tcm.done{border-color:color-mix(in srgb,var(--ok) 55%,transparent)}
+.tcm.done i u{background:var(--ok)}
+.tcm button{border-radius:999px;padding:8px 14px;font-size:13px}
+/* ouverture */
+.tcopen{position:fixed;inset:0;z-index:95;display:grid;grid-template-rows:auto 1fr auto;gap:12px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse 80% 60% at 50% 40%,color-mix(in srgb,var(--pc) 26%,#0b0a0e),#08070b 75%);overflow:auto}
+.tcopen h2{text-align:center;font-size:clamp(18px,5vw,26px);font-weight:900}
+.tcopen .mid{display:grid;place-items:center;align-content:center;gap:16px}
+.tcopen .pouch{width:min(56vw,230px);max-width:none;cursor:pointer}
+@media (prefers-reduced-motion:no-preference){.tcopen .pouch{animation:tcshake 1.6s ease-in-out infinite}.tcopen .pouch.tear{animation:tctear .5s ease-in both}.tcflip{animation:tcflip .45s cubic-bezier(.2,.9,.3,1.2) both}}
+@keyframes tcshake{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-6px)}}
+@keyframes tctear{to{transform:scale(1.25) translateY(-30px);opacity:0}}
+@keyframes tcflip{from{transform:rotateY(90deg) scale(.9)}to{transform:none}}
+.tcrow{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%}
+.tcrow > *{flex:0 0 calc((100% - 40px) / 5);max-width:150px}
+@media (max-width:640px){.tcrow > *{flex-basis:calc((100% - 20px) / 3)}}
+.tcback{aspect-ratio:5/7.4;border-radius:12px;border:1.5px solid var(--line);background:repeating-linear-gradient(135deg,#17151c 0 10px,#121016 10px 20px);display:grid;place-items:center;font-family:var(--brand);font-weight:900;font-size:34px;color:rgba(255,255,255,.18);padding:0}
+.tcopen .bot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tcopen .bot button{border-radius:999px;padding:13px 24px}
+/* accueil et notification */
+.tchome{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:0 0 14px;background:linear-gradient(100deg,color-mix(in srgb,#f5b53a 10%,var(--panel)),var(--panel) 60%)}
+.tchome b{font-family:var(--title);font-weight:900;font-size:16px}
+.tchome span{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
+.tchome button{border-radius:999px}
+.tctoast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);padding:11px 16px;border-radius:999px;border:1px solid var(--accent);background:var(--panel);box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:14px;font-weight:700;cursor:pointer}
+.tctoast i{font-style:normal;font-family:var(--brand);font-weight:900;color:var(--accent)}
+.tcbig{display:grid;grid-template-columns:minmax(0,220px) 1fr;gap:18px;align-items:start}
+@media (max-width:560px){.tcbig{grid-template-columns:1fr}.tcbig .tc{max-width:220px;margin:0 auto;width:100%}}
+</style>
+<script>
+/* =====================================================================
+   CARTES À COLLECTIONNER — boosters, album, missions du jour. Tout est gardé sur l'appareil (stockage du navigateur).
+   Une carte par personnage de One Piece, Dragon Ball et Naruto (ceux de DATA). Six raretés, calculées par univers à partir
+   du niveau du personnage et de sa popularité (TC_POP : estimation maison d'après les sondages de popularité connus).
+   Booster = 5 cartes, la dernière est Rare ou mieux. Taux par emplacement dans TC_RATE ; garanties après une série sans gros tirage (TC_PITY).
+   On gagne un booster en gagnant une partie (crochet sur histAdd), avec les missions du jour, les boosters gratuits qui se rechargent,
+   ou en recyclant ses doublons en éclats (◆). Les éclats servent aussi à forger une carte manquante (prix dans TC_R).
+   ===================================================================== */
+const TC_KEY = "mercato-cartes";
+const TC_R = {C: ["Commune", 2, 25], P: ["Peu commune", 4, 50], R: ["Rare", 10, 120], E: ["Épique", 30, 350], L: ["Légendaire", 100, 1200], M: ["Mythique", 300, 3500]};   // nom, éclats au recyclage, prix à la forge
+const TC_ORDER = ["C", "P", "R", "E", "L", "M"];
+// part de chaque rareté dans un univers (du plus rare au plus commun) : le reste est Commune
+const TC_QUOTA = [["M", .05], ["L", .10], ["E", .17], ["R", .24], ["P", .22]];
+// taux par emplacement, en % : quatre emplacements normaux, puis le cinquième « Rare ou mieux »
+// volontairement proches de Kyara (Épique ~18 %, Légendaire ~3 %, Mythique ~0,4 % par booster) : il y a peu de cartes, la collection doit rester longue à finir
+const TC_RATE = [{C: 70, P: 24, R: 5, E: .9, L: .09, M: .01}, {R: 82, E: 15, L: 2.6, M: .4}];
+const TC_PITY = {M: 120, L: 25};   // Mythique sûre au 120e booster sans Mythique ; Légendaire ou mieux au 25e sans
+const TC_PACKS = {mix: ["Mélange", "混", "#f5c518", 100, "Les trois univers"], op: ["One Piece", "海", "#ff5a36", 120, "Pirates et Marine"], db: ["Dragon Ball", "龍", "#ff9f1c", 120, "Guerriers et dieux"], na: ["Naruto", "忍", "#5aa9ff", 120, "Shinobi"]};
+const TC_FREE = {max: 2, every: 8 * 36e5}, TC_WINCAP = 3;
+// popularité : S = têtes d'affiche, A = très aimés (bonus de rareté même si le personnage est faible)
+const TC_POP = {
+  op: {S: ["Monkey D. Luffy", "Roronoa Zoro", "Sanji", "Trafalgar D. Water Law", "Portgas D. Ace", "Nami", "Nico Robin", "Shanks"],
+       A: ["Sabo", "Usopp", "Tony Tony Chopper", "Boa Hancock", "Dracule Mihawk", "Yamato", "Eustass Kid", "Donquixote Doflamingo", "Franky", "Brook", "Jinbe", "Charlotte Katakuri", "Nefertari Vivi", "Marco", "Baggy", "Buggy", "Crocodile", "Edward Newgate", "Gol D. Roger"]},
+  db: {S: ["Son Goku", "Vegeta", "Son Gohan", "Trunks", "Piccolo", "Freezer"],
+       A: ["Broly", "Krilin", "Bardock", "Cell", "Majin Buu", "Beerus", "Gogeta", "Vegeto", "C-18", "C-17", "Goku Black", "Tortue Géniale", "Bulma", "Zeno", "Jiren", "Whis"]},
+  na: {S: ["Naruto Uzumaki", "Sasuke Uchiha", "Kakashi Hatake", "Itachi Uchiha", "Minato Namikaze", "Gaara"],
+       A: ["Madara Uchiha", "Jiraiya", "Shikamaru Nara", "Hinata Hyûga", "Sakura Haruno", "Rock Lee", "Neji Hyûga", "Obito Uchiha", "Nagato (Pain)", "Deidara", "Tsunade", "Gaï Maito", "Killer B", "Hashirama Senju", "Tobirama Senju", "Shisui Uchiha", "Kushina Uzumaki", "Sasori", "Orochimaru", "Zabuza Momochi", "Haku"]}};
+let TC_ALL = null, TC_TAB = "packs", TC_PICK = "mix", TC_F = {u: "all", r: "all", own: false};
+
+// toutes les cartes, numérotées, avec leur rareté
+function tcCards(){
+  if (TC_ALL) return TC_ALL;
+  TC_ALL = []; let no = 0;
+  for (const u of ["op", "db", "na"]){
+    const pop = TC_POP[u], list = (DATA[u] || []).map(c => ({id: u + ":" + c.n, u, n: c.n, i: c.i, p: c.p, no: ++no, pop: pop.S.includes(c.n) ? "S" : pop.A.includes(c.n) ? "A" : ""}));
+    const sorted = [...list].sort((a, b) => (b.p + (b.pop === "S" ? 9 : b.pop === "A" ? 5 : 0)) - (a.p + (a.pop === "S" ? 9 : a.pop === "A" ? 5 : 0)) || b.p - a.p);
+    let k = 0; for (const [r, q] of TC_QUOTA){ const n = Math.max(1, Math.round(list.length * q)); for (let j = 0; j < n && k < sorted.length; j++) sorted[k++].r = r; }
+    for (; k < sorted.length; k++) sorted[k].r = "C";
+    // plancher de popularité : une tête d'affiche est au moins Épique, un personnage très aimé au moins Rare
+    for (const c of list){ const f = c.pop === "S" ? "E" : c.pop === "A" ? "R" : "C"; if (TC_ORDER.indexOf(c.r) < TC_ORDER.indexOf(f)) c.r = f; }
+    TC_ALL.push(...list);
+  }
+  return TC_ALL;
+}
+const tcDay = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+function tcLoad(){
+  const s = lsGet(TC_KEY, null) || {own: {}, packs: {mix: 3, op: 0, db: 0, na: 0}, gems: 0, pity: {M: 0, L: 0}, free: {n: TC_FREE.max, t: Date.now()}, opened: 0};
+  // boosters gratuits : un de plus toutes les 8 heures, deux en réserve au maximum
+  if (s.free.n < TC_FREE.max){ const k = Math.floor((Date.now() - s.free.t) / TC_FREE.every); if (k > 0){ s.free.n = Math.min(TC_FREE.max, s.free.n + k); s.free.t = s.free.n >= TC_FREE.max ? Date.now() : s.free.t + k * TC_FREE.every; } }
+  if (!s.day || s.day.d !== tcDay()) s.day = {d: tcDay(), play: 0, win: 0, open: 0, neu: 0, modes: [], unis: [], claimed: [], bonus: false, vp: 0};
+  return s;
+}
+const tcSave = s => { lsSet(TC_KEY, s); tcHome(s); };
+const tcStock = s => Object.values(s.packs).reduce((a, b) => a + b, 0) + s.free.n;
+
+// ---- tirage ----
+function tcRoll(rate){ let r = Math.random() * Object.values(rate).reduce((a, b) => a + b, 0); for (const k in rate){ r -= rate[k]; if (r <= 0) return k; } return Object.keys(rate)[0]; }
+function tcOpenPack(s, kind){
+  const pool = tcCards().filter(c => kind === "mix" || c.u === kind), got = [];
+  const pickOf = r => { for (let k = TC_ORDER.indexOf(r); k >= 0; k--){ const l = pool.filter(c => c.r === TC_ORDER[k] && !got.some(g => g.id === c.id)); if (l.length) return l[Math.floor(Math.random() * l.length)]; } return pool[0]; };
+  for (let slot = 0; slot < 5; slot++){
+    let r = tcRoll(TC_RATE[slot === 4 ? 1 : 0]);
+    if (slot === 4){ if (s.pity.M + 1 >= TC_PITY.M) r = "M"; else if (s.pity.L + 1 >= TC_PITY.L && r !== "M") r = "L"; }
+    const c = pickOf(r); got.push({...c, isNew: !s.own[c.id]}); s.own[c.id] = (s.own[c.id] || 0) + 1;
+  }
+  const best = Math.max(...got.map(c => TC_ORDER.indexOf(c.r)));
+  s.pity.M = best >= 5 ? 0 : s.pity.M + 1; s.pity.L = best >= 4 ? 0 : s.pity.L + 1;
+  s.opened++; s.day.open++; s.day.neu += got.filter(c => c.isNew).length;
+  return got;
+}
+// chance d'avoir au moins une carte de cette rareté (ou mieux) dans un booster, en %
+function tcOdds(r){ const k = TC_ORDER.indexOf(r), p = t => TC_ORDER.slice(k).reduce((a, x) => a + (t[x] || 0), 0) / 100; return (1 - Math.pow(1 - p(TC_RATE[0]), 4) * (1 - p(TC_RATE[1]))) * 100; }
+
+// ---- gains ----
+function tcToast(txt){
+  document.querySelector(".tctoast")?.remove();
+  document.body.insertAdjacentHTML("beforeend", `<div class="tctoast" role="status"><i>札</i><span>${esc(txt)}</span></div>`);
+  const t = document.querySelector(".tctoast"); t.onclick = () => { t.remove(); tcShow("packs"); }; setTimeout(() => t.remove(), 6000);
+}
+function tcGive(s, kind, n = 1){ s.packs[kind] = (s.packs[kind] || 0) + n; }
+// fin de partie : missions, et un booster si la partie est gagnée (de l'univers joué quand il y en a un)
+function tcOnGame(mode, players, o){
+  const s = tcLoad(), d = s.day, me = profGet()?.name;
+  const u = Object.keys(UNI).find(k => mode.includes(UNI[k].name)) || "mix", base = mode.split(" · ")[0];
+  d.play++; if (!d.modes.includes(base)) d.modes.push(base); if (u !== "mix" && !d.unis.includes(u)) d.unis.push(u);
+  // gagné : partie coopérative réussie, ou gagnant désigné (toi si ton pseudo est dans la partie, sinon quelqu'un sur ce téléphone)
+  const won = o.coop ? !!o.ok : Array.isArray(o.win) && o.win.length > 0 && (me && players.includes(me) ? o.win.includes(me) : true);
+  if (won){ d.win++; if (d.vp < TC_WINCAP){ d.vp++; tcGive(s, u); setTimeout(() => tcToast(`Victoire : 1 booster ${TC_PACKS[u][0]} gagné`), 900); } }
+  tcSave(s);
+}
+{ const base = histAdd; histAdd = function(id, mode, players, result, o = {}){ const known = lsGet(HIST_KEY, []).some(x => x.id === id); base(id, mode, players, result, o); if (!known) try { tcOnGame(String(mode), players || [], o); } catch {} }; }
+
+// ---- missions du jour : trois par jour, les mêmes pour tout le monde ce jour-là ----
+const TC_MIS = [
+  {k: "play2", t: "Termine 2 parties", g: 2, v: d => d.play, rw: {g: 40}},
+  {k: "win1", t: "Gagne 1 partie", g: 1, v: d => d.win, rw: {p: "mix"}},
+  {k: "open1", t: "Ouvre 1 booster", g: 1, v: d => d.open, rw: {g: 30}},
+  {k: "modes2", t: "Joue à 2 jeux différents", g: 2, v: d => d.modes.length, rw: {g: 50}},
+  {k: "win2", t: "Gagne 2 parties", g: 2, v: d => d.win, rw: {g: 80}},
+  {k: "new1", t: "Obtiens 1 nouvelle carte", g: 1, v: d => d.neu, rw: {g: 30}},
+  {k: "uni", t: "", g: 1, v: (d, u) => d.unis.includes(u) ? 1 : 0, rw: {p: "uni"}},
+  {k: "play4", t: "Termine 4 parties", g: 4, v: d => d.play, rw: {p: "mix"}}];
+function tcMissions(s){
+  let h = 0; for (const ch of s.day.d) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const u = ["op", "db", "na"][h % 3], idx = TC_MIS.map((_, i) => i), out = [];
+  for (let k = 0; k < 3; k++){ h = (h * 1103515245 + 12345) >>> 0; out.push(TC_MIS[idx.splice(h % idx.length, 1)[0]]); }
+  return out.map(m => ({...m, t: m.k === "uni" ? `Termine une partie dans l'univers ${TC_PACKS[u][0]}` : m.t, cur: Math.min(m.g, m.v(s.day, u)), rw: m.rw.p === "uni" ? {p: u} : m.rw}));
+}
+const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + TC_PACKS[rw.p][0];
+
+// ---- affichage ----
+const tcCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc r-${c.r} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}"` : ""}><img src="${c.i}" alt="" loading="lazy">
+  <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
+  <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span class="kj">${TC_PACKS[c.u][1]}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
+const tcPouch = k => `<div class="pouch" style="--pc:${TC_PACKS[k][2]}"><span class="sh"></span><span class="br">MERCATO</span><span class="kj">${TC_PACKS[k][1]}</span><span class="nm">${TC_PACKS[k][0]}<small>5 CARTES</small></span></div>`;
+function tcHome(s){
+  const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
+  const n = tcStock(s), own = Object.keys(s.own).length, todo = tcMissions(s).filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length;
+  box.innerHTML = `<div><b>Cartes à collectionner · 札</b><span>${own}/${tcCards().length} cartes · ${n ? n + " booster" + (n > 1 ? "s" : "") + " à ouvrir" : "gagne une partie pour un booster"}${todo ? " · " + todo + " mission" + (todo > 1 ? "s" : "") + " à réclamer" : ""}</span></div><button class="${n || todo ? "primary" : ""}" id="tcHomeGo">${n ? "Ouvrir" : "Voir ma collection"}</button>`;
+  document.querySelector("#tcHomeGo").onclick = () => tcShow(n ? "packs" : todo ? "missions" : "album");
+}
+function tcShow(tab){ if (tab) TC_TAB = tab; show("tcg"); tcRender(); }
+function tcRender(){
+  const s = tcLoad(), all = tcCards(), own = Object.keys(s.own).length, dup = Object.values(s.own).reduce((a, n) => a + n - 1, 0), mis = tcMissions(s);
+  const claim = mis.filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length;
+  let html = `<div class="tcstats"><div><b>${own}/${all.length}</b><span>Cartes uniques</span></div><div><b>${Math.floor(own / all.length * 100)} %</b><span>Collection</span></div><div><b>${s.gems} ◆</b><span>Éclats</span></div><div><b>${tcStock(s)}</b><span>Boosters</span></div></div>
+    <div class="tctabs">${[["packs", "Boosters", tcStock(s)], ["album", "Collection", ""], ["missions", "Missions", claim || ""]].map(([k, n, b]) => `<button class="${TC_TAB === k ? "sel" : ""}" data-tct="${k}">${n}${b ? `<small>${b}</small>` : ""}</button>`).join("")}</div>`;
+  if (TC_TAB === "packs"){
+    const k = TC_PICK, P = TC_PACKS[k], have = s.packs[k] || 0, left = s.free.n < TC_FREE.max ? Math.max(0, s.free.t + TC_FREE.every - Date.now()) : 0;
+    html += `<div class="tcpacks">${Object.keys(TC_PACKS).map(x => `<button class="tcpk ${x === k ? "sel" : ""}" data-tcp="${x}" style="--pc:${TC_PACKS[x][2]}">${s.packs[x] ? `<span class="cnt">${s.packs[x]}</span>` : ""}${tcPouch(x)}<span class="lb">${TC_PACKS[x][0]}</span></button>`).join("")}</div>
+      <div class="panel"><div class="eyebrow">Booster choisi <i>· 札</i></div><h2 style="margin:6px 0 2px">${P[0]}</h2><p class="muted">${P[4]} · ${all.filter(c => k === "mix" || c.u === k).length} personnages possibles · 5 cartes, dont une <b>Rare ou mieux</b> garantie.</p>
+        <div class="row"><button class="primary" id="tcOpen" ${have || s.free.n ? "" : "disabled"}>${have ? `Ouvrir (${have} en stock)` : s.free.n ? `Ouvrir un gratuit (${s.free.n})` : "Aucun booster"}</button><button id="tcBuy" ${s.gems >= P[3] ? "" : "disabled"}>Acheter · ${P[3]} ◆</button></div>
+        <p class="small" style="margin-top:10px">Boosters gratuits : ${s.free.n}/${TC_FREE.max}${left ? ` · le prochain dans ${Math.floor(left / 36e5)} h ${String(Math.floor(left % 36e5 / 6e4)).padStart(2, "0")}` : ""}. Tu en gagnes aussi en remportant une partie (${s.day.vp}/${TC_WINCAP} aujourd'hui) et avec les missions.</p>
+        <h2 style="margin-top:16px;font-size:16px">Chance par booster, hors garanties</h2>
+        <div class="tcodds">${["R", "E", "L", "M"].map(r => { const p = tcOdds(r); return `<div class="r-${r}"><span>${TC_R[r][0]}${r === "M" ? "" : " ou mieux"}</span><i><u style="width:${Math.max(2, p)}%"></u></i><b>${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</b></div>`; }).join("")}</div>
+        <p class="small">Garanties : une Légendaire ou mieux au plus tard au ${TC_PITY.L}e booster sans gros tirage (encore ${TC_PITY.L - s.pity.L}), une Mythique au plus tard au ${TC_PITY.M}e sans Mythique (encore ${TC_PITY.M - s.pity.M}).</p></div>`;
+  } else if (TC_TAB === "album"){
+    const f = TC_F, list = all.filter(c => (f.u === "all" || c.u === f.u) && (f.r === "all" || c.r === f.r) && (!f.own || s.own[c.id]));
+    const gain = all.reduce((a, c) => a + Math.max(0, (s.own[c.id] || 0) - 1) * TC_R[c.r][1], 0);
+    html += `<div class="tcbars">${["op", "db", "na"].map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
+      <div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
+      <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}<button class="${f.own ? "sel" : ""}" id="tcOwn">Obtenues</button></div>
+      <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes</button>${[...TC_ORDER].reverse().map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${all.filter(c => c.r === r && s.own[c.id]).length}/${all.filter(c => c.r === r).length}</button>`).join("")}</div>
+      <div class="tcgrid">${list.map(c => tcCard(c, {btn: true, no: !s.own[c.id], x: s.own[c.id]})).join("") || `<p class="muted">Aucune carte ici pour l'instant.</p>`}</div>`;
+  } else {
+    const all3 = mis.every(m => s.day.claimed.includes(m.k));
+    html += `<div class="panel"><div class="eyebrow">Missions du jour <i>· 任務</i></div><p class="muted" style="margin:6px 0 12px">Trois missions, renouvelées chaque jour à minuit. Les trois réclamées : un booster Mélange en bonus.</p>
+      <div class="tcms">${mis.map(m => { const ok = m.cur >= m.g, cl = s.day.claimed.includes(m.k); return `<div class="tcm ${ok ? "done" : ""}"><div><b>${esc(m.t)}</b><small>${m.cur}/${m.g} · récompense : ${tcRw(m.rw)}</small></div><button class="${ok && !cl ? "primary" : ""}" data-tcm="${m.k}" ${ok && !cl ? "" : "disabled"}>${cl ? "✔ Réclamée" : ok ? "Réclamer" : "En cours"}</button><i><u style="width:${m.cur / m.g * 100}%"></u></i></div>`; }).join("")}
+        <div class="tcm ${all3 ? "done" : ""}"><div><b>Bonus : les trois missions</b><small>récompense : 1 booster Mélange</small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / 3 * 100}%"></u></i></div></div></div>
+      <div class="panel"><b>Comment gagner des boosters</b><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : un booster de l'univers joué (One Piece, Dragon Ball, Naruto), ou un Mélange si le jeu n'a pas d'univers. ${TC_WINCAP} par jour au maximum.</li><li><b>Boosters gratuits</b> : un toutes les 8 heures, ${TC_FREE.max} en réserve au maximum.</li><li><b>Missions du jour</b> : éclats (◆) ou boosters.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter le booster de ton choix ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></div>`;
+  }
+  $("#tcBoard").innerHTML = html;
+  document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); });
+  document.querySelectorAll("[data-tcp]").forEach(b => b.onclick = () => { TC_PICK = b.dataset.tcp; tcRender(); });
+  document.querySelectorAll("[data-tcu]").forEach(b => b.onclick = () => { TC_F.u = b.dataset.tcu; tcRender(); });
+  document.querySelectorAll("[data-tcr]").forEach(b => b.onclick = () => { TC_F.r = b.dataset.tcr; tcRender(); });
+  $("#tcOwn") && ($("#tcOwn").onclick = () => { TC_F.own = !TC_F.own; tcRender(); });
+  $("#tcOpen") && ($("#tcOpen").onclick = () => { const s = tcLoad(), k = TC_PICK; if (s.packs[k] > 0) s.packs[k]--; else if (s.free.n > 0){ if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n--; } else return; const got = tcOpenPack(s, k); tcSave(s); tcOpening(k, got); });
+  $("#tcBuy") && ($("#tcBuy").onclick = () => { const s = tcLoad(), c = TC_PACKS[TC_PICK][3]; if (s.gems < c) return; s.gems -= c; tcGive(s, TC_PICK); tcSave(s); tcRender(); });
+  $("#tcRecycle") && ($("#tcRecycle").onclick = () => { const s = tcLoad(); for (const c of tcCards()) if (s.own[c.id] > 1){ s.gems += (s.own[c.id] - 1) * TC_R[c.r][1]; s.own[c.id] = 1; } tcSave(s); tcRender(); });
+  document.querySelectorAll("[data-tcm]").forEach(b => b.onclick = () => { const s = tcLoad(), m = tcMissions(s).find(x => x.k === b.dataset.tcm); if (!m || m.cur < m.g || s.day.claimed.includes(m.k)) return; s.day.claimed.push(m.k); if (m.rw.g) s.gems += m.rw.g; else tcGive(s, m.rw.p); tcSave(s); tcRender(); });
+  $("#tcBonus") && ($("#tcBonus").onclick = () => { const s = tcLoad(); if (s.day.bonus || !tcMissions(s).every(m => s.day.claimed.includes(m.k))) return; s.day.bonus = true; tcGive(s, "mix"); tcSave(s); tcRender(); });
+  document.querySelectorAll("#tcBoard [data-tc]").forEach(b => b.onclick = () => { const c = tcCards().find(x => x.id === b.dataset.tc), s = tcLoad(); if (!c) return;
+    const M = $("#modal"), close = () => { M.classList.add("hidden"); M.innerHTML = ""; };
+    if (!s.own[c.id]){   // carte manquante : on peut la forger avec des éclats
+      const cost = TC_R[c.r][2];
+      M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>Carte #${String(c.no).padStart(3, "0")}</h2><button class="ghost" id="tcClose">✕ Fermer</button></div><div class="tcbig">${tcCard(c, {no: true})}<div><p class="muted">${TC_PACKS[c.u][0]} · ${TC_R[c.r][0]}. Tu ne l'as pas encore : elle sort des boosters ${TC_PACKS[c.u][0]} et Mélange.</p><p style="margin:12px 0">Tu peux aussi la <b>forger</b> avec tes éclats, obtenus en recyclant tes doublons et avec les missions.</p><div class="row"><button class="primary" id="tcForge" ${s.gems >= cost ? "" : "disabled"}>Forger · ${cost} ◆</button></div><p class="small" style="margin-top:10px">Tu as ${s.gems} ◆.</p></div></div></div>`;
+      M.classList.remove("hidden"); $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); };
+      $("#tcForge").onclick = () => { const s = tcLoad(); if (s.own[c.id] || s.gems < cost) return; s.gems -= cost; s.own[c.id] = 1; s.day.neu++; tcSave(s); close(); tcRender(); SFX.play("win"); };
+      return; } M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>${esc(c.n)}</h2><button class="ghost" id="tcClose">✕ Fermer</button></div><div class="tcbig">${tcCard(c, {x: s.own[c.id]})}<div><p class="muted">${TC_PACKS[c.u][0]} · ${TC_R[c.r][0]} · niveau ${c.p}${c.pop ? " · personnage " + (c.pop === "S" ? "très populaire" : "populaire") : ""}</p>${infoHTML(c.u, DATA[c.u].find(x => x.n === c.n)) || ""}<p class="small" style="margin-top:10px">Tu en as ${s.own[c.id]}. Un doublon de cette rareté vaut ${TC_R[c.r][1]} ◆ au recyclage.</p></div></div></div>`;
+    M.classList.remove("hidden"); $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); }; });
+}
+// ouverture : on déchire le sachet, puis on retourne les cinq cartes
+function tcOpening(kind, got){
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen" style="--pc:${TC_PACKS[kind][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><h2>Booster ${TC_PACKS[kind][0]}</h2><div class="mid">${tcPouch(kind)}<p class="muted">Touche le sachet pour l'ouvrir</p></div><div class="bot"></div></div>`);
+  const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false);
+  const end = () => { O.remove(); tcRender(); };
+  const done = () => { const best = got.reduce((a, c) => TC_ORDER.indexOf(c.r) > TC_ORDER.indexOf(a.r) ? c : a), nw = got.filter(c => c.isNew).length;
+    O.querySelector("h2").textContent = nw ? nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : "") + " !" : "Que des doublons cette fois";
+    const s = tcLoad(), k = s.packs[kind] > 0 || s.free.n > 0;
+    bot.innerHTML = `${k ? `<button class="primary" id="tcAgain">Ouvrir un autre</button>` : ""}<button class="${k ? "" : "primary"}" id="tcDone">Continuer</button>`;
+    $("#tcDone").onclick = end; $("#tcAgain") && ($("#tcAgain").onclick = () => { O.remove(); tcRender(); $("#tcOpen")?.click(); });
+    if (TC_ORDER.indexOf(best.r) >= 4) SFX.play("fanfare"); };
+  const flip = k => { if (seen[k]) return; seen[k] = true; const c = got[k], el = mid.querySelector(`[data-k="${k}"]`); el.outerHTML = tcCard(c, {isNew: c.isNew, cls: "tcflip"}); SFX.play(TC_ORDER.indexOf(c.r) >= 3 ? "win" : "pop"); if (seen.every(Boolean)) done(); };
+  O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.classList.add("tear"); p.onclick = null;
+    setTimeout(() => { mid.innerHTML = `<div class="tcrow">${got.map((_, k) => `<button class="tcback" data-k="${k}" aria-label="Retourner la carte ${k + 1}">札</button>`).join("")}</div>`;
+      mid.querySelectorAll(".tcback").forEach(b => b.onclick = () => flip(+b.dataset.k));
+      bot.innerHTML = `<button id="tcAll">Tout retourner</button>`; $("#tcAll").onclick = () => got.forEach((_, k) => setTimeout(() => flip(k), k * 160)); }, matchMedia("(prefers-reduced-motion:reduce)").matches ? 0 : 460); };
+}
+// écran « Cartes », bandeau d'accueil
+document.querySelector(".wrap").insertAdjacentHTML("beforeend", `<section id="tcg" class="hidden"><div class="topbar"><h1>CARTES · 札</h1><button class="ghost" id="tcQuit">✕ Accueil</button></div><div id="tcBoard"></div></section>`);
+$("#tcQuit").onclick = () => { show("home"); tcHome(); };
+document.querySelector("#home .feature")?.insertAdjacentHTML("afterend", `<div class="tchome" id="tcHome"></div>`);
+document.querySelector(".sitenav")?.insertAdjacentHTML("beforeend", `<a href="#" id="navTcg">Cartes</a>`);
+$("#navTcg") && ($("#navTcg").onclick = e => { e.preventDefault(); tcShow(); });
+try { tcHome(); } catch {}
+</script>
+
+<style>
 /* =====================================================================
    COUCHE D'HABILLAGE COMMUNE — chargée en dernier, elle harmonise l'intérieur de tous les modes avec l'accueil.
    Règle : ne styler ici que des classes partagées entre plusieurs modes. Tout doit tenir sur un téléphone de 360 px de large.
@@ -9012,7 +9310,7 @@ input::placeholder{color:#716c7a}
 @media (max-width:640px){
   .sitenav{display:none}
   body:has(#home:not(.hidden)) .tabbar{display:grid}
-  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
   .tabbar a{display:grid;justify-items:center;gap:2px;padding:6px 4px;border-radius:12px;color:#b7b2bd;text-decoration:none;font-size:12px;font-weight:700}
   .tabbar a i{font-style:normal;font-family:var(--brand);font-weight:900;font-size:18px;line-height:1;color:var(--text)}
   .tabbar a:active{background:var(--panel2)}
@@ -9128,7 +9426,8 @@ input::placeholder{color:#716c7a}
   document.querySelectorAll(".panel.rules").forEach(p => { const h = p.querySelector(":scope > b:first-child"); if (!h) return; p.classList.add("fold");
     h.setAttribute("role", "button"); h.tabIndex = 0; const tog = () => p.classList.toggle("open"); h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
   // téléphone : onglets en bas de l'accueil
-  document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#joinBox"><i>参</i>Rejoindre</a><a href="#joinBox" id="tabProf"><i>名</i>Profil</a></nav>`);
+  document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#joinBox"><i>参</i>Rejoindre</a><a href="#" id="tabTcg"><i>札</i>Cartes</a><a href="#joinBox" id="tabProf"><i>名</i>Profil</a></nav>`);
+  document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); tcShow(); };
   document.querySelector("#tabProf").onclick = () => setTimeout(() => (document.querySelector("#profOpen") || document.querySelector("#profName"))?.focus({preventScroll: true}), 300);
 })();
 </script>
