@@ -9404,6 +9404,34 @@ setInterval(voxRender, 2000);
 .tc.tc.f-A{box-shadow:inset 0 0 0 3px rgba(11,10,14,.75),inset 0 0 0 4px rgba(255,255,255,.4),0 0 18px rgba(170,215,255,.32)}
 .tc.tc.f-A.f-B{box-shadow:inset 0 0 0 3px rgba(11,10,14,.75),inset 0 0 0 4px rgba(159,196,255,.5),0 0 18px rgba(120,170,255,.36)}
 @keyframes tcarshine{from{background-position:130% 0,0 0}to{background-position:-130% 0,300% 0}}
+/* ---- ouverture : barre du haut, fond aux couleurs de Hanko (braise vermillon, sceau en filigrane, hachures), écran de résultat ---- */
+.tcopen{grid-template-rows:auto auto 1fr auto;background:radial-gradient(ellipse 70% 52% at 50% 46%,color-mix(in srgb,var(--accent) 22%,#0b0a0e),transparent 72%),radial-gradient(ellipse 60% 40% at 50% 100%,color-mix(in srgb,var(--pc) 16%,transparent),transparent 70%),repeating-linear-gradient(135deg,transparent 0 26px,rgba(255,255,255,.014) 26px 27px),#08070b}
+.tcopen .otop{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;position:relative;z-index:2}
+.tcopen .otop button{justify-self:start;border-radius:999px;padding:8px 14px;font-size:13.5px}
+.tcopen .otop b{font-family:var(--title);font-weight:900;font-size:clamp(13px,3.4vw,17px);white-space:nowrap}
+.tcopen .otop b i{font-style:normal;font-family:var(--brand);color:var(--accent);margin-right:8px}
+.tcopen .otop .ost{justify-self:end;display:flex;gap:6px}
+.tcopen .otop .ost span{font-family:var(--mono);font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(11,10,14,.6);white-space:nowrap}
+.tcopen .owm{position:absolute;right:-.06em;bottom:-.24em;font-family:var(--brand);font-weight:900;font-size:min(70vw,560px);line-height:1;color:rgba(255,90,54,.045);pointer-events:none;z-index:0}
+.tcopen h2,.tcopen .mid,.tcopen .bot{position:relative;z-index:1}
+.tcopen.res h2{font-size:clamp(26px,7vw,54px);letter-spacing:-.03em;margin-top:6px}
+.tcopen .osum{color:#c9c5ce;font-size:15px;text-align:center}
+.tcopen .obest{font-family:var(--title);font-weight:900;font-size:13.5px;color:var(--accent);text-align:center;margin-top:-6px}
+.tcopen .oxn{font-family:var(--mono);font-size:13px;font-weight:500;background:var(--accent);color:#0e0d12;border-radius:999px;padding:5px 14px}
+.tcopen.res .bot button{display:inline-flex;align-items:center;gap:12px;border-radius:999px;padding:14px 22px;font-weight:700}
+.tcopen.res .bot button.primary{font-family:var(--title);font-weight:900;font-size:15.5px;padding:15px 26px}
+.tcopen.res .bot button small{font-family:var(--mono);font-weight:500;font-size:12px;padding-left:12px;border-left:1px solid rgba(14,13,18,.3)}
+.tcopen.res .bot{gap:10px}
+.tcopen.res .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%;min-width:0}
+.tcopen.res .mid > .tcrow{width:100%;flex:none}
+/* éventail : la meilleure carte au centre, plus grande, les autres penchées autour */
+@media (min-width:700px){
+  .tcrow.tcfan{gap:0;align-items:center;justify-content:center;flex-wrap:nowrap;padding:26px 0 30px;max-width:1040px;margin:0 auto}
+  .tcrow.tcfan > *{flex:0 0 19%;max-width:190px;margin:0 -1.2%;transform:rotate(calc(var(--k) * 6deg)) translateY(calc((var(--k) * var(--k)) * 9px));transition:transform .5s cubic-bezier(.2,.9,.3,1.1);box-shadow:0 18px 34px rgba(0,0,0,.55)}
+  .tcrow.tcfan > .best{flex-basis:22%;max-width:226px;z-index:2;transform:translateY(-14px);box-shadow:0 0 0 2px var(--accent),0 0 46px color-mix(in srgb,var(--accent) 55%,transparent),0 22px 40px rgba(0,0,0,.6)}
+  .tcrow.tcfan > *:hover{transform:rotate(0) translateY(-18px) scale(1.04);z-index:3}
+}
+@media (max-width:699px){.tcrow.tcfan > .best{box-shadow:0 0 0 2px var(--accent),0 0 30px color-mix(in srgb,var(--accent) 50%,transparent)}.tcopen .otop b{display:none}.tcopen .otop{grid-template-columns:auto 1fr}}
 </style>
 <script>
 /* =====================================================================
@@ -9435,7 +9463,7 @@ const TC_FINMUL = [1, 1.4, 2.2, 4];   // les finitions sortent plus souvent dans
 // transformations (rareté « Éveil ») : chaque forme d'un personnage est une carte, dans l'ordre de ses évolutions.
 // Dragon Ball : images de formes déjà présentes dans le jeu (GUESS). One Piece et Naruto : images relevées sur les wikis
 // ([univers, clé de l'image dans TCOBJ, nom de la carte, personnage de base]). Rien d'inventé : seulement des formes qui existent.
-const TC_FORMS = ["Son Goku (Super Saiyan)", "Son Goku (Super Saiyan 2)", "Son Goku (Super Saiyan 3)", "Son Goku (Super Saiyan 4)", "Son Goku (Super Saiyan Blue)", "Son Goku (Ultra Instinct)", "Vegeta (Super Saiyan)", "Vegeta (Super Saiyan 2)", "Vegeta (Super Saiyan 4)", "Vegeta (Super Saiyan Blue)", "Vegeta (Ultra Ego)", "Son Gohan (Super Saiyan)", "Son Gohan (Super Saiyan 2)", "Son Gohan (Ultime)", "Son Gohan (Beast)", "Piccolo (Super Namek)", "Piccolo (Orange)", "Freezer (2e forme)", "Freezer (3e forme)", "Freezer (forme parfaite)", "Cell (forme imparfaite)", "Cell (semi-parfait)", "Cell (super parfait)", "Majin Buu (absorbe Gotenks)", "Majin Buu (absorbe Gohan)", "Trunks (Super Saiyan)", "Trunks (Super Saiyan 2)", "Trunks (Super Saiyan 3)", "Trunks (Rage)", "Gogeta (Super Saiyan)", "Gogeta (Super Saiyan 4)", "Gogeta (Super Saiyan Blue)", "Gogeta (Blue évolué)", "Vegeto (Super Saiyan)", "Vegeto (Super Saiyan Blue)", "Gotenks (Super Saiyan)", "Gotenks (Super Saiyan 3)"].concat([["op", "form-Gear-2", "Monkey D. Luffy (Gear 2)", "Monkey D. Luffy"], ["op", "form-Gear-3", "Monkey D. Luffy (Gear 3)", "Monkey D. Luffy"], ["op", "form-Gear-4", "Monkey D. Luffy (Gear 4)", "Monkey D. Luffy"], ["op", "form-Gear-5", "Monkey D. Luffy (Gear 5)", "Monkey D. Luffy"], ["op", "form-Diable-Jambe", "Sanji (Diable Jambe)", "Sanji"], ["op", "form-Ifrit-Jambe", "Sanji (Ifrit Jambe)", "Sanji"], ["op", "form-Asura", "Roronoa Zoro (Asura)", "Roronoa Zoro"], ["op", "form-Hito-Hito-no-Mi--Model--Daibutsu", "Sengoku (Bouddha)", "Sengoku"], ["op", "form-Ryu-Ryu-no-Mi--Model--Pteranodon", "King (Ptéranodon)", "King"], ["na", "form-Tailed-Beast-Mode", "Naruto Uzumaki (Manteau de Kyûbi)", "Naruto Uzumaki"], ["na", "form-Nine-Tails-Chakra-Mode", "Naruto Uzumaki (Mode Chakra de Kyûbi)", "Naruto Uzumaki"], ["na", "form-Six-Paths-Senjutsu", "Naruto Uzumaki (Mode Rikudô)", "Naruto Uzumaki"], ["na", "form-Cursed-Seal-of-Heaven", "Sasuke Uchiha (Marque maudite)", "Sasuke Uchiha"], ["na", "form-Susanoo", "Itachi Uchiha (Susanoo)", "Itachi Uchiha"], ["na", "form-Eight-Gates", "Rock Lee (Huit Portes)", "Rock Lee"], ["na", "form-Lightning-Release-Chakra-Mode", "A (Armure de foudre)", "A (4e Raikage)"]]);
+const TC_FORMS = ["Son Goku (Super Saiyan)", "Son Goku (Super Saiyan 2)", "Son Goku (Super Saiyan 3)", "Son Goku (Super Saiyan 4)", "Son Goku (Super Saiyan Blue)", "Son Goku (Ultra Instinct)", "Vegeta (Super Saiyan)", "Vegeta (Super Saiyan 2)", "Vegeta (Super Saiyan 4)", "Vegeta (Super Saiyan Blue)", "Vegeta (Ultra Ego)", "Son Gohan (Super Saiyan)", "Son Gohan (Super Saiyan 2)", "Son Gohan (Ultime)", "Son Gohan (Beast)", "Piccolo (Super Namek)", "Piccolo (Orange)", "Freezer (2e forme)", "Freezer (3e forme)", "Freezer (forme parfaite)", "Cell (forme imparfaite)", "Cell (semi-parfait)", "Cell (super parfait)", "Majin Buu (absorbe Gotenks)", "Majin Buu (absorbe Gohan)", "Trunks (Super Saiyan)", "Trunks (Super Saiyan 2)", "Trunks (Super Saiyan 3)", "Trunks (Rage)", "Gogeta (Super Saiyan)", "Gogeta (Super Saiyan 4)", "Gogeta (Super Saiyan Blue)", "Gogeta (Blue évolué)", "Vegeto (Super Saiyan)", "Vegeto (Super Saiyan Blue)", "Gotenks (Super Saiyan)", "Gotenks (Super Saiyan 3)"].concat([["op", "form-Gear-2", "Monkey D. Luffy (Gear 2)", "Monkey D. Luffy"], ["op", "form-Gear-3", "Monkey D. Luffy (Gear 3)", "Monkey D. Luffy"], ["op", "form-Gear-4", "Monkey D. Luffy (Gear 4)", "Monkey D. Luffy"], ["op", "form-Gear-5", "Monkey D. Luffy (Gear 5)", "Monkey D. Luffy"], ["op", "form-Diable-Jambe", "Sanji (Diable Jambe)", "Sanji"], ["op", "form-Ifrit-Jambe", "Sanji (Ifrit Jambe)", "Sanji"], ["op", "form-Asura", "Roronoa Zoro (Asura)", "Roronoa Zoro"], ["op", "form-Hito-Hito-no-Mi--Model--Daibutsu", "Sengoku (Bouddha)", "Sengoku"], ["op", "form-Ryu-Ryu-no-Mi--Model--Pteranodon", "King (Ptéranodon)", "King"], ["na", "form-Tailed-Beast-Mode", "Naruto Uzumaki (Manteau de Kyûbi)", "Naruto Uzumaki"], ["na", "form-Nine-Tails-Chakra-Mode", "Naruto Uzumaki (Mode Chakra de Kyûbi)", "Naruto Uzumaki"], ["na", "form-Six-Paths-Senjutsu", "Naruto Uzumaki (Mode Rikudô)", "Naruto Uzumaki"], ["na", "form-Cursed-Seal-of-Heaven", "Sasuke Uchiha (Marque maudite)", "Sasuke Uchiha"], ["na", "form-Susanoo", "Itachi Uchiha (Susanoo)", "Itachi Uchiha"], ["na", "form-Eight-Gates", "Rock Lee (Huit Portes)", "Rock Lee"]]);
 // cartes « objet » : les objets, armes, fruits, navires et invocations les plus célèbres des trois œuvres (rien d'inventé).
 // [clé de l'image, univers, nom, rareté, type, porteur, description]
 const TC_OBJ = [
@@ -9920,14 +9948,21 @@ function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1;
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div><div class="tearw">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">判</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div><div class="tearw">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const end = () => { O.remove(); tcRender(); };
-  const done = () => { const nw = got.filter(c => c.isNew).length, s = tcLoad(), more = tcStock(s) > 0;
-    const nf = got.filter(c => c.newFin && !c.isNew).length;
-    O.querySelector("h2").textContent = nw ? nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : "") + " !" : nf ? "Nouvelle finition !" : "Que des doublons cette fois";
-    bot.innerHTML = `<p class="tcxp">+${got.xp} XP${got.ups.map(([l, tt]) => ` · <b>Niveau ${l} : booster ${TC_T[tt].n} offert</b>`).join("")}</p>${more ? `<button class="primary" id="tcAgain">Ouvrir le suivant</button>` : ""}<button class="${more ? "" : "primary"}" id="tcDone">Continuer</button>`;
-    $("#tcDone").onclick = end; $("#tcAgain") && ($("#tcAgain").onclick = () => { O.remove(); tcRender(); $("#tcOpen")?.click(); });
+  $("#tcBackB").onclick = () => { TC_TAB = "packs"; end(); };
+  // écran de résultat : titre du booster, bilan, les cartes en éventail avec la meilleure au centre, puis les actions
+  const done = () => { const nw = got.filter(c => c.isNew).length, nf = got.filter(c => c.newFin && !c.isNew).length, dup = got.length - nw - nf, s = tcLoad(), all = tcCards();
+    const gain = got.filter(c => !c.isNew && !c.newFin).reduce((a, c) => a + TC_R[c.r][1] * (c.f ? TC_FIN[c.f][3] : 1), 0), have = (s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0), price = tcPrice(u, t);
+    O.classList.add("res"); O.querySelector("h2").textContent = tcName(key);
+    const row = mid.querySelector(".tcrow"); if (row && got.length <= 5){ row.classList.add("tcfan"); [...row.children].forEach((el, k) => { el.classList.remove("tcflip", "tcburst"); el.style.setProperty("--k", k === last ? 0 : k < 2 ? k - 2 : k - 1); el.style.order = k === last ? 3 : k < 2 ? k + 1 : k + 2; if (k === last) el.classList.add("best"); }); }
+    mid.insertAdjacentHTML("afterbegin", `<p class="osum">${[nw && nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : ""), nf && nf + " nouvelle" + (nf > 1 ? "s" : "") + " version" + (nf > 1 ? "s" : ""), dup && dup + " doublon" + (dup > 1 ? "s" : "") + " (+" + gain + " ◆ si recyclé" + (dup > 1 ? "s" : "") + ")"].filter(Boolean).join(", ")}</p><p class="obest">Meilleure carte : ${esc(got[last].n)}</p>`);
+    mid.insertAdjacentHTML("beforeend", `<span class="oxn">×${got.packs || 1}</span><p class="tcxp">+${got.xp} XP${got.ups.map(([l, tt]) => ` · <b>Niveau ${l} : booster ${TC_T[tt].n} offert</b>`).join("")}</p>`);
+    bot.innerHTML = `<button class="primary" id="tcAgain" ${have || s.gems >= price ? "" : "disabled"}>Ouvrir un autre${have ? `<small>${have} en stock</small>` : `<small>${price} ◆</small>`}</button><button id="tcSwap">Changer de booster</button><button id="tcColl">Voir la collection</button>`;
+    $("#tcSwap").onclick = () => { TC_TAB = "packs"; end(); }; $("#tcColl").onclick = () => { TC_TAB = "album"; end(); };
+    $("#tcAgain").onclick = () => { const s = tcLoad(); if (!((s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0))){ if (s.gems < price) return; s.gems -= price; tcGive(s, key); tcSave(s); } TC_PICK = (tcLoad().packs[key] || 0) > 0 ? key : "free"; TC_TAB = "packs"; TC_SUB = "mine"; O.remove(); tcRender(); $("#tcOpen")?.click(); };
+    const st = tcLoad(); O.querySelector(".otop .ost").innerHTML = `<span>${tcStock(st)} booster${tcStock(st) > 1 ? "s" : ""}</span><span>${st.gems} ◆</span>`;
     if (got.ups.length) SFX.play("fanfare"); };
   const flip = async k => { if (seen[k] || busy) return; seen[k] = true; const c = got[k], ri = TC_ORDER.indexOf(c.r), el = mid.querySelector(`[data-k="${k}"]`);
     const show = big(c) && (got.length <= 5 || k >= last - 2);
@@ -10635,6 +10670,11 @@ input::placeholder{color:#716c7a}
 .panel > p + button.primary{margin-top:14px}
 /* sur téléphone, les boutons d'action d'un écran de jeu prennent toute la largeur */
 @media (max-width:520px){.wrap > section:not(#home) .panel > .row > button{flex:1 1 auto}}
+/* ---- boutons : pastilles ; le bouton principal en caractères de titre, les autres en contour sombre ---- */
+.row > button,.topbar button,button.primary,button.ghost{border-radius:999px}
+button.primary{font-family:var(--title);font-weight:700;letter-spacing:-.01em;font-size:.94em;box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 60%,#000),0 8px 24px color-mix(in srgb,var(--accent) 28%,transparent)}
+button.primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+.row > button:not(.primary):not(.red):not(.ghost){background:rgba(23,21,28,.7);border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 <script>
