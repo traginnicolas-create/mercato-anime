@@ -507,7 +507,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
     </ul>
   </div>
   <div class="panel ch hidden">
-    <label class="f step"><i>01</i>Quels thèmes ?</label>
+    <label class="f step"><i>01</i>Les thèmes</label>
     <div class="where" id="pcSets"></div>
     <label class="f step" style="margin-top:16px"><i>02</i>Comment jouer ?</label>
     <div class="where" id="pcWhere"></div>
@@ -530,7 +530,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
   <div class="panel rules ch hidden" style="margin-top:14px">
     <b style="color:var(--text)">Règles de « Pourcentage »</b>
     <ul style="margin-top:6px">
-      <li><b>Chacun pour soi</b>, de 2 à 8. Un <b>thème</b> apparaît, <b>le même pour tout le monde</b>, par exemple « Les meilleurs antagonistes ». Avant la partie, tu choisis la famille de thèmes : animés, classiques (films, plats, jeux vidéo, sports…), les deux mélangés, ou hardcore (réservé aux adultes : sexe, mort, morale sans filtre ; jamais tiré dans le mélange).</li>
+      <li><b>Chacun pour soi</b>, de 2 à 8. Un <b>thème</b> apparaît, <b>le même pour tout le monde</b>, par exemple « Les meilleurs antagonistes ». Les thèmes portent sur les animés.</li>
       <li>Le thème ne vous plaît pas ? Avant le début de la manche, vous pouvez le <b>changer, à l'unanimité seulement</b>.</li>
       <li>Chaque joueur tire en secret un <b>pourcentage différent</b>, de 0 à 100, et donne une réponse qui vaut ce pourcentage : 87 % = un très gros antagoniste, 7 % = un antagoniste raté.</li>
       <li>Sans jamais dire les chiffres, <b>chacun fait son propre classement</b> des réponses, de la plus faible à la plus forte, en secret.</li>
@@ -8409,7 +8409,9 @@ const PC_THEMES = [
 ];
 const PC_NA = 110;    // nombre de thèmes animés (les premiers de la liste)
 const PC_NC = 218;   // fin des thèmes classiques : au-delà, ce sont les thèmes hardcore
-const PC_SETS = {anime: ["Animés", "Personnages, combats, openings, arcs…"], classic: ["Classiques", "Films, plats, jeux vidéo, sports, animaux…"], mix: ["Animés + classiques", "Tirage au sort dans les deux"], hard: ["Hardcore", "Adultes : sexe, mort, politique, sujets qui fâchent"]};
+// Familles de thèmes proposées. « Classiques », « Animés + classiques » et « Hardcore » sont retirées pour le moment (demande de l'utilisateur, 14 oct. 2026) :
+// leurs thèmes restent dans PC_THEMES ; pour les remettre, rajouter ici classic: ["Classiques", …], mix: ["Animés + classiques", …], hard: ["Hardcore", …].
+const PC_SETS = {anime: ["Animés", "Personnages, combats, openings, arcs…"]};
 const pcPool = set => PC_THEMES.map((_, k) => k).filter(k => set === "hard" ? k >= PC_NC : k < PC_NC && (set === "mix" || (set === "anime") === (k < PC_NA)));
 let PCG = null, PCV = null, PC_WHERE = "local", PC_KEY = null, PC_ROUNDS = 3, PC_SET = "anime";
 const PCN = {role:null, game:null, code:null, lobby:[], unsub:[], timers:[], myName:""};
@@ -8630,7 +8632,7 @@ async function pcJoin(){
     game.emit("ghello", {name: PCN.myName}).catch(() => {}); };
   hello(); PCN.timers.push(setInterval(hello, 2000));
 }
-PC_SET = lsGet("mercato-pct-themes", "anime");
+PC_SET = lsGet("mercato-pct-themes", "anime"); if (!PC_SETS[PC_SET]) PC_SET = "anime";
 pcInit();
 </script>
 
