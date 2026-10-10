@@ -754,8 +754,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
     <div class="unis-foot"><button class="ghost" id="seeRoster">Voir les personnages du pool</button></div>
     <label class="f step"><i>02</i>Mode d'enchère</label>
     <div class="modes">
-      <button class="mode sel" data-m="live"><b>Enchères progressives</b><span>Le tireur ouvre, puis vous surenchérissez chacun votre tour jusqu'à ce que l'un passe.</span></button>
-      <button class="mode" data-m="blind"><b>Enchères à l'aveugle</b><span>Chacun mise en secret, une seule fois. La plus grosse mise l'emporte.</span></button>
+      <button class="mode sel" data-m="live"><b>Classique</b><span>Le tireur ouvre, puis vous surenchérissez chacun votre tour jusqu'à ce que l'un passe.</span></button>
       <button class="mode" data-m="bluff"><b>Bluff</b><span>Enchères progressives, mais seul le tireur voit qui est tombé. L'adversaire surenchérit sans savoir : bluffe pour faire monter le prix !</span></button>
     </div>
     <label class="f step" style="margin-top:16px"><i>03</i>Où jouer ?</label>
@@ -764,14 +763,11 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <button class="mode" data-w="online"><b>En ligne</b><span>Chacun sur son appareil : tu crées une partie et ton ami la rejoint avec un code.</span></button>
     </div>
 
-    <label class="f step" style="margin-top:16px"><i>04</i>Options (facultatives)</label>
+    <label class="f step" style="margin-top:16px"><i>04</i>Option (facultative)</label>
     <div class="opts">
       <label class="opt"><input type="checkbox" id="optOrder"><span><b>Ordre de combat</b><small>Après le mercato, chacun place ses 5 combattants dans l'ordre de son choix, en secret.</small></span></label>
-      <label class="opt"><input type="checkbox" id="optAnim"><span><b>Combat animé</b><small>Le 5 contre 5 se joue duel par duel, avec barres de vie, pouvoirs et K.O.</small></span></label>
-      <label class="opt"><input type="checkbox" id="optEvents"><span><b>Événements aléatoires</b><small>Buster Call, Marché noir, Blessure… peuvent tomber pendant le mercato.</small></span></label>
-      <label class="opt"><input type="checkbox" id="optJokers"><span><b>Jokers</b><small>Chacun reçoit 1 joker tiré au hasard, d'autant plus rare qu'il est fort : Relance (40 %), Espion (30 %), Verrou (20 %), Vol (10 %).</small></span></label>
     </div>
-    <p class="small" style="margin-top:6px">Toutes décochées par défaut. En ligne, ton ami accepte ou refuse chaque option avant le début.</p>
+    <p class="small" style="margin-top:6px">Le combat final est toujours animé : le 5 contre 5 se joue duel par duel, avec barres de vie, pouvoirs et K.O. En ligne, ton ami accepte ou refuse l'ordre de combat avant le début.</p>
 
     <div id="localForm">
       <div class="grid2" style="margin-top:16px">
@@ -805,13 +801,12 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <li>Chaque joueur a <b>300M</b> et doit recruter <b>exactement 5 personnages</b>. On ne sait jamais qui va tomber.</li>
       <li>Le joueur qui tire <b>ne peut pas laisser filer</b> : il doit miser au moins <b>10M</b>. Si l'adversaire ne surenchérit pas, il garde le personnage.</li>
       <li>Toutes les mises se font <b>par tranches de 10M</b> : 10, 20, 30…</li>
-      <li><b>Progressif</b> : après l'ouverture, chacun peut surenchérir (d'au moins 10M) à tour de rôle, sans limite, jusqu'à ce que l'un des deux passe.</li>
-      <li><b>À l'aveugle</b> : chacun mise en secret une fois (l'adversaire peut ne rien miser). La plus haute mise gagne ; en cas d'égalité, le tireur l'emporte.</li>
-      <li><b>Bluff</b> : comme les enchères progressives, mais l'adversaire ne voit ni le nom ni l'image du personnage : il est révélé une fois l'enchère terminée.</li>
+      <li><b>Classique</b> : après l'ouverture, chacun peut surenchérir (d'au moins 10M) à tour de rôle, sans limite, jusqu'à ce que l'un des deux passe.</li>
+      <li><b>Bluff</b> : comme le mode classique, mais l'adversaire ne voit ni le nom ni l'image du personnage : il est révélé une fois l'enchère terminée.</li>
       <li>Le gagnant paie sa mise. <b>Si tu remportes un personnage tiré par ton adversaire, c'est toi qui tires ensuite.</b></li>
       <li>Tu peux miser <b>tout ton argent restant</b>. S'il te reste moins de 10M, tu mises ce qu'il te reste, même 0.</li>
       <li>Quand un joueur a ses 5 personnages, <b>tous les tirages suivants sont pour l'autre</b> : plus d'enchère, c'est le hasard qui complète son équipe (gratuitement).</li>
-      <li><b>Options facultatives</b>, à cocher avant de lancer : ordre de combat choisi en secret, combat animé duel par duel, événements aléatoires pendant le mercato, jokers (1 par joueur tiré au hasard : Relance d'un tirage 40 %, Espion du prochain tirage 30 %, Verrou d'une enchère 20 %, Vol d'un personnage adverse au double de son prix 10 %). En ligne, une option n'est utilisée que si les deux joueurs l'acceptent.</li>
+      <li><b>Option facultative</b>, à cocher avant de lancer : l'ordre de combat, que chacun choisit en secret après le mercato.</li>
       <li>La partie se termine quand les <b>deux équipes ont 5 personnages</b>. Le vainqueur est désigné par un <b>combat 5 contre 5</b> : niveau individuel, pouvoirs, haki, techniques et affrontements favorables comptent, pas la somme des points.</li>
     </ul>
   </div>
@@ -933,7 +928,7 @@ const UNI = {
   db:{name:"Dragon Ball",title:"MERCATO DRAGON BALL",cur:"Zénis",unit:"guerrier",units:"guerriers",team:"escouade",all:"toute l'escouade",preview:["Son Goku","Vegeta","Freezer"]},
   na:{name:"Naruto",title:"MERCATO NARUTO",cur:"Ryôs",unit:"ninja",units:"ninjas",team:"équipe",all:"toute l'équipe",preview:["Naruto Uzumaki","Itachi Uchiha","Gaara"]}
 };
-const MODES = {live:"Enchères progressives",blind:"Enchères à l'aveugle",bluff:"Mode bluff"};
+const MODES = {live:"Classique",bluff:"Mode bluff"};   // l'enchère à l'aveugle a été retirée du menu (demande de l'utilisateur, 14 oct. 2026) ; son code reste pour les parties déjà commencées
 const TIER = {M:"Mythique",L:"Légendaire",E:"Épique",R:"Rare",C:"Commun"};
 const WEIGHT = {M:0.8,L:1,E:1,R:1,C:0.8};
 const BUDGET = 300, MIN = 10, MAX = 5;
@@ -1012,7 +1007,8 @@ $("#quit").onclick = () => {
   quitTimer = setTimeout(() => { quitTimer = null; b.textContent = "✕ Quitter"; b.classList.remove("red"); }, 3000);
 };
 
-const readOpts = () => ({order: $("#optOrder").checked, anim: $("#optAnim").checked, events: $("#optEvents").checked, jokers: $("#optJokers").checked});
+// combat animé toujours actif ; jokers et événements aléatoires retirés (demande de l'utilisateur, 14 oct. 2026)
+const readOpts = () => ({order: $("#optOrder").checked, anim: true, events: false, jokers: false});
 function show(id){ if (id !== "gs" && typeof gsStop === "function") gsStop(); ["home","lobby","game","end","uc","gs","tp","pm","jg","nt","fx","el","rl","wh","bt","mm","pc","tcg"].forEach(s => $("#"+s).classList.toggle("hidden", s !== id)); window.scrollTo(0,0); if (typeof renderEmojiBar === "function") renderEmojiBar(); }
 
 /* ---------- Moteur (tourne en local, ou chez l'hôte en ligne) ---------- */
@@ -1020,7 +1016,7 @@ function newGame(u, mode, n1, n2, opts){
   G = {
     u, mode, seq: 0, round: 0, cur: null, log: [], over: false, event: null, orders: null,
     id: Math.random().toString(36).slice(2, 10),
-    opts: {order: !!opts?.order, anim: !!opts?.anim, events: !!opts?.events, jokers: !!opts?.jokers},
+    opts: {order: !!opts?.order, anim: true, events: false, jokers: false},
     peek: null,
     players: [{name:n1,budget:BUDGET,team:[]},{name:n2,budget:BUDGET,team:[]}],
     pool: DATA[u].map((_, i) => i),
@@ -1029,7 +1025,7 @@ function newGame(u, mode, n1, n2, opts){
   // jokers : 2 différents par joueur, tirés au hasard, visibles de l'adversaire
   // jokers : 1 seul par joueur, tiré au hasard ; plus il est puissant, plus il est rare
   G.jokers = G.opts.jokers ? [0, 1].map(() => [{k: pickJoker(), used:false}]) : null;
-  const on = [G.opts.order && "ordre de combat", G.opts.anim && "combat animé", G.opts.events && "événements aléatoires", G.opts.jokers && "jokers"].filter(Boolean);
+  const on = [G.opts.order && "ordre de combat"].filter(Boolean);
   if (on.length) addLog(`⚙️ Options de la partie : ${on.join(", ")}.`);
   if (G.jokers) addLog(`Jokers tirés : ${G.players.map((p, i) => `${esc(p.name)} → ${JOKERS[G.jokers[i][0].k].ico} ${JOKERS[G.jokers[i][0].k].name}`).join(", ")}.`);
   addLog(`Tirage au sort : ${esc(G.players[G.drawer].name)} commence.`);
@@ -2143,7 +2139,7 @@ $("#host").onclick = async () => {
   NET.role = "host"; ME = 0; G = null;
   const u = cfg.u, mode = cfg.mode, want = readOpts();
   NET.hostOpts = want;
-  const optNames = {order:"Ordre de combat", anim:"Combat animé", events:"Événements aléatoires", jokers:"Jokers"};
+  const optNames = {order:"Ordre de combat"};   // seule option encore proposée à l'invité
   const proposed = Object.keys(optNames).filter(k => want[k]);
   lobby(`<h2>Partie créée</h2><p class="muted">Envoie ce code à ton ami :</p><div class="code">${code}</div>
     <button id="copyCode">Copier le code</button>
@@ -2172,7 +2168,7 @@ $("#host").onclick = async () => {
     if (msg.sameTab || msg.peer !== NET.guestPeer || G || NET.role !== "host") return;
     const a = msg.data?.opts || {};
     // seules les options voulues par les deux joueurs sont retenues
-    const final = {order: want.order && !!a.order, anim: want.anim && !!a.anim, events: want.events && !!a.events, jokers: want.jokers && !!a.jokers};
+    const final = {order: want.order && !!a.order, anim: true, events: false, jokers: false};
     newGame(u, mode, NET.myName, NET.guestName || "Joueur 2", final);
   }));
   NET.unsub.push(game.on("act", msg => {
@@ -2235,7 +2231,7 @@ $("#join").onclick = async () => {
     const d = msg.data || {};
     if (!DATA[d.u] || !MODES[d.mode]) return;
     NET.hostPeer = msg.peer; NET.proposed = true;
-    const optNames = {order:["Ordre de combat","chacun place ses combattants dans l'ordre de son choix, en secret"], anim:["Combat animé","le 5 contre 5 se joue duel par duel"], events:["Événements aléatoires","Buster Call, Marché noir, Blessure pendant le mercato"], jokers:["Jokers","1 joker chacun, tiré au hasard : Relance, Espion, Verrou ou Vol (plus il est fort, plus il est rare)"]};
+    const optNames = {order:["Ordre de combat","chacun place ses combattants dans l'ordre de son choix, en secret"]};
     const keys = Object.keys(optNames).filter(k => d.opts?.[k]);
     lobby(`<h2>${esc(cleanName(d.host, "Ton ami"))} te propose une partie</h2>
       <p class="muted">${UNI[d.u].name} · ${MODES[d.mode]}</p>
