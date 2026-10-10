@@ -9325,6 +9325,41 @@ setInterval(voxRender, 2000);
 .tc.ob.r-L::before,.tc.ob.r-M::before{z-index:2}
 .tc.ob .nw{top:auto;bottom:22%;left:6cqw}.tc.ob .x{top:auto;bottom:22%;right:6cqw}
 @container (max-width:150px){.tc.ob .od em{display:none}}
+/* ---- cartes objet : une brillance par rareté ---- */
+.tc.ob .fx{position:absolute;inset:0;z-index:2;opacity:0;pointer-events:none}
+/* Rare : reflet bleu acier sur le cadre */
+.tc.ob.r-R .fx{opacity:.5;background:linear-gradient(118deg,transparent 40%,rgba(120,180,255,.45) 50%,transparent 60%);background-size:280% 100%;mix-blend-mode:screen}
+/* Épique : feuille violette et quelques éclats */
+.tc.ob.r-E{background:linear-gradient(160deg,#3b3350,#201c2c 46%,#2f2942)}
+.tc.ob.r-E .ow{box-shadow:0 0 0 1.2cqw #c9b1ff,0 0 0 1.8cqw #1a1c21,0 0 14px rgba(176,124,255,.55)}
+.tc.ob.r-E .fx{opacity:.75;background:linear-gradient(118deg,transparent 36%,rgba(200,170,255,.55) 50%,transparent 64%),radial-gradient(circle at 20% 24%,#fff 0 .8px,transparent 1.6px),radial-gradient(circle at 76% 70%,#e3d1ff 0 1px,transparent 1.8px);background-size:280% 100%,71px 83px,97px 61px;mix-blend-mode:screen}
+/* Légendaire : dorure — cadre et fenêtre en or, nom doré, balayage d'or, paillettes */
+.tc.ob.r-L{border-color:#f7c64a;background:linear-gradient(160deg,#4a3a12,#211a0a 46%,#3a2d0e);box-shadow:0 0 26px rgba(247,198,74,.45)}
+.tc.ob.r-L::after{box-shadow:inset 0 0 0 3px #1a1407,inset 0 0 0 4px #f7c64a,inset 0 0 0 5px rgba(255,236,160,.35)}
+.tc.ob.r-L .ow{box-shadow:0 0 0 1.4cqw #f7c64a,0 0 0 2cqw #5a3f06,0 0 18px rgba(247,198,74,.7)}
+.tc.ob.r-L .on{background:linear-gradient(180deg,#fff7d6,#f7c64a 58%,#c98a12);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 2px #000)}
+.tc.ob.r-L .od{background:linear-gradient(160deg,#fff6d8,#f1dfa6)}
+.tc.ob.r-L .fx{opacity:.9;background:linear-gradient(118deg,transparent 34%,rgba(255,240,170,.75) 48%,rgba(255,200,80,.5) 54%,transparent 66%),radial-gradient(circle at 18% 20%,#fff6c9 0 .9px,transparent 1.8px),radial-gradient(circle at 70% 62%,#ffd23f 0 1.1px,transparent 2px),radial-gradient(circle at 44% 86%,#fff6c9 0 .8px,transparent 1.6px);background-size:280% 100%,61px 73px,89px 67px,47px 97px;mix-blend-mode:screen}
+/* Mythique : prisme — cadre arc-en-ciel animé, halo tournant derrière l'illustration, nom irisé, film holographique sur toute la carte */
+.tc.ob.r-M{border-color:transparent;background:linear-gradient(160deg,#2a1150,#0d0820 50%,#3a1836) padding-box,linear-gradient(120deg,#ff5a8a,#fff275,#6ee7a8,#5ac8fa,#b07cff,#ff5a8a) border-box;background-size:auto,300% 300%;box-shadow:0 0 32px rgba(176,124,255,.6)}
+.tc.ob.r-M::after{box-shadow:inset 0 0 0 3px #0d0820,inset 0 0 0 4px rgba(213,179,255,.8)}
+.tc.ob.r-M .ow{box-shadow:0 0 0 1.4cqw #fff,0 0 0 2cqw #0d0820,0 0 22px rgba(255,122,184,.8),0 0 44px rgba(90,200,250,.5)}
+.tc.ob.r-M .on{background:linear-gradient(100deg,#ffd1e6,#fff,#bfe9ff,#e3d1ff,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 3px #000)}
+.tc.ob.r-M .od{background:linear-gradient(135deg,#fdeef6,#eef6ff 50%,#f3ecff)}
+.tc.ob.r-M .fx{opacity:.8;background:linear-gradient(118deg,transparent 38%,rgba(255,255,255,.5) 49%,transparent 60%),linear-gradient(115deg,rgba(255,90,138,.16),rgba(255,242,117,.13),rgba(110,231,168,.13),rgba(90,200,250,.16),rgba(176,124,255,.16)),radial-gradient(circle,#fff 0 .9px,transparent 1.8px),radial-gradient(circle,#ffb3d9 0 1.1px,transparent 2.2px);background-size:280% 100%,300% 300%,66px 82px,98px 70px;mix-blend-mode:screen}
+.tc.ob.r-M .oh b{background:linear-gradient(100deg,#ffd1e6,#bfe9ff,#e3d1ff)}
+/* la version Holo ajoute son film arc-en-ciel par-dessus, quelle que soit la rareté */
+.tc.ob.f-H .ow::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,90,138,.4) 0 8%,rgba(255,242,117,.4) 8% 16%,rgba(110,231,168,.4) 16% 24%,rgba(90,200,250,.4) 24% 32%,rgba(176,124,255,.4) 32% 40%);background-size:300% 300%;mix-blend-mode:color-dodge}
+.tc.ob .ow{position:relative}
+@media (prefers-reduced-motion:no-preference){
+  .tc.ob.r-R .fx,.tc.ob.r-E .fx,.tc.ob.r-L .fx{animation:obsweep 3.6s linear infinite}
+  .tc.ob.r-M .fx{animation:obprism 5s linear infinite}
+  .tc.ob.r-M{animation:vtborder 4s linear infinite}
+  .tc.ob.r-M .on{animation:vttext 4s linear infinite}
+  .tc.ob.f-H .ow::after{animation:tcprism 6s linear infinite}
+}
+@keyframes obsweep{from{background-position:130% 0,0 0,0 0,0 0}to{background-position:-130% 0,0 0,0 0,0 0}}
+@keyframes obprism{from{background-position:130% 0,0 0,0 0,0 0}to{background-position:-130% 0,300% 0,0 -164px,0 -140px}}
 </style>
 <script>
 /* =====================================================================
@@ -9358,47 +9393,47 @@ const TC_FORMS = ["Son Goku (Super Saiyan)", "Son Goku (Super Saiyan 3)", "Son G
 // cartes « objet » : les objets, armes, fruits, navires et invocations les plus célèbres des trois œuvres (rien d'inventé).
 // [clé de l'image, univers, nom, rareté, type, porteur, description]
 const TC_OBJ = [
-  ["Enma", "op", "Enma", "M", "Sabre", "Kozuki Oden, puis Zoro", "L'un des 21 Grands Sabres. Il aspire le haki de son porteur, et c'est l'une des rares lames à avoir blessé Kaido."],
-  ["Yoru", "op", "Yoru", "M", "Sabre noir", "Dracule Mihawk", "La lame noire du plus grand épéiste du monde, l'un des 12 Sabres Suprêmes."],
-  ["Murakumogiri", "op", "Murakumogiri", "M", "Naginata", "Edward Newgate", "Le naginata de Barbe Blanche, l'un des 12 Sabres Suprêmes."],
-  ["Ace--Sword-", "op", "Ace", "M", "Sabre", "Gol D. Roger", "Le sabre du Roi des pirates, l'un des 12 Sabres Suprêmes."],
+  ["Enma", "op", "Enma", "L", "Sabre", "Kozuki Oden, puis Zoro", "L'un des 21 Grands Sabres. Il aspire le haki de son porteur, et c'est l'une des rares lames à avoir blessé Kaido."],
+  ["Yoru", "op", "Yoru", "L", "Sabre noir", "Dracule Mihawk", "La lame noire du plus grand épéiste du monde, l'un des 12 Sabres Suprêmes."],
+  ["Murakumogiri", "op", "Murakumogiri", "L", "Naginata", "Edward Newgate", "Le naginata de Barbe Blanche, l'un des 12 Sabres Suprêmes."],
+  ["Ace--Sword-", "op", "Ace", "L", "Sabre", "Gol D. Roger", "Le sabre du Roi des pirates, l'un des 12 Sabres Suprêmes."],
   ["Straw-Hat", "op", "Chapeau de paille", "M", "Trésor", "Roger, Shanks, puis Luffy", "Le chapeau de Roger, confié à Shanks, puis par Shanks à Luffy."],
   ["Gomu-Gomu-no-Mi", "op", "Gomu Gomu no Mi", "M", "Fruit du démon", "Monkey D. Luffy", "Le fruit mangé par Luffy. Son vrai nom : Hito Hito no Mi, modèle Nika, un Zoan mythique."],
-  ["Gura-Gura-no-Mi", "op", "Gura Gura no Mi", "M", "Fruit du démon", "Barbe Blanche, puis Barbe Noire", "Le fruit des séismes, réputé capable de détruire le monde."],
-  ["Wado-Ichimonji", "op", "Wadô Ichimonji", "L", "Sabre", "Roronoa Zoro", "L'un des 21 Grands Sabres. Le sabre de Kuina, que Zoro porte depuis son enfance."],
-  ["Shusui", "op", "Shûsui", "L", "Sabre noir", "Ryuma, puis Zoro", "Lame noire du samouraï Ryuma, trésor national du pays de Wano, l'un des 21 Grands Sabres."],
-  ["Gryphon", "op", "Gryphon", "L", "Sabre", "Shanks", "Le sabre de Shanks le Roux."],
-  ["Mera-Mera-no-Mi", "op", "Mera Mera no Mi", "L", "Fruit du démon", "Ace, puis Sabo", "Le Logia du feu, mangé par Ace puis par Sabo."],
-  ["Ope-Ope-no-Mi", "op", "Ope Ope no Mi", "L", "Fruit du démon", "Trafalgar Law", "Le « fruit ultime » : il peut offrir la jeunesse éternelle, au prix de la vie de son utilisateur."],
-  ["Yami-Yami-no-Mi", "op", "Yami Yami no Mi", "L", "Fruit du démon", "Marshall D. Teach", "Le Logia des ténèbres, qui annule les pouvoirs des autres fruits."],
-  ["Thousand-Sunny", "op", "Thousand Sunny", "L", "Navire", "Équipage du Chapeau de paille", "Le second navire de l'équipage, construit par Franky en bois d'Adam."],
-  ["Poneglyph", "op", "Ponéglyphe", "L", "Stèle", "", "Stèle indestructible gravée d'une écriture ancienne. Quatre d'entre elles mènent à Laugh Tale."],
-  ["Sandai-Kitetsu", "op", "Sandai Kitetsu", "E", "Sabre maudit", "Roronoa Zoro", "Sabre maudit de la lignée Kitetsu. Zoro a mis son bras en jeu pour prouver que sa chance était plus forte que la malédiction."],
-  ["Going-Merry", "op", "Vogue Merry", "E", "Navire", "Équipage du Chapeau de paille", "Le premier navire de l'équipage, offert par Kaya."],
-  ["Clima-Tact", "op", "Clima-Tact", "R", "Arme", "Nami", "Le bâton météo de Nami, conçu par Usopp."],
-  ["Kabuto", "op", "Kabuto", "R", "Arme", "Usopp", "Le lance-pierre géant d'Usopp."],
-  ["Vivre-Card", "op", "Vivre Card", "P", "Objet", "", "Papier fait à partir d'un ongle : il pointe vers son propriétaire et se consume quand sa vie faiblit."],
-  ["Log-Pose", "op", "Log Pose", "P", "Objet", "", "La boussole spéciale indispensable pour naviguer sur Grand Line."],
+  ["Gura-Gura-no-Mi", "op", "Gura Gura no Mi", "L", "Fruit du démon", "Barbe Blanche, puis Barbe Noire", "Le fruit des séismes, réputé capable de détruire le monde."],
+  ["Wado-Ichimonji", "op", "Wadô Ichimonji", "E", "Sabre", "Roronoa Zoro", "L'un des 21 Grands Sabres. Le sabre de Kuina, que Zoro porte depuis son enfance."],
+  ["Shusui", "op", "Shûsui", "E", "Sabre noir", "Ryuma, puis Zoro", "Lame noire du samouraï Ryuma, trésor national du pays de Wano, l'un des 21 Grands Sabres."],
+  ["Gryphon", "op", "Gryphon", "E", "Sabre", "Shanks", "Le sabre de Shanks le Roux."],
+  ["Mera-Mera-no-Mi", "op", "Mera Mera no Mi", "E", "Fruit du démon", "Ace, puis Sabo", "Le Logia du feu, mangé par Ace puis par Sabo."],
+  ["Ope-Ope-no-Mi", "op", "Ope Ope no Mi", "E", "Fruit du démon", "Trafalgar Law", "Le « fruit ultime » : il peut offrir la jeunesse éternelle, au prix de la vie de son utilisateur."],
+  ["Yami-Yami-no-Mi", "op", "Yami Yami no Mi", "E", "Fruit du démon", "Marshall D. Teach", "Le Logia des ténèbres, qui annule les pouvoirs des autres fruits."],
+  ["Thousand-Sunny", "op", "Thousand Sunny", "E", "Navire", "Équipage du Chapeau de paille", "Le second navire de l'équipage, construit par Franky en bois d'Adam."],
+  ["Poneglyph", "op", "Ponéglyphe", "E", "Stèle", "", "Stèle indestructible gravée d'une écriture ancienne. Quatre d'entre elles mènent à Laugh Tale."],
+  ["Sandai-Kitetsu", "op", "Sandai Kitetsu", "R", "Sabre maudit", "Roronoa Zoro", "Sabre maudit de la lignée Kitetsu. Zoro a mis son bras en jeu pour prouver que sa chance était plus forte que la malédiction."],
+  ["Going-Merry", "op", "Vogue Merry", "R", "Navire", "Équipage du Chapeau de paille", "Le premier navire de l'équipage, offert par Kaya."],
+  ["Clima-Tact", "op", "Clima-Tact", "P", "Arme", "Nami", "Le bâton météo de Nami, conçu par Usopp."],
+  ["Kabuto", "op", "Kabuto", "P", "Arme", "Usopp", "Le lance-pierre géant d'Usopp."],
+  ["Vivre-Card", "op", "Vivre Card", "C", "Objet", "", "Papier fait à partir d'un ongle : il pointe vers son propriétaire et se consume quand sa vie faiblit."],
+  ["Log-Pose", "op", "Log Pose", "C", "Objet", "", "La boussole spéciale indispensable pour naviguer sur Grand Line."],
   ["Den-Den-Mushi", "op", "Escargophone", "C", "Objet", "", "Un escargot qui sert de téléphone."],
   ["Dragon-Ball--object-", "db", "Dragon Balls", "M", "Trésor", "", "Les sept boules de cristal. Réunies, elles permettent d'invoquer Shenron."],
   ["Shenron", "db", "Shenron", "M", "Invocation", "", "Le dragon sacré de la Terre, qui exauce les vœux de celui qui réunit les sept Dragon Balls."],
-  ["Potara", "db", "Potaras", "M", "Objet divin", "Les Kaio Shin", "Boucles d'oreilles des Kaio Shin : deux êtres qui en portent une chacun fusionnent."],
-  ["Power-Pole", "db", "Nyoibô, le bâton magique", "L", "Arme", "Son Goku", "Un bâton qui s'allonge à volonté, hérité de son grand-père Son Gohan."],
-  ["Flying-Nimbus", "db", "Kinto-un, le nuage magique", "L", "Monture", "Son Goku", "Nuage volant offert par Tortue Géniale. Seuls les cœurs purs peuvent monter dessus."],
-  ["Z-Sword", "db", "Épée Z", "L", "Épée", "Son Gohan", "L'épée légendaire du monde des Kaio Shin, dans laquelle était scellé le Doyen des Kaio Shin."],
-  ["Time-Machine", "db", "Machine à voyager dans le temps", "L", "Machine", "Trunks", "Construite par la Bulma du futur pour changer le cours de l'histoire."],
-  ["Senzu-Bean", "db", "Senzu", "E", "Objet", "Maître Karin", "Un haricot magique qui rend toutes ses forces à celui qui le mange."],
-  ["Dragon-Radar", "db", "Dragon Radar", "E", "Machine", "Bulma", "Le radar inventé par Bulma pour localiser les Dragon Balls."],
-  ["Capsule", "db", "Capsules Hoi-Poi", "R", "Objet", "Capsule Corporation", "Un véhicule ou une maison entière tient dans une capsule."],
-  ["Scouter", "db", "Scouter", "R", "Machine", "Armée de Freezer", "L'appareil qui mesure la puissance de combat."],
-  ["Gunbai", "na", "Gunbai", "M", "Arme", "Madara Uchiha", "L'éventail de guerre des Uchiha, porté par Madara puis par Obito."],
-  ["Sword-of-Totsuka", "na", "Épée de Totsuka", "M", "Arme spirituelle", "Itachi Uchiha", "La lame du Susanoo d'Itachi, qui scelle ce qu'elle transperce."],
-  ["Yata-Mirror", "na", "Miroir de Yata", "M", "Arme spirituelle", "Itachi Uchiha", "Le bouclier du Susanoo d'Itachi, qui renvoie toutes les attaques."],
-  ["Samehada", "na", "Samehada", "L", "Épée", "Kisame, puis Killer B", "L'une des sept épées de Kiri. Vivante, elle dévore le chakra."],
-  ["Flying-Thunder-God-Kunai", "na", "Kunai du Hiraishin", "L", "Arme", "Minato Namikaze", "Kunai à trois pointes marqué du sceau de téléportation de Minato."],
-  ["Kubikirib-ch-", "na", "Kubikiribôchô", "E", "Épée", "Zabuza Momochi", "Le « hachoir » de Zabuza, l'une des sept épées de Kiri. Elle se répare avec le fer du sang."],
-  ["Scroll-of-Seals", "na", "Rouleau des techniques interdites", "E", "Rouleau", "Village de Konoha", "Le rouleau scellé par le Premier Hokage. Naruto y apprend le Multi-clonage."],
-  ["Forehead-Protector", "na", "Bandeau frontal", "P", "Objet", "", "Le bandeau gravé du symbole du village, porté par les ninjas."]];
+  ["Potara", "db", "Potaras", "L", "Objet divin", "Les Kaio Shin", "Boucles d'oreilles des Kaio Shin : deux êtres qui en portent une chacun fusionnent."],
+  ["Power-Pole", "db", "Nyoibô, le bâton magique", "E", "Arme", "Son Goku", "Un bâton qui s'allonge à volonté, hérité de son grand-père Son Gohan."],
+  ["Flying-Nimbus", "db", "Kinto-un, le nuage magique", "E", "Monture", "Son Goku", "Nuage volant offert par Tortue Géniale. Seuls les cœurs purs peuvent monter dessus."],
+  ["Z-Sword", "db", "Épée Z", "E", "Épée", "Son Gohan", "L'épée légendaire du monde des Kaio Shin, dans laquelle était scellé le Doyen des Kaio Shin."],
+  ["Time-Machine", "db", "Machine à voyager dans le temps", "E", "Machine", "Trunks", "Construite par la Bulma du futur pour changer le cours de l'histoire."],
+  ["Senzu-Bean", "db", "Senzu", "R", "Objet", "Maître Karin", "Un haricot magique qui rend toutes ses forces à celui qui le mange."],
+  ["Dragon-Radar", "db", "Dragon Radar", "R", "Machine", "Bulma", "Le radar inventé par Bulma pour localiser les Dragon Balls."],
+  ["Capsule", "db", "Capsules Hoi-Poi", "P", "Objet", "Capsule Corporation", "Un véhicule ou une maison entière tient dans une capsule."],
+  ["Scouter", "db", "Scouter", "P", "Machine", "Armée de Freezer", "L'appareil qui mesure la puissance de combat."],
+  ["Gunbai", "na", "Gunbai", "E", "Arme", "Madara Uchiha", "L'éventail de guerre des Uchiha, porté par Madara puis par Obito."],
+  ["Sword-of-Totsuka", "na", "Épée de Totsuka", "L", "Arme spirituelle", "Itachi Uchiha", "La lame du Susanoo d'Itachi, qui scelle ce qu'elle transperce."],
+  ["Yata-Mirror", "na", "Miroir de Yata", "L", "Arme spirituelle", "Itachi Uchiha", "Le bouclier du Susanoo d'Itachi, qui renvoie toutes les attaques."],
+  ["Samehada", "na", "Samehada", "E", "Épée", "Kisame, puis Killer B", "L'une des sept épées de Kiri. Vivante, elle dévore le chakra."],
+  ["Flying-Thunder-God-Kunai", "na", "Kunai du Hiraishin", "E", "Arme", "Minato Namikaze", "Kunai à trois pointes marqué du sceau de téléportation de Minato."],
+  ["Kubikirib-ch-", "na", "Kubikiribôchô", "R", "Épée", "Zabuza Momochi", "Le « hachoir » de Zabuza, l'une des sept épées de Kiri. Elle se répare avec le fer du sang."],
+  ["Scroll-of-Seals", "na", "Rouleau des techniques interdites", "R", "Rouleau", "Village de Konoha", "Le rouleau scellé par le Premier Hokage. Naruto y apprend le Multi-clonage."],
+  ["Forehead-Protector", "na", "Bandeau frontal", "C", "Objet", "", "Le bandeau gravé du symbole du village, porté par les ninjas."]];
 const TC_XRATE = [2.5, 4, 8, 18];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
 const TC_ORDER = ["C", "P", "R", "E", "L", "M", "X"];
 // part de chaque rareté dans un univers (du plus rare au plus commun) : le reste est Commune
