@@ -9127,10 +9127,11 @@ function tcLoad(){
   if (s.free.n < TC_FREE.max){ const k = Math.floor((Date.now() - s.free.t) / TC_FREE.every); if (k > 0){ s.free.n = Math.min(TC_FREE.max, s.free.n + k); s.free.t = s.free.n >= TC_FREE.max ? Date.now() : s.free.t + k * TC_FREE.every; } }
   if (!s.day || s.day.d !== tcDay()) s.day = {d: tcDay(), play: 0, win: 0, open: 0, neu: 0, modes: [], unis: [], claimed: [], bonus: false, vp: 0};
   // série de connexion : un jour de plus si la dernière visite date d'hier, sinon on repart à 1
+  if (s.login) s.loginBest = Math.max(s.loginBest || 0, s.login.n);
   if (!s.login || s.login.d !== tcDay()) s.login = {d: tcDay(), n: s.login && s.login.d === tcDay(-1) ? s.login.n + 1 : 1, got: false};
   return s;
 }
-const tcSave = s => { delete s.sig; s.signed = 1; lsSet(TC_KEY, {...s, sig: tcSig(s)}); tcHome(s); };
+const tcSave = s => { try { vtCheck(s); } catch {} delete s.sig; s.signed = 1; lsSet(TC_KEY, {...s, sig: tcSig(s)}); tcHome(s); };
 // doublons d'une carte : on garde un exemplaire de chaque finition obtenue (et un normal s'il y en a)
 function tcDups(s, c){ const fin = s.fin[c.id] || {}, nf = Object.values(fin).reduce((a, b) => a + b, 0), n0 = Math.max(0, (s.own[c.id] || 0) - nf); let n = Math.max(0, n0 - 1), g = n * TC_R[c.r][1];
   for (const k in fin){ const e = Math.max(0, fin[k] - 1); n += e; g += e * TC_R[c.r][1] * TC_FIN[k][3]; } return {n, g}; }
@@ -9194,11 +9195,14 @@ let TC_REC = 0;
 function tcOnGame(mode, players, o){
   const s = tcLoad(), d = s.day, me = profGet()?.name;
   const u = Object.keys(UNI).find(k => mode.includes(UNI[k].name)) || "mix", base = mode.split(" · ")[0];
+  // compteurs à vie (l'historique, lui, ne garde que les 80 dernières parties)
+  if (!s.stat){ const h = lsGet(HIST_KEY, []); s.stat = {g: Math.max(0, h.length - 1), w: 0, modes: [...new Set(h.map(x => x.mode.split(" · ")[0]))]}; }
+  s.stat.g++; if (!s.stat.modes.includes(base)) s.stat.modes.push(base);
   d.play++; if (!d.modes.includes(base)) d.modes.push(base); if (u !== "mix" && !d.unis.includes(u)) d.unis.push(u);
   // gagné : partie coopérative réussie, ou gagnant désigné (toi si ton pseudo est dans la partie, sinon quelqu'un sur ce téléphone)
   const won = o.coop ? !!o.ok : Array.isArray(o.win) && o.win.length > 0 && (me && players.includes(me) ? o.win.includes(me) : true);
   const record = Date.now() - TC_REC < 20000; TC_REC = 0;
-  if (won){ d.win++; s.streak++; s.best = Math.max(s.best || 0, s.streak); d.vg = d.vg || 0;
+  if (won){ d.win++; s.stat.w++; s.streak++; s.best = Math.max(s.best || 0, s.streak); d.vg = d.vg || 0;
     // une victoire rapporte des éclats (crédits) ; parfois elle lâche en plus un booster, dont le niveau est tiré au sort
     const g = d.vg < TC_GAIN.cap ? TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * (s.streak - 1)) + (record ? TC_GAIN.record : 0) : 0; if (g){ d.vg++; s.gems += g; }
     const drop = d.vp < TC_WINCAP && (record || Math.random() < tcDropChance(s.streak)); let t = -1;
@@ -9248,7 +9252,7 @@ function tcRender(){
   const claim = mis.filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1);
   const lv = tcLvl(s.xp), x0 = tcLvlNeed(lv), x1 = tcLvlNeed(lv + 1);
   let html = `<div class="tcstats"><div><b>${own}/${all.length}</b><span>Cartes · ${Math.floor(own / all.length * 100)} %</span></div><div><b>Niv. ${lv}</b><span>${s.xp - x0}/${x1 - x0} XP</span><i class="xp"><u style="width:${(s.xp - x0) / (x1 - x0) * 100}%"></u></i></div><div><b>${s.gems} ◆</b><span>Éclats</span></div><div><b>${tcStock(s)}</b><span>Boosters</span></div></div>
-    <div class="tctabs">${[["packs", "Boosters", tcStock(s)], ["album", "Collection", ""], ["missions", "Missions", claim || ""]].map(([k, n, b]) => `<button class="${TC_TAB === k ? "sel" : ""}" data-tct="${k}">${n}${b ? `<small>${b}</small>` : ""}</button>`).join("")}</div>`;
+    <div class="tctabs">${[["packs", "Boosters", tcStock(s)], ["album", "Collection", ""], ["missions", "Missions", claim || ""], ["vitrine", "Vitrine", ""]].map(([k, n, b]) => `<button class="${TC_TAB === k ? "sel" : ""}" data-tct="${k}">${n}${b ? `<small>${b}</small>` : ""}</button>`).join("")}</div>`;
   if (TC_TAB === "packs"){
     const keys = Object.keys(s.packs).filter(k => s.packs[k] > 0).sort((a, b) => tcParse(b).t - tcParse(a).t || a.localeCompare(b)), inv = [...(s.free.n ? ["free"] : []), ...keys];
     if (!inv.includes(TC_PICK)) TC_PICK = inv[0] || null;
@@ -9273,6 +9277,7 @@ function tcRender(){
       <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}<button class="${f.own ? "sel" : ""}" id="tcOwn">Obtenues</button></div>
       <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes</button>${[...TC_ORDER].reverse().filter(r => all.some(c => c.r === r)).map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${all.filter(c => c.r === r && s.own[c.id]).length}/${all.filter(c => c.r === r).length}</button>`).join("")}</div>
       <div class="tcgrid">${list.map(c => tcCard(c, {btn: true, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)})).join("") || `<p class="muted">Aucune carte ici pour l'instant.</p>`}</div>`;
+  } else if (TC_TAB === "vitrine"){ html += vtHTML(s);
   } else {
     const all3 = mis.every(m => s.day.claimed.includes(m.k)), lr = tcLoginRw(s.login.n), nx = [1, 2, 3, 4, 5, 6, 7].map(k => s.login.n - ((s.login.n - 1) % 7) + k - 1);
     html += `<div class="panel"><div class="eyebrow">Série de connexion <i>· 連続</i></div><h2 style="margin:6px 0 10px">Jour ${s.login.n}</h2>
@@ -9284,6 +9289,7 @@ function tcRender(){
       <div class="panel"><b>Comment gagner des boosters</b><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster Argent au minimum, avec trois fois plus de chances d'un Or ou d'un Divin.</li><li><b>Boosters gratuits</b> : un toutes les 8 heures, ${TC_FREE.max} en réserve au maximum.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></div>`;
   }
   $("#tcBoard").innerHTML = html;
+  if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
   document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); });
   document.querySelectorAll("[data-tcp]").forEach(b => b.onclick = () => { TC_PICK = b.dataset.tcp; tcRender(); });
   document.querySelectorAll("[data-tcsu]").forEach(b => b.onclick = () => { TC_SHOP.u = b.dataset.tcsu; tcRender(); });
@@ -9381,6 +9387,114 @@ try { tcHome(); } catch {}
 </script>
 
 <style>
+/* ---- cartes de visite (bannières à débloquer) et vitrine du profil ---- */
+.vt{position:relative;overflow:hidden;display:grid;align-content:end;gap:2px;min-height:86px;padding:12px 14px;border-radius:14px;border:1px solid var(--vc);background:linear-gradient(110deg,color-mix(in srgb,var(--vc) 26%,#0b0a0e),#0b0a0e 72%);text-align:left;color:var(--text)}
+.vt1{--vc:#c98a5b}.vt2{--vc:#cfd6e0}.vt3{--vc:#f5b53a}.vt4{--vc:#c9a2ff}
+.vt .kj{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--brand);font-weight:900;font-size:64px;line-height:1;color:color-mix(in srgb,var(--vc) 34%,transparent);pointer-events:none;white-space:nowrap}
+.vt .tr{font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--vc)}
+.vt b{font-family:var(--title);font-weight:900;font-size:15px;letter-spacing:-.01em;line-height:1.1;position:relative}
+.vt small{color:#c9c5ce;font-size:12px;position:relative}
+.vt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(115deg,transparent 0 13px,rgba(255,255,255,.03) 13px 14px)}
+.vt3{box-shadow:0 0 22px rgba(245,181,58,.25)}
+.vt4{border-color:transparent;background:linear-gradient(110deg,#1b1326,#0b0a0e 72%) padding-box,linear-gradient(120deg,#ff5a8a,#fff275,#6ee7a8,#5ac8fa,#b07cff,#ff5a8a) border-box;box-shadow:0 0 28px rgba(176,124,255,.4)}
+.vt3::before,.vt4::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.2) 48%,transparent 62%);background-size:260% 100%}
+@media (prefers-reduced-motion:no-preference){.vt3::before,.vt4::before{animation:tcholo 3.6s linear infinite}}
+.vt.lock{border-style:dashed;border-color:var(--line);background:#0b0a0e;box-shadow:none}
+.vt.lock::before{display:none}
+.vt.lock b,.vt.lock small{color:var(--muted)}.vt.lock .kj{color:rgba(255,255,255,.05)}
+.vt .pg{display:block;height:4px;border-radius:2px;background:var(--panel2);overflow:hidden;margin-top:6px;position:relative}
+.vt .pg u{display:block;height:100%;background:var(--vc)}
+.vtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.vtitem{display:grid;gap:6px}
+.vtitem .row{gap:6px}
+.vtitem .row button{flex:1;border-radius:999px;padding:6px 10px;font-size:12.5px}
+.vtitem button.on{border-color:var(--accent);color:var(--accent)}
+.vtshow{border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:14px;display:grid;gap:12px;margin-bottom:16px}
+.vtshow .vt.main{min-height:112px}.vtshow .vt.main b{font-size:20px}.vtshow .vt.main .kj{font-size:92px}
+.vtshow .tro{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.vtshow .tro .vt{min-height:64px;padding:9px 10px}.vtshow .tro .vt b{font-size:12px}.vtshow .tro .vt small,.vtshow .tro .vt .tr{display:none}.vtshow .tro .vt .kj{font-size:44px}
+.vtshow .best{display:grid;grid-template-columns:repeat(3,minmax(0,150px));gap:8px;justify-content:center}
+.vtshow .slot{border:1px dashed var(--line);border-radius:12px;display:grid;place-items:center;min-height:64px;color:var(--muted);font-size:12px;text-align:center;padding:6px}
+.vtshow .best .slot{aspect-ratio:5/7.4}
+.vtpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.vtpick .tc{opacity:.6}.vtpick .tc.pick{opacity:1;outline:2px solid var(--text);outline-offset:1px}
+</style>
+<script>
+/* =====================================================================
+   CARTES DE VISITE ET VITRINE — des bannières à débloquer par des accomplissements, en quatre paliers (Bronze, Argent, Or, Légende).
+   Le joueur en choisit une comme bannière de profil, épingle jusqu'à trois autres en trophées et jusqu'à trois de ses cartes.
+   Cette vitrine s'affiche dans l'onglet « Vitrine » des Cartes et sur le profil que voient les amis. Tout est rangé dans la
+   sauvegarde des cartes (s.unl = débloquées, s.show = vitrine, s.stat = compteurs de parties).
+   VT : [clé, nom, kanji, palier 1 à 4, description, mesure(contexte), objectif].
+   ===================================================================== */
+const VT_T = ["", "Bronze", "Argent", "Or", "Légende"], VT_GEMS = [0, 20, 50, 150, 500];
+const VT = [
+  ["g1", "Premier pas", "一歩", 1, "Termine 1 partie", x => x.g, 1], ["g2", "Habitué", "常連", 2, "Termine 25 parties", x => x.g, 25], ["g3", "Vétéran", "古参", 3, "Termine 100 parties", x => x.g, 100], ["g4", "Légende vivante", "伝説", 4, "Termine 500 parties", x => x.g, 500],
+  ["w1", "Rookie", "新人", 1, "Gagne 5 parties", x => x.w, 5], ["w2", "Rival", "好敵手", 2, "Gagne 25 parties", x => x.w, 25], ["w3", "Champion", "王者", 3, "Gagne 100 parties", x => x.w, 100], ["w4", "Empereur", "皇帝", 4, "Gagne 300 parties", x => x.w, 300],
+  ["s1", "En feu", "炎", 1, "Série de 3 victoires", x => x.best, 3], ["s2", "Inarrêtable", "無敵", 2, "Série de 7 victoires", x => x.best, 7], ["s3", "Plus Ultra", "極", 3, "Série de 12 victoires", x => x.best, 12],
+  ["c1", "Collectionneur", "収集", 1, "Obtiens 25 cartes", x => x.own, 25], ["c2", "Otaku", "オタク", 2, "Obtiens 100 cartes", x => x.own, 100], ["c3", "Encyclopédie", "図鑑", 3, "Obtiens 200 cartes", x => x.own, 200], ["c4", "Collection complète", "完", 4, "Obtiens toutes les cartes", x => x.own, 0],
+  ["uo", "Roi des mers", "海", 3, "Complète One Piece", x => x.u.op, 1], ["un", "Maître shinobi", "忍", 3, "Complète Naruto", x => x.u.na, 1], ["ud", "Guerrier légendaire", "龍", 3, "Complète Dragon Ball (hors Éveil)", x => x.u.db, 1],
+  ["m1", "Béni des dieux", "運", 2, "Obtiens 1 carte Mythique", x => x.myth, 1], ["m2", "Élu", "神", 3, "Obtiens 5 cartes Mythiques", x => x.myth, 5], ["m3", "Panthéon", "神々", 4, "Obtiens toutes les Mythiques", x => x.myth, -1],
+  ["x1", "Éveillé", "覚醒", 2, "Obtiens 1 carte Éveil", x => x.ev, 1], ["x2", "Transcendant", "超越", 3, "Obtiens 10 cartes Éveil", x => x.ev, 10],
+  ["f1", "Brillant", "輝", 1, "Obtiens 5 cartes Holo", x => x.fin.H, 5], ["f2", "Arc-en-ciel", "虹", 2, "Obtiens 1 carte SAR", x => x.fin.S, 1], ["f3", "Chasseur d'or", "黄金", 3, "Obtiens 1 carte UR dorée", x => x.fin.G, 1], ["f4", "Trésor national", "国宝", 4, "Obtiens 5 cartes UR dorées", x => x.fin.G, 5],
+  ["o1", "Déballeur", "開", 1, "Ouvre 10 boosters", x => x.opened, 10], ["o2", "Accro aux boosters", "中毒", 2, "Ouvre 100 boosters", x => x.opened, 100], ["o3", "Grossiste", "問屋", 3, "Ouvre 500 boosters", x => x.opened, 500],
+  ["a1", "Nakama", "仲間", 1, "Ajoute 1 ami", x => x.fr, 1], ["a2", "Équipage", "一味", 2, "Ajoute 5 amis", x => x.fr, 5],
+  ["t1", "Marchand", "商人", 1, "Fais 1 échange", x => x.tr, 1], ["t2", "Négociant", "豪商", 2, "Fais 10 échanges", x => x.tr, 10],
+  ["d1", "Régulier", "日課", 1, "Connecte-toi 3 jours de suite", x => x.login, 3], ["d2", "Assidu", "皆勤", 2, "Connecte-toi 7 jours de suite", x => x.login, 7], ["d3", "Sans faille", "不屈", 3, "Connecte-toi 30 jours de suite", x => x.login, 30],
+  ["p1", "Curieux", "好奇", 1, "Joue à 5 jeux différents", x => x.modes, 5], ["p2", "Polyvalent", "万能", 2, "Joue à 10 jeux différents", x => x.modes, 10], ["p3", "Touche-à-tout", "全制覇", 3, "Joue aux 17 jeux", x => x.modes, 17],
+  ["l1", "Apprenti", "見習", 1, "Atteins le niveau 3", x => x.lv, 3], ["l2", "Senpai", "先輩", 2, "Atteins le niveau 8", x => x.lv, 8], ["l3", "Sensei", "先生", 3, "Atteins le niveau 15", x => x.lv, 15]];
+// tout ce que mesurent les accomplissements
+function vtCtx(s){
+  const all = tcCards(), has = c => !!s.own[c.id], st = s.stat || {g: 0, w: 0, modes: []}, base = all.filter(c => c.r !== "X");
+  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, S: 0, G: 0};
+  Object.values(s.fin || {}).forEach(f => Object.keys(f).forEach(k => { if (f[k]) fin[k]++; }));
+  return {g: st.g, w: st.w, modes: st.modes.length, best: s.best || 0, own: all.filter(has).length, total: all.length, u: {op: full("op"), db: full("db"), na: full("na")},
+    myth: all.filter(c => c.r === "M" && has(c)).length, mythAll: all.filter(c => c.r === "M").length, ev: all.filter(c => c.r === "X" && has(c)).length, fin,
+    opened: s.opened || 0, fr: (typeof frList === "function" ? frList().length : 0), tr: s.trades || 0, login: Math.max(s.login?.n || 0, s.loginBest || 0), lv: tcLvl(s.xp || 0)};
+}
+const vtGoal = (v, x) => v[6] === 0 ? x.total : v[6] === -1 ? x.mythAll : v[6];
+// nouvelles cartes de visite : on les enregistre, on offre des éclats, et on prévient (appelé à chaque sauvegarde)
+function vtCheck(s){
+  s.unl = s.unl || []; const x = vtCtx(s), neu = VT.filter(v => !s.unl.includes(v[0]) && v[5](x) >= vtGoal(v, x));
+  if (!neu.length) return;
+  neu.forEach(v => { s.unl.push(v[0]); s.gems += VT_GEMS[v[3]]; });
+  s.show = s.show || {b: "", t: [], c: []}; if (!s.show.b) s.show.b = neu[0][0];
+  const top = neu.sort((a, b) => b[3] - a[3])[0];
+  setTimeout(() => { document.querySelector(".tctoast")?.remove();
+    document.body.insertAdjacentHTML("beforeend", `<div class="tctoast t${Math.min(3, top[3] - 1)}" role="status"><i>${top[2]}</i><span>Carte de visite ${VT_T[top[3]]} débloquée : ${esc(top[1])}${neu.length > 1 ? " (+" + (neu.length - 1) + ")" : ""} · +${neu.reduce((a, v) => a + VT_GEMS[v[3]], 0)} ◆</span></div>`);
+    const el = document.querySelector(".tctoast"); el.onclick = () => { el.remove(); tcShow("vitrine"); }; setTimeout(() => el.remove(), 8000); SFX.play(top[3] >= 3 ? "fanfare" : "win"); }, 2600);
+}
+const vtCardHTML = (k, o = {}) => { const v = VT.find(z => z[0] === k); if (!v) return `<div class="slot">${o.empty || "Emplacement libre"}</div>`;
+  return `<div class="vt vt${v[3]} ${o.cls || ""} ${o.lock ? "lock" : ""}"><span class="kj" aria-hidden="true">${v[2]}</span><span class="tr">${VT_T[v[3]]}</span><b>${esc(v[1])}</b><small>${esc(v[4])}${o.pg != null ? ` · ${o.pg}` : ""}</small>${o.bar != null ? `<span class="pg"><u style="width:${o.bar}%"></u></span>` : ""}</div>`; };
+// la vitrine telle qu'elle s'affiche sur un profil : sh = {b, t:[clés], c:[[numéro, finition]]}
+function vtShowcase(sh, name){
+  const all = tcCards(), t = [0, 1, 2].map(i => (sh.t || [])[i]), c = [0, 1, 2].map(i => (sh.c || [])[i]);
+  return `<div class="vtshow">${sh.b ? vtCardHTML(sh.b, {cls: "main"}) : `<div class="slot" style="min-height:112px">Aucune carte de visite pour l'instant</div>`}
+    <div class="tro">${t.map(k => vtCardHTML(k, {empty: "Trophée"})).join("")}</div>
+    <div class="best">${c.map(e => { const x = e && all.find(y => y.no === e[0]); return x ? tcCard(x, {f: e[1]}) : `<div class="slot">Carte</div>`; }).join("")}</div></div>`;
+}
+const vtMine = s => { const sh = s.show || {b: "", t: [], c: []}, all = tcCards(); return {b: sh.b, t: sh.t || [], c: (sh.c || []).map(id => all.find(x => x.id === id)).filter(x => x && s.own[x.id]).map(x => [x.no, tcBestFin(s, x)])}; };
+// onglet « Vitrine » des Cartes
+function vtHTML(s){
+  const x = vtCtx(s), unl = s.unl || [], sh = s.show || {b: "", t: [], c: []}, all = tcCards();
+  const owned = all.filter(c => s.own[c.id]).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p).slice(0, 36);
+  return `<h2 class="tch">Ma vitrine</h2><p class="small" style="margin:-4px 0 10px">C'est ce que tes amis voient sur ton profil : une carte de visite en bannière, trois trophées, tes trois plus belles cartes.</p>${vtShowcase(vtMine(s))}
+    <h2 class="tch">Cartes de visite <small style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px">${unl.length}/${VT.length}</small></h2>
+    <div class="vtgrid">${[...VT].sort((a, b) => (unl.includes(b[0]) ? 1 : 0) - (unl.includes(a[0]) ? 1 : 0) || (unl.includes(a[0]) ? b[3] - a[3] : a[3] - b[3])).map(v => { const ok = unl.includes(v[0]), g = vtGoal(v, x), cur = Math.min(g, v[5](x));
+      return `<div class="vtitem">${vtCardHTML(v[0], ok ? {} : {lock: true, pg: cur + "/" + g + " · " + VT_GEMS[v[3]] + " ◆", bar: g ? cur / g * 100 : 0})}${ok ? `<div class="row"><button class="${sh.b === v[0] ? "on" : ""}" data-vtb="${v[0]}">${sh.b === v[0] ? "✔ Bannière" : "En bannière"}</button><button class="${(sh.t || []).includes(v[0]) ? "on" : ""}" data-vtt="${v[0]}">${(sh.t || []).includes(v[0]) ? "✔ Épinglée" : "Épingler"}</button></div>` : ""}</div>`; }).join("")}</div>
+    <h2 class="tch" style="margin-top:20px">Mes cartes épinglées <small style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px">${(sh.c || []).length}/3</small></h2>
+    ${owned.length ? `<div class="vtpick">${owned.map(c => tcCard(c, {btn: true, f: tcBestFin(s, c), cls: (sh.c || []).includes(c.id) ? "pick" : ""})).join("")}</div>` : `<p class="muted">Ouvre des boosters pour avoir des cartes à épingler.</p>`}`;
+}
+function vtBind(){
+  const upd = fn => { const s = tcLoad(); s.show = s.show || {b: "", t: [], c: []}; s.show.t = s.show.t || []; s.show.c = s.show.c || []; fn(s.show); tcSave(s); tcRender(); SFX.play("pop"); };
+  const tog = (l, k) => { const i = l.indexOf(k); if (i >= 0) l.splice(i, 1); else { if (l.length >= 3) l.shift(); l.push(k); } };
+  document.querySelectorAll("[data-vtb]").forEach(b => b.onclick = () => upd(sh => { sh.b = b.dataset.vtb; }));
+  document.querySelectorAll("[data-vtt]").forEach(b => b.onclick = () => upd(sh => tog(sh.t, b.dataset.vtt)));
+  document.querySelectorAll(".vtpick [data-tc]").forEach(b => b.onclick = e => { e.stopPropagation(); upd(sh => tog(sh.c, b.dataset.tc)); });
+}
+</script>
+
+<style>
 .frstats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}
 @media (max-width:560px){.frstats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .frstats div{border:1px solid var(--line);border-radius:12px;background:#0b0a0e;padding:10px 8px;text-align:center}
@@ -9439,7 +9553,7 @@ function frCard(){
   const top = all.filter(c => s.own[c.id]).sort((a, b) => s.own[b.id] - s.own[a.id])[0];
   return {id: me.id, since: profGet().since, lv: tcLvl(s.xp), g: h.length, w: tot.w, l: tot.l, d: tot.d, best,
     modes: Object.entries(S).sort((a, b) => b[1].n - a[1].n).slice(0, 3).map(([k, x]) => [k, x.n]), rec: rec.slice(0, 15),
-    top: top ? [top.no, s.own[top.id]] : null, own: all.filter(c => s.own[c.id]).map(c => [c.no, tcBestFin(s, c)]), tr: frTradeable(s), n: all.length, v: !s.taint};
+    top: top ? [top.no, s.own[top.id]] : null, own: all.filter(c => s.own[c.id]).map(c => [c.no, tcBestFin(s, c)]), tr: frTradeable(s), n: all.length, v: !s.taint, show: vtMine(s), unl: (s.unl || []).length};
 }
 function frToast(txt, label, fn){
   document.querySelector(".tctoast")?.remove();
@@ -9468,7 +9582,7 @@ function frAsk(room, d){
   M.classList.remove("hidden"); SFX.play("pop");
   $("#frNo").onclick = () => { answer(false); close(); };
   $("#frYes").onclick = () => { const s = tcLoad(); if (!frTradeable(s).includes(b.no)){ answer(false); close(); return; }
-    s.own[b.id]--; const nw = !s.own[a.id]; s.own[a.id] = (s.own[a.id] || 0) + 1; if (nw) s.xp += TC_XP[a.r]; tcSave(s); answer(true); close(); frToast("Échange fait : " + a.n + " rejoint ta collection"); };
+    s.own[b.id]--; const nw = !s.own[a.id]; s.own[a.id] = (s.own[a.id] || 0) + 1; if (nw) s.xp += TC_XP[a.r]; s.trades = (s.trades || 0) + 1; tcSave(s); answer(true); close(); frToast("Échange fait : " + a.n + " rejoint ta collection"); };
 }
 // se connecter au salon d'un ami et lui demander sa fiche
 async function frOpen(id){
@@ -9532,6 +9646,7 @@ async function frView(id){
   const draw = (c, live) => { const ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]), s = tcLoad(), mine = frTradeable(s).map(n => all.find(x => x.no === n)).filter(Boolean), his = (c.tr || []).map(n => all.find(x => x.no === n)).filter(Boolean);
     const by = r => c.own.filter(([n]) => all.find(x => x.no === n)?.r === r).length;
     M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><h2>${esc(f.name)}<span style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.6em"> #${f.tag}</span></h2><span class="small" style="color:${live ? "var(--ok)" : "var(--muted)"}">${live ? "En ligne" : "Hors ligne : dernière fiche connue"} · collectionneur niveau ${c.lv}</span></div><button class="ghost" id="frBack">← Amis</button></div>
+      ${c.show ? vtShowcase(c.show) + `<p class="small" style="margin:-8px 0 12px">${c.unl || 0}/${VT.length} cartes de visite débloquées</p>` : ""}
       <div class="frstats"><div><b>${c.g}</b><span>Parties</span></div><div><b style="color:var(--ok)">${c.w}</b><span>Victoires</span></div><div><b style="color:var(--danger)">${c.l}</b><span>Défaites</span></div><div><b>${ratio}</b><span>Ratio V/D</span></div><div><b>${c.best}</b><span>Meilleure série</span></div></div>
       <p class="small">${c.modes.length ? "Jeux les plus joués : " + c.modes.map(([k, n]) => `<b style="color:var(--text)">${esc(k)}</b> (${n})`).join(" · ") : "Aucune partie enregistrée."}${top ? ` · Carte la plus tirée : <b style="color:var(--text)">${esc(top.n)}</b> (×${c.top[1]})` : ""}</p>
       ${c.rec.length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><div class="frrec">${c.rec.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(String(v))}</span>`).join("")}</div>` : ""}
@@ -9558,7 +9673,7 @@ async function frView(id){
       $("#frSend").disabled = true; $("#frTErr").textContent = "Proposition envoyée, en attente de sa réponse…"; let done = false;
       room.on("ftres", m => { const d = m.data; if (m.sameTab || done || d?.to !== me.id || d.k !== k) return; done = true;
         if (!d.ok){ $("#frTErr") && ($("#frTErr").textContent = "Échange refusé."); $("#frSend") && ($("#frSend").disabled = false); return; }
-        const s = tcLoad(); s.own[a.id] = Math.max(0, (s.own[a.id] || 0) - 1); const nw = !s.own[b.id]; s.own[b.id] = (s.own[b.id] || 0) + 1; if (nw) s.xp += TC_XP[b.r]; tcSave(s); frToast("Échange fait : " + b.n + " rejoint ta collection"); frView(id); });
+        const s = tcLoad(); s.own[a.id] = Math.max(0, (s.own[a.id] || 0) - 1); const nw = !s.own[b.id]; s.own[b.id] = (s.own[b.id] || 0) + 1; if (nw) s.xp += TC_XP[b.r]; s.trades = (s.trades || 0) + 1; tcSave(s); frToast("Échange fait : " + b.n + " rejoint ta collection"); frView(id); });
       room.emit("ftrade", {to: id, from: me.id, k, give, want}).catch(() => {}); }); };
   M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${esc(f.name)}<span style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.6em"> #${f.tag}</span></h2><button class="ghost" id="frBack">← Amis</button></div>${waitHTML("Connexion à ton ami…")}</div>`;
   M.classList.remove("hidden"); $("#frBack").onclick = () => frShow();
