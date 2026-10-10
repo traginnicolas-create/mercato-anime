@@ -228,7 +228,6 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
 .feature .row{margin-top:22px;position:relative}
 .feature .row button{padding:14px 26px;font-size:16px;border-radius:999px}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
-@media (max-width:760px){.steps{grid-template-columns:1fr}}
 .steps div{border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;background:var(--panel)}
 .steps i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:1px}
 .steps b{display:block;font-family:var(--title);font-weight:700;font-size:15px;margin:6px 0 4px}
@@ -239,14 +238,50 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
 .cath{margin-bottom:14px}
 .cath h2{font-size:clamp(21px,3.6vw,28px);font-weight:900;margin-top:6px}
 .cath small{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+/* cartes de jeux : une « jaquette » par jeu (visuel, sceau kanji, couleur de la famille, joueurs et genre) */
+.cat{--fc:var(--accent)} #cat2{--fc:#5aa9ff} #cat3{--fc:#3fcf8e} #cat4{--fc:#c084fc}
+.cath .eyebrow{color:var(--fc)}
+.cath{display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:12px}
+.cath .eyebrow,.cath small{grid-column:1 / -1}
+.cath .nb{font-family:var(--mono);font-size:12px;color:var(--muted);padding:5px 11px;border:1px solid var(--line);border-radius:999px;align-self:center}
 .gcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:860px){.gcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:500px){.gcards{grid-template-columns:1fr}}
-.gcards .mode{position:relative;overflow:hidden;background:var(--panel);border-radius:var(--r);padding:18px 18px 16px;min-height:118px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px}
-.gcards .mode .k{position:absolute;right:10px;top:2px;font-family:var(--brand);font-weight:900;font-size:64px;line-height:1.1;color:rgba(255,255,255,.07);transition:color .2s}
-.gcards .mode:hover .k,.gcards .mode.sel .k{color:color-mix(in srgb,var(--accent) 60%,transparent)}
-.gcards .mode b{font-family:var(--title);font-size:16px;font-weight:700;letter-spacing:-.01em;line-height:1.15;margin:0;position:relative}
-.gcards .mode span{font-size:13.5px;line-height:1.35;position:relative}
+.gcards .mode{position:relative;overflow:hidden;background:var(--panel);border-radius:var(--r);padding:0;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:0;text-align:left}
+.gcards .mode .art{position:relative;height:104px;flex:none;overflow:hidden;background:linear-gradient(120deg,color-mix(in srgb,var(--fc) 30%,#0b0a0e),#0b0a0e 78%)}
+.gcards .mode .art::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 13px,rgba(255,255,255,.035) 13px 14px)}
+.gcards .mode .art::after{content:"";position:absolute;inset:auto 0 0 0;height:46%;background:linear-gradient(transparent,var(--panel))}
+.gcards .mode .art img{position:absolute;right:0;top:0;width:58%;height:170%;max-width:none;object-fit:cover;object-position:50% 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 42%);mask-image:linear-gradient(90deg,transparent,#000 42%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.gcards .mode .art img.two{right:26%;opacity:.55}
+.gcards .mode[data-g="sil"] .art img{filter:brightness(0) drop-shadow(0 0 10px color-mix(in srgb,var(--fc) 70%,transparent))}
+.gcards .mode[data-g="guess"] .art img{filter:blur(5px) saturate(1.3)}
+.gcards .mode[data-g="fx"] .art img{mix-blend-mode:screen}
+.gcards .mode .bars{position:absolute;right:14px;bottom:18px;top:16px;width:52%;display:flex;align-items:flex-end;justify-content:flex-end;gap:5px}
+.gcards .mode .bars u{flex:1;max-width:9px;border-radius:3px;background:linear-gradient(var(--fc),color-mix(in srgb,var(--fc) 25%,transparent))}
+.gcards .mode .k{position:absolute;left:12px;top:12px;z-index:1;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;font-style:normal;font-family:var(--brand);font-weight:900;font-size:19px;line-height:1;color:var(--fc);background:color-mix(in srgb,var(--fc) 14%,#0b0a0e);border:1px solid color-mix(in srgb,var(--fc) 45%,transparent);transition:background .2s,color .2s}
+.gcards .mode:hover .k,.gcards .mode.sel .k{background:var(--fc);color:#0e0d12}
+.gcards .mode b{font-family:var(--title);font-size:16px;font-weight:700;letter-spacing:-.01em;line-height:1.15;margin:0;padding:2px 14px 0;position:relative}
+.gcards .mode span{font-size:13.5px;line-height:1.35;padding:5px 14px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gcards .mode .mt{margin-top:auto;padding:12px 14px 13px;font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:#8f8a97;display:flex;flex-wrap:wrap;gap:4px 10px}
+.gcards .mode .mt em{font-style:normal;color:var(--fc)}
+.gcards .mode.sel{border-color:var(--fc);background:var(--panel);box-shadow:inset 0 0 0 1px var(--fc),0 0 36px color-mix(in srgb,var(--fc) 20%,transparent)}
+.gcards .mode:hover .art img{transform:scale(1.06)}
+@media (max-width:500px){
+  .gcards{gap:10px}
+  .gcards .mode .art{height:84px}
+  .gcards .mode .k{left:10px;top:10px;width:32px;height:32px;font-size:17px}
+  .gcards .mode b{font-size:14px;padding:2px 11px 0}
+  .gcards .mode span{font-size:12.5px;padding:4px 11px 0}
+  .gcards .mode .mt{padding:9px 11px 11px;font-size:9.5px;letter-spacing:.3px}
+}
+/* raccourcis vers les familles */
+.famnav{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 22px;padding:2px 16px;scrollbar-width:none}
+.famnav::-webkit-scrollbar{display:none}
+.famnav button{flex:none;display:flex;align-items:center;gap:8px;border-radius:999px;padding:9px 14px;font-size:13.5px;background:var(--panel);border:1px solid var(--line);white-space:nowrap}
+.famnav button i{width:8px;height:8px;border-radius:50%;background:var(--fc)}
+.famnav button small{font-family:var(--mono);color:var(--muted);font-size:11.5px}
+@media (min-width:641px){.famnav{display:none}}
+/* les trois étapes : une ligne compacte sur téléphone */
+@media (max-width:760px){.steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.steps div{padding:12px 11px}.steps span{display:none}.steps b{font-size:12.5px;margin:5px 0 0;line-height:1.2}}
 .cfgh{margin:10px 0 16px;padding-top:34px;border-top:1px solid var(--line);scroll-margin-top:70px}
 .cfgh h2{font-size:clamp(24px,4.4vw,34px);font-weight:900;margin-top:6px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 16px}
@@ -282,18 +317,18 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <div class="err" id="qjErr"></div>
     </div>
   </div>
+  <nav class="famnav" id="famNav" aria-label="Familles de jeux"></nav>
   <section class="cat" id="cat1">
     <div class="cath"><div class="eyebrow">Famille 01 <i>· 対戦</i></div><h2>Affrontement</h2><small>Enchères, bluff et déduction</small></div>
-    <div class="gcards"><button class="mode sel" data-g="mercato"><i class="k" aria-hidden="true">競</i><b>Mercato</b><span>Enchéris, compose ton équipe, gagne le combat 5 contre 5.</span></button><button class="mode" data-g="uc"><i class="k" aria-hidden="true">潜</i><b>Undercover</b><span>Un intrus se cache parmi vous. Trouvez-le.</span></button><button class="mode" data-g="liar"><i class="k" aria-hidden="true">嘘</i><b>Le Menteur</b><span>Une affirmation est fausse. Repère-la avant les autres.</span></button><button class="mode" data-g="rl"><i class="k" aria-hidden="true">則</i><b>Trouve la règle</b><span>Propose des personnages pour deviner ta règle secrète.</span></button><button class="mode" data-g="wh"><i class="k" aria-hidden="true">誰</i><b>Devine le perso</b><span>Pose des questions pour trouver qui tu es.</span></button><button class="mode" data-g="jg"><i class="k" aria-hidden="true">審</i><b>Mon perso</b><span>Un juge, des catégories, un personnage à ne pas dévoiler.</span></button></div>
-    <footer class="sitefoot"><span>Mercato Anime · アニメ市場</span><span>Jeu de fans, sans lien avec les ayants droit des œuvres citées.</span></footer>
-</section>
+    <div class="gcards"><button class="mode sel" data-g="mercato"><i class="k" aria-hidden="true">競</i><b>Mercato</b><span>Enchéris, compose ton équipe, gagne le combat 5 contre 5.</span></button><button class="mode" data-g="uc"><i class="k" aria-hidden="true">潜</i><b>Undercover</b><span>Un intrus se cache parmi vous. Trouvez-le.</span></button><button class="mode" data-g="liar"><i class="k" aria-hidden="true">嘘</i><b>Le Menteur</b><span>Une affirmation est fausse. Repère-la avant les autres.</span></button><button class="mode" data-g="rl"><i class="k" aria-hidden="true">則</i><b>Trouve la règle</b><span>Propose des personnages pour deviner ta règle secrète.</span></button><button class="mode" data-g="wh"><i class="k" aria-hidden="true">誰</i><b>Devine le perso</b><span>Pose des questions pour trouver qui tu es.</span></button><button class="mode" data-g="jg"><i class="k" aria-hidden="true">審</i><b>Mon perso</b><span>Un juge, des catégories, un personnage à ne pas dévoiler.</span></button><button class="mode" data-g="pc"><i class="k" aria-hidden="true">率</i><b>Pourcentage</b><span>Un pourcentage secret chacun. Le meilleur classement gagne.</span></button></div>
+  </section>
   <section class="cat" id="cat2">
     <div class="cath"><div class="eyebrow">Famille 02 <i>· 知識</i></div><h2>Connaissance</h2><small>Reconnaître, classer, se souvenir</small></div>
     <div class="gcards"><button class="mode" data-g="guess"><i class="k" aria-hidden="true">像</i><b>Perso pixelisé</b><span>L'image se précise peu à peu. Qui est-ce ?</span></button><button class="mode" data-g="sil"><i class="k" aria-hidden="true">影</i><b>Silhouettes</b><span>Une ombre, un nom à trouver.</span></button><button class="mode" data-g="top"><i class="k" aria-hidden="true">十</i><b>Top 10</b><span>Retrouve les dix noms d'un classement officiel.</span></button><button class="mode" data-g="fx"><i class="k" aria-hidden="true">顔</i><b>Visages superposés</b><span>Plusieurs visages fondus en un seul. Démêle-les.</span></button><button class="mode" data-g="bt"><i class="k" aria-hidden="true">音</i><b>Blind test</b><span>Openings et endings : le titre, l'animé, l'artiste.</span></button></div>
   </section>
   <section class="cat" id="cat3">
     <div class="cath"><div class="eyebrow">Famille 03 <i>· 協力</i></div><h2>Complicité</h2><small>Gagner en pensant pareil</small></div>
-    <div class="gcards"><button class="mode" data-g="vs"><i class="k" aria-hidden="true">強</i><b>Plus fort ?</b><span>Deux personnages, un seul choix. Le même que ton ami ?</span></button><button class="mode" data-g="tier"><i class="k" aria-hidden="true">位</i><b>Tier list</b><span>Classez à deux sans vous concerter.</span></button><button class="mode" data-g="nt"><i class="k" aria-hidden="true">点</i><b>Trouve ma note</b><span>Trois questions pour deviner une note secrète.</span></button><button class="mode" data-g="el"><i class="k" aria-hidden="true">落</i><b>Élimination</b><span>Retrouve l'ordre dans lequel ton ami élimine.</span></button><button class="mode" data-g="pc"><i class="k" aria-hidden="true">率</i><b>Pourcentage</b><span>Un pourcentage secret chacun. Le meilleur classement gagne.</span></button></div>
+    <div class="gcards"><button class="mode" data-g="vs"><i class="k" aria-hidden="true">強</i><b>Plus fort ?</b><span>Deux personnages, un seul choix. Le même que ton ami ?</span></button><button class="mode" data-g="tier"><i class="k" aria-hidden="true">位</i><b>Tier list</b><span>Classez à deux sans vous concerter.</span></button><button class="mode" data-g="nt"><i class="k" aria-hidden="true">点</i><b>Trouve ma note</b><span>Trois questions pour deviner une note secrète.</span></button><button class="mode" data-g="el"><i class="k" aria-hidden="true">落</i><b>Élimination</b><span>Retrouve l'ordre dans lequel ton ami élimine.</span></button></div>
   </section>
   <section class="cat" id="cat4">
     <div class="cath"><div class="eyebrow">Famille 04 <i>· 声</i></div><h2>Voix</h2><small>Tout se joue au micro</small></div>
@@ -778,6 +813,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <li>La partie se termine quand les <b>deux équipes ont 5 personnages</b>. Le vainqueur est désigné par un <b>combat 5 contre 5</b> : niveau individuel, pouvoirs, haki, techniques et affrontements favorables comptent, pas la somme des points.</li>
     </ul>
   </div>
+  <footer class="sitefoot"><span>Mercato Anime · アニメ市場</span><span>Jeu de fans, sans lien avec les ayants droit des œuvres citées.</span></footer>
 </section>
 
 <!-- SALON EN LIGNE -->
@@ -8483,7 +8519,7 @@ function pcRender(force){
   } else if (ph === "show"){
     html = `${hud}<div class="panel">${theme}${mine(V.pct[V.seen])}
       <p class="muted" style="text-align:center;max-width:54ch;margin:10px auto">Trouve une réponse qui vaut ton pourcentage sur ce thème. Ne dis jamais ton chiffre.</p>
-      <label class="f" for="pcA">Ta réponse (conseillé : elle s'affichera quand chacun fera son classement)</label><input id="pcA" maxlength="50" autocomplete="off" placeholder="Ma réponse" style="width:100%">
+      <label class="f" for="pcA">Ta réponse</label><input id="pcA" maxlength="50" autocomplete="off" placeholder="Elle s'affichera au moment des classements" style="width:100%">
       <div class="row" style="justify-content:center;margin-top:12px"><button class="primary" id="pcSeen">Cacher${V.seen + 1 < N ? " et passer le téléphone" : ""}</button></div></div>`;
   } else if (ph === "answer"){
     const done = !!V.ans[me];
@@ -8989,6 +9025,26 @@ input::placeholder{color:#716c7a}
   .lobby .code{font-size:36px;letter-spacing:6px}
   .board div{flex-wrap:wrap}
 }
+/* ---- écrans de jeu : passage du téléphone, bandeau de résultat, thème, lignes de classement ---- */
+.cover{position:relative;overflow:hidden;min-height:min(56vh,440px);display:grid;align-content:center;justify-items:center;gap:4px;padding:44px 18px;border-radius:16px;background:radial-gradient(ellipse 70% 60% at 50% 0,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%)}
+.cover::after{content:"秘";position:absolute;right:-.08em;bottom:-.28em;font-family:var(--brand);font-weight:900;font-size:clamp(150px,44vw,260px);line-height:1;color:rgba(255,255,255,.035);pointer-events:none}
+.cover > *{position:relative;z-index:1}
+.cover button.primary{min-width:min(100%,280px)}
+.gsres{display:block;text-align:center;padding:14px 16px;margin-bottom:12px;border-radius:14px;border:1px solid var(--line);background:#0b0a0e;font-family:var(--title);font-weight:900;font-size:clamp(18px,5vw,26px);letter-spacing:-.02em;line-height:1.15;overflow-wrap:anywhere}
+.gsres.ok{border-color:color-mix(in srgb,var(--ok) 55%,transparent);background:color-mix(in srgb,var(--ok) 10%,#0b0a0e)}
+.gsres.ko{border-color:color-mix(in srgb,var(--danger) 55%,transparent);background:color-mix(in srgb,var(--danger) 10%,#0b0a0e)}
+.gsres.ok::before,.gsres.ko::before{display:inline-grid;vertical-align:middle;width:40px;height:40px;margin:0 12px 0 0;border-radius:11px;font-size:21px}
+.pctheme{border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,#0b0a0e),#0b0a0e);padding:14px 14px 15px;border-radius:16px}
+.pctheme::before{content:"Thème · 題";display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.pctheme b{font-family:var(--title);font-weight:900;font-size:clamp(19px,5.2vw,30px);letter-spacing:-.02em;line-height:1.12;color:var(--text)}
+.pcbig{font-family:var(--title);font-weight:900;letter-spacing:-.04em}
+.pcrow{border:1px solid var(--line);border-left-width:4px;border-radius:14px;padding:10px 12px;background:#0b0a0e}
+.pcrow .rk{font-family:var(--mono);font-weight:500;font-size:13px;width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:var(--panel2);color:var(--text)}
+.pcrow .mv button{border-radius:10px;width:42px;padding:0}
+.pcrow .p{font-family:var(--mono);font-weight:500;font-size:19px}
+.pcrow.me{outline:none;box-shadow:inset 0 0 0 1px var(--accent)}
+/* sur téléphone, les boutons d'action d'un écran de jeu prennent toute la largeur */
+@media (max-width:520px){.wrap > section:not(#home) .panel > .row > button{flex:1 1 auto}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 <script>
@@ -9009,6 +9065,19 @@ input::placeholder{color:#716c7a}
   const sheet = c => { const m = META[c.dataset.g] || []; document.querySelector("#modeDesc").textContent = c.querySelector("span").textContent;
     document.querySelector("#modeMeta").innerHTML = [["人", m[0]], ["場", m[1]], ["型", m[2]], ["時", DUR[c.dataset.g]]].filter(x => x[1]).map(x => `<span><b>${x[0]}</b>${x[1]}</span>`).join("");
     head.classList.remove("flash"); void head.offsetWidth; head.classList.add("flash"); };
+  // jaquettes : un visuel par jeu (personnage déjà présent dans le jeu, ou barres de son pour les jeux audio), joueurs et genre en pied de carte
+  try { const pool = []; const us = Object.keys(DATA).map(u => DATA[u].filter(c => c.i).slice(0, 12)); for (let k = 0; k < 12; k++) us.forEach(l => l[k] && pool.push(l[k].i));
+    cards.forEach((c, n) => { const g = c.dataset.g, m = META[g] || [], pic = k => pool.length ? `<img src="${pool[(n * 5 + k) % pool.length]}" alt="" loading="lazy">` : "";
+      const art = g === "bt" || g === "mm" ? `<div class="bars">${Array.from({length: 14}, (_, k) => `<u style="height:${g === "mm" ? 22 + Math.round(70 * Math.abs(Math.sin(k * 1.9 + 1))) : 18 + Math.round(78 * Math.abs(Math.sin(k * .83 + .4) * Math.cos(k * .31)))}%"></u>`).join("")}</div>`
+        : g === "fx" ? pic(0).replace("<img", '<img class="two"') + pic(7) : pic(0);
+      c.insertAdjacentHTML("afterbegin", `<div class="art" aria-hidden="true">${art}</div>`);
+      c.insertAdjacentHTML("beforeend", `<small class="mt"><em>${m[2] || ""}</em>${(m[0] || "").replace(" joueurs", " j.")}</small>`); });
+  } catch {}
+  // raccourcis vers les familles, avec le nombre de jeux
+  const fam = document.querySelector("#famNav");
+  document.querySelectorAll("section.cat").forEach(sec => { const n = sec.querySelectorAll(".mode").length, h = sec.querySelector(".cath"), name = h.querySelector("h2").textContent;
+    h.querySelector("h2").insertAdjacentHTML("afterend", `<span class="nb">${n} jeu${n > 1 ? "x" : ""}</span>`);
+    if (fam){ const b = document.createElement("button"); b.type = "button"; b.style.setProperty("--fc", getComputedStyle(sec).getPropertyValue("--fc")); b.innerHTML = `<i></i>${name} <small>${n}</small>`; b.onclick = () => sec.scrollIntoView({behavior: "smooth", block: "start"}); fam.appendChild(b); } });
   let last = null; try { last = localStorage.getItem("mercato-dernier-jeu"); } catch {}
   cards.forEach(c => c.addEventListener("click", () => { sheet(c); try { localStorage.setItem("mercato-dernier-jeu", c.dataset.g); } catch {} }));
   sheet(document.querySelector(".gcards .mode.sel") || cards[0]);
