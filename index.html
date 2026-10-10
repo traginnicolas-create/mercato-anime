@@ -9190,7 +9190,7 @@ function tcOnGame(mode, players, o){
   // gagné : partie coopérative réussie, ou gagnant désigné (toi si ton pseudo est dans la partie, sinon quelqu'un sur ce téléphone)
   const won = o.coop ? !!o.ok : Array.isArray(o.win) && o.win.length > 0 && (me && players.includes(me) ? o.win.includes(me) : true);
   const record = Date.now() - TC_REC < 20000; TC_REC = 0;
-  if (won){ d.win++; s.streak++; d.vg = d.vg || 0;
+  if (won){ d.win++; s.streak++; s.best = Math.max(s.best || 0, s.streak); d.vg = d.vg || 0;
     // une victoire rapporte des éclats (crédits) ; parfois elle lâche en plus un booster, dont le niveau est tiré au sort
     const g = d.vg < TC_GAIN.cap ? TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * (s.streak - 1)) + (record ? TC_GAIN.record : 0) : 0; if (g){ d.vg++; s.gems += g; }
     const drop = d.vp < TC_WINCAP && (record || Math.random() < tcDropChance(s.streak)); let t = -1;
@@ -9369,6 +9369,168 @@ document.querySelector("#home .feature")?.insertAdjacentHTML("afterend", `<div c
 document.querySelector(".sitenav")?.insertAdjacentHTML("beforeend", `<a href="#" id="navTcg">Cartes</a>`);
 $("#navTcg") && ($("#navTcg").onclick = e => { e.preventDefault(); tcShow(); });
 try { tcHome(); } catch {}
+</script>
+
+<style>
+.frstats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}
+@media (max-width:560px){.frstats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.frstats div{border:1px solid var(--line);border-radius:12px;background:#0b0a0e;padding:10px 8px;text-align:center}
+.frstats b{display:block;font-family:var(--mono);font-weight:500;font-size:clamp(16px,4.6vw,22px)}
+.frstats span{font-family:var(--mono);font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted)}
+.frlist{display:grid;gap:8px;margin:12px 0}
+.frrow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:14px;background:#0b0a0e;padding:11px 14px}
+.frrow b{font-size:15px}.frrow b i{font-style:normal;font-family:var(--mono);font-weight:500;color:var(--muted);font-size:13px}
+.frrow small{display:block;color:var(--muted);font-size:12.5px}
+.frrow small.on{color:var(--ok)}
+.frrow button{border-radius:999px;padding:8px 14px;font-size:13px}
+.frid{font-family:var(--mono);font-size:clamp(18px,5vw,24px);letter-spacing:.5px}
+.frid i{font-style:normal;color:var(--accent)}
+.frrec{display:grid;grid-template-columns:1fr auto;gap:5px 14px;font-size:13.5px;margin:8px 0}
+.frrec span:nth-child(even){font-family:var(--mono);text-align:right}
+.frtrade{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+@media (max-width:520px){.frtrade{grid-template-columns:1fr}}
+.frtrade select{width:100%}
+.frinv{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:4px;font-size:13px;color:var(--muted)}
+.frinv button{border-radius:999px;padding:7px 13px;font-size:13px}
+</style>
+<script>
+/* =====================================================================
+   AMIS — identifiant « Pseudo#1234 », sans serveur ni compte.
+   Chaque joueur qui a un pseudo ouvre un petit salon personnel tant que le site est ouvert. Un ami s'y connecte pour lire
+   son profil (statistiques, records, collection), l'inviter dans une partie ou lui proposer un échange de cartes.
+   Conséquence : tout cela ne marche que si les deux ont le site ouvert en même temps. La liste d'amis reste sur l'appareil.
+   Messages du salon personnel : fq (demande de profil) / fa (réponse), finv (invitation), ftrade (proposition) / ftres (réponse).
+   ===================================================================== */
+const FR_KEY = "mercato-amis", FR_TAG = "mercato-tag";
+const FR = {host: null, conn: null, connId: null, online: {}};
+const frMe = () => { const p = profGet(); if (!p?.name) return null; let t = lsGet(FR_TAG, null); if (!/^\d{4}$/.test(t)){ t = String(1000 + Math.floor(Math.random() * 9000)); lsSet(FR_TAG, t); } return {name: p.name, tag: t, id: p.name + "#" + t}; };
+const frParse = v => { const m = String(v || "").trim().match(/^(.{1,16})#(\d{4})$/); return m ? {name: m[1].trim(), tag: m[2], id: m[1].trim() + "#" + m[2]} : null; };
+const frRoom = id => "ami-" + id.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
+const frList = () => lsGet(FR_KEY, []);
+// rejoindre un salon sans déranger le salon de la partie en cours (le vocal suit p2pRoom.current)
+async function frJoin(name, host){ const cur = p2pRoom.current; try { return await NET.room.join(name, host); } finally { if (NET.p2p) p2pRoom.current = cur; } }
+const frTradeable = s => tcCards().filter(c => (s.own[c.id] || 0) - Object.values(s.fin[c.id] || {}).reduce((a, b) => a + b, 0) >= 2).map(c => c.no);
+
+// ma fiche publique : ce qu'un ami voit de moi
+function frCard(){
+  const me = frMe(), s = tcLoad(), all = tcCards(), h = lsGet(HIST_KEY, []), S = histStats(me.name), us = Object.keys(UNI);
+  const tot = Object.values(S).reduce((a, x) => ({w: a.w + x.w, l: a.l + x.l, d: a.d + x.d}), {w: 0, l: 0, d: 0});
+  // plus longue série de victoires dans l'historique (du plus ancien au plus récent), complétée par la série tenue par les cartes
+  let run = 0, best = s.best || 0; [...h].reverse().forEach(x => { if (x.c || !x.w || !x.players.includes(me.name)) return; if (x.w.includes(me.name)){ run++; best = Math.max(best, run); } else run = 0; });
+  const rec = []; [["Perso pixelisé", "mercato-devine-", " pts"], ["Silhouettes", "mercato-sil-", " pts"], ["Plus fort ? (série)", "mercato-vs-", ""], ["Tier list", "mercato-tier-", ""], ["Le Menteur", "mercato-liar-", " pts"]].forEach(([n, k, suf]) => us.forEach(u => { const v = lsGet(k + u, null); if (typeof v === "number") rec.push([n + " · " + UNI[u].name, v + suf]); }));
+  const top = all.filter(c => s.own[c.id]).sort((a, b) => s.own[b.id] - s.own[a.id])[0];
+  return {id: me.id, since: profGet().since, lv: tcLvl(s.xp), g: h.length, w: tot.w, l: tot.l, d: tot.d, best,
+    modes: Object.entries(S).sort((a, b) => b[1].n - a[1].n).slice(0, 3).map(([k, x]) => [k, x.n]), rec: rec.slice(0, 15),
+    top: top ? [top.no, s.own[top.id]] : null, own: all.filter(c => s.own[c.id]).map(c => [c.no, tcBestFin(s, c)]), tr: frTradeable(s), n: all.length};
+}
+function frToast(txt, label, fn){
+  document.querySelector(".tctoast")?.remove();
+  document.body.insertAdjacentHTML("beforeend", `<div class="tctoast" role="status"><i>友</i><span>${esc(txt)}</span>${label ? `<button class="primary" style="border-radius:999px;padding:7px 13px;font-size:13px">${esc(label)}</button>` : ""}</div>`);
+  const el = document.querySelector(".tctoast"); el.onclick = () => { el.remove(); fn && fn(); }; setTimeout(() => el.remove(), 20000); SFX.play("win");
+}
+// mon salon personnel : je réponds aux demandes de mes amis tant que le site est ouvert
+async function frHost(){
+  const me = frMe(); if (!me || !NET.room || FR.host) return;
+  let room; try { room = await frJoin(frRoom(me.id), true); } catch { return; }   // déjà ouvert dans un autre onglet : on laisse l'autre répondre
+  FR.host = room;
+  room.on("fq", m => { if (m.sameTab || m.data?.to !== me.id) return; room.emit("fa", {to: m.data.from, card: frCard()}).catch(() => {}); });
+  room.on("finv", m => { const d = m.data; if (m.sameTab || d?.to !== me.id || !/^[A-Z0-9]{4}$/.test(d.code || "")) return;
+    frToast(`${d.from} t'invite à une partie (${d.code})`, "Rejoindre", () => { show("home"); const c = $("#qjCode"), n = $("#qjName"); c.value = d.code; if (!n.value) n.value = me.name; $("#qjGo").click(); }); });
+  room.on("ftrade", m => { const d = m.data; if (m.sameTab || d?.to !== me.id) return; frAsk(room, d); });
+}
+// proposition d'échange reçue : je donne `want` (un de mes doublons) et je reçois `give`
+function frAsk(room, d){
+  const all = tcCards(), a = all.find(c => c.no === d.give), b = all.find(c => c.no === d.want), M = $("#modal"); if (!a || !b) return;
+  const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }, answer = ok => room.emit("ftres", {to: d.from, k: d.k, ok}).catch(() => {});
+  M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>Échange proposé</h2><button class="ghost" id="frNo">✕ Refuser</button></div><p class="muted" style="margin-bottom:12px"><b>${esc(d.from)}</b> te donne la carte de gauche contre ton doublon de droite.</p>
+    <div class="frtrade"><div><label class="f">Tu reçois</label>${tcCard(a)}</div><div><label class="f">Tu donnes</label>${tcCard(b)}</div></div><div class="row"><button class="primary" id="frYes">Accepter l'échange</button></div></div>`;
+  M.classList.remove("hidden"); SFX.play("pop");
+  $("#frNo").onclick = () => { answer(false); close(); };
+  $("#frYes").onclick = () => { const s = tcLoad(); if (!frTradeable(s).includes(b.no)){ answer(false); close(); return; }
+    s.own[b.id]--; const nw = !s.own[a.id]; s.own[a.id] = (s.own[a.id] || 0) + 1; if (nw) s.xp += TC_XP[a.r]; tcSave(s); answer(true); close(); frToast("Échange fait : " + a.n + " rejoint ta collection"); };
+}
+// se connecter au salon d'un ami et lui demander sa fiche
+async function frOpen(id){
+  const me = frMe(); frClose(); if (!me || !NET.room) return null;
+  let room; try { room = await frJoin(frRoom(id), false); } catch { return null; }
+  FR.conn = room; FR.connId = id;
+  return new Promise(res => { let done = false; const ask = () => room.emit("fq", {to: id, from: me.id}).catch(() => {});
+    room.on("fa", m => { if (m.sameTab || m.data?.to !== me.id || done) return; done = true; clearInterval(t); const card = m.data.card; FR.online[id] = Date.now();
+      lsSet(FR_KEY, frList().map(f => f.id === id ? {...f, last: card, seen: Date.now()} : f)); res(card); });
+    ask(); const t = setInterval(ask, 1500); setTimeout(() => { if (!done){ done = true; clearInterval(t); res(null); } }, 9000); });
+}
+function frClose(){ if (FR.conn){ try { FR.conn.leave(); } catch {} } FR.conn = null; FR.connId = null; }
+// inviter un ami dans le salon de partie ouvert
+async function frInvite(id, code, btn){
+  const me = frMe(); if (!me) return; btn.disabled = true; btn.textContent = "Envoi…";
+  let room; try { room = await frJoin(frRoom(id), false); } catch { btn.textContent = "Échec"; return; }
+  for (let k = 0; k < 4; k++){ room.emit("finv", {to: id, from: me.id, code}).catch(() => {}); await new Promise(r => setTimeout(r, 900)); }
+  try { room.leave(); } catch {} btn.textContent = "Invité ✔";
+}
+
+// ---- affichage ----
+function frHome(){
+  const box = $("#frHome"); if (!box) return; const me = frMe(), n = frList().length;
+  box.innerHTML = me ? `<div><b>Amis · 友</b><span>Ton identifiant : <b style="font-family:var(--mono);font-size:14px;color:var(--text)">${esc(me.name)}<i style="font-style:normal;color:var(--accent)">#${me.tag}</i></b> · ${n} ami${n > 1 ? "s" : ""}</span></div><button id="frGo">Mes amis</button>`
+    : `<div><b>Amis · 友</b><span>Crée ton pseudo (plus bas) pour recevoir un identifiant et ajouter des amis.</span></div>`;
+  $("#frGo") && ($("#frGo").onclick = frShow);
+}
+function frShow(msg){
+  const me = frMe(); if (!me) return; frClose(); const M = $("#modal"), L = frList();
+  M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>Amis</h2><button class="ghost" id="frX">✕ Fermer</button></div>
+    <label class="f">Ton identifiant</label><div class="row" style="align-items:center"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button class="ghost" id="frCopy">Copier</button></div>
+    <p class="small" style="margin:6px 0 16px">Donne-le à tes amis. Tout passe en direct entre vos appareils : profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert.</p>
+    <label class="f" for="frAdd">Ajouter un ami</label><div class="row"><input id="frAdd" maxlength="22" placeholder="Pseudo#1234" autocomplete="off" style="flex:1;min-width:170px"><button class="primary" id="frAddGo">Ajouter</button></div><div class="err" id="frErr">${esc(typeof msg === "string" ? msg : "")}</div>
+    <div class="frlist">${L.length ? L.map(f => { const on = Date.now() - (FR.online[f.id] || 0) < 12e4; return `<div class="frrow"><div><b>${esc(f.name)}<i>#${f.tag}</i></b><small class="${on ? "on" : ""}">${on ? "En ligne" : f.seen ? "Vu le " + new Date(f.seen).toLocaleDateString("fr-FR", {day: "numeric", month: "short"}) : "Jamais vu en ligne"}${f.last ? " · niveau " + f.last.lv + " · " + f.last.own.length + " cartes" : ""}</small></div><div class="row"><button class="primary" data-frv="${esc(f.id)}">Voir</button><button class="ghost" data-frd="${esc(f.id)}">Retirer</button></div></div>`; }).join("") : `<p class="muted">Aucun ami pour l'instant.</p>`}</div></div>`;
+  M.classList.remove("hidden"); M.scrollTo(0, 0);
+  const close = () => { M.classList.add("hidden"); M.innerHTML = ""; frHome(); };
+  $("#frX").onclick = close; M.onclick = e => { if (e.target === M) close(); };
+  $("#frCopy").onclick = async () => { try { await navigator.clipboard.writeText(me.id); $("#frCopy").textContent = "Copié ✔"; } catch { $("#frCopy").textContent = me.id; } };
+  const add = () => { const f = frParse($("#frAdd").value); if (!f) return $("#frErr").textContent = "Écris le pseudo suivi de # et de 4 chiffres, par exemple Zoro#4821.";
+    if (f.id.toLowerCase() === me.id.toLowerCase()) return $("#frErr").textContent = "C'est ton propre identifiant.";
+    if (!frList().some(x => x.id.toLowerCase() === f.id.toLowerCase())) lsSet(FR_KEY, [...frList(), {id: f.id, name: f.name, tag: f.tag}].slice(0, 50)); frView(f.id); };
+  $("#frAddGo").onclick = add; $("#frAdd").onkeydown = e => { if (e.key === "Enter") add(); };
+  document.querySelectorAll("[data-frv]").forEach(b => b.onclick = () => frView(b.dataset.frv));
+  document.querySelectorAll("[data-frd]").forEach(b => b.onclick = () => { lsSet(FR_KEY, frList().filter(f => f.id !== b.dataset.frd)); frShow(); });
+}
+async function frView(id){
+  const M = $("#modal"), f = frList().find(x => x.id === id) || frParse(id), all = tcCards();
+  const draw = (c, live) => { const ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]), s = tcLoad(), mine = frTradeable(s).map(n => all.find(x => x.no === n)).filter(Boolean), his = (c.tr || []).map(n => all.find(x => x.no === n)).filter(Boolean);
+    const by = r => c.own.filter(([n]) => all.find(x => x.no === n)?.r === r).length;
+    M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><h2>${esc(f.name)}<span style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.6em"> #${f.tag}</span></h2><span class="small" style="color:${live ? "var(--ok)" : "var(--muted)"}">${live ? "En ligne" : "Hors ligne : dernière fiche connue"} · collectionneur niveau ${c.lv}</span></div><button class="ghost" id="frBack">← Amis</button></div>
+      <div class="frstats"><div><b>${c.g}</b><span>Parties</span></div><div><b style="color:var(--ok)">${c.w}</b><span>Victoires</span></div><div><b style="color:var(--danger)">${c.l}</b><span>Défaites</span></div><div><b>${ratio}</b><span>Ratio V/D</span></div><div><b>${c.best}</b><span>Meilleure série</span></div></div>
+      <p class="small">${c.modes.length ? "Jeux les plus joués : " + c.modes.map(([k, n]) => `<b style="color:var(--text)">${esc(k)}</b> (${n})`).join(" · ") : "Aucune partie enregistrée."}${top ? ` · Carte la plus tirée : <b style="color:var(--text)">${esc(top.n)}</b> (×${c.top[1]})` : ""}</p>
+      ${c.rec.length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><div class="frrec">${c.rec.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(String(v))}</span>`).join("")}</div>` : ""}
+      <div class="tierh" style="--tc:var(--accent)">Collection <small>${c.own.length}/${c.n} cartes</small></div>
+      <div class="tcchips">${[...TC_ORDER].reverse().map(r => `<button class="r-${r}" disabled>${TC_R[r][0]} ${by(r)}</button>`).join("")}</div>
+      <details><summary class="small" style="cursor:pointer;margin:6px 0 10px">Voir ses ${c.own.length} cartes</summary><div class="tcgrid">${c.own.map(([n, fin]) => { const x = all.find(y => y.no === n); return x ? tcCard(x, {f: fin}) : ""; }).join("")}</div></details>
+      <div class="tierh" style="--tc:var(--accent)">Échange</div>
+      ${!live ? `<p class="muted">Ton ami doit être en ligne pour échanger.</p>` : !mine.length || !his.length ? `<p class="muted">Un échange porte sur des doublons : ${!mine.length ? "tu n'en as pas" : "ton ami n'en a pas"} pour l'instant.</p>`
+        : `<p class="small">Un doublon contre un doublon. Ton ami doit accepter sur son écran.</p><div class="frtrade"><div><label class="f" for="frGive">Tu donnes</label><select id="frGive">${mine.map(x => `<option value="${x.no}">${esc(x.n)} · ${TC_R[x.r][0]}</option>`).join("")}</select></div><div><label class="f" for="frWant">Tu demandes</label><select id="frWant">${his.map(x => `<option value="${x.no}">${esc(x.n)} · ${TC_R[x.r][0]}${s.own[x.id] ? "" : " · nouvelle"}</option>`).join("")}</select></div></div><div class="row"><button class="primary" id="frSend">Proposer l'échange</button></div><div class="err" id="frTErr"></div>`}</div>`;
+    $("#frBack").onclick = () => frShow();
+    $("#frSend") && ($("#frSend").onclick = () => { const me = frMe(), give = +$("#frGive").value, want = +$("#frWant").value, k = Math.random().toString(36).slice(2, 8), a = all.find(x => x.no === give), b = all.find(x => x.no === want), room = FR.conn; if (!room) return;
+      $("#frSend").disabled = true; $("#frTErr").textContent = "Proposition envoyée, en attente de sa réponse…"; let done = false;
+      room.on("ftres", m => { const d = m.data; if (m.sameTab || done || d?.to !== me.id || d.k !== k) return; done = true;
+        if (!d.ok){ $("#frTErr") && ($("#frTErr").textContent = "Échange refusé."); $("#frSend") && ($("#frSend").disabled = false); return; }
+        const s = tcLoad(); s.own[a.id] = Math.max(0, (s.own[a.id] || 0) - 1); const nw = !s.own[b.id]; s.own[b.id] = (s.own[b.id] || 0) + 1; if (nw) s.xp += TC_XP[b.r]; tcSave(s); frToast("Échange fait : " + b.n + " rejoint ta collection"); frView(id); });
+      room.emit("ftrade", {to: id, from: me.id, k, give, want}).catch(() => {}); }); };
+  M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${esc(f.name)}<span style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.6em"> #${f.tag}</span></h2><button class="ghost" id="frBack">← Amis</button></div>${waitHTML("Connexion à ton ami…")}</div>`;
+  M.classList.remove("hidden"); $("#frBack").onclick = () => frShow();
+  const card = NET.room ? await frOpen(id) : null;
+  if ($("#modal").classList.contains("hidden")) return frClose();
+  if (card) draw(card, true); else if (f.last) draw(f.last, false); else frShow(NET.room ? `${f.id} n'est pas en ligne pour l'instant : sa fiche s'affichera quand vous serez connectés en même temps.` : "Le jeu en ligne n'est pas disponible sur cet appareil.");
+}
+// invitation rapide depuis le salon d'attente d'une partie
+{ const base = inviteBtn; inviteBtn = function(){ base();
+    const c = document.querySelector("#lobbyBox .code"), L = frList(); if (!c || !L.length || !frMe() || document.querySelector("#frInv")) return;
+    const code = c.textContent.trim(); if (!/^[A-Z0-9]{4}$/.test(code)) return;
+    (document.querySelector("#inviteBtn") || c).insertAdjacentHTML("afterend", `<div class="frinv" id="frInv"><span>Inviter :</span>${L.slice(0, 8).map(f => `<button data-fri="${esc(f.id)}">${esc(f.name)}</button>`).join("")}</div>`);
+    document.querySelectorAll("[data-fri]").forEach(b => b.onclick = () => frInvite(b.dataset.fri, code, b)); }; }
+document.querySelector("#tcHome")?.insertAdjacentHTML("afterend", `<div class="tchome" id="frHome" style="background:var(--panel)"></div>`);
+try { frHome(); } catch {}
+// l'identifiant apparaît dès que le pseudo est créé ou changé ; le salon personnel s'ouvre quand le jeu en ligne est prêt
+{ const base = profApply; profApply = function(prev){ base(prev); try { frHome(); frHost(); } catch {} }; }
+{ const t = setInterval(() => { if (!NET.ready) return; clearInterval(t); frHost(); }, 500); }
 </script>
 
 <style>
