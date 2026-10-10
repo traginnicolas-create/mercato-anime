@@ -9834,6 +9834,7 @@ const tcMonth = s => { const k = tcDay().slice(0, 7); if (!s.month || s.month.k 
 function tcGo(k){ if (k === "mdays") return; if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
 const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + tcName(rw.p);
 // cadeau de connexion : éclats chaque jour, booster Argent tous les 3 jours, Or le 7e jour de chaque semaine de série
+const TC_LOGIN_PACKS = 2;   // boosters Classique offerts chaque jour avec le cadeau de connexion, en plus de la récompense du jour
 const tcLoginRw = n => n % 7 === 0 ? {p: "mix:2"} : n % 3 === 0 ? {p: "mix:1"} : {g: 20 * Math.min(5, n)};
 
 // ---- affichage ----
@@ -9979,7 +9980,7 @@ function tcRender(){
     html += `<div class="tcmhead"><div><span>À réclamer</span><b>${claim}</b></div><div><span>Série de connexion</span><b>Jour ${s.login.n}</b></div><div><span>Faites aujourd'hui</span><b>${left(mis)}/3</b></div><button class="primary" id="tcClaimAll" ${claim ? "" : "disabled"}>Tout réclamer</button></div>
       ${sec("Connexion", "連続", "Jour " + s.login.n, "nouveau cadeau · " + inT(tDay))}
       <div class="tcweek">${nx.map(n => { const r = tcLoginRw(n); return `<div class="${n < s.login.n || (n === s.login.n && s.login.got) ? "ok" : n === s.login.n ? "now" : ""}"><small>J${n}</small><b>${r.g ? r.g + " ◆" : TC_T[tcParse(r.p).t].k}</b></div>`; }).join("")}</div>
-      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr)}</button></div><p class="small" style="margin-top:8px">Booster Argent (銀) tous les 3 jours, booster Or (金) le 7e. Un jour manqué remet la série à 1.</p>
+      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour : ${TC_LOGIN_PACKS} boosters Classique, plus la récompense du jour (booster Argent 銀 tous les 3 jours, booster Or 金 le 7e). Un jour manqué remet la série à 1.</p>
       ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/3", inT(tDay))}
       <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
         <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : les trois missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / 3 * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/3</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
@@ -10019,14 +10020,14 @@ function tcRender(){
   document.querySelectorAll("[data-tcw]").forEach(b => b.onclick = e => { e.stopPropagation(); const s = tcLoad(), w = tcWeek(s), m = TC_WK.find(x => x.k === b.dataset.tcw); if (!m || m.v(w) < m.g || w.claimed.includes(m.k)) return; w.claimed.push(m.k); pay(s, m.rw); tcSave(s); tcRender(); SFX.play("win"); });
   document.querySelectorAll("[data-tcgo]").forEach(b => { b.onclick = () => tcGo(b.dataset.tcgo); b.onkeydown = e => { if (e.key === "Enter") tcGo(b.dataset.tcgo); }; });
   $("#tcClaimAll") && ($("#tcClaimAll").onclick = () => { const s = tcLoad(), w = tcWeek(s); let n = 0;
-    if (!s.login.got){ s.login.got = true; pay(s, tcLoginRw(s.login.n)); n++; }
+    if (!s.login.got){ s.login.got = true; pay(s, tcLoginRw(s.login.n)); tcGive(s, "mix:0", TC_LOGIN_PACKS); n++; }
     tcMissions(s).forEach(m => { if (m.cur >= m.g && !s.day.claimed.includes(m.k)){ s.day.claimed.push(m.k); pay(s, m.rw); n++; } });
     if (!s.day.bonus && tcMissions(s).every(m => s.day.claimed.includes(m.k))){ s.day.bonus = true; tcGive(s, "mix:1"); n++; }
     { const mo = tcMonth(s); TC_MO.forEach(m => { if (m.v(mo) >= m.g && !mo.claimed.includes(m.k)){ mo.claimed.push(m.k); pay(s, m.rw); n++; } }); }
     TC_WK.forEach(m => { if (m.v(w) >= m.g && !w.claimed.includes(m.k)){ w.claimed.push(m.k); pay(s, m.rw); n++; } });
     if (n){ tcSave(s); tcRender(); SFX.play("fanfare"); tcCele(n > 1 ? n + " récompenses" : "Récompense", "réclamée" + (n > 1 ? "s" : ""), "褒"); } });
   $("#tcBonus") && ($("#tcBonus").onclick = () => { const s = tcLoad(); if (s.day.bonus || !tcMissions(s).every(m => s.day.claimed.includes(m.k))) return; s.day.bonus = true; tcGive(s, "mix:1"); tcSave(s); tcRender(); SFX.play("win"); });
-  $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; const rw = tcLoginRw(s.login.n); pay(s, rw); tcSave(s); tcRender(); SFX.play("win"); tcCele("Jour " + s.login.n, tcRw(rw), "連"); });
+  $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; const rw = tcLoginRw(s.login.n); pay(s, rw); tcGive(s, "mix:0", TC_LOGIN_PACKS); tcSave(s); tcRender(); SFX.play("win"); tcCele("Jour " + s.login.n, tcRw(rw) + " + " + TC_LOGIN_PACKS + " boosters", "連"); });
   document.querySelectorAll("#tcBoard [data-tc]").forEach(b => b.onclick = () => { const c = tcCards().find(x => x.id === b.dataset.tc), s = tcLoad(); if (!c) return;
     const M = $("#modal"), close = () => { M.classList.add("hidden"); M.innerHTML = ""; };
     const vsel = b.dataset.v || ((TC_F.f ?? "*") === "*" ? "*" : "");
