@@ -293,7 +293,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
   </section>
   <section class="cat" id="cat3">
     <div class="cath"><div class="eyebrow">Famille 03 <i>· 協力</i></div><h2>Complicité</h2><small>Gagner en pensant pareil</small></div>
-    <div class="gcards"><button class="mode" data-g="vs"><i class="k" aria-hidden="true">強</i><b>Plus fort ?</b><span>Deux personnages, un seul choix. Le même que ton ami ?</span></button><button class="mode" data-g="tier"><i class="k" aria-hidden="true">位</i><b>Tier list</b><span>Classez à deux sans vous concerter.</span></button><button class="mode" data-g="nt"><i class="k" aria-hidden="true">点</i><b>Trouve ma note</b><span>Trois questions pour deviner une note secrète.</span></button><button class="mode" data-g="el"><i class="k" aria-hidden="true">落</i><b>Élimination</b><span>Retrouve l'ordre dans lequel ton ami élimine.</span></button><button class="mode" data-g="pc"><i class="k" aria-hidden="true">率</i><b>Pourcentage</b><span>Un pourcentage secret chacun, un classement commun.</span></button></div>
+    <div class="gcards"><button class="mode" data-g="vs"><i class="k" aria-hidden="true">強</i><b>Plus fort ?</b><span>Deux personnages, un seul choix. Le même que ton ami ?</span></button><button class="mode" data-g="tier"><i class="k" aria-hidden="true">位</i><b>Tier list</b><span>Classez à deux sans vous concerter.</span></button><button class="mode" data-g="nt"><i class="k" aria-hidden="true">点</i><b>Trouve ma note</b><span>Trois questions pour deviner une note secrète.</span></button><button class="mode" data-g="el"><i class="k" aria-hidden="true">落</i><b>Élimination</b><span>Retrouve l'ordre dans lequel ton ami élimine.</span></button><button class="mode" data-g="pc"><i class="k" aria-hidden="true">率</i><b>Pourcentage</b><span>Un pourcentage secret chacun. Le meilleur classement gagne.</span></button></div>
   </section>
   <section class="cat" id="cat4">
     <div class="cath"><div class="eyebrow">Famille 04 <i>· 声</i></div><h2>Voix</h2><small>Tout se joue au micro</small></div>
@@ -493,10 +493,11 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
   <div class="panel rules ch hidden" style="margin-top:14px">
     <b style="color:var(--text)">Règles de « Pourcentage »</b>
     <ul style="margin-top:6px">
-      <li>Jeu <b>coopératif</b>, de 2 à 8. Chaque joueur tire en secret un <b>pourcentage différent</b>, de 0 à 100.</li>
-      <li>Un <b>thème</b> apparaît, <b>le même pour tout le monde</b>, par exemple « Les meilleurs antagonistes ». Avant la partie, tu choisis la famille de thèmes : animés, classiques (films, plats, jeux vidéo, sports…), les deux mélangés, ou hardcore (réservé aux adultes : sexe, mort, morale sans filtre ; jamais tiré dans le mélange). Chacun donne une réponse qui vaut son pourcentage : 87 % = un très gros antagoniste, 7 % = un antagoniste raté.</li>
-      <li>Sans jamais dire les chiffres, vous <b>rangez les réponses</b> de la plus faible à la plus forte, en discutant.</li>
-      <li>Quand tout le monde est d'accord sur le même ordre, on révèle les pourcentages : <b>gagné si l'ordre est exactement le bon</b>.</li>
+      <li><b>Chacun pour soi</b>, de 2 à 8. Un <b>thème</b> apparaît, <b>le même pour tout le monde</b>, par exemple « Les meilleurs antagonistes ». Avant la partie, tu choisis la famille de thèmes : animés, classiques (films, plats, jeux vidéo, sports…), les deux mélangés, ou hardcore (réservé aux adultes : sexe, mort, morale sans filtre ; jamais tiré dans le mélange).</li>
+      <li>Le thème ne vous plaît pas ? Avant le début de la manche, vous pouvez le <b>changer, à l'unanimité seulement</b>.</li>
+      <li>Chaque joueur tire en secret un <b>pourcentage différent</b>, de 0 à 100, et donne une réponse qui vaut ce pourcentage : 87 % = un très gros antagoniste, 7 % = un antagoniste raté.</li>
+      <li>Sans jamais dire les chiffres, <b>chacun fait son propre classement</b> des réponses, de la plus faible à la plus forte, en secret.</li>
+      <li>On révèle les pourcentages : <b>le classement le plus proche du vrai gagne la manche</b> (égalité possible). Le gagnant de la partie est celui qui a gagné le plus de manches.</li>
       <li>Une partie = 3 manches, avec un nouveau thème et de nouveaux pourcentages à chaque fois.</li>
     </ul>
   </div>
@@ -8186,13 +8187,13 @@ mmInit();
 </style>
 <script>
 /* =====================================================================
-   MODE « POURCENTAGE » — coopératif, 2 à 8 joueurs, sur un téléphone ou en ligne.
-   Chaque joueur tire en secret un pourcentage différent (0 à 100). Un thème apparaît (« Les meilleurs antagonistes »…) :
-   chacun donne une réponse qui vaut son pourcentage sur ce thème (87 % = un très gros antagoniste, 7 % = un antagoniste raté).
-   Sans jamais dire les chiffres, le groupe range ensuite les réponses de la plus faible à la plus forte.
-   Gagné si l'ordre choisi est exactement celui des pourcentages. Plusieurs manches.
-   Sur un téléphone : chacun regarde son pourcentage en secret, les réponses peuvent se dire à voix haute, l'ordre se règle ensemble.
-   En ligne : chacun écrit sa réponse, tout le monde peut déplacer les réponses, la manche se joue quand tous ont validé le même ordre.
+   MODE « POURCENTAGE » — chacun pour soi, 2 à 8 joueurs, sur un téléphone ou en ligne.
+   Un thème apparaît (« Les meilleurs antagonistes »…) : avant la manche, les joueurs peuvent le changer, à l'unanimité seulement.
+   Chaque joueur tire en secret un pourcentage différent (0 à 100) et donne une réponse qui vaut ce pourcentage sur le thème
+   (87 % = un très gros antagoniste, 7 % = un antagoniste raté). Sans jamais dire les chiffres, chacun fait ensuite SON classement
+   des réponses, de la plus faible à la plus forte. Le classement le plus proche du vrai gagne la manche (égalité possible). Plusieurs manches.
+   Sur un téléphone : chacun regarde son pourcentage puis fait son classement en secret, à tour de rôle.
+   En ligne : chacun écrit sa réponse et range sur son appareil ; la manche se joue quand tous ont validé.
    L'hôte fait autorité (sujets ghello / globby / gstate / gact, salon « pc-CODE », code commençant par C).
    Thèmes : PC_THEMES [intitulé, ce que vaut 0 %, ce que vaut 100 %].
    ===================================================================== */
@@ -8373,8 +8374,8 @@ function pcHome(){
   if (!PC_SETS[PC_SET]) PC_SET = "anime";
   $("#pcSets").innerHTML = Object.entries(PC_SETS).map(([k, [n, d]]) => `<button class="mode ${PC_SET === k ? "sel" : ""}" data-pcs="${k}"><b>${n}</b><span>${d} · ${pcPool(k).length} thèmes</span></button>`).join("");
   document.querySelectorAll("[data-pcs]").forEach(b => b.onclick = () => { PC_SET = b.dataset.pcs; lsSet("mercato-pct-themes", PC_SET); pcHome(); });
-  $("#pcWhere").innerHTML = `<button class="mode ${PC_WHERE === "local" ? "sel" : ""}" data-pcw="local"><b>Sur ce téléphone (2 à 8)</b><span>Chacun regarde son pourcentage en secret, puis vous rangez les réponses ensemble.</span></button>
-    <button class="mode ${PC_WHERE === "online" ? "sel" : ""}" data-pcw="online"><b>En ligne (2 à 8)</b><span>Chacun sur son appareil, avec un code. Tout le monde doit valider le même ordre.</span></button>`;
+  $("#pcWhere").innerHTML = `<button class="mode ${PC_WHERE === "local" ? "sel" : ""}" data-pcw="local"><b>Sur ce téléphone (2 à 8)</b><span>Chacun regarde son pourcentage puis fait son classement en secret, à tour de rôle.</span></button>
+    <button class="mode ${PC_WHERE === "online" ? "sel" : ""}" data-pcw="online"><b>En ligne (2 à 8)</b><span>Chacun sur son appareil, avec un code. Le classement le plus proche gagne la manche.</span></button>`;
   document.querySelectorAll("[data-pcw]").forEach(b => b.onclick = () => { PC_WHERE = b.dataset.pcw; pcHome(); });
   $("#pcLocal").classList.toggle("hidden", PC_WHERE !== "local");
   $("#pcOnline").classList.toggle("hidden", PC_WHERE !== "online" || !NET.room);
@@ -8402,39 +8403,54 @@ function pcStart(names, where){
   PCG = {id: Math.random().toString(36).slice(2, 10), where, set: PC_SET, players: names, round: 0, nRounds: PC_ROUNDS, used: [], results: []};
   show("pc"); pcRound();
 }
+// le même thème pour tout le monde, tiré dans la famille choisie (animés, classiques, les deux ou hardcore)
+function pcTheme(){
+  const G = PCG, all = pcPool(G.set || "anime"), free = all.filter(k => !G.used.includes(k)), from = free.length ? free : all, t = from[Math.floor(Math.random() * from.length)];
+  G.used.push(t); G.theme = t; G.skip = G.players.map(() => false);
+}
 function pcRound(){
-  const G = PCG, N = G.players.length;
-  // le même thème pour tout le monde, tiré dans la famille choisie (animés, classiques ou les deux)
-  const all = pcPool(G.set || "anime"), free = all.filter(k => !G.used.includes(k)), from = free.length ? free : all, t = from[Math.floor(Math.random() * from.length)]; G.used.push(t);
+  const G = PCG, N = G.players.length, mix = () => G.players.map((_, i) => i).sort(() => Math.random() - .5);
   // pourcentages tous différents ; deux joueurs peuvent n'avoir qu'un point d'écart
   const pct = []; while (pct.length < N){ const v = Math.floor(Math.random() * 101); if (!pct.includes(v)) pct.push(v); }
-  Object.assign(G, {theme: t, pct, ans: G.players.map(() => ""), order: G.players.map((_, i) => i).sort(() => Math.random() - .5), ok: G.players.map(() => false), seen: 0, phase: G.where === "local" ? "cover" : "answer"});
-  pcSync();
+  // chaque joueur a son propre classement, mélangé au départ
+  Object.assign(G, {pct, ans: G.players.map(() => ""), orders: G.players.map(mix), ok: G.players.map(() => false), seen: 0, turn: 0, phase: "theme"});
+  pcTheme(); pcSync();
+}
+// fin de manche : écart de chaque classement avec le vrai (somme des décalages de places) ; le ou les plus proches gagnent la manche
+function pcScore(){
+  const G = PCG, good = G.players.map((_, i) => i).sort((a, b) => G.pct[a] - G.pct[b]);
+  const dist = G.orders.map(o => o.reduce((s, p, k) => s + Math.abs(k - good.indexOf(p)), 0)), right = G.orders.map(o => o.filter((p, k) => p === good[k]).length), best = Math.min(...dist);
+  G.results.push({dist, right, win: dist.map((d, i) => d === best ? i : -1).filter(i => i >= 0)});
+  G.phase = G.round + 1 >= G.nRounds ? "over" : "reveal";
 }
 const pcTxt = v => String(v ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 50);
-// actions : show / see (voir son pourcentage, sur un téléphone), ans (réponse), up / down (déplacer une réponse), ok (valider l'ordre), next
+// actions : skip (voter pour changer de thème) / play (garder le thème), show / see (voir son pourcentage, sur un téléphone), ans (réponse),
+// up / down (déplacer une réponse dans son classement), ok (valider son classement), next
 function pcAct(i, t, v){
   const G = PCG; if (!G) return; const N = G.players.length, loc = G.where === "local";
-  if (t === "show" && G.phase === "cover") G.phase = "show";
-  else if (t === "see" && G.phase === "show"){ G.ans[G.seen] = pcTxt(v); G.seen++; G.phase = G.seen >= N ? "order" : "cover"; }
+  if (t === "skip" && G.phase === "theme"){ if (loc) G.skip = G.skip.map(() => true); else G.skip[i] = !G.skip[i]; if (G.skip.every(Boolean)) pcTheme(); }   // changement à l'unanimité seulement
+  else if (t === "play" && G.phase === "theme") G.phase = loc ? "cover" : "answer";   // dès qu'un joueur veut le jouer, il n'y a plus d'unanimité : la manche commence
+  else if (t === "show" && G.phase === "cover") G.phase = "show";
+  else if (t === "see" && G.phase === "show"){ G.ans[G.seen] = pcTxt(v); G.seen++; G.phase = G.seen >= N ? "ocover" : "cover"; }
   else if (t === "ans" && G.phase === "answer" && !loc){ const a = pcTxt(v); if (!a) return; G.ans[i] = a; if (G.ans.every(Boolean)) G.phase = "order"; }
-  else if ((t === "up" || t === "down") && G.phase === "order"){ const k = G.order.indexOf(+v), j = k + (t === "up" ? -1 : 1); if (k < 0 || j < 0 || j >= N) return; [G.order[k], G.order[j]] = [G.order[j], G.order[k]]; G.ok = G.ok.map(() => false); }
-  else if (t === "ok" && G.phase === "order"){ if (loc) G.ok = G.ok.map(() => true); else G.ok[i] = !G.ok[i];
-    if (G.ok.every(Boolean)){ const good = G.order.slice().sort((a, b) => G.pct[a] - G.pct[b]), win = G.order.every((p, k) => p === good[k]);
-      G.results.push({win, right: G.order.filter((p, k) => p === good[k]).length, n: N}); G.phase = G.round + 1 >= G.nRounds ? "over" : "reveal"; } }
+  else if (t === "rank" && G.phase === "ocover") G.phase = "order";
+  else if ((t === "up" || t === "down") && G.phase === "order"){ const w = loc ? G.turn : i, o = G.orders[w], k = o.indexOf(+v), j = k + (t === "up" ? -1 : 1); if (G.ok[w] || k < 0 || j < 0 || j >= N) return; [o[k], o[j]] = [o[j], o[k]]; }
+  else if (t === "ok" && G.phase === "order"){
+    if (loc){ G.ok[G.turn] = true; G.turn++; if (G.turn < N) G.phase = "ocover"; } else G.ok[i] = !G.ok[i];
+    if (G.ok.every(Boolean)) pcScore(); }
   else if (t === "next" && G.phase === "reveal"){ G.round++; return pcRound(); }
   else return;
   pcSync();
 }
 function pcView(i){
-  const G = PCG, done = G.phase === "reveal" || G.phase === "over", loc = G.where === "local";
-  return {id: G.id, where: G.where, players: G.players, round: G.round, nRounds: G.nRounds, theme: G.theme, phase: G.phase, seen: G.seen, order: G.order, ok: G.ok, results: G.results, me: i,
-    ans: G.phase === "answer" ? G.ans.map((a, k) => k === i ? a : a ? "✔" : "") : G.ans, pct: G.pct.map((p, k) => done || k === i || (loc && G.phase === "show" && k === G.seen) ? p : null)};
+  const G = PCG, done = G.phase === "reveal" || G.phase === "over";
+  return {id: G.id, where: G.where, players: G.players, round: G.round, nRounds: G.nRounds, theme: G.theme, phase: G.phase, seen: G.seen, turn: G.turn, order: G.orders[i] || [], ok: G.ok, skip: G.skip, results: G.results, me: i,
+    ans: G.phase === "answer" ? G.ans.map((a, k) => k === i ? a : a ? "✔" : "") : G.ans, pct: G.pct.map((p, k) => done || k === i ? p : null)};
 }
 function pcSync(){
   const G = PCG; if (!G) return;
   if (PCN.role === "host") PCN.game.emit("gstate", {pc: 1, views: G.players.map((_, i) => pcView(i))}).catch(() => {});
-  PCV = G.where === "local" ? {...pcView(G.phase === "show" ? G.seen : -1), local: true} : pcView(0);
+  PCV = G.where === "local" ? {...pcView(G.phase === "show" ? G.seen : G.phase === "order" ? G.turn : -1), local: true} : pcView(0);
   pcRender();
 }
 function pcSend(t, v){
@@ -8447,49 +8463,69 @@ function pcSend(t, v){
 function pcRender(force){
   const V = PCV; if (!V) return;
   const P = V.players, N = P.length, online = V.where === "online", me = V.me, th = PC_THEMES[V.theme], ph = V.phase;
-  const key = [V.id, V.round, ph, V.seen, V.order.join(""), V.ok.join(""), V.ans.map(a => a ? 1 : 0).join("")].join(":");
+  const key = [V.id, V.round, ph, V.theme, V.seen, V.turn, V.order.join(""), V.ok.join(""), V.skip.join(""), V.ans.map(a => a ? 1 : 0).join("")].join(":");
   if (key === PC_KEY && !force) return; PC_KEY = key;
   $("#pcTitle").textContent = "POURCENTAGE" + (online ? " · EN LIGNE" : "");
-  const wins = V.results.filter(r => r.win).length;
-  const hud = `<div class="gshud"><span class="pill">Manche ${V.round + 1}/${V.nRounds}</span><span class="pill">Réussies : ${wins}/${V.results.length}</span>${V.results.length ? `<span class="pill">Bien placées : ${V.results.reduce((a, r) => a + r.right, 0)}/${V.results.reduce((a, r) => a + r.n, 0)}</span>` : ""}</div>`;
+  const wins = P.map((_, i) => V.results.filter(r => r.win.includes(i)).length), tot = P.map((_, i) => V.results.reduce((a, r) => a + r.dist[i], 0));
+  const hud = `<div class="gshud"><span class="pill">Manche ${V.round + 1}/${V.nRounds}</span>${online && V.results.length ? `<span class="pill">Tes manches gagnées : ${wins[me]}</span>` : ""}</div>`;
   const theme = `<div class="pctheme"><b>${esc(th[0])}</b><span>0 % = ${esc(th[1])} · 100 % = ${esc(th[2])}</span></div>`;
   const mine = p => `<p class="muted" style="text-align:center;margin-bottom:0">Ton pourcentage secret :</p><div class="pcbig">${p} %</div><div class="pcscale"><i style="left:${p}%"></i></div>`;
   let html = "";
-  if (ph === "cover"){
+  if (ph === "theme"){
+    const nS = V.skip.filter(Boolean).length;
+    html = `${hud}<div class="panel"><h2 style="text-align:center">Le thème de la manche</h2>${theme}
+      <p class="muted" style="text-align:center;max-width:54ch;margin:10px auto">${online ? "Ce thème ne vous inspire pas ? Il change seulement si <b>tout le monde</b> vote pour le changer. Dès qu'un joueur choisit de le jouer, la manche commence." : "Ce thème ne vous inspire pas ? Changez-le seulement si <b>tout le monde</b> est d'accord."}</p>
+      <div class="row" style="justify-content:center;margin-top:12px"><button class="primary" id="pcPlay">On joue ce thème</button><button id="pcSkip">${online ? (V.skip[me] ? `✔ Tu veux changer (${nS}/${N}) · annuler` : `Changer de thème (${nS}/${N})`) : "Tout le monde veut changer"}</button></div>
+      ${online ? `<div class="ucp" style="justify-content:center;margin-top:12px">${P.map((n, k) => `<span>${esc(n)}${V.skip[k] ? " · veut changer" : ""}</span>`).join("")}</div>` : ""}</div>`;
+  } else if (ph === "cover"){
     html = `${hud}<div class="panel"><div class="cover"><div class="ico"></div><h2>${esc(P[V.seen])}, à toi de regarder</h2>
       <p class="muted" style="margin:8px 0 14px">Tu vas voir ton pourcentage secret. Les autres ne regardent pas !</p><button class="primary" id="pcShow">Je suis ${esc(P[V.seen])}, voir mon pourcentage</button></div></div>`;
   } else if (ph === "show"){
     html = `${hud}<div class="panel">${theme}${mine(V.pct[V.seen])}
       <p class="muted" style="text-align:center;max-width:54ch;margin:10px auto">Trouve une réponse qui vaut ton pourcentage sur ce thème. Ne dis jamais ton chiffre.</p>
-      <label class="f" for="pcA">Ta réponse (facultatif : tu peux aussi la dire à voix haute tout à l'heure)</label><input id="pcA" maxlength="50" autocomplete="off" placeholder="Ma réponse" style="width:100%">
-      <div class="row" style="justify-content:center;margin-top:12px"><button class="primary" id="pcSeen">Cacher${V.seen + 1 < N ? " et passer le téléphone" : " et ranger les réponses"}</button></div></div>`;
+      <label class="f" for="pcA">Ta réponse (conseillé : elle s'affichera quand chacun fera son classement)</label><input id="pcA" maxlength="50" autocomplete="off" placeholder="Ma réponse" style="width:100%">
+      <div class="row" style="justify-content:center;margin-top:12px"><button class="primary" id="pcSeen">Cacher${V.seen + 1 < N ? " et passer le téléphone" : ""}</button></div></div>`;
   } else if (ph === "answer"){
     const done = !!V.ans[me];
     html = `${hud}<div class="panel">${theme}${mine(V.pct[me])}
       ${done ? `<p class="banner" style="text-align:center;margin-top:10px">Ta réponse : <b>${esc(V.ans[me])}</b></p>${waitHTML("Les autres écrivent leur réponse…")}`
         : `<p class="muted" style="text-align:center;margin:10px 0">Écris une réponse qui vaut ton pourcentage sur ce thème. Ne donne jamais ton chiffre.</p><div class="row"><input id="pcA" maxlength="50" autocomplete="off" placeholder="Ma réponse" style="flex:1;min-width:200px"><button class="primary" id="pcAOk">Valider</button></div>`}
       <div class="ucp" style="justify-content:center;margin-top:12px">${P.map((n, k) => `<span>${esc(n)} ${V.ans[k] ? "✔" : "…"}</span>`).join("")}</div></div>`;
+  } else if (ph === "ocover"){
+    html = `${hud}<div class="panel"><div class="cover"><div class="ico"></div><h2>${esc(P[V.turn])}, à toi de classer</h2>
+      <p class="muted" style="margin:8px 0 14px">${V.turn ? "" : "Dites vos réponses à voix haute si besoin, sans donner de chiffre. "}Chacun fait son classement en secret : les autres ne regardent pas !</p><button class="primary" id="pcRank">Je suis ${esc(P[V.turn])}, faire mon classement</button></div></div>`;
   } else if (ph === "order"){
-    const nOk = V.ok.filter(Boolean).length;
-    html = `${hud}<div class="panel">${theme}${online ? `<p class="muted" style="text-align:center">Ton pourcentage : <b>${V.pct[me]} %</b> (ne le dis pas)</p>` : ""}
-      <h2>Rangez les réponses, de la plus faible à la plus forte</h2><p class="muted">Discutez sans donner de chiffre. ${online ? "Tout le monde peut déplacer ; la manche se joue quand tous ont validé le même ordre." : "Déplacez avec les flèches, puis validez ensemble."}</p>
-      <div class="pclist">${V.order.map((p, k) => `<div class="pcrow ${online && p === me ? "me" : ""}"><span class="rk">${k + 1}</span><span class="a">${esc(V.ans[p] || "Réponse de " + P[p])}<small>${esc(P[p])}${online ? (V.ok[p] ? " · ✔ a validé" : "") : ""}</small></span>
-        <span class="mv"><button data-pcm="up:${p}" ${k === 0 ? "disabled" : ""}>▲</button><button data-pcm="down:${p}" ${k === N - 1 ? "disabled" : ""}>▼</button></span></div>`).join("")}</div>
+    const nOk = V.ok.filter(Boolean).length, lock = online && V.ok[me];
+    html = `${hud}<div class="panel">${theme}<p class="muted" style="text-align:center">Ton pourcentage : <b>${V.pct[me]} %</b> (ne le dis pas)</p>
+      <h2>${online ? "Ton classement" : "Le classement de " + esc(P[me])}, de la plus faible à la plus forte</h2><p class="muted">Chacun fait le sien, en secret. Le plus proche du vrai classement gagne la manche.</p>
+      <div class="pclist">${V.order.map((p, k) => `<div class="pcrow ${p === me ? "me" : ""}"><span class="rk">${k + 1}</span><span class="a">${esc(V.ans[p] || "Réponse de " + P[p])}<small>${esc(P[p])}${p === me ? " · toi" : ""}</small></span>
+        <span class="mv"><button data-pcm="up:${p}" ${k === 0 || lock ? "disabled" : ""}>▲</button><button data-pcm="down:${p}" ${k === N - 1 || lock ? "disabled" : ""}>▼</button></span></div>`).join("")}</div>
       <p class="small" style="text-align:center">⬆ en haut : proche de 0 % (${esc(th[1])}) · en bas : proche de 100 % (${esc(th[2])}) ⬇</p>
-      <div class="row" style="justify-content:center;margin-top:10px"><button class="primary" id="pcOk">${online ? (V.ok[me] ? `✔ Validé (${nOk}/${N}) · annuler` : `Je valide cet ordre (${nOk}/${N})`) : "On valide cet ordre"}</button></div></div>`;
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="primary" id="pcOk">${online ? (lock ? `✔ Validé (${nOk}/${N}) · modifier` : `Je valide mon classement (${nOk}/${N})`) : "Valider" + (V.turn + 1 < N ? " et passer le téléphone" : " et voir le résultat")}</button></div>
+      ${online ? `<div class="ucp" style="justify-content:center;margin-top:12px">${P.map((n, k) => `<span>${esc(n)} ${V.ok[k] ? "✔" : "…"}</span>`).join("")}</div>` : ""}</div>`;
   } else {
-    const r = V.results[V.results.length - 1], good = V.order.slice().sort((a, b) => V.pct[a] - V.pct[b]), canNext = !online || PCN.role === "host";
-    html = `${hud}<div class="panel"><div class="gsres ${r.win ? "ok" : "ko"}">${r.win ? "✔ Ordre parfait !" : `✗ Raté : ${r.right}/${r.n} à la bonne place`}</div>${theme}
-      <div class="pclist">${V.order.map((p, k) => `<div class="pcrow ${p === good[k] ? "ok" : "ko"}"><span class="rk">${k + 1}</span><span class="a">${esc(V.ans[p] || "Réponse de " + P[p])}<small>${esc(P[p])}${p === good[k] ? "" : " · devait être n° " + (good.indexOf(p) + 1)}</small></span><span class="p">${V.pct[p]} %</span></div>`).join("")}</div>
-      ${ph === "over" ? `<h2 style="margin-top:12px">${wins === V.nRounds ? "Sans faute : " + wins + "/" + V.nRounds + " !" : wins ? wins + " manche" + (wins > 1 ? "s" : "") + " réussie" + (wins > 1 ? "s" : "") + " sur " + V.nRounds : "Aucune manche réussie…"}</h2><p class="muted">${V.results.reduce((a, r) => a + r.right, 0)} réponses bien placées sur ${V.results.reduce((a, r) => a + r.n, 0)}.</p>
+    const r = V.results[V.results.length - 1], good = P.map((_, i) => i).sort((a, b) => V.pct[a] - V.pct[b]), canNext = !online || PCN.role === "host";
+    const names = l => l.map(i => P[i]).join(", "), rank = P.map((_, i) => i).sort((a, b) => r.dist[a] - r.dist[b]);
+    // gagnant de la partie : le plus de manches gagnées, puis le plus petit écart cumulé
+    const top = P.map((_, i) => i).filter(i => !P.some((_, j) => wins[j] > wins[i] || (wins[j] === wins[i] && tot[j] < tot[i])));
+    html = `${hud}<div class="panel"><div class="gsres ok">${r.dist[r.win[0]] === 0 ? "✔ Classement parfait : " : "Le plus proche : "}${esc(names(r.win))}</div>${theme}
+      <h2>Le vrai classement</h2>
+      <div class="pclist">${good.map((p, k) => `<div class="pcrow ${online ? (V.order[k] === p ? "ok" : "ko") : ""}"><span class="rk">${k + 1}</span><span class="a">${esc(V.ans[p] || "Réponse de " + P[p])}<small>${esc(P[p])}${online && V.order[k] !== p ? " · tu l'avais mis n° " + (V.order.indexOf(p) + 1) : ""}</small></span><span class="p">${V.pct[p]} %</span></div>`).join("")}</div>
+      <h2 style="margin-top:12px">Qui était le plus proche ?</h2>
+      <div class="pclist">${rank.map((i, k) => `<div class="pcrow ${r.win.includes(i) ? "ok" : ""} ${online && i === me ? "me" : ""}"><span class="rk">${k && r.dist[rank[k - 1]] === r.dist[i] ? "=" : k + 1}</span><span class="a">${esc(P[i])}${r.win.includes(i) ? " · gagne la manche" : ""}<small>${r.right[i]}/${N} à la bonne place · écart de ${r.dist[i]} · ${wins[i]} manche${wins[i] > 1 ? "s" : ""} gagnée${wins[i] > 1 ? "s" : ""}</small></span><span class="p">${r.dist[i] ? "−" + r.dist[i] : "✔"}</span></div>`).join("")}</div>
+      <p class="small">L'écart additionne, pour chaque réponse, le nombre de places entre ton classement et le vrai. Le plus petit écart gagne la manche.</p>
+      ${ph === "over" ? `<h2 style="margin-top:12px">${top.length > 1 ? "Égalité : " : "Victoire de "}${esc(names(top))}</h2><p class="muted">${wins[top[0]]} manche${wins[top[0]] > 1 ? "s" : ""} gagnée${wins[top[0]] > 1 ? "s" : ""} sur ${V.nRounds}, écart cumulé de ${tot[top[0]]}.</p>
           <div class="row">${canNext ? `<button class="primary" id="pcAgain">Rejouer</button>` : ""}<button id="pcMenu">Menu</button></div>${canNext ? "" : `<p class="small" style="margin-top:6px">L'hôte peut relancer une partie.</p>`}`
         : canNext ? `<button class="primary" id="pcNext">Manche suivante ▶</button>` : waitHTML("L'hôte lance la manche suivante…")}</div>`;
-    if (ph === "over") histAdd("pc-" + V.id, "Pourcentage", P, wins + "/" + V.nRounds + " manche" + (wins > 1 ? "s réussies" : " réussie"), {coop: true, ok: wins === V.nRounds});
-    SFX.play(r.win ? (ph === "over" ? "fanfare" : "win") : "ko");
+    if (ph === "over") histAdd("pc-" + V.id, "Pourcentage", P, (top.length > 1 ? "Égalité : " : "Gagnant : ") + names(top), {win: top.length > 1 ? [] : [P[top[0]]]});
+    SFX.play(!online || r.win.includes(me) ? (ph === "over" ? "fanfare" : "win") : "ko");
   }
   $("#pcBoard").innerHTML = html;
+  $("#pcPlay") && ($("#pcPlay").onclick = () => pcSend("play"));
+  $("#pcSkip") && ($("#pcSkip").onclick = () => pcSend("skip"));
   $("#pcShow") && ($("#pcShow").onclick = () => pcSend("show"));
   $("#pcSeen") && ($("#pcSeen").onclick = () => pcSend("see", $("#pcA").value));
+  $("#pcRank") && ($("#pcRank").onclick = () => pcSend("rank"));
   const a = $("#pcAOk") && $("#pcA"); if (a){ a.focus({preventScroll: true}); const go = () => { if (a.value.trim()) pcSend("ans", a.value); }; a.onkeydown = e => { if (e.key === "Enter") go(); }; $("#pcAOk").onclick = go; }
   document.querySelectorAll("[data-pcm]").forEach(b => b.onclick = () => { const [t, p] = b.dataset.pcm.split(":"); pcSend(t, +p); });
   $("#pcOk") && ($("#pcOk").onclick = () => pcSend("ok"));
@@ -8514,7 +8550,7 @@ async function pcHost(){
     PCN.lobby.push({name: n, peer: msg.peer}); pcLobbyCast();
   });
   game.on("gact", msg => { const d = msg.data; if (msg.sameTab || !PCG || !d?.pc || d.id !== PCG.id || d.round !== PCG.round) return;
-    const i = PCN.lobby.findIndex(p => p.peer === msg.peer); if (i > 0 && ["ans", "up", "down", "ok"].includes(d.t)) pcAct(i, d.t, d.v); });
+    const i = PCN.lobby.findIndex(p => p.peer === msg.peer); if (i > 0 && ["skip", "play", "ans", "up", "down", "ok"].includes(d.t)) pcAct(i, d.t, d.v); });
   game.onPeers(ch => { if (!PCG && ch.left.length){ PCN.lobby = PCN.lobby.filter((p, i) => i === 0 || !ch.left.some(l => l.peer === p.peer)); pcLobbyCast(); } });
   PCN.timers.push(setInterval(() => PCG ? PCN.game.emit("gstate", {pc: 1, views: PCG.players.map((_, i) => pcView(i))}).catch(() => {}) : pcLobbyCast(), 3000));
   pcLobbyCast();
@@ -8965,7 +9001,7 @@ input::placeholder{color:#716c7a}
     guess: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Rapidité"], sil: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Rapidité"], top: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Mémoire"],
     fx: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Observation"], bt: ["1 à 8 joueurs", "Seul ou en ligne, équipes possibles", "Musique"], vs: ["2 joueurs", "Un téléphone ou en ligne", "Coopératif"],
     tier: ["2 joueurs", "Un téléphone ou en ligne", "Coopératif"], nt: ["2 joueurs", "Un téléphone ou en ligne", "Coopératif"], el: ["2 joueurs", "Un téléphone ou en ligne", "Coopératif"],
-    pc: ["2 à 8 joueurs", "Un téléphone ou en ligne", "Coopératif"], mm: ["1 à 5 joueurs", "Micro obligatoire, hors claude.ai", "Voix"]};
+    pc: ["2 à 8 joueurs", "Un téléphone ou en ligne", "Chacun pour soi"], mm: ["1 à 5 joueurs", "Micro obligatoire, hors claude.ai", "Voix"]};
   // durées : seulement là où elles découlent des chronomètres du jeu
   const DUR = {bt: "≈ 6 min les 10 musiques", top: "≈ 5 min en duel", fx: "≈ 5 min en duel", mm: "≈ 5 min les 4 rounds"};
   const head = document.querySelector("#modeCfg");
