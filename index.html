@@ -9529,6 +9529,15 @@ setInterval(voxRender, 2000);
 .tc.f-G .tx{background:linear-gradient(120deg,#fff6cf,#f2c230,#fff,#f2c230);opacity:.3}
 .tc.f-W .tx,.tc.f-S .tx,.tc.f-Z .tx,.tc.no .tx{display:none}
 .tcdrops .tx{display:none}
+/* ---- célébration plein écran ---- */
+.tccele{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--cc) 22%,rgba(9,8,12,.9)),rgba(9,8,12,.94) 65%);overflow:hidden;cursor:pointer;padding:16px}
+.tccele .ray{position:absolute;left:50%;top:45%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;background:repeating-conic-gradient(color-mix(in srgb,var(--cc) 30%,transparent) 0 6deg,transparent 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 55%);mask-image:radial-gradient(circle,#000 0,transparent 55%);pointer-events:none}
+.tccele .in{position:relative;display:grid;justify-items:center;gap:14px;text-align:center}
+.tccele .cseal{display:grid;place-items:center;width:clamp(96px,26vw,140px);aspect-ratio:1;border-radius:22%;background:var(--cc);color:#0e0d12;font-family:var(--brand);font-weight:900;font-size:clamp(54px,15vw,80px);line-height:1;rotate:0deg;box-shadow:inset 0 0 0 4px rgba(14,13,18,.85),inset 0 0 0 7px var(--cc),0 0 60px color-mix(in srgb,var(--cc) 70%,transparent),0 18px 40px rgba(0,0,0,.6)}
+.tccele b{font-family:var(--title);font-weight:900;font-size:clamp(30px,9vw,58px);letter-spacing:-.02em;line-height:1;perspective:400px}
+.tccele b u{display:inline-block;text-decoration:none}
+.tccele small{font-family:var(--mono);font-size:clamp(12px,3.4vw,15px);letter-spacing:.14em;text-transform:uppercase;color:var(--cc)}
+@media (prefers-reduced-motion:no-preference){.tccele{animation:pop .25s ease-out both}}
 </style>
 <script>
 /* =====================================================================
@@ -10008,9 +10017,9 @@ function tcRender(){
     if (!s.day.bonus && tcMissions(s).every(m => s.day.claimed.includes(m.k))){ s.day.bonus = true; tcGive(s, "mix:1"); n++; }
     { const mo = tcMonth(s); TC_MO.forEach(m => { if (m.v(mo) >= m.g && !mo.claimed.includes(m.k)){ mo.claimed.push(m.k); pay(s, m.rw); n++; } }); }
     TC_WK.forEach(m => { if (m.v(w) >= m.g && !w.claimed.includes(m.k)){ w.claimed.push(m.k); pay(s, m.rw); n++; } });
-    if (n){ tcSave(s); tcRender(); SFX.play("fanfare"); } });
+    if (n){ tcSave(s); tcRender(); SFX.play("fanfare"); tcCele(n > 1 ? n + " récompenses" : "Récompense", "réclamée" + (n > 1 ? "s" : ""), "褒"); } });
   $("#tcBonus") && ($("#tcBonus").onclick = () => { const s = tcLoad(); if (s.day.bonus || !tcMissions(s).every(m => s.day.claimed.includes(m.k))) return; s.day.bonus = true; tcGive(s, "mix:1"); tcSave(s); tcRender(); SFX.play("win"); });
-  $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; pay(s, tcLoginRw(s.login.n)); tcSave(s); tcRender(); SFX.play("win"); });
+  $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; const rw = tcLoginRw(s.login.n); pay(s, rw); tcSave(s); tcRender(); SFX.play("win"); tcCele("Jour " + s.login.n, tcRw(rw), "連"); });
   document.querySelectorAll("#tcBoard [data-tc]").forEach(b => b.onclick = () => { const c = tcCards().find(x => x.id === b.dataset.tc), s = tcLoad(); if (!c) return;
     const M = $("#modal"), close = () => { M.classList.add("hidden"); M.innerHTML = ""; };
     const vsel = b.dataset.v || ((TC_F.f ?? "*") === "*" ? "*" : "");
@@ -10078,9 +10087,33 @@ function tcCine(c, o = {}){
   });
 }
 // ouverture : le sachet se charge et se déchire (la couleur de l'éclair annonce le meilleur tirage), puis on retourne les cinq cartes
+// Sons de l'ouverture, fabriqués à la volée (bruit filtré et notes) : froissement, montée, déchirure, distribution, et un carillon par niveau de rareté.
+function tcSnd(n){ if (!SFX.on) return; try { const a = SFX.ac(); if (!a) return; const T0 = a.currentTime;
+    const nz = (d, vol, delay, type, f0, f1, q = 1) => { const b = a.createBuffer(1, Math.floor(a.sampleRate * d), a.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+      const src = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(), t = T0 + delay; src.buffer = b; fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f0, t); if (f1) fl.frequency.exponentialRampToValueAtTime(f1, t + d);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + Math.min(.02, d / 4)); g.gain.exponentialRampToValueAtTime(.0001, t + d); src.connect(fl).connect(g).connect(a.destination); src.start(t); };
+    const bell = (f, d, vol, delay, type = "sine") => { SFX.tone(f, d, type, vol, delay); SFX.tone(f * 2.01, d * .6, "sine", vol * .35, delay); };
+    if (n === "rustle"){ nz(.09, .07, 0, "bandpass", 3200, 5200, 1.2); nz(.07, .05, .1, "bandpass", 4200, 2600, 1.2); nz(.11, .06, .19, "bandpass", 2800, 4800, 1.2); }
+    else if (n === "charge"){ nz(.78, .07, 0, "bandpass", 500, 5200, 3); SFX.tone(110, .78, "sawtooth", .035, 0, 720); SFX.tone(55, .78, "sine", .1, 0, 180); }
+    else if (n === "rip"){ nz(.34, .22, 0, "highpass", 900, 5200, .7); nz(.12, .14, .02, "bandpass", 1800, 600, 2); SFX.tone(160, .22, "sine", .16, .03, 50); }
+    else if (n === "deal"){ for (let k = 0; k < 5; k++) nz(.05, .06, k * .07, "bandpass", 2400 + k * 250, 1500, 2); }
+    else if (n === "flip0"){ nz(.05, .05, 0, "bandpass", 2600, 1400, 2); SFX.tone(520, .09, "triangle", .05, .01); }
+    else if (n === "flip1"){ nz(.05, .05, 0, "bandpass", 2600, 1400, 2); bell(659, .22, .07, .02, "triangle"); bell(988, .3, .07, .11, "triangle"); }
+    else if (n === "flip2"){ nz(.06, .06, 0, "bandpass", 3000, 1400, 2); [784, 988, 1175, 1568].forEach((f, i) => bell(f, .38, .075, .03 + i * .075)); SFX.tone(98, .5, "sine", .12, 0, 60); }
+    else if (n === "flip3"){ nz(.5, .08, 0, "highpass", 6000, 2000, .7); SFX.tone(65, .9, "sine", .2, 0, 38); [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => bell(f, .6, .075, .05 + i * .065)); [1047, 1319, 1568].forEach(f => bell(f, 1.1, .05, .62)); }
+    else if (n === "cele"){ SFX.tone(82, .5, "sine", .16, 0, 50); nz(.12, .12, 0, "lowpass", 900, 200, 1); [523, 784, 1047, 1568].forEach((f, i) => bell(f, .5, .07, .1 + i * .08)); }
+  } catch {} }
+// Célébration plein écran (montée de niveau, récompenses réclamées) : un sceau qui se pose, des rayons, le texte lettre à lettre. Animée par GSAP, repli en simple fondu.
+function tcCele(title, sub, kj = "祝", col = "var(--accent)"){ document.querySelector(".tccele")?.remove();
+  document.body.insertAdjacentHTML("beforeend", `<div class="tccele" style="--cc:${col}" role="status"><i class="ray"></i><div class="in"><span class="cseal">${kj}</span><b>${[...title].map(ch => `<u>${ch === " " ? "&nbsp;" : esc(ch)}</u>`).join("")}</b><small>${esc(sub || "")}</small></div></div>`);
+  const E = document.querySelector(".tccele"), bye = () => { if (!E.isConnected) return; if (window.gsap && !tcCalm()) gsap.to(E, {opacity: 0, duration: .3, onComplete: () => E.remove()}); else E.remove(); }; E.onclick = bye; setTimeout(bye, 2500); tcSnd("cele");
+  if (window.gsap && !tcCalm()){ const G = gsap; G.from(E, {opacity: 0, duration: .2}); G.fromTo(E.querySelector(".cseal"), {scale: 3.4, rotation: -38, opacity: 0}, {scale: 1, rotation: -6, opacity: 1, duration: .42, ease: "back.out(2.2)"});
+    G.fromTo(E.querySelector(".in"), {x: 0}, {keyframes: [{x: -7}, {x: 6}, {x: -3}, {x: 0}], duration: .28, delay: .36}); G.fromTo(E.querySelector(".ray"), {scale: .2, opacity: 0}, {scale: 1, opacity: 1, duration: .6, delay: .3, ease: "power2.out"}); G.to(E.querySelector(".ray"), {rotation: 60, duration: 2.6, ease: "none"});
+    G.from(E.querySelectorAll("b u"), {y: 26, opacity: 0, rotationX: -80, duration: .4, stagger: .035, delay: .45, ease: "back.out(1.8)"}); G.from(E.querySelector("small"), {y: 10, opacity: 0, duration: .4, delay: .85}); setTimeout(() => tcBoom(2, E.querySelector(".cseal")), 400); } }
 // GSAP (enchaînements) et canvas-confetti (particules), chargés depuis cdnjs à la première visite des cartes. S'ils manquent, tout marche quand même en CSS.
 function tcLibs(){ if (tcLibs.done) return; tcLibs.done = true;
-  [["gsap", "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"], ["confetti", "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"], ["THREE", "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"]].forEach(([g, src]) => { if (window[g]) return; const sc = document.createElement("script"); sc.src = src; sc.async = true; document.head.appendChild(sc); }); }
+  [["gsap", "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"], ["confetti", "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"], ["THREE", "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"], ["qrcode", "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"]].forEach(([g, src]) => { if (window[g]) return; const sc = document.createElement("script"); sc.src = src; sc.async = true; if (g === "gsap") sc.onload = () => { try { gsap.ticker.lagSmoothing(0); } catch {} };   // sans ce réglage, GSAP ralentit ses animations quand l'affichage saccade : elles doivent suivre l'horloge réelle
+    document.head.appendChild(sc); }); }
 // gerbe de particules ; lvl 0 = petite, 1 = Épique ou version rare, 2 = Légendaire, 3 = Mythique et au-dessus
 const TC_BOOM = [["#ffffff", "#c9a36a", "#ff5a36"], ["#b07cff", "#e3d1ff", "#ffffff"], ["#f7c64a", "#fff3c2", "#ffffff", "#ff9d2e"], ["#ff5a8a", "#ffb347", "#fff275", "#6ee7a8", "#5ac8fa", "#b07cff"]];
 function tcBoom(lvl, el){ if (!window.confetti || tcCalm()) return; const r = el && el.getBoundingClientRect(), o = r ? {x: (r.left + r.width / 2) / innerWidth, y: (r.top + r.height / 2) / innerHeight} : {x: .5, y: .5};
@@ -10131,9 +10164,13 @@ function tcPouchGL(O, key){ const T = window.THREE, wrap = O.querySelector(".tea
     g.computeVertexNormals(); const tx = tex[back ? 1 : 0], m = new T.MeshPhysicalMaterial({map: tx, side: back ? T.BackSide : T.FrontSide, roughness: [.62, .34, .3, .28][t], metalness: [.02, .35, .55, .45][t], clearcoat: [.15, .7, .9, 1][t], clearcoatRoughness: .28, emissive: 0xffffff, emissiveMap: tx, emissiveIntensity: 0}); mats.push(m); m.userData.top = top; return new T.Mesh(g, m); };
   const grp = new T.Group(), bodyG = new T.Group(), stripG = new T.Group(); bodyG.add(piece(false, false), piece(true, false)); stripG.add(piece(false, true), piece(true, true)); stripG.position.y = CY; grp.add(bodyG, stripG); sc.add(grp);
   const inner = new T.PointLight(0xfff0c2, 0, 5); inner.position.set(0, TY, .5); grp.add(inner);
+  // halo : deux disques lumineux en fusion additive (pas de post-traitement : il rendrait le fond du canvas opaque). L'un derrière le sachet, qui enfle avec la charge ; l'autre à l'ouverture, à la déchirure.
+  const gcv = document.createElement("canvas"); gcv.width = gcv.height = 128; { const g2 = gcv.getContext("2d"), gr = g2.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.25, "rgba(255,255,255,.55)"); gr.addColorStop(.6, "rgba(255,255,255,.12)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g2.fillStyle = gr; g2.fillRect(0, 0, 128, 128); }
+  const gtx = new T.CanvasTexture(gcv), spr = (col) => new T.Sprite(new T.SpriteMaterial({map: gtx, color: col, blending: T.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0}));
+  const halo = spr([0xffc98a, 0xcfe0ff, 0xffd45a, 0xc9a2ff][t]), mouth = spr(0xfff3c9); halo.position.z = -.5; sc.add(halo); mouth.position.set(0, TY + .05, .16); grp.add(mouth);
   let raf = 0, dead = false, t0 = performance.now(), last = t0, tx2 = 0, ty2 = 0, rx = 0, ry = 0, chg = 0, tear = 0, slow = 0, n = 0;
   const move = e => { const r = O.getBoundingClientRect(); ty2 = ((e.clientX - r.left) / r.width - .5) * 1.1; tx2 = ((e.clientY - r.top) / r.height - .5) * .6; glint.position.x = ty2 * 2.4; glint.position.y = -tx2 * 3; }; O.addEventListener("pointermove", move, {passive: true}); addEventListener("resize", size);
-  const stop = () => { if (dead) return; dead = true; cancelAnimationFrame(raf); O.removeEventListener("pointermove", move); removeEventListener("resize", size); wrap.classList.remove("gl"); cv.remove(); [...bodyG.children, ...stripG.children].forEach(m => { m.geometry.dispose(); m.material.dispose(); }); tex.forEach(x => x.dispose()); rd.dispose(); try { rd.forceContextLoss(); } catch {} };
+  const stop = () => { if (dead) return; dead = true; cancelAnimationFrame(raf); O.removeEventListener("pointermove", move); removeEventListener("resize", size); wrap.classList.remove("gl"); cv.remove(); [...bodyG.children, ...stripG.children].forEach(m => { m.geometry.dispose(); m.material.dispose(); }); tex.forEach(x => x.dispose()); gtx.dispose(); halo.material.dispose(); mouth.material.dispose(); rd.dispose(); try { rd.forceContextLoss(); } catch {} };
   const fade = (top, o) => mats.forEach(m => { if (m.userData.top !== top) return; if (!m.transparent){ m.transparent = true; m.needsUpdate = true; } m.opacity = o; });
   const loop = now => { if (dead) return; if (!O.isConnected || !cv.isConnected){ stop(); return; } const dt = Math.min(.05, (now - last) / 1000), el = (now - t0) / 1000; last = now;
     // garde-fou : si l'appareil ne suit pas (moins de 25 images par seconde en moyenne sur les 45 premières), on revient au sachet CSS
@@ -10144,10 +10181,11 @@ function tcPouchGL(O, key){ const T = window.THREE, wrap = O.querySelector(".tea
     grp.rotation.x = rx * (tear ? .4 : 1) + Math.sin(el * 1.3) * .035 + Math.sin(now * .061) * sh; grp.rotation.y = ry * (tear ? .4 : 1) + Math.sin(el * .9) * .22 * calmY + (1 - e3) * -4.2 + Math.sin(now * .083) * sh * 1.6; grp.rotation.z = Math.sin(el * 1.1) * .03 + Math.sin(now * .097) * sh;
     grp.position.y = Math.sin(el * 1.6) * .035 + (1 - e3) * 1.4; grp.scale.setScalar((inn < 1 ? .4 + .6 * back : 1) * (1 + c * c * .16));
     mats.forEach(m => m.emissiveIntensity = c * c * c * 1.5);
+    { const pulse = .5 + .5 * Math.sin(el * 2.2), hc = tear ? Math.max(0, 1 - tr / .9) : c; halo.material.opacity = e3 * (.16 + pulse * .07 + hc * hc * .6) + (tear ? Math.exp(-tr * 3) * .5 : 0); const hs = 2.5 + pulse * .15 + hc * 1.1 + (tear ? Math.min(1.6, tr * 5) : 0); halo.scale.set(hs, hs * 1.25, 1); }
     if (tr >= 0){ // la languette se soulève par la gauche, part en vrille vers la droite et s'efface ; la lumière sort ; le corps s'enfonce
       const e = Math.min(1, tr / .8), ee = e * e, lift = Math.sin(Math.min(1, e * 2.2) * Math.PI / 2);
       stripG.position.set(ee * 2.5, CY + lift * .16 + ee * 1.0, lift * .18 + ee * .5); stripG.rotation.set(-lift * .5 - ee * 2.4, ee * 1.1, lift * .3 - ee * 1.5); if (e > .5) fade(true, 1 - (e - .5) / .5); stripG.visible = e < 1;
-      inner.intensity = 3.2 * Math.exp(-tr * 1.8) * Math.min(1, tr * 12);
+      inner.intensity = 3.2 * Math.exp(-tr * 1.8) * Math.min(1, tr * 12); mouth.material.opacity = Math.min(1, tr * 9) * Math.exp(-tr * 1.5) * .95; mouth.scale.set(1.5 + tr * 1.2, .85 + tr * 1.6, 1); mouth.position.y = TY + .05 + tr * .35;
       const s2 = Math.max(0, Math.min(1, (tr - .95) / .5)); if (s2 > 0){ bodyG.position.y = -s2 * s2 * .95; fade(false, 1 - s2); } }
     rd.render(sc, cam); raf = requestAnimationFrame(loop); };
   raf = requestAnimationFrame(loop);
@@ -10159,7 +10197,7 @@ function tcOpening(key, got){
   document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">判</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const G = !calm && window.gsap, lvlOf = c => c.r === "M" || c.r === "X" || c.f === "G" || c.f === "Z" ? 3 : c.r === "L" || c.f === "K" || c.f === "S" || c.f === "W" ? 2 : TC_ORDER.indexOf(c.r) === 3 || c.f ? 1 : 0;
-  const GL = tcPouchGL(O, key);
+  const GL = tcPouchGL(O, key); if (!calm) setTimeout(() => tcSnd("rustle"), 420);
   if (G){ O.classList.add("gs"); const p0 = O.querySelector(".pouch"); G.fromTo(p0, {y: -110, rotation: -16, scale: .45, opacity: 0}, {y: 0, rotation: -2, scale: 1, opacity: 1, duration: .75, ease: "back.out(1.5)", onComplete: () => G.to(p0, {y: -9, rotation: 2, duration: 1.3, yoyo: true, repeat: -1, ease: "sine.inOut"})});
     G.from(O.querySelectorAll(".mid > p"), {y: 12, opacity: 0, duration: .4, delay: .45, stagger: .1}); }
   const end = () => { GL && GL.stop(); O.remove(); tcRender(); };
@@ -10178,23 +10216,24 @@ function tcOpening(key, got){
     const st = tcLoad(); O.querySelector(".otop .ost").innerHTML = `<span>${tcStock(st)} booster${tcStock(st) > 1 ? "s" : ""}</span><span>${st.gems} ◆</span>`;
     if (G){ G.from(mid.querySelectorAll(".osum,.obest,.osec,.tcxp,.oxn"), {y: 16, opacity: 0, duration: .45, stagger: .08, clearProps: "transform,opacity"}); G.from(bot.children, {y: 24, opacity: 0, duration: .4, stagger: .07, delay: .25, clearProps: "transform,opacity"});
       const bl = Math.max(...got.map(lvlOf)); if (bl >= 2) setTimeout(() => tcBoom(bl, mid.querySelector(".tcrow .best") || mid.querySelector(".tcrow")), 350); }
-    if (got.ups.length) SFX.play("fanfare"); };
+    if (got.ups.length){ SFX.play("fanfare"); const [l, tt] = got.ups[got.ups.length - 1]; setTimeout(() => tcCele("Niveau " + l, "Booster " + TC_T[tt].n + " offert", "昇", ["#c9a36a", "#dfe5ee", "#f2c230", "#c9a2ff"][tt]), 900); } };
   const flip = async k => { if (seen[k] || busy) return; seen[k] = true; const c = got[k], ri = TC_ORDER.indexOf(c.r), el = mid.querySelector(`[data-k="${k}"]`);
     const show = big(c) && (got.length <= 5 || k >= last - 2);
     if (show){ busy = true; await tcCine(c); busy = false; }
     else if ((ri === 3 || c.f === "A" || c.f === "B") && k === last && got.length <= 5){ busy = true; await tcCine(c, {mini: true}); busy = false; }
     const par = el.parentElement, ix = [...par.children].indexOf(el);
-    el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); if (!show) SFX.play(ri >= 3 || c.f ? "win" : "pop");
+    el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); tcSnd("flip" + lvlOf(c));
     if (G){ const ne = par.children[ix]; G.fromTo(ne, {rotationY: -100, scale: .82, y: -14, transformPerspective: 700}, {rotationY: 0, scale: 1, y: 0, duration: .55, ease: "back.out(1.9)", clearProps: "transform"}); if (lvlOf(c)) tcBoom(Math.min(lvlOf(c), got.length > 5 ? 1 : 3), ne); }
     if (seen.every(Boolean)) done(); };
-  O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.onclick = null; p.classList.add("charge"); GL && GL.charge();
+  O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.onclick = null; p.classList.add("charge"); GL && GL.charge(); tcSnd("charge");
     if (G){ G.killTweensOf(p); G.to(p, {keyframes: [{x: -5, rotation: -3, scale: .95}, {x: 6, rotation: 3, scale: 1.02}, {x: -8, rotation: -5, scale: .96}, {x: 10, rotation: 5, scale: 1.07}, {x: -6, rotation: -3, scale: 1.1}, {x: 0, rotation: 0, scale: 1.15}], duration: .78, ease: "power2.in"}); G.to(p, {filter: "brightness(2.3)", duration: .78, ease: "power3.in"}); } mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
     setTimeout(() => { GL && GL.tear(); if (G){ G.killTweensOf(p); G.set(p, {clearProps: "transform,filter,opacity"}); } p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement; tcBoom(bi >= 5 ? 3 : bi >= 4 ? 2 : 0, w);
       // la bande du haut part sur le côté, la lumière sort par l'ouverture, les cinq cartes montent
       w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.slice(-5).map((c, k) => tcBack(c.r, {style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
-      O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); SFX.play("win"); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
+      O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); tcSnd("rip"); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
       setTimeout(() => { O.querySelector(".burst")?.remove(); mid.innerHTML = `<div class="tcrow ${got.length > 5 ? "many" : ""}">${got.map((c, k) => tcBack(c.r, {btn: true, cls: "tcback " + (big(c) ? "hot" : TC_ORDER.indexOf(c.r) === 3 || c.f ? "warm" : ""), attr: `data-k="${k}" aria-label="Retourner la carte ${k + 1}"`, style: `--n:${Math.min(k, 14)};--rc:${TC_BKC[c.r][0]}`})).join("")}</div>`;
         mid.querySelectorAll(".tcback").forEach(b => b.onclick = () => flip(+b.dataset.k));
+        tcSnd("deal");
         if (G) G.from(mid.querySelectorAll(".tcback"), {y: 140, opacity: 0, scale: .5, rotation: () => Math.random() * 50 - 25, duration: .6, stagger: got.length > 5 ? .025 : .07, ease: "back.out(1.6)", clearProps: "transform,opacity"});
         bot.innerHTML = `<button id="tcAll">Tout retourner</button>`; $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (let k = 0; k < got.length; k++){ await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : got.length > 5 ? 90 : 260)); } }; }, calm ? 0 : 1500); }, calm ? 0 : 800); };
 }
@@ -10447,6 +10486,9 @@ document.addEventListener("pointermove", e => { const v = e.target.closest && e.
 .frpick .tc.pick{opacity:1;outline:2px solid var(--text);outline-offset:1px;transform:translateY(-2px)}
 .frinv{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:4px;font-size:13px;color:var(--muted)}
 .frinv button{border-radius:999px;padding:7px 13px;font-size:13px}
+.frqr{display:grid;justify-items:center;gap:8px;margin-top:12px;text-align:center}
+.frqr #frQr{width:min(100%,220px);background:#fff;border-radius:14px;padding:6px;color:#0e0d12;font-size:13px}
+.frqr #frQr svg{display:block;width:100%;height:auto}
 </style>
 <script>
 /* =====================================================================
@@ -10542,11 +10584,15 @@ function frHome(){
   const mk = () => { const name = cleanName($("#frNew").value, ""); if (!name || name.includes("#")) return $("#frNew").focus(); frSetName(name); };
   $("#frNewGo") && ($("#frNewGo").onclick = mk); $("#frNew") && ($("#frNew").onkeydown = e => { if (e.key === "Enter") mk(); });
 }
+const FR_SITE = "https://traginnicolas-create.github.io/mercato-anime/", FR_PEND = "mercato-ami-qr";
 function frShow(msg){
-  const me = frMe(); if (!me) return; frClose(); const M = $("#modal"), L = frList();
+  const me = frMe(); if (!me) return; try { tcLibs(); } catch {}
+  // ami reçu par code QR : ajouté à l'ouverture de la liste
+  { const pd = frParse(lsGet(FR_PEND, "")); if (pd){ lsSet(FR_PEND, ""); if (pd.id.toLowerCase() !== me.id.toLowerCase()){ if (!frList().some(x => x.id.toLowerCase() === pd.id.toLowerCase())) lsSet(FR_KEY, [...frList(), {id: pd.id, name: pd.name, tag: pd.tag}].slice(0, 50)); if (typeof msg !== "string") msg = pd.id + " a été ajouté à tes amis."; } } } frClose(); const M = $("#modal"), L = frList();
   M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>Amis</h2><button class="ghost" id="frX">✕ Fermer</button></div>
-    <label class="f">Ton identifiant</label><div class="row" style="align-items:center"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button class="ghost" id="frCopy">Copier</button><button class="ghost" id="frEdit">Changer de pseudo</button></div>
+    <label class="f">Ton identifiant</label><div class="row" style="align-items:center"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button class="ghost" id="frCopy">Copier</button><button class="ghost" id="frQrGo">Code QR</button><button class="ghost" id="frEdit">Changer de pseudo</button></div>
     <div id="frEditBox" class="hidden" style="margin-top:10px"><div class="row"><input id="frName" maxlength="16" value="${esc(me.name)}" autocomplete="off" style="flex:1;min-width:150px"><span class="frid" style="font-size:18px"><i>#${me.tag}</i></span><button class="primary" id="frNameGo">Enregistrer</button></div><p class="small" style="margin-top:6px">Tu choisis le pseudo ; les 4 chiffres sont attribués une fois pour toutes et ne changent pas. Tes amis devront t'ajouter à nouveau avec le nouvel identifiant.</p></div>
+    <div id="frQrBox" class="hidden frqr"><div id="frQr"></div><p class="small">Ton ami scanne ce code avec l'appareil photo de son téléphone : le site s'ouvre et t'ajoute à ses amis.</p></div>
     <p class="small" style="margin:6px 0 16px">Donne-le à tes amis. Tout passe en direct entre vos appareils : profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert.</p>
     <label class="f" for="frAdd">Ajouter un ami</label><div class="row"><input id="frAdd" maxlength="22" placeholder="Pseudo#1234" autocomplete="off" style="flex:1;min-width:170px"><button class="primary" id="frAddGo">Ajouter</button></div><div class="err" id="frErr">${esc(typeof msg === "string" ? msg : "")}</div>
     <div class="frlist">${L.length ? L.map(f => { const on = Date.now() - (FR.online[f.id] || 0) < 12e4; return `<div class="frrow"><div><b>${esc(f.name)}<i>#${f.tag}</i></b><small class="${on ? "on" : ""}">${on ? "En ligne" : f.seen ? "Vu le " + new Date(f.seen).toLocaleDateString("fr-FR", {day: "numeric", month: "short"}) : "Jamais vu en ligne"}${f.last ? " · niveau " + f.last.lv + " · " + f.last.own.length + " cartes" : ""}</small></div><div class="row"><button class="primary" data-frv="${esc(f.id)}">Voir</button><button class="ghost" data-frd="${esc(f.id)}">Retirer</button></div></div>`; }).join("") : `<p class="muted">Aucun ami pour l'instant.</p>`}</div></div>`;
@@ -10554,6 +10600,9 @@ function frShow(msg){
   const close = () => { M.classList.add("hidden"); M.innerHTML = ""; frHome(); };
   $("#frX").onclick = close; M.onclick = e => { if (e.target === M) close(); };
   $("#frCopy").onclick = async () => { try { await navigator.clipboard.writeText(me.id); $("#frCopy").textContent = "Copié ✔"; } catch { $("#frCopy").textContent = me.id; } };
+  // code QR : l'adresse du site suivie de #ami=Pseudo%231234 (bibliothèque qrcode-generator, chargée à la demande)
+  $("#frQrGo").onclick = () => { const box = $("#frQrBox"); if (box.classList.toggle("hidden")) return; const draw = k => { if (!box.isConnected) return; if (!window.qrcode){ $("#frQr").textContent = k > 12 ? "Code QR indisponible hors ligne." : "Chargement…"; if (k <= 12) setTimeout(() => draw(k + 1), 400); return; }
+      const q = qrcode(0, "M"); q.addData(FR_SITE + "#ami=" + encodeURIComponent(me.id)); q.make(); $("#frQr").innerHTML = q.createSvgTag({cellSize: 6, margin: 3, scalable: true}); }; draw(0); };
   $("#frEdit").onclick = () => { $("#frEditBox").classList.toggle("hidden"); $("#frName").focus(); $("#frName").select(); };
   const rename = () => { const name = cleanName($("#frName").value, ""); if (!name || name.includes("#")) return $("#frName").focus(); if (name === me.name) return $("#frEditBox").classList.add("hidden"); frSetName(name); frShow(); };
   $("#frNameGo").onclick = rename; $("#frName").onkeydown = e => { if (e.key === "Enter") rename(); };
@@ -10612,6 +10661,8 @@ async function frView(id){
     document.querySelectorAll("[data-fri]").forEach(b => b.onclick = () => frInvite(b.dataset.fri, code, b)); }; }
 document.querySelector("#tcHome")?.insertAdjacentHTML("afterend", `<div class="tchome" id="frHome" style="background:var(--panel)"></div>`);
 try { frHome(); } catch {}
+// arrivée par un code QR d'ami (#ami=Pseudo%231234) : on retient l'identifiant, puis on ouvre la liste d'amis (ou on demande d'abord un pseudo)
+try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIComponent(m[1])); if (pd){ lsSet(FR_PEND, pd.id); history.replaceState(null, "", location.pathname + location.search); setTimeout(() => { if (frMe()) frShow(); else frToast("Choisis ton pseudo pour ajouter " + pd.id + " à tes amis."); }, 900); } } catch {}
 // l'identifiant apparaît dès que le pseudo est créé ou changé ; le salon personnel s'ouvre quand le jeu en ligne est prêt
 { const base = profApply; profApply = function(prev){ base(prev); try { frHome(); frHost(); } catch {} }; }
 { const t = setInterval(() => { if (!NET.ready) return; clearInterval(t); frHost(); }, 500); }
