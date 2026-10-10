@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer">
 <title>Hanko</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Rye&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Mise en page : une colonne large et calme. Fond d'encre presque noir, texte papier, un seul rouge-orangé pour agir (boutons en pilule),
@@ -9169,7 +9169,8 @@ setInterval(voxRender, 2000);
 .tcpk .lb{font-size:11.5px;line-height:1.2;text-align:center}
 .tcpk.sel .pouch{box-shadow:0 0 0 2px var(--text),0 0 34px color-mix(in srgb,var(--pc) 60%,transparent)}
 .tcpk .cnt{top:2px;right:8%}
-.tcshop{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tcshop{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tcsh li{white-space:nowrap}
 .tcsh{padding:14px 10px 12px;border-radius:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--qc,var(--pc)) 9%,#0b0a0e),#0b0a0e 60%);border-color:color-mix(in srgb,var(--qc,var(--line)) 40%,var(--line))}
 .tcsh .pw{width:100%;max-width:none}
 .tcsh ul{list-style:none;display:grid;gap:3px;font-size:12px;color:#b7b2bd;width:100%;text-align:left;margin:2px 0 6px}
@@ -9207,6 +9208,40 @@ setInterval(voxRender, 2000);
 @keyframes tcglowup{0%{opacity:0;transform:scaleY(.3)}30%{opacity:1;transform:scaleY(1.2)}100%{opacity:.5;transform:scaleY(1)}}
 @keyframes tcrise{0%{opacity:0;transform:translate(-50%,40%) rotate(0)}30%{opacity:1}100%{opacity:1;transform:translate(calc(-50% + var(--x)),-92%) rotate(var(--r))}}
 @keyframes tcsink{to{transform:translateY(46%);opacity:0}}
+/* ---- SAR « encre rouge » : estampe noir et rouge sur papier washi, kanji au pinceau, feuille d'or, nom vertical ---- */
+.tc.tc.f-S{border:1.5px solid #c9a24a;background:#16090b;box-shadow:0 0 26px rgba(200,16,46,.45)}
+.tc.tc.f-S > img{top:0;height:100%;object-position:50% 6%;filter:grayscale(1) contrast(1.7) brightness(1.02);transform:scale(1.08);transform-origin:50% 18%}
+.tc.tc.f-S > .sc{inset:0;z-index:0;-webkit-mask-image:none;mask-image:none;mix-blend-mode:multiply;animation:none;background:linear-gradient(165deg,#ff3347 0,#d1122c 45%,#7c0014 100%)}
+.tc.tc.f-S .fx{opacity:1;z-index:1;animation:none!important;mix-blend-mode:normal!important;background:repeating-linear-gradient(8deg,transparent 0 5px,rgba(255,232,190,.07) 5px 5.6px),repeating-linear-gradient(97deg,transparent 0 9px,rgba(0,0,0,.1) 9px 9.5px),radial-gradient(circle at 18% 22%,rgba(244,214,130,.75) 0 .8px,transparent 1.6px),radial-gradient(circle at 72% 64%,rgba(244,214,130,.65) 0 1px,transparent 1.8px),radial-gradient(circle at 44% 86%,rgba(244,214,130,.55) 0 .7px,transparent 1.5px),linear-gradient(118deg,transparent 38%,rgba(255,226,150,.34) 50%,transparent 62%)!important;background-size:auto,auto,97px 113px,131px 89px,71px 149px,280% 100%!important}
+.tc.tc.f-S::after{background:linear-gradient(180deg,rgba(10,4,5,.5) 0,transparent 16%,transparent 66%,rgba(10,4,5,.94) 97%);box-shadow:inset 0 0 0 4px #16090b,inset 0 0 0 5px rgba(201,162,74,.75)}
+.tc.tc.f-S > .vk{position:absolute;right:5%;top:9%;left:auto;z-index:1;writing-mode:horizontal-tb;font-family:var(--brand);font-weight:900;font-size:min(40cqw,96px);line-height:1;color:rgba(246,226,174,.22);-webkit-text-stroke:0;pointer-events:none}
+.tc.tc.f-S > .vn{position:absolute;left:7%;top:12%;z-index:2;writing-mode:vertical-rl;font-family:var(--title);font-weight:900;font-size:11.5px;letter-spacing:.14em;color:#f6e2ae;text-shadow:0 2px 8px #000;max-height:66%;overflow:hidden}
+.tc.f-S{container-type:inline-size}
+.tc.tc.f-S .nm{display:none}
+.tc.tc.f-S .tp{color:#f6e2ae;font-weight:500}.tc.tc.f-S .tp b{color:#16090b;background:#e7c873;border-radius:3px;padding:0 4px}
+.tc.tc.f-S .ft{margin-top:auto;color:#f6e2ae}
+.tcview .vf .tc.f-S > .vn,.tccine .cardw .tc.f-S > .vn{font-size:clamp(16px,5vw,22px)}
+@media (prefers-reduced-motion:no-preference){.tc.tc.f-S .fx{animation:tcinkfoil 4.5s linear infinite!important}}
+@keyframes tcinkfoil{from{background-position:0 0,0 0,0 0,0 0,0 0,130% 0}to{background-position:0 0,0 0,0 0,0 0,0 0,-130% 0}}
+/* ---- Wanted : l'avis de recherche sur vieux papier (bords déchirés, plis, taches, bords roussis), dorure à chaud sur le titre et reflet nacré ---- */
+.tc.f-W{container-type:inline-size;border:0;border-radius:3px;color:#3a2a14;clip-path:polygon(0 1.2%,4% 0,11% .9%,19% 0,27% 1%,36% .2%,45% 1.1%,55% 0,64% .9%,73% .1%,82% 1%,91% .2%,100% 1.1%,99.2% 9%,100% 18%,99% 27%,100% 37%,99.1% 47%,100% 57%,99% 67%,100% 77%,99.2% 87%,100% 98.6%,93% 100%,84% 99%,75% 100%,65% 99.1%,55% 100%,45% 99%,35% 100%,25% 99.1%,15% 100%,6% 99%,0 100%,.9% 90%,0 80%,1% 70%,0 60%,.9% 50%,0 40%,1% 30%,0 20%,.8% 10%);
+  background:radial-gradient(ellipse 34% 20% at 84% 88%,rgba(96,58,16,.42),transparent 70%),radial-gradient(ellipse 26% 16% at 10% 58%,rgba(96,58,16,.3),transparent 70%),radial-gradient(ellipse 20% 12% at 70% 12%,rgba(120,80,30,.22),transparent 70%),radial-gradient(circle at 34% 20%,#f6e9c3,#e0cb95 58%,#bd9d5d);
+  box-shadow:inset 0 0 0 1px rgba(90,60,20,.5),inset 0 0 30px rgba(84,48,10,.75),inset 0 0 70px rgba(120,80,30,.35)}
+.tc.f-W::after{background:linear-gradient(0deg,transparent 49.3%,rgba(255,250,225,.5) 49.7%,rgba(60,40,10,.3) 50.2%,transparent 50.7%),linear-gradient(90deg,transparent 49.3%,rgba(255,250,225,.4) 49.7%,rgba(60,40,10,.24) 50.2%,transparent 50.7%),repeating-linear-gradient(11deg,transparent 0 5px,rgba(90,60,20,.06) 5px 5.5px),repeating-linear-gradient(96deg,transparent 0 8px,rgba(255,250,225,.07) 8px 8.4px),radial-gradient(circle,rgba(70,45,10,.2) 0 .6px,transparent 1.2px);background-size:auto,auto,auto,auto,7px 9px}
+.tc.f-W > img{left:11%;top:18%;width:78%;height:47%;border:max(2px,1.4cqw) solid #3a2a14;filter:sepia(.42) contrast(1.08) saturate(.9);object-position:50% 8%;box-shadow:0 0 0 1px rgba(255,250,225,.4)}
+.tc.f-W > .wt,.tc.f-W > .wd,.tc.f-W > .wn,.tc.f-W > .wb,.tc.f-W > .wm{position:absolute;left:3%;right:3%;z-index:2;text-align:center;font-family:Rye,Georgia,serif;color:#3a2a14;line-height:1;white-space:nowrap;overflow:hidden}
+.tc.f-W > .wt{top:5.5%;font-size:17cqw;letter-spacing:.04em;background:linear-gradient(105deg,#3a2a14 0 34%,#a8700a 42%,#ffe9a0 50%,#a8700a 58%,#3a2a14 66% 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 0 rgba(255,250,225,.6))}
+.tc.f-W > .wd{top:67.5%;font-size:6.2cqw;letter-spacing:.12em}
+.tc.f-W > .wn{top:73.5%;font-size:8.6cqw;white-space:normal;line-height:1.02;max-height:17cqw}
+.tc.f-W > .wb{bottom:7.5%;font-size:8.6cqw;text-shadow:0 1px 0 rgba(255,250,225,.55)}
+.tc.f-W > .wm{bottom:2.6%;font-family:var(--mono);font-size:4.4cqw;letter-spacing:.5em;text-indent:.5em;color:rgba(58,42,20,.75)}
+.tc.f-W .nm,.tc.f-W .ft{display:none}
+.tc.f-W .tp{position:absolute;left:0;right:0;top:0;padding:4px 8px;font-size:7.5px;color:rgba(58,42,20,.7)}.tc.f-W .tp b{color:rgba(58,42,20,.7)}
+.tc.f-W .fx{opacity:1;z-index:3;background:linear-gradient(118deg,transparent 32%,rgba(255,255,255,.8) 47%,rgba(255,226,140,.6) 52%,transparent 66%),radial-gradient(circle at 22% 30%,rgba(255,236,170,.95) 0 .8px,transparent 1.6px),radial-gradient(circle at 68% 62%,rgba(255,236,170,.85) 0 1px,transparent 1.8px),linear-gradient(118deg,rgba(255,90,138,.16),rgba(255,242,117,.16),rgba(110,231,168,.16),rgba(90,200,250,.16),rgba(176,124,255,.16));background-size:260% 100%,83px 97px,113px 71px,300% 300%;mix-blend-mode:soft-light}
+.tc.f-W .nw{top:auto;bottom:6px;left:6px}.tc.f-W .x{top:auto;bottom:6px}
+@media (prefers-reduced-motion:no-preference){.tc.f-W .fx{animation:tcwanted 3.4s linear infinite}.tc.f-W > .wt{animation:tcwfoil 3.4s linear infinite}}
+@keyframes tcwfoil{from{background-position:120% 0}to{background-position:-120% 0}}
+@keyframes tcwanted{from{background-position:130% 0,0 0,0 0,0 0}to{background-position:-130% 0,0 0,0 0,300% 0}}
 </style>
 <script>
 /* =====================================================================
@@ -9221,9 +9256,16 @@ const TC_KEY = "mercato-cartes";
 const TC_R = {C: ["Commune", 2, 25], P: ["Peu commune", 4, 50, "Peu com."], R: ["Rare", 10, 120], E: ["Épique", 30, 350], L: ["Légendaire", 100, 1200], M: ["Mythique", 300, 3500], X: ["Éveil", 100, 1200]};   // nom, éclats au recyclage, prix à la forge, nom court
 // finitions façon cartes à collectionner : chaque carte peut sortir en version brillante, « art » pleine carte, « art spécial » ou dorée.
 // [nom, sigle, chance en % par carte tirée, multiplicateur de valeur au recyclage, expérience pour une première]
-const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], B: ["Art rare", "AR", 1.4, 10, 80], S: ["Art spécial", "SAR", .5, 20, 150], G: ["Or", "UR", .15, 40, 300]};
+const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], B: ["Art rare", "AR", 1.4, 10, 80], S: ["Art spécial", "SAR", .5, 20, 150], W: ["Wanted", "WANTED", .8, 15, 120], G: ["Or", "UR", .15, 40, 300]};
 // illustration propre à chaque version (rang dans TCALT) : une version n'existe pour un personnage que s'il a cette illustration
 const TC_ARTK = {A: 0, S: 1, B: 2, G: 3};
+// version « Wanted » : l'avis de recherche des pirates de One Piece, avec leur prime en berrys. Dernières primes parues dans le manga
+// (revérifiées le 11 octobre 2026 : pas de nouvelles primes annoncées depuis l'après-Wano). À mettre à jour quand le manga en révèle.
+const TC_BOUNTY = {"Gol D. Roger": 5564800000, "Edward Newgate": 5046000000, "Kaido": 4611100000, "Charlotte Linlin": 4388000000, "Shanks": 4048900000, "Marshall D. Teach": 3996000000, "Dracule Mihawk": 3590000000, "Buggy": 3189000000,
+  "Monkey D. Luffy": 3000000000, "Trafalgar D. Water Law": 3000000000, "Eustass Kid": 3000000000, "Crocodile": 1965000000, "Boa Hancock": 1659000000, "King": 1390000000, "Marco": 1374000000, "Queen": 1320000000, "Roronoa Zoro": 1111000000, "Jinbe": 1100000000,
+  "Charlotte Katakuri": 1057000000, "Sanji": 1032000000, "Jack": 1000000000, "Nico Robin": 930000000, "Charlotte Cracker": 860000000, "Sabo": 602000000, "Portgas D. Ace": 550000000, "Usopp": 500000000, "Franky": 394000000, "Brook": 383000000, "Nami": 366000000,
+  "Donquixote Doflamingo": 340000000, "Cavendish": 330000000, "Gecko Moria": 320000000, "Jewelry Bonney": 320000000, "Caesar Clown": 300000000, "Bartholomew Kuma": 296000000, "X Drake": 222000000, "Killer": 200000000, "Bartolomeo": 200000000, "Bellamy": 195000000,
+  "Bentham (Mr. 2 Bon Clay)": 32000000, "Galdino (Mr. 3)": 24000000, "Arlong": 20000000, "Don Krieg": 17000000, "Kuro": 16000000, "Tony Tony Chopper": 1000};
 const TC_FINMUL = [1, 1.4, 2.2, 4];   // les finitions sortent plus souvent dans les meilleurs boosters
 // transformations (rareté « Éveil ») : cartes à part, tirées des images de formes déjà présentes dans le jeu (Dragon Ball seulement pour l'instant)
 const TC_FORMS = ["Son Goku (Super Saiyan)", "Son Goku (Super Saiyan 3)", "Son Goku (Super Saiyan 4)", "Son Goku (Super Saiyan Blue)", "Son Goku (Ultra Instinct)", "Vegeta (Super Saiyan)", "Vegeta (Super Saiyan 4)", "Vegeta (Super Saiyan Blue)", "Vegeta (Ultra Ego)",
@@ -9317,13 +9359,13 @@ function tcOpenPack(s, key){
     if (slot === 4 && Math.random() * 100 < TC_XRATE[t] && pool.some(c => c.r === "X")) r = "X";
     const c = pickOf(r);
     // finition : tirée à part pour chaque carte
-    let f = "", x = Math.random() * 100; for (const k of ["G", "S", "B", "A", "H"]){ x -= TC_FIN[k][2] * TC_FINMUL[t]; if (x <= 0){ f = k; break; } }
+    let f = "", x = Math.random() * 100; for (const k of ["G", "W", "S", "B", "A", "H"]){ x -= TC_FIN[k][2] * TC_FINMUL[t]; if (x <= 0){ f = k; break; } }
     if (f && !tcVersOf(c).includes(f)) f = "H";
     const newFin = !!f && !(s.fin[c.id] && s.fin[c.id][f]);
     got.push({...c, f, isNew: !s.own[c.id], newFin}); s.own[c.id] = (s.own[c.id] || 0) + 1;
     if (f){ s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; }
   }
-  const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, S: 3.5, G: 4.5}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
+  const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, G: 4.5}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
   got.sort((a, b) => wow(a) - wow(b));   // la meilleure carte se retourne en dernier
   const best = Math.max(...got.map(c => TC_ORDER.indexOf(c.r)));
   s.pity.M = best >= 5 ? 0 : s.pity.M + 1; s.pity.L = best >= 4 ? 0 : s.pity.L + 1;
@@ -9418,14 +9460,14 @@ const tcAlt = c => { try { return ((window.__MA && window.__MA.TCALT) || {})[c.u
 // les illustrations alternatives sont dans trois fichiers à part, chargés après l'ouverture du jeu ; l'écran des cartes se redessine à leur arrivée
 ["op", "db", "na"].forEach(u => { const e = document.createElement("script"); e.src = "ma-alt-" + u + ".js"; e.async = true; e.onerror = () => {}; document.head.appendChild(e); });
 window.addEventListener("tcalt", () => { try { if (!$("#tcg").classList.contains("hidden") && !document.querySelector(".tcopen,.tcview,.tccine")) tcRender(); } catch {} });
-const tcArt = (c, f) => (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || c.i;
+const tcArt = (c, f) => f === "W" ? [...tcAlt(c)].reverse()[0] || c.i : (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || c.i;
 // versions qui existent pour une carte : normale et Holo toujours, les autres seulement avec leur propre illustration
 // Les versions illustrées sont réservées aux personnages forts et populaires, pour rester rares : AR à partir d'Épique,
 // seconde AR (autre illustration, même nom « AR ») et SAR à partir de Légendaire (ou tête d'affiche), UR pour les Mythiques.
 function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 4 && r <= 5 || (c.pop === "S" && r >= 3), v = ["", "H"];
-  if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[1]) v.push("S"); if (r === 5 && a[3]) v.push("G"); return v; }
-const tcBestFin = (s, c) => ["G", "S", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
-const tcCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="mgw" aria-hidden="true"><img src="${c.i}" alt="" loading="lazy"></span><span class="sc" aria-hidden="true"></span><span class="pw" aria-hidden="true">${c.p * 100}</span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
+  if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[1]) v.push("S"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); return v; }
+const tcBestFin = (s, c) => ["G", "S", "W", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
+const tcCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
 // sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
@@ -9439,7 +9481,7 @@ function tcDrops(key){
     const a = (R[0][c.r] || 0) / 100 / n, b = (R[1][c.r] || 0) / 100 * (1 - (pool.some(x => x.r === "X") ? xr : 0)) / n; return (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; };
   M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><h2>Booster ${tcName(key)}</h2><span class="small">${pool.length} personnages possibles · 5 cartes · ${TC_T[t].g} ou mieux garantie</span></div><button class="ghost" id="tcClose">✕ Fermer</button></div>
     <div class="tierh" style="--tc:var(--accent)">Versions <small>chance pour chaque carte tirée</small></div>
-    <div class="tcchips">${[["H", TC_FIN.H[2]], ["A", TC_FIN.A[2] + TC_FIN.B[2]], ["S", TC_FIN.S[2]], ["G", TC_FIN.G[2]]].map(([k, v]) => `<button disabled>${TC_FIN[k][0]} · ${pct(v * TC_FINMUL[t])}</button>`).join("")}</div><p class="small" style="margin:-4px 0 10px">Holo pour toutes les cartes. AR à partir d'Épique, SAR à partir de Légendaire, UR or pour les Mythiques seulement : sur une autre carte, le tirage donne une Holo.</p>
+    <div class="tcchips">${[["H", TC_FIN.H[2]], ["A", TC_FIN.A[2] + TC_FIN.B[2]], ["W", TC_FIN.W[2]], ["S", TC_FIN.S[2]], ["G", TC_FIN.G[2]]].map(([k, v]) => `<button disabled>${TC_FIN[k][0]} · ${pct(v * TC_FINMUL[t])}</button>`).join("")}</div><p class="small" style="margin:-4px 0 10px">Holo pour toutes les cartes. AR à partir d'Épique, SAR à partir de Légendaire, UR or pour les Mythiques seulement, Wanted pour les pirates de One Piece qui ont une prime : sur une autre carte, le tirage donne une Holo.</p>
     ${[...TC_ORDER].reverse().filter(r => pool.some(c => c.r === r)).map(r => { const l = pool.filter(c => c.r === r), p = one(l[0]);
       return `<div class="tierh r-${r}" style="--tc:var(--rc)">${TC_R[r][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${pct(p)} par booster pour chacune${p > 0 ? `, soit 1 booster sur ${Math.max(1, Math.round(100 / p))}` : ""}</small></div>
         <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${c.i}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
@@ -9510,9 +9552,9 @@ function tcRender(){
     const f = TC_F, ver = f.f ?? "*", vks = ver === "A" ? ["A", "B"] : [ver], list = all.filter(c => (f.u === "all" || c.u === f.u) && (f.r === "all" || c.r === f.r)).flatMap(c => ver === "*" ? (!f.own || s.own[c.id] ? [[c, "*"]] : []) : vks.filter(x => tcVersOf(c).includes(x) && (!f.own || tcHas(s, c, x))).map(x => [c, x]));
     const gain = all.reduce((a, c) => a + tcDups(s, c).g, 0), fins = all.reduce((a, c) => a + Object.keys(s.fin[c.id] || {}).length, 0);
     html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}<div class="tcbars">${["op", "db", "na"].map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
-      <p class="small" style="margin:-4px 0 12px">Chaque personnage existe en plusieurs versions, chacune avec sa propre illustration, qui comptent chacune comme une carte : normale et Holo pour tous ; AR à partir d'Épique (parfois deux illustrations différentes), SAR à partir de Légendaire, UR or pour les Mythiques. Tu en as <b>${vers}</b> sur ${versAll}. Touche une carte pour la regarder en 3D.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
+      <p class="small" style="margin:-4px 0 12px">Chaque personnage existe en plusieurs versions, chacune avec sa propre illustration, qui comptent chacune comme une carte : normale et Holo pour tous ; AR à partir d'Épique (parfois deux illustrations différentes), SAR à partir de Légendaire, UR or pour les Mythiques, et l'avis de recherche « Wanted » des pirates de One Piece. Tu en as <b>${vers}</b> sur ${versAll}. Touche une carte pour la regarder en 3D.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
       <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}<button class="${f.own ? "sel" : ""}" id="tcOwn">Obtenues</button></div>
-      <div class="tcchips">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["S", "SAR"], ["G", "UR or"]].map(([k, n]) => { const ks = k === "A" ? ["A", "B"] : [k]; return `<button class="${(f.f ?? "*") === k ? "sel" : ""}" data-tcv="${k}">${n}${k === "*" ? "" : " " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</button>`; }).join("")}</div>
+      <div class="tcchips">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["G", "UR or"]].map(([k, n]) => { const ks = k === "A" ? ["A", "B"] : [k]; return `<button class="${(f.f ?? "*") === k ? "sel" : ""}" data-tcv="${k}">${n}${k === "*" ? "" : " " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</button>`; }).join("")}</div>
       <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes</button>${[...TC_ORDER].reverse().filter(r => all.some(c => c.r === r)).map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${all.filter(c => c.r === r && s.own[c.id]).length}/${all.filter(c => c.r === r).length}</button>`).join("")}</div>
       <div class="tcgrid">${list.map(([c, v]) => tcCard(c, v === "*" ? {btn: true, v, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)} : {btn: true, v, no: !tcHas(s, c, v), f: v, x: v ? (s.fin[c.id] || {})[v] : 0})).join("") || `<p class="muted">Aucune carte ici pour l'instant.</p>`}</div>`;
   } else if (TC_TAB === "vitrine"){ html += vtHTML(s);
@@ -9545,7 +9587,7 @@ function tcRender(){
   const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
     let all = [], xp = 0, ups = []; for (let i = 0; i < q; i++){ const g = tcOpenPack(s, real); xp += g.xp; ups.push(...g.ups); all.push(...g); }
-    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, S: 3.5, G: 4.5}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q;
+    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, G: 4.5}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
   document.querySelectorAll("[data-tcopen]").forEach(b => b.onclick = () => openN(+b.dataset.tcopen));
@@ -9608,7 +9650,7 @@ const tcCalm = () => matchMedia("(prefers-reduced-motion:reduce)").matches;
 // o.mini : version courte (un indice, pas de silhouette) pour une Épique ou une AR.
 function tcCine(c, o = {}){
   return new Promise(res => {
-    const sty = c.f === "G" ? "G" : c.f === "S" ? "S" : c.r === "X" ? "X" : c.r === "M" ? "M" : c.r === "L" ? "L" : "E", myth = sty !== "L" && sty !== "E", calm = tcCalm(), mini = !!o.mini || sty === "E";
+    const sty = c.f === "G" ? "G" : c.f === "S" ? "S" : c.f === "W" ? "L" : c.r === "X" ? "X" : c.r === "M" ? "M" : c.r === "L" ? "L" : "E", myth = sty !== "L" && sty !== "E", calm = tcCalm(), mini = !!o.mini || sty === "E";
     const img = tcArt(c, c.f);
     document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${c.r} y${sty} ${mini ? "mini" : ""}" role="dialog" aria-modal="true" aria-label="${TC_R[c.r][0]} : ${esc(c.n)}">
       <div class="tun" aria-hidden="true"><i class="floor"></i><i class="ceil"></i><i class="beam b1"></i><i class="beam b2"></i></div>
@@ -9618,7 +9660,7 @@ function tcCine(c, o = {}){
       <div class="hero" aria-hidden="true"><img src="${img}" alt=""></div>
       <div class="fl"></div><div class="rays"></div>${myth ? `<div class="rays two"></div>` : ""}<div class="ring"></div>${myth ? `<div class="ring two"></div>` : ""}
       <div class="sp">${Array.from({length: myth ? 46 : 28}, (_, k) => `<i style="--a:${Math.round(Math.random() * 360)}deg;--d:${30 + Math.round(Math.random() * 46)}vmin;--t:${(.7 + Math.random() * 1.1).toFixed(2)}s;--w:${(Math.random() * .5).toFixed(2)}s"></i>`).join("")}</div>
-      <div class="seal">${c.r === "X" ? "覚醒" : c.f === "G" ? "黄金" : c.f === "S" ? "特別" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : "叙事"}</div><div class="lab">${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle version" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
+      <div class="seal">${c.r === "X" ? "覚醒" : c.f === "G" ? "黄金" : c.f === "S" ? "特別" : c.f === "W" ? "手配" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : "叙事"}</div><div class="lab">${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle version" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
     const el = document.querySelector(".tccine"), timers = []; let final = 0;
     const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); el.classList.add("s1", "s2", "s3", "s4"); SFX.play("fanfare"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
       if (myth && !calm){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); } };
@@ -9631,7 +9673,7 @@ function tcCine(c, o = {}){
 }
 // ouverture : le sachet se charge et se déchire (la couleur de l'éclair annonce le meilleur tirage), puis on retourne les cinq cartes
 function tcOpening(key, got){
-  const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "G", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
+  const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "G" || c.f === "W", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1;
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
   document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div><div class="tearw">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
@@ -9708,6 +9750,18 @@ try { tcHome(); } catch {}
 .vt4 .art img:not(.b){filter:drop-shadow(0 0 12px rgba(213,179,255,.9))}
 .vt4 .art img.g{mix-blend-mode:screen;opacity:.5;filter:hue-rotate(90deg) saturate(1.6);translate:-5px 2px}
 .vt4 .fx{background:radial-gradient(circle,#fff 0 1.1px,transparent 2.2px),radial-gradient(circle,#ffb3d9 0 1.3px,transparent 2.6px),radial-gradient(circle,#9be7ff 0 1px,transparent 2.2px),linear-gradient(112deg,transparent 36%,rgba(255,255,255,.4) 50%,transparent 64%);background-size:46px 58px,70px 44px,94px 76px,280% 100%;background-position:0 0,20px 30px,50px 10px,130% 0;mix-blend-mode:screen}
+.vt4{perspective:700px;transform:perspective(700px) rotateX(var(--vx,0deg)) rotateY(var(--vy,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.vt4.live{transition:transform .08s linear;box-shadow:0 0 46px rgba(176,124,255,.8),0 18px 40px rgba(0,0,0,.6)}
+.vt4 .art{transform:translate3d(calc(var(--mx,0) * -14px),calc(var(--my,0) * -8px),0) scale(1.06);transition:transform .2s}
+.vt4 .kj{transform:translate(calc(-50% + var(--mx,0) * 18px),calc(-50% + var(--my,0) * 10px))}
+.vt4 .glare{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at calc(50% + var(--mx,0) * 50%) calc(50% + var(--my,0) * 50%),rgba(255,255,255,.42),transparent 42%);mix-blend-mode:overlay;opacity:0;transition:opacity .3s}
+.vt4.live .glare{opacity:1}
+.vt4 .aur{position:absolute;inset:-30%;z-index:-2;pointer-events:none;background:conic-gradient(from 0deg at 72% 50%,transparent 0 20deg,rgba(255,90,138,.4) 40deg,transparent 70deg,rgba(90,200,250,.4) 130deg,transparent 170deg,rgba(255,242,117,.34) 230deg,transparent 280deg,rgba(176,124,255,.44) 320deg,transparent 360deg);filter:blur(14px);mix-blend-mode:screen}
+.vt4 .bolt{position:absolute;right:20%;top:-6%;bottom:-6%;width:16%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#fff,#d5b3ff);clip-path:polygon(52% 0,66% 0,44% 40%,72% 40%,26% 100%,46% 54%,20% 54%);opacity:0;filter:drop-shadow(0 0 10px #d5b3ff)}
+.vt4 .bolt.two{right:54%;transform:scaleX(-1)}
+@media (prefers-reduced-motion:no-preference){.vt4 .aur{animation:vtspin 9s linear infinite}.vt4 .bolt{animation:vtbolt 4.2s steps(1) infinite}.vt4 .bolt.two{animation-delay:2.1s}.vt4:not(.live){animation:vtborder 4s linear infinite,vtbreath 3.6s ease-in-out infinite}}
+@keyframes vtbolt{0%,100%{opacity:0}3%{opacity:.95}6%{opacity:.15}9%{opacity:.8}13%{opacity:0}}
+@keyframes vtbreath{0%,100%{box-shadow:0 0 26px rgba(176,124,255,.42)}50%{box-shadow:0 0 54px rgba(255,122,184,.7)}}
 .vt4 b{background:linear-gradient(100deg,#ffd1e6,#fff,#bfe9ff,#e3d1ff,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 2px 6px #000)}
 @media (prefers-reduced-motion:no-preference){
   .vt2 .fx{animation:vtsweep 5s ease-in-out infinite}
@@ -9751,7 +9805,10 @@ try { tcHome(); } catch {}
 .vtshow .tro .vt{aspect-ratio:2.1/1;min-height:0;padding:7px 9px}.vtshow .tro .vt b{font-size:clamp(10px,9cqw,13px)}.vtshow .tro .vt small,.vtshow .tro .vt .tr,.vtshow .tro .vt .kj{display:none}
 .vtshow .best{display:grid;grid-template-columns:repeat(3,minmax(0,150px));gap:8px;justify-content:center}
 .vtshow .slot{border:1px dashed var(--line);border-radius:12px;display:grid;place-items:center;min-height:54px;color:var(--muted);font-size:12px;text-align:center;padding:6px}
-.vtshow .best .slot{aspect-ratio:5/7.4}
+.vtshow .tro > .slot,.vtshow .best > .slot,.vtshow > .slot{width:100%!important;max-width:none;flex:none;height:auto!important;min-width:0;box-sizing:border-box;justify-self:stretch;overflow:visible}
+.vtshow .tro .slot{aspect-ratio:2.1/1;min-height:0}
+.vtshow .best .slot{aspect-ratio:5/7.4;min-height:0}
+.vtshow .tro > *,.vtshow .best > *{min-width:0;width:100%}
 .vtpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
 .vtpick .tc{opacity:.6}.vtpick .tc.pick{opacity:1;outline:2px solid var(--text);outline-offset:1px}
 </style>
@@ -9791,7 +9848,7 @@ const VT = [
 // tout ce que mesurent les accomplissements
 function vtCtx(s){
   const all = tcCards(), has = c => !!s.own[c.id], st = s.stat || {g: 0, w: 0, modes: []}, base = all.filter(c => c.r !== "X");
-  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, B: 0, S: 0, G: 0};
+  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, B: 0, S: 0, W: 0, G: 0};
   Object.values(s.fin || {}).forEach(f => Object.keys(f).forEach(k => { if (f[k]) fin[k]++; }));
   return {g: st.g, w: st.w, modes: st.modes.length, best: s.best || 0, own: all.filter(has).length, total: all.length, u: {op: full("op"), db: full("db"), na: full("na")},
     vers: (typeof tcVers === "function" ? tcVers(s) : 0), evAll: all.filter(c => c.r === "X").length, mw: k => (st.mw || {})[k] || 0,
@@ -9824,7 +9881,7 @@ function vtImg(id){ const [u, n] = [id.slice(0, 2), id.slice(3)]; try { return (
 const vtCardHTML = (k, o = {}) => { const v = VT.find(z => z[0] === k); if (!v) return `<div class="slot">${o.empty || "Emplacement libre"}</div>`;
   const fam = VT_ART[k[0]] || ["dots", []], lst = VT_ONE[k] || [fam[1][Math.min(fam[1].length - 1, +k.slice(1) - 1)], v[3] >= 3 ? fam[1][Math.max(0, Math.min(fam[1].length - 1, +k.slice(1) - 1) - 1)] : null];
   const a = lst[0] && vtImg(lst[0]), b = v[3] >= 3 && lst[1] && lst[1] !== lst[0] && vtImg(lst[1]);
-  return `<div class="vt vt${v[3]} ${o.cls || ""} ${o.lock ? "lock" : ""}"><span class="bg ${fam[0]}"></span><span class="art" aria-hidden="true">${b ? `<img class="b" src="${b}" alt="" loading="lazy">` : ""}${a ? `<img src="${a}" alt="" loading="lazy">${v[3] === 4 ? `<img class="g" src="${a}" alt="" loading="lazy">` : ""}` : ""}</span><span class="fx"></span><span class="kj" aria-hidden="true">${v[2]}</span>
+  return `<div class="vt vt${v[3]} ${o.cls || ""} ${o.lock ? "lock" : ""}"><span class="bg ${fam[0]}"></span><span class="art" aria-hidden="true">${b ? `<img class="b" src="${b}" alt="" loading="lazy">` : ""}${a ? `<img src="${a}" alt="" loading="lazy">${v[3] === 4 ? `<img class="g" src="${a}" alt="" loading="lazy">` : ""}` : ""}</span>${v[3] === 4 ? `<span class="aur"></span><span class="bolt"></span><span class="bolt two"></span>` : ""}<span class="fx"></span>${v[3] === 4 ? `<span class="glare"></span>` : ""}<span class="kj" aria-hidden="true">${v[2]}</span>
     <span class="tr">${VT_T[v[3]]}</span><b>${esc(v[1])}</b><small>${esc(v[4])}${o.pg != null ? ` · ${o.pg}` : ""}</small>${o.bar != null ? `<span class="pg"><u style="width:${o.bar}%"></u></span>` : ""}</div>`; };
 // la vitrine telle qu'elle s'affiche sur un profil : sh = {b, t:[clés], c:[[numéro, finition]]}
 function vtShowcase(sh, name){
@@ -9852,6 +9909,10 @@ function vtBind(){
   document.querySelectorAll("[data-vtt]").forEach(b => b.onclick = () => upd(sh => tog(sh.t, b.dataset.vtt)));
   document.querySelectorAll(".vtpick [data-tc]").forEach(b => b.onclick = e => { e.stopPropagation(); upd(sh => tog(sh.c, b.dataset.tc)); });
 }
+// cartes de visite Légende : elles s'inclinent et leur personnage glisse en parallaxe sous le doigt ou la souris
+document.addEventListener("pointermove", e => { const v = e.target.closest && e.target.closest(".vt4:not(.lock)"); document.querySelectorAll(".vt4.live").forEach(x => { if (x !== v){ x.classList.remove("live"); ["--vx", "--vy", "--mx", "--my"].forEach(k => x.style.removeProperty(k)); } });
+  if (!v) return; const r = v.getBoundingClientRect(), mx = (e.clientX - r.left) / r.width * 2 - 1, my = (e.clientY - r.top) / r.height * 2 - 1;
+  v.classList.add("live"); v.style.setProperty("--mx", mx.toFixed(3)); v.style.setProperty("--my", my.toFixed(3)); v.style.setProperty("--vy", (mx * 9).toFixed(2) + "deg"); v.style.setProperty("--vx", (-my * 7).toFixed(2) + "deg"); }, {passive: true});
 </script>
 
 <style>
