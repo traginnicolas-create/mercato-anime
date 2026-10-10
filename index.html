@@ -9476,6 +9476,31 @@ setInterval(voxRender, 2000);
 .tc.no img,.tc.ob.no .ow img,.tc.lx.no > img{filter:blur(9px) saturate(.85) brightness(.72) !important;opacity:1;transform:scale(1.18)}
 .tc.lx.no{filter:none}
 .tc.no .wt,.tc.no .wd,.tc.no .wb,.tc.no .vk,.tc.no .bolt,.tc.no .glare,.tc.no .aur{filter:blur(3px);opacity:.6;animation:none}
+/* ---- reflets qui suivent le doigt ou la souris (principe des couches « shine » et « glare » de pokemon-cards-css, textures écrites ici) ----
+   --px / --py : position du pointeur sur la carte, en % ; --ph : 0 au centre, 1 dans un coin. Posées par le script sur la carte survolée (.hl) et sur la carte de la vue 3D. */
+.tc .fx::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),rgba(255,255,255,.6),rgba(255,255,255,.12) 22%,transparent 46%);opacity:0;transition:opacity .35s}
+:is(.tc.hl,.vcard.live .tc) .fx::after{opacity:.55}
+:is(.tc.hl,.vcard.live .tc):not(.f-S):not(.f-Z):not(.f-W) .fx{animation:none!important;background-position:var(--px,50%) var(--py,50%)!important}
+/* carte sans version brillante : rien au repos, un simple reflet de vernis au survol */
+.tc.hl:not(.no):not(.lx):not(.ob):not([class*="f-"]) .fx,.vcard.live .tc:not(.lx):not(.ob):not([class*="f-"]) .fx{opacity:.5;mix-blend-mode:overlay}
+/* Holo : faisceaux arc-en-ciel fins et trame horizontale, qui glissent avec le pointeur et s'éclairent vers les bords */
+.tc.tc.f-H .fx{opacity:.46;background:repeating-linear-gradient(0deg,rgba(255,255,255,.1) 0 1px,transparent 1px 3px),repeating-linear-gradient(112deg,#ff7aa8 0,#ffe27a 5%,#7af0b4 10%,#7ad0ff 15%,#c39bff 20%,#ff7aa8 25%);background-size:auto,260% 260%;background-blend-mode:overlay;mix-blend-mode:color-dodge;filter:brightness(.5) contrast(1.3) saturate(1.1)}
+:is(.tc.hl,.vcard.live .tc).f-H .fx{opacity:.6;filter:brightness(calc(.5 + var(--ph,0) * .3)) contrast(1.35) saturate(1.2)}
+.tc.ob.f-H .ow::after{display:none}
+/* AR : voile nacré très léger ; au survol une lumière douce se déplace, sans blanc dur */
+:is(.tc.hl,.vcard.live .tc).f-A .fx{opacity:.75}
+:is(.tc.hl,.vcard.live .tc).f-A .fx::after{opacity:.45;background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),rgba(214,232,255,.9),rgba(255,214,240,.25) 32%,transparent 64%)}
+/* UR : gaufrage doré en losanges et halo d'or sous le pointeur */
+.tc.tc.f-G .fx{opacity:.55;background:repeating-linear-gradient(45deg,transparent 0 4px,rgba(255,236,160,.22) 4px 5px),repeating-linear-gradient(-45deg,transparent 0 4px,rgba(255,236,160,.22) 4px 5px),linear-gradient(115deg,transparent 30%,rgba(255,244,200,.75) 48%,transparent 62%);background-size:auto,auto,260% 100%;mix-blend-mode:screen}
+.tc.tc.f-G .fx::after{background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),rgba(255,246,200,.6),rgba(255,196,70,.2) 24%,transparent 48%)}
+@keyframes tcgold3{from{background-position:0 0,0 0,130% 0}to{background-position:0 0,0 0,-130% 0}}
+@media (prefers-reduced-motion:no-preference){.tc.tc.f-G .fx{animation:tcgold3 3s linear infinite}}
+/* Légendaire, Mythique, Éveil (cadre premium) : reflet plus large, teinté par la rareté */
+.tc.lx .fx::after{background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),rgba(255,255,255,.65),color-mix(in srgb,var(--rc) 35%,transparent) 26%,transparent 54%)}
+/* dans la collection, la carte survolée se soulève et penche vers le pointeur */
+.tcgrid .tc{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s}
+.tcgrid .tc.hl:not(.no){transform:perspective(520px) rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) scale(1.045);transition:transform .08s linear;z-index:3}
+@media (prefers-reduced-motion:reduce){.tcgrid .tc.hl:not(.no){transform:none}}
 </style>
 <script>
 /* =====================================================================
@@ -9972,7 +9997,7 @@ function tcView(c, want){
     <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] + (k === "B" ? " · 2e illustration" : "") : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button class="primary" id="tcvFlip">Retourner la carte</button><button id="tcvSheet">Lire la fiche</button></div><p class="small">Fais glisser pour incliner la carte.</p></div></div>`);
   const V = document.querySelector(".tcview"), box = V.querySelector(".v3d"), card = V.querySelector(".vcard");
   const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
-  const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); };
+  const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); card.style.setProperty("--px", mx + "%"); card.style.setProperty("--py", my + "%"); card.style.setProperty("--ph", Math.min(1, Math.hypot(mx - 50, my - 50) / 50).toFixed(2)); };
   face(); tilt(0, 0);
   box.onpointermove = e => { const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; card.classList.add("live"); tilt((.5 - y) * 34, (x - .5) * 44, x * 100, y * 100); };
   box.onpointerleave = () => { card.classList.remove("live"); tilt(0, 0); };
@@ -10054,6 +10079,13 @@ document.querySelector("#home .feature")?.insertAdjacentHTML("afterend", `<div c
 document.querySelector(".sitenav")?.insertAdjacentHTML("beforeend", `<a href="#" id="navTcg">Cartes</a>`);
 $("#navTcg") && ($("#navTcg").onclick = e => { e.preventDefault(); tcShow(); });
 try { tcHome(); } catch {}
+// reflets : la carte sous le pointeur reçoit sa position (--px, --py), son éloignement du centre (--ph) et une légère inclinaison (--tx, --ty)
+{ let cur = null; const off = () => { if (cur){ cur.classList.remove("hl"); ["--px", "--py", "--ph", "--tx", "--ty"].forEach(k => cur.style.removeProperty(k)); cur = null; } };
+  document.addEventListener("pointermove", e => { const t = e.target.closest && e.target.closest(".tc"); if (!t || t.closest(".vcard,.tccine")){ off(); return; } if (t !== cur){ off(); cur = t; t.classList.add("hl"); }
+    const r = t.getBoundingClientRect(), x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    t.style.setProperty("--px", (x * 100).toFixed(1) + "%"); t.style.setProperty("--py", (y * 100).toFixed(1) + "%"); t.style.setProperty("--ph", Math.min(1, Math.hypot(x - .5, y - .5) / .5).toFixed(2));
+    t.style.setProperty("--tx", ((.5 - y) * 14).toFixed(1) + "deg"); t.style.setProperty("--ty", ((x - .5) * 16).toFixed(1) + "deg"); }, {passive: true});
+  ["pointerup", "pointercancel", "pointerleave"].forEach(k => document.addEventListener(k, e => { if (k !== "pointerup" || e.pointerType !== "mouse") off(); }, {passive: true})); }
 </script>
 
 <style>
