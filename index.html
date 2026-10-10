@@ -9360,6 +9360,36 @@ setInterval(voxRender, 2000);
 }
 @keyframes obsweep{from{background-position:130% 0,0 0,0 0,0 0}to{background-position:-130% 0,0 0,0 0,0 0}}
 @keyframes obprism{from{background-position:130% 0,0 0,0 0,0 0}to{background-position:-130% 0,300% 0,0 -164px,0 -140px}}
+/* ---- carte « prestige » (Légendaire, Mythique, Éveil) : contour de métal gravé, sceau, fenêtre, plaque ---- */
+/* le cadre est la carte elle-même (marge en %), l'intérieur est .li : les tailles en cqw ne valent que pour les enfants */
+.tc.lx{--m1:#f6e3b0;--m2:#d9a441;--m3:#7a4f10;--in:#15100a;--gl:rgba(217,164,65,.5);container-type:inline-size;border:0;padding:2.2%;gap:0;border-radius:13px;
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.38) 0 .7px,transparent .7px 2.2px),linear-gradient(135deg,var(--m1),var(--m2) 28%,var(--m3) 52%,var(--m2) 74%,var(--m1));
+  background-size:auto,300% 300%;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 24px var(--gl),0 12px 26px rgba(0,0,0,.5)}
+.tc.lx.r-M{--m1:#ffd9a0;--m2:#ff5a36;--m3:#7a0a2e;--in:#150a0d;--gl:rgba(255,90,54,.55)}
+.tc.lx.r-X{--m1:#ffffff;--m2:#7de3ff;--m3:#3a3fb0;--in:#080c1c;--gl:rgba(125,227,255,.55)}
+.tc.lx::before,.tc.lx::after{display:none}
+.tc.lx > .li{display:flex;flex-direction:column;flex:1;min-height:0;position:relative;border-radius:10px;overflow:hidden;background:linear-gradient(170deg,color-mix(in srgb,var(--m2) 18%,var(--in)),var(--in) 46%,color-mix(in srgb,var(--m3) 26%,var(--in)));box-shadow:0 0 0 1px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.16)}
+/* gravure : fines hachures croisées sur tout l'intérieur, et poussière d'étoiles */
+.tc.lx > .li::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 .6px,transparent .6px 3px),repeating-linear-gradient(45deg,rgba(0,0,0,.16) 0 .6px,transparent .6px 3px),radial-gradient(circle at 22% 12%,rgba(255,255,255,.7) 0 .5px,transparent 1.1px),radial-gradient(circle at 78% 90%,rgba(255,255,255,.6) 0 .5px,transparent 1.1px);background-size:auto,auto,53px 61px,71px 47px}
+.tc.lx > .li > *{position:relative;z-index:1}
+.tc.lx .lh{display:flex;align-items:center;justify-content:space-between;gap:2cqw;padding:3.4cqw 3.6cqw 2.6cqw 4.4cqw}
+.tc.lx .lh b{font-family:var(--title);font-weight:900;font-size:max(8px,7.2cqw);line-height:1.05;letter-spacing:-.02em;color:#fff;text-align:left;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.tc.lx .sl{flex:none;display:grid;place-items:center;width:10.5cqw;height:10.5cqw;border-radius:50%;font-style:normal;font-family:var(--brand);font-weight:900;font-size:6.2cqw;line-height:1;color:var(--in);background:radial-gradient(circle at 34% 28%,#fff,var(--m1) 38%,var(--m2) 78%);box-shadow:0 0 0 .6cqw var(--in),0 0 0 1cqw var(--m2),0 0 10px var(--gl)}
+.tc.lx .lw{display:block;position:relative;flex:1;min-height:0;margin:0 2.6cqw;border-radius:3.6cqw;overflow:hidden;background:#000;box-shadow:0 0 0 .5cqw var(--in),0 0 0 .9cqw color-mix(in srgb,var(--m1) 70%,transparent),inset 0 0 14px rgba(0,0,0,.6)}
+.tc.lx .lw img{object-position:50% 10%}
+.tc.lx .lw::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 62%,rgba(0,0,0,.72)),radial-gradient(ellipse 90% 60% at 50% 0,color-mix(in srgb,var(--m2) 22%,transparent),transparent 70%)}
+.tc.lx .lw em{position:absolute;left:4%;bottom:4%;z-index:1;font-style:normal;font-family:var(--mono);font-size:max(6.5px,4.6cqw);letter-spacing:.06em;color:#fff;text-shadow:0 1px 3px #000}
+.tc.lx .lw u{position:absolute;inset:0;z-index:1;background:repeating-linear-gradient(115deg,rgba(255,90,138,.42) 0 8%,rgba(255,242,117,.42) 8% 16%,rgba(110,231,168,.42) 16% 24%,rgba(90,200,250,.42) 24% 32%,rgba(176,124,255,.42) 32% 40%);background-size:300% 300%;mix-blend-mode:color-dodge}
+.tc.lx .lu{display:flex;align-items:center;gap:1.6cqw;padding:2.6cqw 4.4cqw 2cqw;font-size:max(6.5px,4.6cqw);color:#e6dfd2;white-space:nowrap}
+.tc.lx .lu b{margin-left:auto;font-family:var(--mono);font-weight:500;font-size:.88em;letter-spacing:.1em;text-transform:uppercase;color:var(--m1)}
+.tc.lx .ls{display:flex;justify-content:space-between;margin:0 2.6cqw 2.6cqw;padding:2.2cqw 3.4cqw;border-radius:2.6cqw;font-family:var(--mono);font-size:max(6.5px,4.8cqw);letter-spacing:.08em;color:#cfc8ba;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.3));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--m2) 45%,transparent)}
+.tc.lx .ls b{font-weight:500;color:#fff;margin-left:.3em}
+.tc.lx .fx{position:absolute;inset:0;z-index:3;opacity:.9;border-radius:inherit;background:linear-gradient(118deg,transparent 40%,rgba(255,255,255,.34) 50%,transparent 60%);background-size:280% 100%;mix-blend-mode:overlay}
+.tc.lx .nw{top:auto;bottom:25%;left:6cqw}.tc.lx .x{top:auto;bottom:25%;right:6cqw}
+.tc.lx.no .lw img{filter:grayscale(1) blur(7px) brightness(.4)}.tc.lx.no{filter:saturate(.25) brightness(.7)}
+@media (prefers-reduced-motion:no-preference){.tc.lx{animation:lxmetal 7s linear infinite}.tc.lx .fx{animation:obsweep 4.2s linear infinite}.tc.lx .lw u{animation:tcprism 6s linear infinite}}
+@keyframes lxmetal{to{background-position:0 0,300% 0}}
+.tcview .vf .tc.lx,.tccine .cardw .tc.lx{border-width:0}
 </style>
 <script>
 /* =====================================================================
@@ -9632,7 +9662,7 @@ const tcArt = (c, f) => f === "W" ? [...tcAlt(c)].reverse()[0] || c.i : (f in TC
 function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 4 && r <= 5 || (c.pop === "S" && r >= 3), v = ["", "H"];
   if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[1]) v.push("S"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
 const tcBestFin = (s, c) => ["Z", "G", "S", "W", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
-const tcCard = (c, o = {}) => c.obj ? tcObjCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
+const tcCard = (c, o = {}) => c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
 // sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
@@ -9676,6 +9706,15 @@ const tcObjCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc ob r-${
   <span class="oh"><b>${esc(c.obj.t)}</b><i>#${String(c.no).padStart(3, "0")}</i></span><span class="on">${o.no ? "???" : esc(c.n)}</span>
   <span class="ow">${c.i ? `<img src="${c.i}" alt="" loading="lazy">` : ""}</span><span class="od">${o.no ? "Objet encore inconnu." : esc(c.obj.d)}${!o.no && c.obj.own ? `<em>${esc(c.obj.own)}</em>` : ""}</span>
   <span class="of"><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f === "H" ? `<em class="fn">HOLO</em>` : ""}<b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></span><span class="fx" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
+// désactivée tant que l'utilisateur n'a pas choisi parmi les trois pistes de propositions-prestige.html
+const TC_LUX = false;
+// carte « prestige » des personnages les plus rares (Légendaire, Mythique, Éveil, en version normale ou Holo) :
+// large contour de métal gravé de fines hachures, en-tête avec sceau, illustration dans une fenêtre, plaque de statistiques
+const tcLuxCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc lx r-${c.r} u-${c.u} ${o.f === "H" ? "f-H" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}>
+  <span class="li"><span class="lh"><b>${o.no ? "???" : esc(c.n)}</b><i class="sl" aria-hidden="true">${c.r === "X" ? "覚" : c.r === "M" ? "神" : "伝"}</i></span>
+  <span class="lw"><img src="${c.i}" alt="" loading="lazy"><em>#${String(c.no).padStart(3, "0")}</em>${o.f === "H" ? `<u></u>` : ""}</span>
+  <span class="lu"><span class="kj">${TC_PACKS[c.u][1]}</span>${TC_PACKS[c.u][0]}${o.f === "H" ? `<em class="fn">HOLO</em>` : ""}<b>${TC_R[c.r][0]}</b></span>
+  <span class="ls"><span>NIV <b>${o.no ? "??" : c.p}</b></span><span>RANG <b>${o.no ? "?" : c.pop || "B"}</b></span></span></span><span class="fx" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
 const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="br">HANKO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="stk">判</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
 function tcHome(s){
   const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
