@@ -9148,7 +9148,7 @@ setInterval(voxRender, 2000);
 .pk3d-in{position:relative;transform-style:preserve-3d;transform:rotateY(var(--ry,-16deg)) rotateX(var(--rx,5deg));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 .pk3d-in.live{transition:transform .08s linear}
 .pk3d .pouch{max-width:none;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 14px 0 22px -12px rgba(255,255,255,.45),inset -18px 0 26px -14px rgba(0,0,0,.55)}
-.pk3d .edge{position:absolute;top:1.5%;bottom:1.5%;right:-5%;width:6%;background:linear-gradient(90deg,color-mix(in srgb,var(--pc) 45%,#000),color-mix(in srgb,var(--pc) 22%,#000));transform:rotateY(74deg);transform-origin:0 50%;border-radius:0 3px 3px 0}
+.pk3d .edge{position:absolute;top:1.5%;bottom:1.5%;right:-9%;width:10%;background:linear-gradient(90deg,color-mix(in srgb,var(--pc) 45%,#000),color-mix(in srgb,var(--pc) 22%,#000));transform:rotateY(74deg);transform-origin:0 50%;border-radius:0 3px 3px 0}
 .pk3d .sha{position:absolute;left:12%;right:12%;bottom:2%;height:9%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.7),transparent 68%);filter:blur(4px)}
 .pouch .stk{position:absolute;right:7%;top:62%;z-index:2;display:grid;place-items:center;width:20cqw;height:20cqw;border-radius:50%;font-family:var(--brand);font-weight:900;font-size:11cqw;color:#0b0a0e;background:conic-gradient(from 40deg,#fff,#c7ceda,#fff,#9aa5b5,#fff);box-shadow:0 1px 3px rgba(0,0,0,.5);transform:rotate(-12deg)}
 @media (prefers-reduced-motion:no-preference){.pk3d-in:not(.live){animation:pkfloat 4.6s ease-in-out infinite}.tcpk:hover .pk3d-in,.tcsh:hover .pk3d-in{transform:rotateY(14deg) rotateX(3deg) translateY(-6px);animation:none}}
@@ -9437,6 +9437,41 @@ setInterval(voxRender, 2000);
 .tcopen .osec i{font-style:normal;font-family:var(--brand)}
 .tearw.sec .pouch{box-shadow:0 0 0 2px var(--sc),0 0 60px color-mix(in srgb,var(--sc) 80%,transparent),0 14px 30px rgba(0,0,0,.55)}
 @media (prefers-reduced-motion:no-preference){.tcopen .osec{animation:pop .5s cubic-bezier(.2,1.3,.4,1) both}}
+/* ---- sachet en relief : ventre bombé, soudures écrasées, plis du film, grain, tranche ---- */
+.pouch .vol{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:inherit;
+  background:radial-gradient(ellipse 62% 38% at 46% 50%,rgba(255,255,255,.2),transparent 72%),
+    linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,.08) 7%,rgba(255,255,255,.3) 13%,transparent 27%,transparent 70%,rgba(0,0,0,.2) 88%,rgba(0,0,0,.55)),
+    linear-gradient(180deg,transparent 8.4%,rgba(0,0,0,.42) 9.2%,rgba(255,255,255,.34) 10.6%,transparent 17%,transparent 83%,rgba(0,0,0,.26) 89.4%,rgba(255,255,255,.22) 90.4%,transparent 91.4%),
+    linear-gradient(104deg,transparent 22%,rgba(255,255,255,.13) 23%,transparent 26.5%,transparent 61%,rgba(0,0,0,.14) 62%,rgba(255,255,255,.1) 63.2%,transparent 66%),
+    linear-gradient(81deg,transparent 36%,rgba(0,0,0,.1) 37%,rgba(255,255,255,.1) 38%,transparent 41%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2),inset 0 -10cqw 14cqw -8cqw rgba(0,0,0,.4),inset 0 9cqw 12cqw -8cqw rgba(255,255,255,.22)}
+.pouch .vol::after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");background-size:120px 120px;mix-blend-mode:overlay;opacity:.55}
+.pouch .br,.pouch .tb,.pouch .kj,.pouch .nm,.pouch .stk{z-index:2}
+.pouch .kj{filter:drop-shadow(0 .6cqw 0 rgba(255,255,255,.22)) drop-shadow(0 -.5cqw 0 rgba(0,0,0,.28))}
+.pouch.pouch.t1 .kj,.pouch.pouch.t2 .kj{filter:drop-shadow(0 .8cqw .4cqw rgba(0,0,0,.45))}
+.pouch::before,.pouch::after{z-index:3;box-shadow:inset 0 2px 2px rgba(255,255,255,.3),inset 0 -2px 3px rgba(0,0,0,.35)}
+/* épaisseur : une tranche décalée sous le sachet, puis l'ombre portée */
+.pouch{filter:drop-shadow(1.5px 1.5px 0 color-mix(in srgb,var(--pc) 38%,#17110a)) drop-shadow(2px 2.5px 0 color-mix(in srgb,var(--pc) 24%,#0b0806)) drop-shadow(0 16px 16px rgba(0,0,0,.5))}
+.pk3d .pouch{filter:drop-shadow(-1.5px 1px 0 color-mix(in srgb,var(--pc) 36%,#17110a))}
+.pk3d .edge{background:linear-gradient(90deg,color-mix(in srgb,var(--pc) 58%,#000),color-mix(in srgb,var(--pc) 30%,#000) 55%,color-mix(in srgb,var(--pc) 16%,#000));box-shadow:inset 0 9cqw 4px -6cqw rgba(255,255,255,.25)}
+.pk3d .sha{left:6%;right:2%;height:11%;filter:blur(6px)}
+/* ---- missions : une seule page, sections empilées, récompense en vignette ---- */
+.tcsec{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:26px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.tcsec h3{margin:0;font-family:var(--title);font-weight:900;font-size:clamp(17px,4.6vw,22px);letter-spacing:-.02em}
+.tcsec h3 i{font-style:normal;font-family:var(--brand);color:var(--accent);margin-left:8px;font-size:.8em}
+.tcsec em{font-style:normal;font-family:var(--mono);font-size:11.5px;letter-spacing:.8px;color:#0e0d12;background:var(--accent);border-radius:999px;padding:2px 9px}
+.tcsec span{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.tcsecp{color:var(--muted);font-size:13.5px;margin:0 0 12px;max-width:64ch}
+.tcm.tcm2{grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:11px 12px;background:var(--panel)}
+.tcm2 .rwt{display:grid;place-items:center;align-content:center;gap:1px;width:58px;height:58px;border-radius:12px;background:color-mix(in srgb,var(--rc) 16%,#0b0a0e);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--rc) 70%,transparent);color:var(--rc);font-family:var(--brand);font-weight:900;font-size:22px;line-height:1}
+.tcm2 .rwt small{margin:0;font-family:var(--mono);font-weight:500;font-size:9.5px;letter-spacing:.5px;color:var(--rc);text-transform:uppercase}
+.tcm2 i{grid-column:auto;margin:7px 0 5px;height:7px;border-radius:4px}
+.tcm2 > div small{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11px;margin:0;font-variant-numeric:tabular-nums}
+.tcm2.claimed{opacity:.55}
+.tcm2.done:not(.claimed){box-shadow:0 0 0 1px var(--ok),0 0 22px color-mix(in srgb,var(--ok) 25%,transparent)}
+@media (max-width:480px){.tcm.tcm2{grid-template-columns:auto minmax(0,1fr)}.tcm2 > button{grid-column:1 / -1}.tcm2 .rwt{width:50px;height:50px;font-size:19px}}
+.tchelp{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:12px 14px}
+.tchelp summary{cursor:pointer;font-weight:700}
 </style>
 <script>
 /* =====================================================================
@@ -9790,7 +9825,7 @@ const tcLuxCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc lx r-${
   <span class="lh"><span>#${String(c.no).padStart(3, "0")} · ${TC_R[c.r][0]}${o.f === "H" ? " · Holo" : ""}</span><i class="sl" aria-hidden="true">${c.r === "X" ? "覚" : c.r === "M" ? "神" : "伝"}</i></span>
   <span class="ln">${o.no ? "???" : esc(c.n)}</span>
   <span class="ls"><span>NIV <b>${o.no ? "??" : c.p}</b></span><span><span class="kj">${TC_PACKS[c.u][1]}</span> ${TC_PACKS[c.u][0]}</span><span>RANG <b>${o.no ? "?" : c.pop || "B"}</b></span></span><span class="fx" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
-const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="br">HANKO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="stk">判</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
+const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="vol" aria-hidden="true"></span><span class="br">HANKO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="stk">判</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
 function tcHome(s){
   const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
   const n = tcStock(s), own = Object.keys(s.own).length, todo = tcMissions(s).filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1);
@@ -9844,19 +9879,24 @@ function tcRender(){
   } else if (TC_TAB === "vitrine"){ html += vtHTML(s);
   } else {
     const all3 = mis.every(m => s.day.claimed.includes(m.k)), lr = tcLoginRw(s.login.n), nx = [1, 2, 3, 4, 5, 6, 7].map(k => s.login.n - ((s.login.n - 1) % 7) + k - 1);
-    const row = (m, cl, attr) => { const ok = m.cur >= m.g; return `<div class="tcm ${ok ? "done" : ""} ${ok || cl ? "" : "go"}" ${ok || cl ? "" : `data-tcgo="${m.k}" role="button" tabindex="0"`}><div><b>${esc(m.t)}</b><small>${m.cur}/${m.g} · récompense : ${tcRw(m.rw)}${ok || cl ? "" : " · touche pour y aller →"}</small></div><button class="${ok && !cl ? "primary" : ""}" ${attr}="${m.k}" ${ok && !cl ? "" : "disabled"}>${cl ? "✔ Réclamée" : ok ? "Réclamer" : "En cours"}</button><i><u style="width:${m.cur / m.g * 100}%"></u></i></div>`; };
+    const RC = ["#c9a36a", "#dfe5ee", "#f2c230", "#c9a2ff"], rwt = rw => rw.g ? `<span class="rwt" style="--rc:var(--accent)">◆<small>${rw.g}</small></span>` : `<span class="rwt" style="--rc:${RC[tcParse(rw.p).t]}">${TC_T[tcParse(rw.p).t].k || "札"}<small>${TC_T[tcParse(rw.p).t].n}</small></span>`;
+    const row = (m, cl, attr) => { const ok = m.cur >= m.g; return `<div class="tcm tcm2 ${ok ? "done" : ""} ${cl ? "claimed" : ""} ${ok || cl ? "" : "go"}" ${ok || cl ? "" : `data-tcgo="${m.k}" role="button" tabindex="0"`}>${rwt(m.rw)}<div><b>${esc(m.t)}</b><i><u style="width:${m.cur / m.g * 100}%"></u></i><small><span>${m.cur}/${m.g}</span><span>${ok || cl ? tcRw(m.rw) : "y aller →"}</span></small></div><button class="${ok && !cl ? "primary" : ""}" ${attr}="${m.k}" ${ok && !cl ? "" : "disabled"}>${cl ? "✔ Réclamée" : ok ? "Réclamer" : "En cours"}</button></div>`; };
     const left = l => l.filter(m => m.cur >= m.g).length, dn = (l, c) => l.filter(m => c.includes(m.k)).length;
+    const now = new Date(), inT = d => { const h = Math.max(0, (d - now) / 36e5); return h >= 48 ? "encore " + Math.ceil(h / 24) + " jours" : h >= 1 ? "encore " + Math.floor(h) + " h" : "encore " + Math.ceil(h * 60) + " min"; };
+    const tDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tWk = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((8 - now.getDay()) % 7 || 7)), tMo = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const sec = (t, kj, n, when) => `<div class="tcsec"><h3>${t}<i>${kj}</i></h3><em>${n}</em><span>${when}</span></div>`;
     html += `<div class="tcmhead"><div><span>À réclamer</span><b>${claim}</b></div><div><span>Série de connexion</span><b>Jour ${s.login.n}</b></div><div><span>Faites aujourd'hui</span><b>${left(mis)}/3</b></div><button class="primary" id="tcClaimAll" ${claim ? "" : "disabled"}>Tout réclamer</button></div>
-      <div class="tcsub tcsub4">${[["day", "Jour", dn(mis, s.day.claimed) + "/3"], ["week", "Semaine", dn(wks, wk.claimed) + "/" + wks.length], ["month", "Mois", dn(mos, mo.claimed) + "/" + mos.length], ["help", "Aide", "?"]].map(([k, n, b]) => `<button class="${TC_MSUB === k ? "sel" : ""}" data-tcms="${k}">${n}<small>${b}</small></button>`).join("")}</div>
-      <div class="panel ${TC_MSUB === "day" ? "" : "hidden"}"><div class="eyebrow">Série de connexion <i>· 連続</i></div><h2 style="margin:6px 0 10px">Jour ${s.login.n}</h2>
+      ${sec("Connexion", "連続", "Jour " + s.login.n, "nouveau cadeau · " + inT(tDay))}
       <div class="tcweek">${nx.map(n => { const r = tcLoginRw(n); return `<div class="${n < s.login.n || (n === s.login.n && s.login.got) ? "ok" : n === s.login.n ? "now" : ""}"><small>J${n}</small><b>${r.g ? r.g + " ◆" : TC_T[tcParse(r.p).t].k}</b></div>`; }).join("")}</div>
-      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr)}</button></div><p class="small" style="margin-top:8px">Reviens chaque jour : booster Argent (銀) tous les 3 jours, booster Or (金) le 7e. Un jour manqué remet la série à 1.</p></div>
-      <div class="panel ${TC_MSUB === "day" ? "" : "hidden"}"><div class="eyebrow">Missions du jour <i>· 任務</i></div><p class="muted" style="margin:6px 0 12px">Trois missions, renouvelées chaque jour à minuit. Les trois réclamées : un booster Argent en bonus.</p>
+      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr)}</button></div><p class="small" style="margin-top:8px">Booster Argent (銀) tous les 3 jours, booster Or (金) le 7e. Un jour manqué remet la série à 1.</p>
+      ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/3", inT(tDay))}
       <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
-        <div class="tcm ${all3 ? "done" : ""}"><div><b>Bonus : les trois missions</b><small>récompense : 1 booster Mélange Argent</small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / 3 * 100}%"></u></i></div></div></div>
-      <div class="panel ${TC_MSUB === "month" ? "" : "hidden"}"><div class="eyebrow">Missions du mois <i>· 月間</i></div><p class="muted" style="margin:6px 0 12px">Les plus dures, pour les plus belles récompenses : boosters Divin et Or, gros lots d'éclats. Elles repartent de zéro le 1er du mois.</p><div class="tcms">${mos.map(m => row(m, mo.claimed.includes(m.k), "data-tcmo")).join("")}</div></div>
-      <div class="panel ${TC_MSUB === "week" ? "" : "hidden"}"><div class="eyebrow">Missions de la semaine <i>· 週間</i></div><p class="muted" style="margin:6px 0 12px">Plus longues, mieux payées. Elles repartent de zéro chaque lundi.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}</div></div>
-      <div class="panel ${TC_MSUB === "help" ? "" : "hidden"}"><b>Comment gagner des boosters</b><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster Argent au minimum, avec trois fois plus de chances d'un Or ou d'un Divin.</li><li><b>Boosters gratuits</b> : un toutes les 8 heures, ${TC_FREE.max} en réserve au maximum.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></div>`;
+        <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : les trois missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / 3 * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/3</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
+      ${sec("Hebdomadaires", "週間", dn(wks, wk.claimed) + "/" + wks.length, inT(tWk))}
+      <p class="tcsecp">Plus longues, mieux payées. Elles repartent de zéro chaque lundi.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}</div>
+      ${sec("Mensuelles", "月間", dn(mos, mo.claimed) + "/" + mos.length, inT(tMo))}
+      <p class="tcsecp">Les plus dures, pour les plus belles récompenses : boosters Divin et Or, gros lots d'éclats. Elles repartent de zéro le 1er du mois.</p><div class="tcms">${mos.map(m => row(m, mo.claimed.includes(m.k), "data-tcmo")).join("")}</div>
+      <details class="tchelp"><summary>Comment gagner des boosters</summary><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster Argent au minimum, avec trois fois plus de chances d'un Or ou d'un Divin.</li><li><b>Boosters gratuits</b> : un toutes les 8 heures, ${TC_FREE.max} en réserve au maximum.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
   }
   $("#tcBoard").innerHTML = html;
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
@@ -10086,13 +10126,10 @@ try { tcHome(); } catch {}
 @keyframes vtfloat{0%,100%{translate:0 0}50%{translate:0 -5px}}
 @keyframes vtglitch{0%,86%,100%{translate:-5px 2px;opacity:.5}88%{translate:7px -3px;opacity:.85}92%{translate:-9px 1px;opacity:.7}}
 @keyframes vttext{to{background-position:-250% 0}}
-/* verrouillée : silhouette, tout en gris */
-.vt.lock{border:1.5px dashed var(--line);background:#0b0a0e;box-shadow:none;animation:none}
-.vt.lock .bg{filter:grayscale(1) brightness(.5);animation:none}
-.vt.lock .art img{filter:brightness(0) invert(.2);opacity:.9;animation:none}.vt.lock .art img.g{display:none}
-.vt.lock .fx{display:none}
-.vt.lock b{background:none;color:var(--muted);filter:none;text-shadow:none;animation:none}.vt.lock small{color:var(--muted)}
-.vt.lock .tr{background:var(--panel2);color:var(--muted)}
+/* verrouillée : la carte reste entièrement visible (elle doit donner envie), seul un cadenas la signale */
+.vt.lock .tr::after{content:"· 🔒 à débloquer";letter-spacing:.6px}
+.vt.lock .pg{max-width:70%;height:5px;background:rgba(255,255,255,.2)}
+.vt.lock small{color:#e9e5ee}
 .vtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .vtitem{display:grid;gap:6px}
 .vtitem .row{gap:6px}
