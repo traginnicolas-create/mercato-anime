@@ -9432,6 +9432,11 @@ setInterval(voxRender, 2000);
   .tcrow.tcfan > *:hover{transform:rotate(0) translateY(-18px) scale(1.04);z-index:3}
 }
 @media (max-width:699px){.tcrow.tcfan > .best{box-shadow:0 0 0 2px var(--accent),0 0 30px color-mix(in srgb,var(--accent) 50%,transparent)}.tcopen .otop b{display:none}.tcopen .otop{grid-template-columns:auto 1fr}}
+/* ---- booster secret : bandeau et halo à sa couleur ---- */
+.tcopen .osec{display:inline-flex;align-items:center;gap:10px;font-family:var(--title);font-weight:900;font-size:clamp(12.5px,3.4vw,15px);background:var(--sc);color:#0e0d12;border-radius:999px;padding:9px 18px;box-shadow:0 0 30px color-mix(in srgb,var(--sc) 60%,transparent);text-align:center}
+.tcopen .osec i{font-style:normal;font-family:var(--brand)}
+.tearw.sec .pouch{box-shadow:0 0 0 2px var(--sc),0 0 60px color-mix(in srgb,var(--sc) 80%,transparent),0 14px 30px rgba(0,0,0,.55)}
+@media (prefers-reduced-motion:no-preference){.tcopen .osec{animation:pop .5s cubic-bezier(.2,1.3,.4,1) both}}
 </style>
 <script>
 /* =====================================================================
@@ -9600,17 +9605,25 @@ const tcStock = s => Object.values(s.packs).reduce((a, b) => a + b, 0) + s.free.
 
 // ---- tirage ----
 function tcRoll(rate){ let r = Math.random() * Object.values(rate).reduce((a, b) => a + b, 0); for (const k in rate){ r -= rate[k]; if (r <= 0) return k; } return Object.keys(rate)[0]; }
-function tcOpenPack(s, key){
-  const {u, t} = tcParse(key), pool = tcCards().filter(c => u === "mix" || c.u === u), got = [], lv0 = tcLvl(s.xp || 0);
+// boosters secrets : un booster Classique peut se révéler en être un à l'ouverture (validés par l'utilisateur le 12 octobre 2026).
+// [clé, nom, kanji, une chance sur…, couleur, ce qu'il garantit]
+const TC_SECRET = [["divin", "Divin caché", "神", 500, "#c9a2ff", "Légendaire garantie, taux du booster Divin"], ["tresor", "Trésor", "宝", 200, "#7de3ff", "un objet Légendaire ou Mythique garanti"], ["eveil", "Éveil", "覚", 150, "#8fe9ff", "une transformation garantie"],
+  ["rouge", "Sceau rouge", "判", 100, "#ff5a36", "une version rare garantie (AR, Wanted ou Red Blood)"], ["dore", "Doré", "金", 40, "#f7c64a", "Épique garantie, taux du booster Or"]];
+const tcSecretRoll = () => { for (const sx of TC_SECRET) if (Math.random() < 1 / sx[3]) return sx[0]; return ""; };
+function tcOpenPack(s, key, sec){
+  const P = tcParse(key), u = P.u, t = sec === "divin" ? 3 : sec === "dore" ? 2 : P.t, pool = tcCards().filter(c => u === "mix" || c.u === u), got = [], lv0 = tcLvl(s.xp || 0);
   const pickOf = r => { for (let k = r === "X" ? 6 : Math.min(5, TC_ORDER.indexOf(r)); k >= 0; k--){ const l = pool.filter(c => c.r === TC_ORDER[k] && !got.some(g => g.id === c.id)); if (l.length) return l[Math.floor(Math.random() * l.length)]; } return pool[0]; };
   for (let slot = 0; slot < 5; slot++){
     let r = tcRoll(TC_T[t].rate[slot === 4 ? 1 : 0]);
     if (slot === 4){ if (s.pity.M + 1 >= TC_PITY.M) r = "M"; else if (s.pity.L + 1 >= TC_PITY.L && r !== "M") r = "L"; }
-    if (slot === 4 && Math.random() * 100 < TC_XRATE[t] && pool.some(c => c.r === "X")) r = "X";
-    const c = pickOf(r);
+    if (slot === 4 && (sec === "eveil" || Math.random() * 100 < TC_XRATE[t]) && pool.some(c => c.r === "X")) r = "X";
+    let c = pickOf(r), force = "";
+    if (slot === 4 && sec === "tresor"){ const l = pool.filter(x => x.obj && (x.r === "L" || x.r === "M") && !got.some(g => g.id === x.id)); if (l.length) c = l[Math.floor(Math.random() * l.length)]; }
+    if (slot === 4 && sec === "rouge"){ const l = pool.filter(x => tcVersOf(x).some(v => "ABWK".includes(v) && v) && !got.some(g => g.id === x.id)); if (l.length){ c = l[Math.floor(Math.random() * l.length)]; const vs = tcVersOf(c).filter(v => v && "ABWK".includes(v)); force = vs[Math.floor(Math.random() * vs.length)]; } }
     // finition : tirée à part pour chaque carte
     let f = "", x = Math.random() * 100; for (const k of ["Z", "G", "K", "W", "S", "B", "A", "H"]){ x -= TC_FIN[k][2] * TC_FINMUL[t]; if (x <= 0){ f = k; break; } }
     if (f && !tcVersOf(c).includes(f)) f = "H";
+    if (force) f = force;
     const newFin = !!f && !(s.fin[c.id] && s.fin[c.id][f]);
     got.push({...c, f, isNew: !s.own[c.id], newFin}); s.own[c.id] = (s.own[c.id] || 0) + 1;
     if (f){ s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; }
@@ -9718,8 +9731,10 @@ const tcArt = (c, f) => f === "W" ? [...tcAlt(c)].reverse()[0] || c.i : (f in TC
 // versions qui existent pour une carte : normale et Holo toujours, les autres seulement avec leur propre illustration
 // Les versions illustrées sont réservées aux personnages forts et populaires, pour rester rares : AR à partir d'Épique,
 // seconde AR (autre illustration, même nom « AR ») et SAR à partir de Légendaire (ou tête d'affiche), UR pour les Mythiques.
+// personnages sans version Red Blood (retirés à la demande de l'utilisateur)
+const TC_NOK = ["Nico Robin", "Nami"];
 function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 4 && r <= 5 || (c.pop === "S" && r >= 3), v = ["", "H"];
-  if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[5]) v.push("S"); if (top && a[1]) v.push("K"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
+  if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[5]) v.push("S"); if (top && a[1] && !TC_NOK.includes(c.n)) v.push("K"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
 const tcBestFin = (s, c) => ["Z", "G", "K", "S", "W", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
 const tcCard = (c, o = {}) => c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
@@ -9739,6 +9754,7 @@ function tcDrops(key){
     ${[...TC_ORDER].reverse().filter(r => pool.some(c => c.r === r)).map(r => { const l = pool.filter(c => c.r === r), p = one(l[0]);
       return `<div class="tierh r-${r}" style="--tc:var(--rc)">${TC_R[r][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${pct(p)} par booster pour chacune${p > 0 ? `, soit 1 booster sur ${Math.max(1, Math.round(100 / p))}` : ""}</small></div>
         <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${c.i}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
+    ${t === 0 ? `<div class="tierh" style="--tc:var(--accent)">Boosters secrets <small>un Classique peut en cacher un</small></div><div class="tcdrops" style="grid-template-columns:1fr">${[...TC_SECRET].reverse().map(sx => `<div style="border-left-color:${sx[4]};grid-template-columns:34px 1fr auto"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:${sx[4]};color:#0e0d12;font-family:var(--brand);font-weight:900">${sx[2]}</span><span><b>${sx[1]}</b> · ${sx[5]}</span><em style="color:var(--text);font-family:var(--mono)">1 sur ${sx[3]}</em></div>`).join("")}</div>` : ""}
     <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage. ✔ = tu as déjà ce personnage.</p></div>`;
   M.classList.remove("hidden"); M.scrollTo(0, 0); const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); };
 }
@@ -9805,7 +9821,7 @@ function tcRender(){
             ${oddsHTML(p.t)}
             <div class="row"><button class="primary" id="tcOpen">Ouvrir ce booster</button>${[3, 5, 10].map(q => `<button data-tcopen="${q}" ${(k === "free" ? s.free.n : s.packs[k] || 0) >= q ? "" : "disabled"}>×${q}</button>`).join("")}</div>
             <div class="row" style="margin-top:8px"><button data-tcdrop="${real}">Voir les ${n} persos et les taux</button></div>
-            <p class="small" style="margin-top:10px">Légendaire ou mieux garantie dans ${TC_PITY.L - s.pity.L} booster${TC_PITY.L - s.pity.L > 1 ? "s" : ""} au plus, Mythique dans ${TC_PITY.M - s.pity.M}.</p></div></div>`; })()
+            ${p.t === 0 ? `<p class="small" style="margin-top:10px">Environ 1 Classique sur 22 cache un <b>booster secret</b> : Doré, Sceau rouge, Éveil, Trésor ou Divin caché.</p>` : ""}<p class="small" style="margin-top:10px">Légendaire ou mieux garantie dans ${TC_PITY.L - s.pity.L} booster${TC_PITY.L - s.pity.L > 1 ? "s" : ""} au plus, Mythique dans ${TC_PITY.M - s.pity.M}.</p></div></div>`; })()
         : `<p class="note-off">Aucun booster en stock. Gagne des parties pour des éclats, termine une mission, ou attends le prochain gratuit${wait ? ` (dans ${wait})` : ""}.</p>`;
       html += inv.length > 1 ? `<h2 class="tch">Mes boosters</h2><div class="tcrail">${inv.map(x => { const r = x === "free" ? "mix:0" : x, p = tcParse(r); return `<button class="tcpk ${x === k ? "sel" : ""}" data-tcp="${x}" style="--pc:${TC_PACKS[p.u][2]}"><span class="cnt">${x === "free" ? s.free.n : s.packs[x]}</span>${tcPouch3D(r, "sm")}<span class="lb">${x === "free" ? "Gratuit" : tcName(r)}</span></button>`; }).join("")}</div>` : "";
       html += `<div class="tcluck"><b>Gratuits : ${s.free.n}/${TC_FREE.max}${wait ? ` · le prochain dans ${wait}` : ""}</b><span>Un booster gratuit toutes les 8 heures. Série de victoires : <b>${s.streak}</b>. Prochaine victoire : <b>+${TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * s.streak)} ◆</b> et <b>${Math.round(tcDropChance(s.streak + 1) * 100)} %</b> de chance de booster (${od.map((p, t) => `<em class="q${t}">${TC_T[t].n} ${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</em>`).join(" · ")}). Un <b>record battu</b> donne +${TC_GAIN.record} ◆ et un booster Argent ou mieux. Boosters gagnés en victoire aujourd'hui : ${s.day.vp}/${TC_WINCAP}.</span></div>`;
@@ -9858,8 +9874,8 @@ function tcRender(){
   // ouvrir un booster, ou plusieurs du même type d'un coup (même mise en scène, toutes les cartes à la suite)
   const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
-    let all = [], xp = 0, ups = []; for (let i = 0; i < q; i++){ const g = tcOpenPack(s, real); xp += g.xp; ups.push(...g.ups); all.push(...g); }
-    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q;
+    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 ? tcSecretRoll() : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
+    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
   document.querySelectorAll("[data-tcopen]").forEach(b => b.onclick = () => openN(+b.dataset.tcopen));
@@ -9951,7 +9967,7 @@ function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "K" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1;
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">判</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div><div class="tearw">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">判</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const end = () => { O.remove(); tcRender(); };
   $("#tcBackB").onclick = () => { TC_TAB = "packs"; end(); };
@@ -9960,6 +9976,7 @@ function tcOpening(key, got){
     const gain = got.filter(c => !c.isNew && !c.newFin).reduce((a, c) => a + TC_R[c.r][1] * (c.f ? TC_FIN[c.f][3] : 1), 0), have = (s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0), price = tcPrice(u, t);
     O.classList.add("res"); O.querySelector("h2").textContent = tcName(key);
     const row = mid.querySelector(".tcrow"); if (row && got.length <= 5){ row.classList.add("tcfan"); [...row.children].forEach((el, k) => { el.classList.remove("tcflip", "tcburst"); el.style.setProperty("--k", k === last ? 0 : k < 2 ? k - 2 : k - 1); el.style.order = k === last ? 3 : k < 2 ? k + 1 : k + 2; if (k === last) el.classList.add("best"); }); }
+    if ((got.secs || []).length) mid.insertAdjacentHTML("afterbegin", `<p class="osec" style="--sc:${TC_SECRET.find(x => x[0] === got.secs[0])[4]}">${got.secs.map(k => { const sx = TC_SECRET.find(x => x[0] === k); return `<i>${sx[2]}</i>Booster ${sx[1]} : ${sx[5]}`; }).join(" · ")}</p>`);
     mid.insertAdjacentHTML("afterbegin", `<p class="osum">${[nw && nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : ""), nf && nf + " nouvelle" + (nf > 1 ? "s" : "") + " version" + (nf > 1 ? "s" : ""), dup && dup + " doublon" + (dup > 1 ? "s" : "") + " (+" + gain + " ◆ si recyclé" + (dup > 1 ? "s" : "") + ")"].filter(Boolean).join(", ")}</p><p class="obest">Meilleure carte : ${esc(got[last].n)}</p>`);
     mid.insertAdjacentHTML("beforeend", `<span class="oxn">×${got.packs || 1}</span><p class="tcxp">+${got.xp} XP${got.ups.map(([l, tt]) => ` · <b>Niveau ${l} : booster ${TC_T[tt].n} offert</b>`).join("")}</p>`);
     bot.innerHTML = `<button class="primary" id="tcAgain" ${have || s.gems >= price ? "" : "disabled"}>Ouvrir un autre${have ? `<small>${have} en stock</small>` : `<small>${price} ◆</small>`}</button><button id="tcSwap">Changer de booster</button><button id="tcColl">Voir la collection</button>`;
