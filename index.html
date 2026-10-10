@@ -312,6 +312,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
   </div>
   <div class="hometop" id="joinBox">
     <div class="panel" id="profBox"></div>
+    <div class="panel" id="cpBox"></div>
     <div class="panel" id="quickJoin">
       <label class="f">Rejoindre une partie · 参加</label>
       <div class="row"><input id="qjName" maxlength="16" placeholder="Ton pseudo" style="flex:1;min-width:130px"><input id="qjCode" maxlength="4" placeholder="CODE" autocomplete="off" style="flex:0 1 120px;min-width:96px;text-transform:uppercase;letter-spacing:4px;font-family:var(--mono)"><button class="primary" id="qjGo">Rejoindre</button></div>
@@ -968,8 +969,9 @@ const canAct = i => ME === null || i === ME;
 /* ---------- Accueil ---------- */
 function renderHome(){
   $("#unis").innerHTML = Object.entries(UNI).map(([k,u]) => {
-    const pics = u.preview.map(n => DATA[k].find(c => c.n === n)).filter(Boolean);
-    return `<button class="uni ${k===cfg.u?"sel":""}" data-u="${k}"><div class="imgs">${pics.map(c=>img(c)).join("")}</div><div class="lbl">${u.name}</div></button>`;
+    // tuile sans photo (les trois portraits collés faisaient bas de gamme) : grand kanji de l'univers, couleur propre, nom en capitales larges
+    const [kj, col] = ({op: ["海", "#ff7a59"], db: ["龍", "#ffb347"], na: ["忍", "#6ea8ff"]})[k] || ["札", "#3fe0a8"];
+    return `<button class="uni uni2 ${k===cfg.u?"sel":""}" data-u="${k}" style="--uc:${col}"><span class="ukj" aria-hidden="true">${kj}</span><span class="umeta">${DATA[k].length} ${u.units}</span><span class="lbl">${u.name}</span><span class="uck" aria-hidden="true">✓</span></button>`;
   }).join("");
   $("#seeRoster").textContent = `Voir les ${DATA[cfg.u].length} personnages de ${UNI[cfg.u].name}`;
   document.querySelectorAll(".uni").forEach(b => b.onclick = () => { cfg.u = b.dataset.u; document.body.dataset.u = cfg.u; renderHome(); });
@@ -10788,6 +10790,113 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
 </script>
 
 <style>
+/* compte et sauvegarde */
+#cpBox .cprow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#cpBox input{flex:1;min-width:150px}
+#cpBox .cpst{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);margin-top:8px}
+#cpBox .cpst i{flex:none;width:9px;height:9px;border-radius:50%;background:var(--muted)}
+#cpBox .cpst.ok i{background:var(--ok)}#cpBox .cpst.ko i{background:var(--danger)}#cpBox .cpst.run i{background:var(--amber,#ffc45a)}
+#cpBox details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+#cpBox summary{cursor:pointer;font-weight:700;font-size:14px}
+#cpBox textarea{width:100%;min-height:74px;margin-top:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;font-family:var(--mono);font-size:11.5px;resize:vertical}
+.cpduel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+@media (max-width:520px){.cpduel{grid-template-columns:1fr}}
+.cpduel > div{border:1px solid var(--line);border-radius:14px;background:var(--panel2);padding:14px;display:grid;gap:6px;align-content:start}
+.cpduel b{font-family:var(--title);font-size:15px}
+.cpduel span{font-size:13.5px;color:var(--muted)}
+</style>
+<script>
+/* =====================================================================
+   COMPTE ET SAUVEGARDE (15 oct. 2026) — jusque-là toute la progression vivait dans le navigateur (localStorage) : une navigation privée,
+   un nettoyage de Safari ou un changement de téléphone, et tout était perdu.
+   1) Sauvegarde manuelle, partout : un code (ou un fichier) qui contient toute la progression, à recoller sur n'importe quel appareil.
+   2) Compte, sur le site seulement (claude.ai bloque les appels vers un autre serveur) : e-mail + mot de passe gérés par Supabase Auth.
+      Le mot de passe ne passe jamais par notre code autrement que pour être remis à Supabase, qui le stocke haché. La progression est rangée
+      dans la table « saves », une ligne par joueur, protégée par des règles (RLS) : chacun ne lit et n'écrit que sa ligne.
+   La configuration (adresse du projet et clé publique) vient de supabase.txt à la construction ; sans elle, seul le point 1 s'affiche.
+   Limite connue : la progression reste calculée sur l'appareil, le compte la conserve mais ne la vérifie pas (pas un anti-triche).
+   ===================================================================== */
+const CP = {url: "", key: "", sb: null, user: null, state: "", note: "", timer: 0, recov: false};
+const CP_SKIP = /^mercato-compte/, CP_MAX = 900000;
+const cpReady = () => !!CP.url && !!CP.key && !CP.url.includes("%%") && /^https:\/\//.test(CP.url);
+const cpOnSite = () => /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+// ---- la sauvegarde : toutes les clés « mercato-… » du navigateur, sauf la session du compte ----
+function svPack(){ const keys = {}; try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (!k.startsWith("mercato-") || CP_SKIP.test(k)) continue; const v = localStorage.getItem(k); if (v != null && v.length < 300000) keys[k] = v; } } catch {} return {v: 1, t: Date.now(), keys}; }
+function svValid(b){ return !!b && b.v === 1 && b.keys && typeof b.keys === "object" && Object.entries(b.keys).every(([k, v]) => k.startsWith("mercato-") && !CP_SKIP.test(k) && typeof v === "string") && JSON.stringify(b).length < CP_MAX; }
+function svSummary(b){ let own = 0, lvl = 0, name = "", games = 0; try { const c = JSON.parse(b.keys["mercato-cartes"] || "null"); if (c){ own = Object.keys(c.own || {}).length; lvl = typeof tcLvl === "function" ? tcLvl(c.xp || 0) : 0; } } catch {} try { name = JSON.parse(b.keys["mercato-profil"] || "null")?.name || ""; } catch {} try { games = (JSON.parse(b.keys["mercato-historique"] || "[]") || []).length; } catch {} return {own, lvl, name, games, empty: !own && !games}; }
+const svLine = b => { const s = svSummary(b); return s.empty ? "Aucune progression" : `${s.name ? esc(s.name) + " · " : ""}${s.own} carte${s.own > 1 ? "s" : ""} · niveau ${s.lvl} · ${s.games} partie${s.games > 1 ? "s" : ""} en mémoire`; };
+function svApply(b, extra = {}){ if (!svValid(b)) return false; try { const del = []; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k.startsWith("mercato-") && !CP_SKIP.test(k)) del.push(k); } CP.mute = true; del.forEach(k => localStorage.removeItem(k)); Object.entries(b.keys).forEach(([k, v]) => localStorage.setItem(k, v)); Object.entries(extra).forEach(([k, v]) => localStorage.setItem(k, JSON.stringify(v))); } catch { CP.mute = false; return false; } location.reload(); return true; }
+const svEncode = b => "HANKO1." + btoa(unescape(encodeURIComponent(JSON.stringify(b))));
+function svDecode(txt){ try { const t = String(txt || "").trim(); if (!t.startsWith("HANKO1.")) return null; const b = JSON.parse(decodeURIComponent(escape(atob(t.slice(7).replace(/\s+/g, ""))))); return svValid(b) ? b : null; } catch { return null; } }
+// ---- compte ----
+const cpErr = e => { const m = String(e?.message || e || ""); return /Invalid login/i.test(m) ? "E-mail ou mot de passe incorrect." : /already registered|already been registered/i.test(m) ? "Un compte existe déjà avec cet e-mail : connecte-toi." : /Email not confirmed/i.test(m) ? "Confirme d'abord ton adresse avec le lien reçu par e-mail." : /rate limit|too many/i.test(m) ? "Trop d'essais : patiente quelques minutes." : /password/i.test(m) && /least|short|weak/i.test(m) ? "Mot de passe trop court ou trop simple (8 caractères au minimum)." : /fetch|network|Failed/i.test(m) ? "Connexion impossible : vérifie ton accès à internet." : "Ça n'a pas marché (" + m.slice(0, 90) + ")."; };
+async function cpClient(){ if (CP.sb) return CP.sb; if (!cpReady() || !cpOnSite()) return null;
+  if (!window.supabase) await new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"; sc.onload = ok; sc.onerror = () => ko(new Error("Failed to load")); document.head.appendChild(sc); });
+  CP.sb = window.supabase.createClient(CP.url, CP.key, {auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "mercato-compte-session"}});
+  CP.sb.auth.onAuthStateChange((ev, sess) => { const was = CP.user?.id; CP.user = sess?.user || null; if (ev === "PASSWORD_RECOVERY") CP.recov = true; cpRender(); if (CP.user && CP.user.id !== was && ev !== "TOKEN_REFRESHED") cpSync(); });
+  const {data} = await CP.sb.auth.getSession(); CP.user = data?.session?.user || null; return CP.sb; }
+const cpSet = (state, note) => { CP.state = state; CP.note = note || ""; const el = document.querySelector("#cpBox .cpst"); if (el){ el.className = "cpst " + state; el.querySelector("span").textContent = CP.note; } };
+async function cpPush(){ const sb = await cpClient(); if (!sb || !CP.user) return false; const b = svPack(); if (!svValid(b)){ cpSet("ko", "Sauvegarde trop volumineuse : elle n'a pas été envoyée."); return false; }
+  const iso = new Date().toISOString(); cpSet("run", "Sauvegarde en cours…"); const {error} = await sb.from("saves").upsert({user_id: CP.user.id, data: b, updated_at: iso}); if (error){ cpSet("ko", cpErr(error)); return false; }
+  lsSet("mercato-compte-sync", Date.parse(iso)); lsSet("mercato-compte-uid", CP.user.id); lsSet("mercato-compte-dirty", false); cpSet("ok", "Progression sauvegardée à " + new Date().toLocaleTimeString("fr-FR", {hour: "2-digit", minute: "2-digit"})); return true; }
+// à la connexion et à l'ouverture du site : on compare la sauvegarde du compte et celle de l'appareil
+async function cpSync(){ const sb = await cpClient(); if (!sb || !CP.user || CP.syncing) return; CP.syncing = true;
+  try { cpSet("run", "Vérification de ta sauvegarde…"); const {data: row, error} = await sb.from("saves").select("data,updated_at").eq("user_id", CP.user.id).maybeSingle(); if (error){ cpSet("ko", cpErr(error)); return; }
+    const local = svPack(), linked = lsGet("mercato-compte-uid", "") === CP.user.id, last = lsGet("mercato-compte-sync", 0), dirty = !!lsGet("mercato-compte-dirty", false);
+    if (!row || !svValid(row.data)){ await cpPush(); return; }
+    const rT = Date.parse(row.updated_at) || 0, tags = {"mercato-compte-sync": rT, "mercato-compte-uid": CP.user.id, "mercato-compte-dirty": false};
+    if (linked && rT <= last + 1500){ if (dirty) await cpPush(); else cpSet("ok", "Progression à jour sur ton compte."); return; }      // cet appareil est le dernier à avoir sauvegardé
+    if (svSummary(local).empty || (linked && !dirty)){ cpSet("run", "Récupération de ta progression…"); svApply(row.data, tags); return; }   // rien à perdre ici : on prend le compte
+    cpAsk(row.data, rT, local, tags);                                                                                                       // deux progressions différentes : au joueur de choisir
+  } catch (e){ cpSet("ko", cpErr(e)); } finally { CP.syncing = false; } }
+function cpAsk(remote, rT, local, tags){ const M = $("#modal"); cpSet("run", "Deux sauvegardes différentes : choisis laquelle garder.");
+  M.innerHTML = `<div class="box" style="max-width:620px"><div class="head"><h2>Quelle progression garder ?</h2></div><p class="muted">Ton compte et cet appareil n'ont pas la même progression. Celle que tu ne choisis pas sera remplacée.</p>
+    <div class="cpduel"><div><b>Sur ton compte</b><span>${svLine(remote)}</span><span>Sauvegardée le ${new Date(rT).toLocaleString("fr-FR", {day: "numeric", month: "long", hour: "2-digit", minute: "2-digit"})}</span><button class="primary" id="cpKeepR">Garder celle du compte</button></div>
+      <div><b>Sur cet appareil</b><span>${svLine(local)}</span><span>Elle remplacera celle du compte.</span><button id="cpKeepL">Garder celle de cet appareil</button></div></div>
+    <p class="small">Dans le doute, garde celle qui a le plus de cartes.</p></div>`;
+  M.classList.remove("hidden"); M.scrollTo(0, 0); M.onclick = null;
+  $("#cpKeepR").onclick = () => { M.classList.add("hidden"); M.innerHTML = ""; svApply(remote, tags); };
+  $("#cpKeepL").onclick = async () => { M.classList.add("hidden"); M.innerHTML = ""; await cpPush(); }; }
+// sauvegarde automatique : quelques secondes après chaque changement, et quand on quitte la page
+{ const set = Storage.prototype.setItem; Storage.prototype.setItem = function(k){ const r = set.apply(this, arguments);
+    try { if (this === localStorage && !CP.mute && typeof k === "string" && k.startsWith("mercato-") && !CP_SKIP.test(k)){ set.call(localStorage, "mercato-compte-dirty", "true"); if (CP.user){ clearTimeout(CP.timer); CP.timer = setTimeout(() => { if (!CP.syncing) cpPush(); }, 4000); } } } catch {} return r; };
+  addEventListener("visibilitychange", () => { if (document.hidden && CP.user && lsGet("mercato-compte-dirty", false)){ clearTimeout(CP.timer); cpPush(); } }); }
+// ---- affichage ----
+function cpRender(){ const box = $("#cpBox"); if (!box) return; const acc = cpReady() && cpOnSite(), u = CP.user;
+  const manual = `<details ${acc ? "" : "open"}><summary>Sauvegarde manuelle (code ou fichier)</summary><p class="small" style="margin-top:8px">Un code qui contient toute ta progression. Garde-le dans tes notes ou envoie-le-toi : il se recolle ici, sur n'importe quel appareil.</p>
+      <div class="cprow" style="margin-top:8px"><button id="svCopy">Copier ma sauvegarde</button>${cpOnSite() ? `<button class="ghost" id="svFile">Télécharger le fichier</button>` : ""}<button class="ghost" id="svShow">Restaurer une sauvegarde</button></div>
+      <div id="svIn" class="hidden"><textarea id="svTxt" placeholder="Colle ici ton code de sauvegarde (il commence par HANKO1.)" spellcheck="false"></textarea><div class="cprow" style="margin-top:8px"><button class="primary" id="svGo">Restaurer</button><span class="small" id="svMsg"></span></div></div></details>`;
+  let top;
+  if (!acc) top = `<label class="f">Sauvegarde · 保存</label><p class="muted" style="margin:4px 0 0">${cpReady() ? `Le compte se crée et s'utilise sur le site du jeu : <b style="user-select:all">${esc(FR_SITE)}</b>. Ici, utilise la sauvegarde manuelle ci-dessous.` : "Ta progression est enregistrée dans ce navigateur seulement. Pour ne pas la perdre (navigation privée, nettoyage de Safari, changement de téléphone), fais une sauvegarde manuelle."}</p>`;
+  else if (CP.recov && u) top = `<label class="f">Nouveau mot de passe</label><div class="cprow"><input id="cpNew" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères au minimum"><button class="primary" id="cpNewGo">Enregistrer</button></div>`;
+  else if (u) top = `<label class="f">Compte · 保存</label><p style="margin:4px 0 0"><b>${esc(u.email || "")}</b></p><p class="small" style="margin-top:4px">Ta progression est sauvegardée sur ton compte, automatiquement. Connecte-toi avec ce compte sur un autre appareil pour la retrouver.</p>
+      <div class="cprow" style="margin-top:10px"><button class="primary" id="cpSaveNow">Sauvegarder maintenant</button><button class="ghost" id="cpOut">Se déconnecter</button></div>`;
+  else top = `<label class="f">Compte · 保存</label><p class="small" style="margin:4px 0 8px">Crée un compte pour garder ta progression, même si tu fermes Safari ou changes de téléphone.</p>
+      <div class="cprow"><input id="cpMail" type="email" autocomplete="email" inputmode="email" placeholder="Ton e-mail"><input id="cpPass" type="password" autocomplete="current-password" minlength="8" placeholder="Mot de passe (8 caractères min.)"></div>
+      <div class="cprow" style="margin-top:8px"><button class="primary" id="cpIn">Se connecter</button><button id="cpUp">Créer un compte</button><button class="ghost" id="cpForgot">Mot de passe oublié</button></div>`;
+  box.innerHTML = top + (acc ? `<div class="cpst ${CP.state}"><i></i><span>${esc(CP.note)}</span></div>` : "") + manual;
+  const cred = () => { const mail = $("#cpMail").value.trim(), pass = $("#cpPass").value; if (!/^\S+@\S+\.\S+$/.test(mail)){ cpSet("ko", "Écris une adresse e-mail valide."); return null; } if (pass.length < 8){ cpSet("ko", "Le mot de passe doit faire au moins 8 caractères."); return null; } return {email: mail, password: pass}; };
+  const run = async fn => { try { cpSet("run", "Un instant…"); const sb = await cpClient(); if (!sb) return cpSet("ko", "Connexion impossible."); await fn(sb); } catch (e){ cpSet("ko", cpErr(e)); } };
+  $("#cpIn") && ($("#cpIn").onclick = () => { const c = cred(); if (c) run(async sb => { const {error} = await sb.auth.signInWithPassword(c); if (error) cpSet("ko", cpErr(error)); }); });
+  $("#cpUp") && ($("#cpUp").onclick = () => { const c = cred(); if (c) run(async sb => { const {data, error} = await sb.auth.signUp({...c, options: {emailRedirectTo: FR_SITE}}); if (error) return cpSet("ko", cpErr(error)); if (!data.session) cpSet("ok", "Compte créé : ouvre le lien reçu par e-mail pour le confirmer, puis connecte-toi."); }); });
+  $("#cpForgot") && ($("#cpForgot").onclick = () => { const mail = $("#cpMail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(mail)) return cpSet("ko", "Écris d'abord ton e-mail ci-dessus."); run(async sb => { const {error} = await sb.auth.resetPasswordForEmail(mail, {redirectTo: FR_SITE}); cpSet(error ? "ko" : "ok", error ? cpErr(error) : "Si un compte existe, un lien de réinitialisation vient d'être envoyé."); }); });
+  $("#cpNewGo") && ($("#cpNewGo").onclick = () => { const p = $("#cpNew").value; if (p.length < 8) return cpSet("ko", "Le mot de passe doit faire au moins 8 caractères."); run(async sb => { const {error} = await sb.auth.updateUser({password: p}); if (error) return cpSet("ko", cpErr(error)); CP.recov = false; cpRender(); cpSet("ok", "Mot de passe changé."); }); });
+  $("#cpSaveNow") && ($("#cpSaveNow").onclick = () => cpPush());
+  $("#cpOut") && ($("#cpOut").onclick = () => run(async sb => { if (lsGet("mercato-compte-dirty", false)) await cpPush(); await sb.auth.signOut(); cpSet("", "Déconnecté. Ta progression reste sur cet appareil."); }));
+  $("#svCopy").onclick = async () => { const code = svEncode(svPack()); try { await navigator.clipboard.writeText(code); $("#svCopy").textContent = "Copié ✔"; } catch { $("#svIn").classList.remove("hidden"); $("#svTxt").value = code; $("#svTxt").select(); $("#svMsg").textContent = "Copie ce texte et garde-le."; } };
+  $("#svFile") && ($("#svFile").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([svEncode(svPack())], {type: "text/plain"})); a.download = "hanko-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".txt"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+  $("#svShow").onclick = () => { $("#svIn").classList.toggle("hidden"); $("#svTxt").value = ""; $("#svMsg").textContent = ""; $("#svTxt").focus(); };
+  $("#svGo").onclick = () => { const b = svDecode($("#svTxt").value); if (!b) return $("#svMsg").textContent = "Ce code n'est pas une sauvegarde valide.";
+    const M = $("#modal"); M.innerHTML = `<div class="box" style="max-width:520px"><div class="head"><h2>Restaurer cette sauvegarde ?</h2></div><p class="muted">Elle remplacera la progression de cet appareil.</p><div class="cpduel"><div><b>Sauvegarde</b><span>${svLine(b)}</span><span>Faite le ${new Date(b.t).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"})}</span></div><div><b>Cet appareil</b><span>${svLine(svPack())}</span></div></div><div class="row"><button class="primary" id="svYes">Restaurer</button><button class="ghost" id="svNo">Annuler</button></div></div>`;
+    M.classList.remove("hidden"); M.scrollTo(0, 0); M.onclick = null; $("#svNo").onclick = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#svYes").onclick = () => svApply(b, {"mercato-compte-dirty": true}); }; }
+try { cpRender(); } catch {}
+// demande au navigateur de ne pas effacer ces données de lui-même (sans effet en navigation privée)
+addEventListener("pointerdown", () => { try { navigator.storage?.persist?.(); } catch {} }, {once: true});
+// au chargement : si une session existe, on vérifie la sauvegarde
+if (cpReady() && cpOnSite()) cpClient().then(sb => { cpRender(); if (sb && CP.user) cpSync(); }).catch(() => {});
+</script>
+
+<style>
 /* =====================================================================
    COUCHE D'HABILLAGE COMMUNE — chargée en dernier, elle harmonise l'intérieur de tous les modes avec l'accueil.
    Règle : ne styler ici que des classes partagées entre plusieurs modes. Tout doit tenir sur un téléphone de 360 px de large.
@@ -11111,6 +11220,19 @@ button.primary:hover:not(:disabled){background:linear-gradient(115deg,#62ecbb,#d
 /* barre du haut dans une partie : filet dégradé dessous */
 section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;background-image:linear-gradient(color-mix(in srgb,var(--bg) 94%,transparent),color-mix(in srgb,var(--bg) 94%,transparent)),var(--grad-aurora);background-size:100% calc(100% - 1.5px),100% 100%;background-repeat:no-repeat}
 .vox.on{border-color:var(--cyan)}
+/* ---- choix de l'univers : tuiles épurées, sans photo ---- */
+.uni.uni2{height:132px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(ellipse 70% 120% at 100% 50%,color-mix(in srgb,var(--uc) 26%,transparent),transparent 70%),linear-gradient(135deg,#131d1b,#0b1211);display:grid;align-content:end;justify-items:start;gap:2px;padding:16px 18px;overflow:hidden;transition:transform .15s,border-color .2s,box-shadow .2s}
+.uni2::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(125deg,transparent 0 9px,rgba(255,255,255,.022) 9px 10px);pointer-events:none}
+.uni2::after{content:"";position:absolute;left:18px;bottom:0;width:44px;height:3px;border-radius:3px 3px 0 0;background:var(--uc)}
+.uni2 .ukj{position:absolute;right:-.06em;top:50%;translate:0 -52%;font-family:"Shippori Mincho B1",var(--brand);font-weight:800;font-size:150px;line-height:1;color:transparent;-webkit-text-stroke:1.2px color-mix(in srgb,var(--uc) 70%,transparent);opacity:.75;pointer-events:none;transition:opacity .2s,color .2s}
+.uni2 .umeta{position:relative;font-family:var(--mono);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--uc)}
+.uni2 .lbl{position:relative;inset:auto;padding:0;background:none;font-family:var(--title);font-weight:900;font-size:clamp(19px,2.6vw,24px);letter-spacing:-.02em;text-transform:uppercase;color:var(--text);margin-bottom:8px}
+.uni2 .uck{position:absolute;right:14px;top:12px;display:none;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--uc);color:#0b1211;font-size:13px;font-weight:900}
+.uni2:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--uc) 55%,var(--line))}
+.uni.uni2.sel{border-color:transparent;background:radial-gradient(ellipse 70% 120% at 100% 50%,color-mix(in srgb,var(--uc) 36%,transparent),transparent 70%) padding-box,linear-gradient(135deg,#16231f,#0b1211) padding-box,linear-gradient(120deg,var(--uc),color-mix(in srgb,var(--uc) 30%,#0b1211) 55%,var(--uc)) border-box;box-shadow:0 0 26px color-mix(in srgb,var(--uc) 26%,transparent)}
+.uni2.sel .ukj{color:color-mix(in srgb,var(--uc) 22%,transparent);opacity:1}
+.uni2.sel .uck{display:grid}
+@media (max-width:640px){.uni.uni2{height:104px}.uni2 .ukj{font-size:120px}}
 </style>
 <script>
 /* Accueil : bloc « À la une », fiche du jeu choisi, onglets du bas. */
