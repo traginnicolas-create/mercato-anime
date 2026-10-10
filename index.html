@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Mercato Anime</title>
+<title>Hanko</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -293,7 +293,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
 <!-- ACCUEIL -->
 <section id="home">
   <div class="sitebar">
-    <div class="logo"><div class="seal" aria-hidden="true">市</div><span>Mercato Anime</span></div>
+    <div class="logo"><div class="seal" aria-hidden="true">判</div><span>Hanko</span></div>
     <nav class="sitenav" aria-label="Familles de jeux"><a href="#cat1">Affrontement</a><a href="#cat2">Connaissance</a><a href="#cat3">Complicité</a><a href="#cat4">Voix</a><a href="#joinBox">Rejoindre</a></nav>
   </div>
   <div class="feature">
@@ -813,7 +813,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <li>La partie se termine quand les <b>deux équipes ont 5 personnages</b>. Le vainqueur est désigné par un <b>combat 5 contre 5</b> : niveau individuel, pouvoirs, haki, techniques et affrontements favorables comptent, pas la somme des points.</li>
     </ul>
   </div>
-  <footer class="sitefoot"><span>Mercato Anime · アニメ市場</span><span>Jeu de fans, sans lien avec les ayants droit des œuvres citées.</span></footer>
+  <footer class="sitefoot"><span>Hanko · 判子</span><span>Jeu de fans, sans lien avec les ayants droit des œuvres citées.</span></footer>
 </section>
 
 <!-- SALON EN LIGNE -->
@@ -8866,7 +8866,7 @@ setInterval(voxRender, 2000);
 .tcrow{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%}
 .tcrow > *{flex:0 0 calc((100% - 40px) / 5);max-width:150px}
 @media (max-width:640px){.tcrow > *{flex-basis:calc((100% - 20px) / 3)}}
-.tcback{aspect-ratio:5/7.4;border-radius:12px;border:1.5px solid var(--line);background:repeating-linear-gradient(135deg,#17151c 0 10px,#121016 10px 20px);display:grid;place-items:center;font-family:var(--brand);font-weight:900;font-size:34px;color:rgba(255,255,255,.18);padding:0}
+.tcback-old{display:grid;place-items:center;font-family:var(--brand);font-weight:900;font-size:34px;color:rgba(255,255,255,.18);padding:0}
 .tcopen .bot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .tcopen .bot button{border-radius:999px;padding:13px 24px}
 /* accueil et notification */
@@ -8886,9 +8886,9 @@ setInterval(voxRender, 2000);
 .tc.f-H .fx{opacity:.55;background:repeating-linear-gradient(115deg,rgba(255,90,138,.5) 0 8%,rgba(255,242,117,.5) 8% 16%,rgba(110,231,168,.5) 16% 24%,rgba(90,200,250,.5) 24% 32%,rgba(176,124,255,.5) 32% 40%);background-size:300% 300%;mix-blend-mode:color-dodge}
 .tc.f-A::after,.tc.f-S::after{background:linear-gradient(180deg,rgba(11,10,14,.5) 0,transparent 16%,transparent 66%,rgba(11,10,14,.88) 94%)}
 .tc.f-A{border-color:#e9ecf2;box-shadow:inset 0 0 0 3px rgba(11,10,14,.7),inset 0 0 0 4px rgba(233,236,242,.65),0 0 20px rgba(233,236,242,.25)}
-.tc.f-A .fx{opacity:.5;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.55) 0 1px,transparent 2px),radial-gradient(circle at 70% 60%,rgba(255,255,255,.5) 0 1px,transparent 2px),linear-gradient(125deg,transparent 35%,rgba(255,255,255,.3) 50%,transparent 62%);background-size:26px 26px,34px 34px,260% 100%;mix-blend-mode:screen}
+.tc.f-A .fx{opacity:.28;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.55) 0 1px,transparent 2px),radial-gradient(circle at 70% 60%,rgba(255,255,255,.5) 0 1px,transparent 2px),linear-gradient(125deg,transparent 35%,rgba(255,255,255,.3) 50%,transparent 62%);background-size:26px 26px,34px 34px,260% 100%;mix-blend-mode:screen}
 .tc.f-S{border-color:transparent;background:linear-gradient(#0b0a0e,#0b0a0e) padding-box,conic-gradient(from 0deg,#ff5a8a,#fff275,#6ee7a8,#5ac8fa,#b07cff,#ff5a8a) border-box;box-shadow:0 0 26px rgba(176,124,255,.5)}
-.tc.f-S .fx{opacity:.7;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.32) 0 .6px,transparent 1.4px),radial-gradient(circle at 75% 55%,rgba(255,255,255,.26) 0 .6px,transparent 1.4px),linear-gradient(115deg,rgba(255,90,138,.45),rgba(255,242,117,.4),rgba(110,231,168,.4),rgba(90,200,250,.45),rgba(176,124,255,.45));background-size:18px 18px,24px 24px,300% 300%;mix-blend-mode:color-dodge}
+.tc.f-S .fx{opacity:1;background:linear-gradient(171.5deg,transparent 0 37.6%,#0b0a0e 37.9% 38.5%,#fff 38.8% 40.6%,#0b0a0e 40.9% 41.5%,transparent 41.8%)!important;background-size:auto!important;mix-blend-mode:normal!important;animation:none!important;x-old:background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.32) 0 .6px,transparent 1.4px),radial-gradient(circle at 75% 55%,rgba(255,255,255,.26) 0 .6px,transparent 1.4px),linear-gradient(115deg,rgba(255,90,138,.45),rgba(255,242,117,.4),rgba(110,231,168,.4),rgba(90,200,250,.45),rgba(176,124,255,.45));background-size:18px 18px,24px 24px,300% 300%;mix-blend-mode:color-dodge}
 .tc.f-G{border-color:#f5c84a;box-shadow:inset 0 0 0 3px rgba(11,10,14,.75),inset 0 0 0 4px #f5c84a,0 0 28px rgba(245,200,74,.55)}
 .tc.f-G img{filter:sepia(1) saturate(2.4) hue-rotate(-14deg) brightness(1.02) contrast(1.15)}
 .tc.f-G .nm,.tc.f-G .tp b,.tc.f-G .ft{color:#ffe08a}
@@ -8900,6 +8900,52 @@ setInterval(voxRender, 2000);
 @keyframes tcsheen2{from{background-position:0 0,0 0,130% 0}to{background-position:0 0,0 0,-130% 0}}
 .tc.f-G .fx{animation-name:tcsheen3}
 @keyframes tcsheen3{from{background-position:0 0,130% 0}to{background-position:0 0,-130% 0}}
+/* ---- AR et SAR : mise en page « pleine illustration » (inspirée des Art Rare Pokémon et des Manga Rare du jeu de cartes One Piece) ---- */
+.tc > .sc,.tc > .mgw,.tc > .pw,.tc > .vk{position:absolute}
+.tc > .sc{inset:0;z-index:0;pointer-events:none}
+/* AR : le personnage en grand dans un décor de son univers, cadre fin, nom en cartouche */
+.tc.f-A > img{transform:scale(1.2);transform-origin:50% 14%}
+.tc.f-A.u-op > .sc{background:radial-gradient(130% 46% at 50% 108%,rgba(30,140,255,.85) 0 44%,transparent 46%),repeating-radial-gradient(circle at 18% 116%,transparent 0 8px,rgba(255,255,255,.3) 8px 9.5px),repeating-conic-gradient(from 200deg at 100% 0,rgba(255,196,80,.5) 0 5deg,transparent 5deg 13deg);mix-blend-mode:hard-light;opacity:.7}
+.tc.f-A.u-na > .sc{background:radial-gradient(60% 40% at 14% 12%,rgba(255,150,40,.7),transparent 70%),repeating-conic-gradient(from 0deg at 14% 12%,rgba(120,220,120,.42) 0 8deg,transparent 8deg 24deg),radial-gradient(120% 40% at 50% 110%,rgba(30,110,60,.85) 0 46%,transparent 48%);mix-blend-mode:hard-light;opacity:.65}
+.tc.f-A.u-db > .sc{background:radial-gradient(70% 90% at 50% 112%,rgba(255,220,80,.9),rgba(255,140,20,.5) 42%,transparent 70%),repeating-linear-gradient(90deg,transparent 0 9px,rgba(255,240,170,.3) 9px 10.5px),radial-gradient(50% 30% at 80% 8%,rgba(90,200,250,.6),transparent 70%);mix-blend-mode:hard-light;opacity:.68}
+.tc.f-A::after{background:linear-gradient(180deg,rgba(11,10,14,.45) 0,transparent 14%,transparent 70%,rgba(11,10,14,.92) 96%)}
+.tc.f-A .nm{font-family:var(--body);font-weight:900;letter-spacing:.06em;text-transform:uppercase;font-size:10.5px;border-top:1px solid rgba(233,236,242,.6);margin:auto 8px 0;padding:5px 0 0;text-shadow:0 1px 6px #000}
+.tc.f-A .tp b{color:#e9ecf2}
+/* SAR : case de manga en noir et blanc au-dessus, illustration couleur en dessous, puissance en gros, kanji vertical */
+.tc.f-S > .mgw{inset:0 0 56% 0;z-index:0;overflow:hidden;clip-path:polygon(0 0,100% 0,100% 76%,0 100%);background:#fff}
+.tc.f-S > .mgw img{position:absolute;left:-30%;top:-8%;width:160%;height:auto;max-width:none;aspect-ratio:4/5;object-fit:cover;object-position:50% 0;filter:grayscale(1) contrast(1.45) brightness(1.02)}
+.tc.f-S > .mgw::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(0,0,0,.3) 0 .9px,transparent 1.4px),repeating-conic-gradient(from 0deg at 50% 50%,rgba(0,0,0,.5) 0 1.2deg,transparent 1.2deg 8deg);background-size:4px 4px,auto;-webkit-mask-image:radial-gradient(circle at 50% 50%,transparent 42%,#000 86%);mask-image:radial-gradient(circle at 50% 50%,transparent 42%,#000 86%)}
+.tc.f-S > img{object-position:50% 0;top:30%;height:70%}
+.tc.f-S > .sc{background:linear-gradient(115deg,rgba(255,90,138,.5),rgba(255,242,117,.4),rgba(110,231,168,.4),rgba(90,200,250,.5),rgba(176,124,255,.5));background-size:300% 300%;mix-blend-mode:soft-light;-webkit-mask-image:linear-gradient(180deg,transparent 40%,#000 62%);mask-image:linear-gradient(180deg,transparent 40%,#000 62%)}
+.tc.f-S > .mgw{box-shadow:none}
+.tc.f-S > .vk::before{content:""}
+.tc.f-S > .mgw + .sc + .pw{}
+.tc.f-S > .gut{display:none}
+.tc.f-S::after{background:linear-gradient(180deg,rgba(11,10,14,.35) 0,transparent 12%,transparent 72%,rgba(11,10,14,.95) 97%)}
+.tc.f-S > .pw{left:6%;top:33%;z-index:2;font-family:var(--title);font-weight:900;font-style:italic;font-size:17px;line-height:1;letter-spacing:-.04em;color:#fff;-webkit-text-stroke:3px #0b0a0e;paint-order:stroke fill;text-shadow:2px 2px 0 var(--rc)}
+.tc.f-S > .vk{right:5%;top:46%;z-index:2;writing-mode:vertical-rl;font-family:var(--brand);font-weight:900;font-size:18px;line-height:1;color:#fff;-webkit-text-stroke:3px #0b0a0e;paint-order:stroke fill}
+.tc.f-S .nm{font-style:italic;text-shadow:0 2px 8px #000,2px 2px 0 #0b0a0e}
+.tc.f-S .tp{color:#0b0a0e;font-weight:500}.tc.f-S .tp b{color:#0b0a0e;background:#fff;border-radius:3px;padding:0 4px}
+.tcview .vf .tc.f-S > .pw,.tccine .cardw .tc.f-S > .pw{font-size:clamp(26px,9vw,44px)}
+.tcview .vf .tc.f-S > .vk,.tccine .cardw .tc.f-S > .vk{font-size:clamp(26px,8vw,40px)}
+.tcview .vf .tc.f-A .nm,.tccine .cardw .tc.f-A .nm{font-size:clamp(14px,4.4vw,19px);margin:auto 14px 0;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){.tc.f-S > .sc{animation:tcsar 7s linear infinite}}
+@keyframes tcsar{to{background-position:300% 0}}
+/* ---- dos de carte, un par rareté ---- */
+.tcbk{position:relative;display:block;padding:0;aspect-ratio:5/7.4;border-radius:12px;overflow:hidden;border:0;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--bc) 34%,var(--bd)) 0,var(--bd) 66%);container-type:inline-size;min-width:0}
+.tcbk::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 50%,color-mix(in srgb,var(--bc) 12%,transparent) 0 6deg,transparent 6deg 12deg),repeating-linear-gradient(135deg,transparent 0 9px,rgba(255,255,255,.025) 9px 10px)}
+.tcbk::after{content:"";position:absolute;inset:5%;border-radius:8px;border:1.5px solid var(--bc);box-shadow:inset 0 0 0 3px var(--bd),inset 0 0 0 4px color-mix(in srgb,var(--bc) 45%,transparent)}
+.tcbk svg{position:absolute;left:50%;top:50%;width:62%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--bc) 45%,transparent))}
+.tcbk .wm-off{position:absolute;left:0;right:0;z-index:1;text-align:center;font-family:var(--title);font-weight:900;font-size:max(6px,6.2cqw);letter-spacing:.32em;text-indent:.32em;color:var(--bc)}
+.tcbk .wm.t{top:11%}.tcbk .wm.b{bottom:11%;transform:rotate(180deg)}
+.tcbk.r-L,.tcbk.r-M,.tcbk.r-X{box-shadow:0 0 24px color-mix(in srgb,var(--bc) 45%,transparent)}
+.tcview .vb .tcbk{width:100%;height:100%;border-radius:16px}
+.tcview .vb .tcfiche{position:absolute;inset:0}
+/* AR II : même mise en page pleine illustration, cadre bleu acier et décor décalé */
+.tc.f-B{border-color:#9fc4ff;box-shadow:inset 0 0 0 3px rgba(11,10,14,.7),inset 0 0 0 4px rgba(159,196,255,.7),0 0 20px rgba(120,170,255,.3)}
+.tc.f-B > .sc{filter:hue-rotate(150deg);transform:scaleX(-1)}
+.tc.f-B .tp b{color:#9fc4ff}
+.tc.f-B > img{transform:scale(1.12);transform-origin:50% 22%}
 /* ---- carte en grand, en 3D ---- */
 .tcview{position:fixed;inset:0;z-index:97;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse 70% 55% at 50% 42%,color-mix(in srgb,var(--rc) 22%,#0b0a0e),rgba(6,5,9,.97) 75%);overflow:auto}
 .tcview .vx{justify-self:end;border-radius:999px}
@@ -8974,7 +9020,7 @@ setInterval(voxRender, 2000);
 .burst{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle,#fff,rgba(255,255,255,.2) 45%,transparent 70%)}
 .burst.r-L{background:radial-gradient(circle,#fff6d6,rgba(245,181,58,.75) 40%,transparent 72%)}
 .burst.r-M{background:radial-gradient(circle,#fff,rgba(255,90,54,.85) 34%,rgba(176,124,255,.55) 56%,transparent 76%)}
-.tcback.warm{border-color:color-mix(in srgb,#b07cff 55%,var(--line))}
+.tcback.warm{box-shadow:0 0 16px color-mix(in srgb,var(--rc) 45%,transparent)}
 .tcback.hot{border-color:var(--rc);color:var(--rc);box-shadow:0 0 26px color-mix(in srgb,var(--rc) 55%,transparent)}
 .tcburst{box-shadow:0 0 0 2px #b07cff,0 0 40px rgba(176,124,255,.7)}
 @media (prefers-reduced-motion:no-preference){
@@ -8996,6 +9042,7 @@ setInterval(voxRender, 2000);
 @keyframes tcglow{from{box-shadow:0 0 0 6px #b07cff,0 0 90px rgba(176,124,255,1)}to{box-shadow:0 0 0 2px #b07cff,0 0 40px rgba(176,124,255,.7)}}
 @keyframes tcquake{0%,100%{transform:none}20%{transform:translate(-7px,4px)}40%{transform:translate(6px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(5px,4px)}}
 /* ---- grande scène Légendaire / Mythique ---- */
+
 .tccine{position:fixed;inset:0;z-index:99;display:grid;place-items:center;align-content:center;gap:10px;overflow:hidden;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--rc) 30%,#0b0a0e) 0,#050407 72%);padding:20px;cursor:pointer}
 .tccine > *{grid-column:1}
 .tccine .fl{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
@@ -9041,6 +9088,119 @@ setInterval(voxRender, 2000);
 @keyframes tccard{0%{opacity:0;transform:translateY(80px) rotateY(540deg) scale(.2)}70%{opacity:1;transform:translateY(-8px) rotateY(0) scale(1.06)}100%{opacity:1;transform:none}}
 @keyframes tchue{to{filter:hue-rotate(360deg)}}
 @keyframes tcblink{0%,100%{opacity:.35}50%{opacity:1}}
+/* ---- révélation en plusieurs temps (tunnel, indices, silhouette) ---- */
+.tccine{--yc:var(--rc)}
+.tccine.yL{--yc:#f7c64a}.tccine.yM{--yc:#ff4a2e}.tccine.yX{--yc:#7de3ff}.tccine.yS{--yc:#ff7ab8}.tccine.yG{--yc:#ffd23f}.tccine.yE{--yc:#b07cff}
+.tccine .tun{position:absolute;inset:0;perspective:380px;overflow:hidden;pointer-events:none;transition:opacity .5s}
+.tccine .tun i{position:absolute;display:block}
+.tccine .tun .floor,.tccine .tun .ceil{left:-60%;right:-60%;height:62%;background:repeating-linear-gradient(0deg,transparent 0 38px,color-mix(in srgb,var(--yc) 70%,transparent) 38px 40px),repeating-linear-gradient(90deg,transparent 0 58px,color-mix(in srgb,var(--yc) 45%,transparent) 58px 60px);-webkit-mask-image:linear-gradient(0deg,#000,transparent 82%);mask-image:linear-gradient(0deg,#000,transparent 82%)}
+.tccine .tun .floor{bottom:-6%;transform:rotateX(76deg);transform-origin:50% 100%}
+.tccine .tun .ceil{top:-6%;transform:rotateX(-76deg) scaleY(-1);transform-origin:50% 0;opacity:.5}
+.tccine .tun .beam{top:-20%;bottom:-20%;width:26%;left:37%;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--yc) 34%,transparent),transparent);filter:blur(10px);transform-origin:50% 100%}
+.tccine .clue{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);display:none;align-items:center;gap:14px;white-space:nowrap;z-index:2}
+.tccine .clue.c2{top:38%;flex-direction:column;gap:2px}
+.tccine .clue .kj{display:grid;place-items:center;width:64px;height:64px;border-radius:16px;background:var(--yc);color:#0b0a0e;font-family:var(--brand);font-weight:900;font-size:36px}
+.tccine .clue b{font-family:var(--title);font-weight:900;font-size:clamp(22px,7vw,40px);letter-spacing:-.02em;text-shadow:0 0 26px var(--yc)}
+.tccine .clue span:not(.kj){font-family:var(--mono);font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--yc)}
+.tccine.s1 .clue.c1,.tccine.s2 .clue.c2{display:flex}
+.tccine.s3 .clue{opacity:.25}.tccine.s4 .clue{display:none!important}
+.tccine .hero{position:absolute;left:50%;top:56%;width:min(62vw,300px);aspect-ratio:4/5;transform:translate(-50%,-50%);display:none;z-index:1}
+.tccine .hero img{width:100%;height:100%;object-fit:cover;object-position:50% 0;filter:grayscale(1) brightness(.2) contrast(1.7) drop-shadow(0 0 18px var(--yc)) drop-shadow(0 0 40px var(--yc));-webkit-mask-image:radial-gradient(ellipse 60% 62% at 50% 44%,#000 58%,transparent 76%);mask-image:radial-gradient(ellipse 60% 62% at 50% 44%,#000 58%,transparent 76%)}
+.tccine.s3 .hero{display:block}.tccine.s4 .hero{display:none}
+.tccine .fl,.tccine .rays,.tccine .ring,.tccine .sp,.tccine .seal,.tccine .lab,.tccine .cardw,.tccine .who,.tccine .tap{display:none}
+.tccine.s4 .fl,.tccine.s4 .rays,.tccine.s4 .ring,.tccine.s4 .sp,.tccine.s4 .seal,.tccine.s4 .lab,.tccine.s4 .cardw,.tccine.s4 .who,.tccine.s4 .tap{display:block}
+.tccine.s4 .tun{opacity:.25}
+.tccine .rays{background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--yc) 46%,transparent) 0 5deg,transparent 5deg 16deg)}
+.tccine .ring{border-color:var(--yc)}.tccine .sp i{background:var(--yc);box-shadow:0 0 10px var(--yc)}.tccine .lab{color:var(--yc);text-shadow:0 0 22px var(--yc)}
+.tccine .seal{color:color-mix(in srgb,var(--yc) 22%,transparent)}
+/* styles : orage (Mythique, Éveil), cases de manga (SAR), pluie d'or (UR) */
+.tccine .bolts,.tccine .pans,.tccine .rain{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.tccine .bolts i{position:absolute;top:0;bottom:30%;width:12%;background:linear-gradient(180deg,#fff,var(--yc));clip-path:polygon(46% 0,62% 0,40% 38%,70% 38%,22% 100%,44% 52%,18% 52%);opacity:0;filter:drop-shadow(0 0 14px var(--yc))}
+.tccine .bolts i:nth-child(1){left:8%}.tccine .bolts i:nth-child(2){left:74%;transform:scaleX(-1)}.tccine .bolts i:nth-child(3){left:42%;bottom:55%}
+.tccine .pans i{position:absolute;left:-10%;right:-10%;height:20%;background:#fff;opacity:.92;transform:skewY(-7deg) translateX(-120%);box-shadow:0 0 0 4px #0b0a0e;background-image:repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,0,0,.5) 14px 15px)}
+.tccine .pans i:nth-child(1){top:4%}.tccine .pans i:nth-child(2){top:70%}.tccine .pans i:nth-child(3){top:86%;height:9%}
+.tccine .rain{background:radial-gradient(circle,#fff6c9 0 1.4px,transparent 2.6px),radial-gradient(circle,#ffd23f 0 1.8px,transparent 3px),radial-gradient(circle,#ffe58a 0 1.2px,transparent 2.4px);background-size:53px 71px,89px 97px,37px 61px}
+@media (prefers-reduced-motion:no-preference){
+  .tccine .tun .floor,.tccine .tun .ceil{animation:tcfloor .32s linear infinite}
+  .tccine .tun .b1{animation:tcbeam 1.8s ease-in-out infinite alternate}.tccine .tun .b2{animation:tcbeam 1.8s ease-in-out infinite alternate-reverse}
+  .tccine .clue{animation:tcclue .5s cubic-bezier(.2,1.3,.4,1) both}
+  .tccine .hero{animation:tchero 1.35s cubic-bezier(.3,.1,.3,1) both}
+  .tccine .hero img{animation:tcwalk .34s ease-in-out infinite alternate}
+  .tccine .bolts i{animation:tcbolt 1.3s steps(1) infinite}.tccine .bolts i:nth-child(2){animation-delay:.45s}.tccine .bolts i:nth-child(3){animation-delay:.8s}
+  .tccine .pans i{animation:tcpan .7s cubic-bezier(.2,.9,.3,1) both}.tccine .pans i:nth-child(2){animation-delay:.25s;animation-direction:reverse}.tccine .pans i:nth-child(3){animation-delay:.45s}
+  .tccine .rain{animation:tcrain 1.6s linear infinite}
+}
+@keyframes tcfloor{to{background-position:0 40px,0 0}}
+@keyframes tcbeam{from{transform:rotate(-24deg)}to{transform:rotate(24deg)}}
+@keyframes tcclue{from{opacity:0;transform:translate(-50%,-50%) scale(2.4)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes tchero{0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}25%{opacity:1}100%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
+@keyframes tcwalk{from{translate:0 0;rotate:-1.2deg}to{translate:0 -9px;rotate:1.2deg}}
+@keyframes tcbolt{0%,100%{opacity:0}4%{opacity:1}8%{opacity:.2}12%{opacity:.9}18%{opacity:0}}
+@keyframes tcpan{from{transform:skewY(-7deg) translateX(-120%)}to{transform:skewY(-7deg) translateX(0)}}
+@keyframes tcrain{to{background-position:0 142px,0 194px,0 122px}}
+/* ---- page des boosters : sachets en volume, vedette, boutique ---- */
+.tcsub{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border:1px solid var(--line);border-radius:16px;background:#0b0a0e;margin-bottom:16px}
+.tcsub button{border:0;background:transparent;border-radius:11px;padding:11px 8px;font-weight:900;font-size:14px;color:var(--muted)}
+.tcsub button.sel{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.tcsub small{display:block;font-family:var(--mono);font-weight:500;font-size:11px;color:var(--accent);margin-top:2px}
+.pk3d{position:relative;perspective:760px;width:100%;max-width:210px;margin:0 auto;padding:6% 8% 13%}
+.pk3d.sm{max-width:120px;padding:4% 6% 12%}
+.pk3d-in{position:relative;transform-style:preserve-3d;transform:rotateY(var(--ry,-16deg)) rotateX(var(--rx,5deg));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.pk3d-in.live{transition:transform .08s linear}
+.pk3d .pouch{max-width:none;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 14px 0 22px -12px rgba(255,255,255,.45),inset -18px 0 26px -14px rgba(0,0,0,.55)}
+.pk3d .edge{position:absolute;top:1.5%;bottom:1.5%;right:-5%;width:6%;background:linear-gradient(90deg,color-mix(in srgb,var(--pc) 45%,#000),color-mix(in srgb,var(--pc) 22%,#000));transform:rotateY(74deg);transform-origin:0 50%;border-radius:0 3px 3px 0}
+.pk3d .sha{position:absolute;left:12%;right:12%;bottom:2%;height:9%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.7),transparent 68%);filter:blur(4px)}
+.pouch .stk{position:absolute;right:7%;top:62%;z-index:2;display:grid;place-items:center;width:20cqw;height:20cqw;border-radius:50%;font-family:var(--brand);font-weight:900;font-size:11cqw;color:#0b0a0e;background:conic-gradient(from 40deg,#fff,#c7ceda,#fff,#9aa5b5,#fff);box-shadow:0 1px 3px rgba(0,0,0,.5);transform:rotate(-12deg)}
+@media (prefers-reduced-motion:no-preference){.pk3d-in:not(.live){animation:pkfloat 4.6s ease-in-out infinite}.tcpk:hover .pk3d-in,.tcsh:hover .pk3d-in{transform:rotateY(14deg) rotateX(3deg) translateY(-6px);animation:none}}
+@keyframes pkfloat{0%,100%{translate:0 0;rotate:0deg}50%{translate:0 -7px;rotate:1.2deg}}
+.tchero{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:8px 26px;align-items:center;border:1px solid var(--line);border-radius:22px;padding:22px;margin-bottom:18px;background:radial-gradient(ellipse 60% 90% at 16% 50%,color-mix(in srgb,var(--pc) 26%,transparent),transparent 70%),repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.018) 22px 23px),var(--panel);overflow:hidden}
+.tchero.t2{background:radial-gradient(ellipse 60% 90% at 16% 50%,rgba(247,198,74,.3),transparent 70%),var(--panel)}
+.tchero.t3{background:radial-gradient(ellipse 60% 90% at 16% 50%,rgba(176,124,255,.34),transparent 70%),var(--panel)}
+.tcstage{cursor:pointer;touch-action:pan-y}
+.tcinfo h2{font-size:clamp(22px,5vw,32px);font-weight:900;margin:6px 0 2px}
+.tcfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 4px}
+.tcfacts div{border:1px solid var(--line);border-radius:12px;background:#0b0a0e;padding:9px 10px}
+.tcfacts b{display:block;font-family:var(--title);font-weight:900;font-size:clamp(14px,3.6vw,18px);line-height:1.1}
+.tcfacts span{font-size:11.5px;color:var(--muted);line-height:1.25;display:block;margin-top:3px}
+@media (max-width:680px){.tchero{grid-template-columns:1fr;padding:16px}.tcstage .pk3d{max-width:170px}}
+.tcrail{display:flex;gap:10px;overflow-x:auto;padding:8px 2px 10px;margin-bottom:14px;scrollbar-width:none}
+.tcrail::-webkit-scrollbar{display:none}
+.tcrail .tcpk{flex:0 0 104px}
+.tcpk .lb{font-size:11.5px;line-height:1.2;text-align:center}
+.tcpk.sel .pouch{box-shadow:0 0 0 2px var(--text),0 0 34px color-mix(in srgb,var(--pc) 60%,transparent)}
+.tcpk .cnt{top:2px;right:8%}
+.tcshop{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tcsh{padding:14px 10px 12px;border-radius:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--qc,var(--pc)) 9%,#0b0a0e),#0b0a0e 60%);border-color:color-mix(in srgb,var(--qc,var(--line)) 40%,var(--line))}
+.tcsh .pw{width:100%;max-width:none}
+.tcsh ul{list-style:none;display:grid;gap:3px;font-size:12px;color:#b7b2bd;width:100%;text-align:left;margin:2px 0 6px}
+.tcsh li{display:flex;justify-content:space-between;gap:6px}.tcsh li em{font-style:normal;font-family:var(--mono);color:var(--text)}
+.tcsh .lk{border:0;background:none;font-size:12px;padding:4px;text-decoration:underline;text-underline-offset:3px}
+.tcdrops{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:8px 0 14px}
+.tcdrops div{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-left:3px solid var(--rc);border-radius:9px;background:#0b0a0e;padding:4px 8px 4px 4px;font-size:12.5px;line-height:1.2}
+.tcdrops img{width:34px;height:34px;border-radius:6px;object-fit:cover;object-position:50% 10%}
+.tcdrops em{font-style:normal;color:var(--ok)}
+.tcdrops .miss img{filter:grayscale(1) brightness(.6)}.tcdrops .miss span{color:var(--muted)}
+.tcm.go{cursor:pointer}.tcm.go:hover{border-color:var(--accent)}
+/* ---- ouverture : le haut du sachet se déchire ---- */
+.tearw{position:relative;isolation:isolate;width:min(56vw,230px)}
+.tcopen .tearw .pouch{width:100%;max-width:none}
+.tearw .pouch.torn{clip-path:polygon(0 12%,7% 9.5%,14% 12.5%,21% 9.5%,28% 12.5%,36% 10%,43% 12.5%,50% 9.5%,57% 12.5%,64% 10%,72% 12.5%,79% 9.5%,86% 12.5%,93% 10%,100% 12%,100% 100%,0 100%);animation:none;cursor:default}
+.tearw .strip{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,100% 12%,93% 10%,86% 12.5%,79% 9.5%,72% 12.5%,64% 10%,57% 12.5%,50% 9.5%,43% 12.5%,36% 10%,28% 12.5%,21% 9.5%,14% 12.5%,7% 9.5%,0 12%);animation:none;pointer-events:none;transform-origin:0 6%}
+.tearw .glowup{position:absolute;left:4%;right:4%;top:-34%;height:50%;z-index:-1;border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 50% 100%,#fff,color-mix(in srgb,var(--pc) 70%,transparent) 40%,transparent 72%);filter:blur(8px);opacity:0}
+.tearw .glowup.r-L{background:radial-gradient(ellipse at 50% 100%,#fff6d6,rgba(247,198,74,.9) 40%,transparent 72%)}
+.tearw .glowup.r-M{background:radial-gradient(ellipse at 50% 100%,#fff,rgba(255,90,54,.95) 36%,rgba(176,124,255,.6) 56%,transparent 76%)}
+.tearw .rise{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.tearw .rise .tcbk{position:absolute;left:50%;top:14%;width:52%;transform:translate(-50%,0);opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  .tearw .strip{animation:tcstrip .75s cubic-bezier(.4,0,.7,.3) both}
+  .tearw .glowup{animation:tcglowup 1.4s ease-out both}
+  .tearw .rise .tcbk{animation:tcrise .8s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(.25s + var(--n) * 90ms)}
+  .tearw .pouch.torn{animation:tcsink .7s ease-in .95s both}
+}
+@keyframes tcstrip{0%{transform:none;opacity:1}25%{transform:translate(4%,-2%) rotate(6deg)}100%{transform:translate(150%,-70%) rotate(52deg);opacity:0}}
+@keyframes tcglowup{0%{opacity:0;transform:scaleY(.3)}30%{opacity:1;transform:scaleY(1.2)}100%{opacity:.5;transform:scaleY(1)}}
+@keyframes tcrise{0%{opacity:0;transform:translate(-50%,40%) rotate(0)}30%{opacity:1}100%{opacity:1;transform:translate(calc(-50% + var(--x)),-92%) rotate(var(--r))}}
+@keyframes tcsink{to{transform:translateY(46%);opacity:0}}
 </style>
 <script>
 /* =====================================================================
@@ -9055,7 +9215,9 @@ const TC_KEY = "mercato-cartes";
 const TC_R = {C: ["Commune", 2, 25], P: ["Peu commune", 4, 50, "Peu com."], R: ["Rare", 10, 120], E: ["Épique", 30, 350], L: ["Légendaire", 100, 1200], M: ["Mythique", 300, 3500], X: ["Éveil", 100, 1200]};   // nom, éclats au recyclage, prix à la forge, nom court
 // finitions façon cartes à collectionner : chaque carte peut sortir en version brillante, « art » pleine carte, « art spécial » ou dorée.
 // [nom, sigle, chance en % par carte tirée, multiplicateur de valeur au recyclage, expérience pour une première]
-const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], S: ["Art spécial", "SAR", .5, 20, 150], G: ["Or", "UR", .15, 40, 300]};
+const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], B: ["Art rare II", "AR II", 1.4, 10, 80], S: ["Art spécial", "SAR", .5, 20, 150], G: ["Or", "UR", .15, 40, 300]};
+// illustration propre à chaque version (rang dans TCALT) : une version n'existe pour un personnage que s'il a cette illustration
+const TC_ARTK = {A: 0, S: 1, B: 2, G: 3};
 const TC_FINMUL = [1, 1.4, 2.2, 4];   // les finitions sortent plus souvent dans les meilleurs boosters
 // transformations (rareté « Éveil ») : cartes à part, tirées des images de formes déjà présentes dans le jeu (Dragon Ball seulement pour l'instant)
 const TC_FORMS = ["Son Goku (Super Saiyan)", "Son Goku (Super Saiyan 3)", "Son Goku (Super Saiyan 4)", "Son Goku (Super Saiyan Blue)", "Son Goku (Ultra Instinct)", "Vegeta (Super Saiyan)", "Vegeta (Super Saiyan 4)", "Vegeta (Super Saiyan Blue)", "Vegeta (Ultra Ego)",
@@ -9086,7 +9248,7 @@ const TC_POP = {
        A: ["Broly", "Krilin", "Bardock", "Cell", "Majin Buu", "Beerus", "Gogeta", "Vegeto", "C-18", "C-17", "Goku Black", "Tortue Géniale", "Bulma", "Zeno", "Jiren", "Whis"]},
   na: {S: ["Naruto Uzumaki", "Sasuke Uchiha", "Kakashi Hatake", "Itachi Uchiha", "Minato Namikaze", "Gaara"],
        A: ["Madara Uchiha", "Jiraiya", "Shikamaru Nara", "Hinata Hyûga", "Sakura Haruno", "Rock Lee", "Neji Hyûga", "Obito Uchiha", "Nagato (Pain)", "Deidara", "Tsunade", "Gaï Maito", "Killer B", "Hashirama Senju", "Tobirama Senju", "Shisui Uchiha", "Kushina Uzumaki", "Sasori", "Orochimaru", "Zabuza Momochi", "Haku"]}};
-let TC_ALL = null, TC_TAB = "packs", TC_PICK = null, TC_SHOP = {u: "mix"}, TC_F = {u: "all", r: "all", own: false};
+let TC_ALL = null, TC_TAB = "packs", TC_SUB = "mine", TC_PICK = null, TC_SHOP = {u: "mix"}, TC_F = {u: "all", r: "all", own: false};
 
 // toutes les cartes, numérotées, avec leur rareté
 function tcCards(){
@@ -9149,16 +9311,17 @@ function tcOpenPack(s, key){
     if (slot === 4 && Math.random() * 100 < TC_XRATE[t] && pool.some(c => c.r === "X")) r = "X";
     const c = pickOf(r);
     // finition : tirée à part pour chaque carte
-    let f = "", x = Math.random() * 100; for (const k of ["G", "S", "A", "H"]){ x -= TC_FIN[k][2] * TC_FINMUL[t]; if (x <= 0){ f = k; break; } }
+    let f = "", x = Math.random() * 100; for (const k of ["G", "S", "B", "A", "H"]){ x -= TC_FIN[k][2] * TC_FINMUL[t]; if (x <= 0){ f = k; break; } }
+    if (f && !tcVersOf(c).includes(f)) f = "H";
     const newFin = !!f && !(s.fin[c.id] && s.fin[c.id][f]);
     got.push({...c, f, isNew: !s.own[c.id], newFin}); s.own[c.id] = (s.own[c.id] || 0) + 1;
     if (f){ s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; }
   }
-  const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, S: 3.5, G: 4.5}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
+  const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, S: 3.5, G: 4.5}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
   got.sort((a, b) => wow(a) - wow(b));   // la meilleure carte se retourne en dernier
   const best = Math.max(...got.map(c => TC_ORDER.indexOf(c.r)));
   s.pity.M = best >= 5 ? 0 : s.pity.M + 1; s.pity.L = best >= 4 ? 0 : s.pity.L + 1;
-  s.opened++; s.day.open++; s.day.neu += got.filter(c => c.isNew).length;
+  s.opened++; s.day.open++; s.day.neu += got.filter(c => c.isNew).length; if (s.login){ const w = tcWeek(s); w.open++; w.neu += got.filter(c => c.isNew || c.newFin).length; }
   // expérience de collectionneur : surtout les nouvelles cartes ; chaque niveau offre un booster (Argent, Or tous les 5, Divin tous les 10)
   const xp = got.reduce((a, c) => a + (c.isNew ? TC_XP[c.r] : 1) + (c.newFin ? TC_FIN[c.f][4] : 0), 0); s.xp = (s.xp || 0) + xp; got.xp = xp; got.ups = [];
   for (let l = lv0 + 1; l <= tcLvl(s.xp); l++){ const tt = l % 10 === 0 ? 3 : l % 5 === 0 ? 2 : 1; tcGive(s, tcKey("mix", tt)); got.ups.push([l, tt]); }
@@ -9198,11 +9361,12 @@ function tcOnGame(mode, players, o){
   // compteurs à vie (l'historique, lui, ne garde que les 80 dernières parties)
   if (!s.stat){ const h = lsGet(HIST_KEY, []); s.stat = {g: Math.max(0, h.length - 1), w: 0, modes: [...new Set(h.map(x => x.mode.split(" · ")[0]))]}; }
   s.stat.g++; if (!s.stat.modes.includes(base)) s.stat.modes.push(base);
+  tcWeek(s).play++;
   d.play++; if (!d.modes.includes(base)) d.modes.push(base); if (u !== "mix" && !d.unis.includes(u)) d.unis.push(u);
   // gagné : partie coopérative réussie, ou gagnant désigné (toi si ton pseudo est dans la partie, sinon quelqu'un sur ce téléphone)
   const won = o.coop ? !!o.ok : Array.isArray(o.win) && o.win.length > 0 && (me && players.includes(me) ? o.win.includes(me) : true);
   const record = Date.now() - TC_REC < 20000; TC_REC = 0;
-  if (won){ d.win++; s.stat.w++; s.streak++; s.best = Math.max(s.best || 0, s.streak); d.vg = d.vg || 0;
+  if (won){ d.win++; s.week.win++; s.stat.w++; s.stat.mw = s.stat.mw || {}; s.stat.mw[base] = (s.stat.mw[base] || 0) + 1; s.streak++; s.best = Math.max(s.best || 0, s.streak); d.vg = d.vg || 0;
     // une victoire rapporte des éclats (crédits) ; parfois elle lâche en plus un booster, dont le niveau est tiré au sort
     const g = d.vg < TC_GAIN.cap ? TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * (s.streak - 1)) + (record ? TC_GAIN.record : 0) : 0; if (g){ d.vg++; s.gems += g; }
     const drop = d.vp < TC_WINCAP && (record || Math.random() < tcDropChance(s.streak)); let t = -1;
@@ -9230,16 +9394,68 @@ function tcMissions(s){
   for (let k = 0; k < 3; k++){ h = (h * 1103515245 + 12345) >>> 0; out.push(TC_MIS[idx.splice(h % idx.length, 1)[0]]); }
   return out.map(m => ({...m, t: m.k === "uni" ? `Termine une partie dans l'univers ${TC_PACKS[u][0]}` : m.t, cur: Math.min(m.g, m.v(s.day, u)), rw: m.rw.p === "uni" ? {p: tcKey(u, 0)} : m.rw}));
 }
+// missions de la semaine (du lundi au dimanche), plus longues et mieux payées
+const tcWeekKey = () => Math.floor((Date.now() / 864e5 + 3) / 7);
+const TC_WK = [{k: "wplay", t: "Termine 20 parties", g: 20, v: w => w.play, rw: {p: "mix:1"}}, {k: "wwin", t: "Gagne 10 parties", g: 10, v: w => w.win, rw: {p: "mix:2"}}, {k: "wopen", t: "Ouvre 15 boosters", g: 15, v: w => w.open, rw: {g: 200}}, {k: "wnew", t: "Obtiens 20 nouvelles cartes", g: 20, v: w => w.neu, rw: {g: 150}}];
+const tcWeek = s => { if (!s.week || s.week.k !== tcWeekKey()) s.week = {k: tcWeekKey(), play: 0, win: 0, open: 0, neu: 0, claimed: []}; return s.week; };
+// où aller pour accomplir une mission
+function tcGo(k){ if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
 const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + tcName(rw.p);
 // cadeau de connexion : éclats chaque jour, booster Argent tous les 3 jours, Or le 7e jour de chaque semaine de série
 const tcLoginRw = n => n % 7 === 0 ? {p: "mix:2"} : n % 3 === 0 ? {p: "mix:1"} : {g: 20 * Math.min(5, n)};
 
 // ---- affichage ----
-const tcBestFin = (s, c) => ["G", "S", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
-const tcCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc r-${c.r} ${o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}"` : ""}><img src="${c.i}" alt="" loading="lazy"><span class="fx" aria-hidden="true"></span>
+// chaque version d'une carte (normale, Holo, AR, SAR, UR) est une carte à part dans la collection
+const tcHas = (s, c, f) => f === "*" ? !!s.own[c.id] : f ? !!(s.fin[c.id] && s.fin[c.id][f]) : (s.own[c.id] || 0) - Object.values(s.fin[c.id] || {}).reduce((a, b) => a + b, 0) >= 1;
+const tcVers = s => tcCards().reduce((a, c) => a + tcVersOf(c).filter(f => tcHas(s, c, f)).length, 0);
+const tcAlt = c => { try { return ((window.__MA && window.__MA.TCALT) || {})[c.u]?.[c.n] || []; } catch { return []; } };
+// les illustrations alternatives sont dans trois fichiers à part, chargés après l'ouverture du jeu ; l'écran des cartes se redessine à leur arrivée
+["op", "db", "na"].forEach(u => { const e = document.createElement("script"); e.src = "ma-alt-" + u + ".js"; e.async = true; e.onerror = () => {}; document.head.appendChild(e); });
+window.addEventListener("tcalt", () => { try { if (!$("#tcg").classList.contains("hidden") && !document.querySelector(".tcopen,.tcview,.tccine")) tcRender(); } catch {} });
+const tcArt = (c, f) => (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || c.i;
+// versions qui existent pour une carte : normale et Holo toujours, les autres seulement avec leur propre illustration
+const tcVersOf = c => ["", "H", ...Object.keys(TC_ARTK).filter(f => tcAlt(c)[TC_ARTK[f]])];
+const tcBestFin = (s, c) => ["G", "S", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
+const tcCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "S" ? `<span class="mgw" aria-hidden="true"><img src="${c.i}" alt="" loading="lazy"></span><span class="sc" aria-hidden="true"></span><span class="pw" aria-hidden="true">${c.p * 100}</span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
-const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="br">MERCATO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
+// sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
+const tcPouch3D = (key, size = "") => `<div class="pk3d ${size}"><div class="pk3d-in">${tcPouch(key)}<i class="edge"></i></div><i class="sha"></i></div>`;
+// ce qu'un booster peut donner : chaque personnage avec sa chance par booster, et la chance de chaque version
+function tcDrops(key){
+  const {u, t} = tcParse(key), pool = tcCards().filter(c => u === "mix" || c.u === u), R = TC_T[t].rate, s = tcLoad(), M = $("#modal");
+  const pct = x => x >= 10 ? x.toFixed(0) + " %" : x >= 1 ? x.toFixed(1).replace(".", ",") + " %" : x >= .01 ? x.toFixed(2).replace(".", ",") + " %" : "< 0,01 %";
+  // chance qu'une carte précise sorte dans le booster : quatre emplacements normaux et l'emplacement garanti, partagés entre les cartes de sa rareté
+  const one = c => { const n = pool.filter(x => x.r === c.r).length || 1, xr = TC_XRATE[t] / 100; if (c.r === "X") return xr / n * 100;
+    const a = (R[0][c.r] || 0) / 100 / n, b = (R[1][c.r] || 0) / 100 * (1 - (pool.some(x => x.r === "X") ? xr : 0)) / n; return (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; };
+  M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><h2>Booster ${tcName(key)}</h2><span class="small">${pool.length} personnages possibles · 5 cartes · ${TC_T[t].g} ou mieux garantie</span></div><button class="ghost" id="tcClose">✕ Fermer</button></div>
+    <div class="tierh" style="--tc:var(--accent)">Versions <small>chance pour chaque carte tirée</small></div>
+    <div class="tcchips">${Object.keys(TC_FIN).map(k => `<button disabled>${TC_FIN[k][0]} · ${pct(TC_FIN[k][2] * TC_FINMUL[t])}</button>`).join("")}</div>
+    ${[...TC_ORDER].reverse().filter(r => pool.some(c => c.r === r)).map(r => { const l = pool.filter(c => c.r === r), p = one(l[0]);
+      return `<div class="tierh r-${r}" style="--tc:var(--rc)">${TC_R[r][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${pct(p)} par booster pour chacune${p > 0 ? `, soit 1 booster sur ${Math.max(1, Math.round(100 / p))}` : ""}</small></div>
+        <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${c.i}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
+    <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage. ✔ = tu as déjà ce personnage.</p></div>`;
+  M.classList.remove("hidden"); M.scrollTo(0, 0); const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); };
+}
+// dos de carte : un emblème et une couleur par rareté (cartes face cachée à l'ouverture, dos dans la vue 3D)
+const TC_EMB = {C: "fuda", P: "kizuna", R: "hanko", E: "zenkai", L: "tomoe", M: "crown", X: "bolt"};
+function tcEmblem(kind, c, d){
+  const rot = (n, f) => Array.from({length: n}, (_, k) => `<g transform="rotate(${k * 360 / n} 50 50)">${f}</g>`).join("");
+  const tomoe = `${rot(3, `<circle cx="50" cy="29" r="11" fill="${c}"/><path d="M50 18 A32 32 0 0 1 79 35.5" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`)}<circle cx="50" cy="50" r="4" fill="${c}"/>`;
+  const kj = (t, size = 34) => `<text x="50" y="${50 + size * .36}" text-anchor="middle" font-family="Zen Kaku Gothic New,sans-serif" font-weight="900" font-size="${size}" fill="${c}">${t}</text>`;
+  const body = {
+    fuda: `<rect x="20" y="16" width="42" height="60" rx="7" fill="none" stroke="${c}" stroke-width="4" transform="rotate(-14 41 46)"/><rect x="36" y="20" width="44" height="62" rx="7" fill="${c}" transform="rotate(8 58 51)"/><text x="58" y="63" text-anchor="middle" font-family="Zen Kaku Gothic New,sans-serif" font-weight="900" font-size="32" fill="${d}" transform="rotate(8 58 51)">札</text>`,
+    kizuna: `<circle cx="37" cy="50" r="23" fill="none" stroke="${c}" stroke-width="8"/><circle cx="63" cy="50" r="23" fill="none" stroke="${c}" stroke-width="8"/><path d="M50 31 A23 23 0 0 1 60 50" fill="none" stroke="${d}" stroke-width="12"/><path d="M50 31 A23 23 0 0 1 60 50" fill="none" stroke="${c}" stroke-width="8"/>`,
+    hanko: `<g transform="rotate(-6 50 50)"><rect x="13" y="13" width="74" height="74" rx="14" fill="${c}"/><rect x="19" y="19" width="62" height="62" rx="9" fill="none" stroke="${d}" stroke-width="2.5"/><text x="50" y="67" text-anchor="middle" font-family="Zen Kaku Gothic New,sans-serif" font-weight="900" font-size="46" fill="${d}">稀</text></g>`,
+    zenkai: `${rot(12, `<path d="M50 4 L55.5 30 L44.5 30 Z" fill="${c}"/>`)}<circle cx="50" cy="50" r="27" fill="${c}"/><circle cx="50" cy="50" r="21.5" fill="${d}"/>${kj("極", 28)}`,
+    tomoe: `<circle cx="50" cy="50" r="45" fill="none" stroke="${c}" stroke-width="3"/>${tomoe}`,
+    crown: `${rot(16, `<path d="M50 1 L54 18 L46 18 Z" fill="${c}"/>`)}<circle cx="50" cy="50" r="36" fill="${d}" stroke="${c}" stroke-width="3"/><g transform="translate(11 11) scale(.78)">${tomoe}</g>`,
+    bolt: `${rot(8, `<path d="M50 2 L57 26 L50 21 L43 26 Z" fill="${c}"/>`)}<circle cx="50" cy="50" r="30" fill="none" stroke="${c}" stroke-width="3"/><path d="M56 26 L38 53 L49 53 L43 76 L64 45 L52 45 Z" fill="${c}"/>`}[kind];
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
+}
+const TC_BKC = {C: ["#b9b4c0", "#1b1a20"], P: ["#6fdc9f", "#0e2018"], R: ["#6db6ff", "#0c1a2e"], E: ["#c39bff", "#1a1030"], L: ["#f7c64a", "#12163a"], M: ["#ff6a48", "#2a0d10"], X: ["#8fe9ff", "#0a1c2a"]};
+const tcBack = (r, o = {}) => `<${o.btn ? "button" : "div"} class="tcbk r-${r} ${o.cls || ""}" ${o.attr || ""} style="--bc:${TC_BKC[r][0]};--bd:${TC_BKC[r][1]};${o.style || ""}">${tcEmblem(TC_EMB[r], TC_BKC[r][0], TC_BKC[r][1])}</${o.btn ? "button" : "div"}>`;
+const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch t${t}" style="--pc:${TC_PACKS[u][2]}"><span class="sh"></span><span class="br">HANKO</span>${t ? `<span class="tb">${TC_T[t].k} ${TC_T[t].n}</span>` : ""}<span class="kj">${TC_PACKS[u][1]}</span><span class="stk">判</span><span class="nm">${TC_PACKS[u][0]}<small>5 CARTES</small></span></div>`; };
 function tcHome(s){
   const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
   const n = tcStock(s), own = Object.keys(s.own).length, todo = tcMissions(s).filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1);
@@ -9249,65 +9465,93 @@ function tcHome(s){
 function tcShow(tab){ if (tab) TC_TAB = tab; show("tcg"); tcRender(); }
 function tcRender(){
   const s = tcLoad(), all = tcCards(), own = Object.keys(s.own).length, dup = all.reduce((a, c) => a + tcDups(s, c).n, 0), mis = tcMissions(s);
-  const claim = mis.filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1);
+  const wk = tcWeek(s), wks = TC_WK.map(m => ({...m, cur: Math.min(m.g, m.v(wk))}));
+  const claim = mis.filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1) + wks.filter(m => m.cur >= m.g && !wk.claimed.includes(m.k)).length + (mis.every(m => s.day.claimed.includes(m.k)) && !s.day.bonus ? 1 : 0);
   const lv = tcLvl(s.xp), x0 = tcLvlNeed(lv), x1 = tcLvlNeed(lv + 1);
-  let html = `<div class="tcstats"><div><b>${own}/${all.length}</b><span>Cartes · ${Math.floor(own / all.length * 100)} %</span></div><div><b>Niv. ${lv}</b><span>${s.xp - x0}/${x1 - x0} XP</span><i class="xp"><u style="width:${(s.xp - x0) / (x1 - x0) * 100}%"></u></i></div><div><b>${s.gems} ◆</b><span>Éclats</span></div><div><b>${tcStock(s)}</b><span>Boosters</span></div></div>
+  const vers = tcVers(s), versAll = all.reduce((a, c) => a + tcVersOf(c).length, 0);
+  let html = `<div class="tcstats"><div><b>${vers}/${versAll}</b><span>Cartes · ${own}/${all.length} persos</span></div><div><b>Niv. ${lv}</b><span>${s.xp - x0}/${x1 - x0} XP</span><i class="xp"><u style="width:${(s.xp - x0) / (x1 - x0) * 100}%"></u></i></div><div><b>${s.gems} ◆</b><span>Éclats</span></div><div><b>${tcStock(s)}</b><span>Boosters</span></div></div>
     <div class="tctabs">${[["packs", "Boosters", tcStock(s)], ["album", "Collection", ""], ["missions", "Missions", claim || ""], ["vitrine", "Vitrine", ""]].map(([k, n, b]) => `<button class="${TC_TAB === k ? "sel" : ""}" data-tct="${k}">${n}${b ? `<small>${b}</small>` : ""}</button>`).join("")}</div>`;
   if (TC_TAB === "packs"){
     const keys = Object.keys(s.packs).filter(k => s.packs[k] > 0).sort((a, b) => tcParse(b).t - tcParse(a).t || a.localeCompare(b)), inv = [...(s.free.n ? ["free"] : []), ...keys];
     if (!inv.includes(TC_PICK)) TC_PICK = inv[0] || null;
     const k = TC_PICK, real = k === "free" ? "mix:0" : k, left = s.free.n < TC_FREE.max ? Math.max(0, s.free.t + TC_FREE.every - Date.now()) : 0, od = tcWinOdds(s.streak + 1, false);
-    html += `<div class="tcluck"><b>Série de victoires : ${s.streak}</b><span>Prochaine victoire : <b>+${TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * s.streak)} ◆</b> et <b>${Math.round(tcDropChance(s.streak + 1) * 100)} %</b> de chance de booster (${od.map((p, t) => `<em class="q${t}">${TC_T[t].n} ${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</em>`).join(" · ")}). Un <b>record battu</b> donne +${TC_GAIN.record} ◆ et un booster Argent ou mieux à coup sûr.</span></div>
-      <h2 class="tch">Mes boosters</h2>
-      ${inv.length ? `<div class="tcpacks">${inv.map(x => { const r = x === "free" ? "mix:0" : x, p = tcParse(r); return `<button class="tcpk ${x === k ? "sel" : ""}" data-tcp="${x}" style="--pc:${TC_PACKS[p.u][2]}"><span class="cnt">${x === "free" ? s.free.n : s.packs[x]}</span>${tcPouch(r)}<span class="lb">${x === "free" ? "Gratuit" : tcName(r)}</span></button>`; }).join("")}</div>` : `<p class="note-off">Aucun booster en stock. Gagne des parties pour des éclats, termine une mission, ou attends le prochain gratuit${left ? ` (dans ${Math.floor(left / 36e5)} h ${String(Math.floor(left % 36e5 / 6e4)).padStart(2, "0")})` : ""}.</p>`}
-      ${k ? (() => { const p = tcParse(real), T = TC_T[p.t]; return `<div class="panel"><div class="eyebrow">Booster choisi <i>· 札</i></div><h2 style="margin:6px 0 2px">${k === "free" ? "Gratuit · " : ""}${tcName(real)}</h2><p class="muted">${TC_PACKS[p.u][4]} · ${all.filter(c => p.u === "mix" || c.u === p.u).length} personnages possibles · 5 cartes, dont une <b>${T.g} ou mieux</b> garantie.</p>
-        <div class="row"><button class="primary" id="tcOpen">Ouvrir ce booster</button></div>
-        <h2 style="margin-top:16px;font-size:16px">Chance par booster ${T.n}, hors garanties</h2>
-        <div class="tcodds">${["R", "E", "L", "M"].map(r => { const pr = tcOdds(r, p.t); return `<div class="r-${r}"><span>${TC_R[r][0]}${r === "M" ? "" : " ou mieux"}</span><i><u style="width:${Math.max(2, pr)}%"></u></i><b>${pr >= 10 ? pr.toFixed(0) : pr.toFixed(1)} %</b></div>`; }).join("")}</div>
-        <p class="small">Garanties : une Légendaire ou mieux au plus tard au ${TC_PITY.L}e booster sans gros tirage (encore ${TC_PITY.L - s.pity.L}), une Mythique au plus tard au ${TC_PITY.M}e sans Mythique (encore ${TC_PITY.M - s.pity.M}).</p></div>`; })() : ""}
-      <p class="small" style="margin:10px 0 18px">Boosters gratuits : ${s.free.n}/${TC_FREE.max}${left ? ` · le prochain dans ${Math.floor(left / 36e5)} h ${String(Math.floor(left % 36e5 / 6e4)).padStart(2, "0")}` : ""} (un toutes les 8 heures). Boosters gagnés en victoire aujourd'hui : ${s.day.vp}/${TC_WINCAP}.</p>
-      <h2 class="tch">Boutique</h2>
-      <div class="panel"><div class="tcchips">${Object.keys(TC_PACKS).map(u => `<button class="${TC_SHOP.u === u ? "sel" : ""}" data-tcsu="${u}">${TC_PACKS[u][0]}</button>`).join("")}</div>
-        <div class="tcshop">${TC_T.map((T, t) => { const pr = tcPrice(TC_SHOP.u, t); return `<div class="tcsh q${t}"><div class="pw">${tcPouch(tcKey(TC_SHOP.u, t))}</div><b>${T.n}</b><small>${T.g} garantie<br>Légendaire+ ${tcOdds("L", t) >= 10 ? tcOdds("L", t).toFixed(0) : tcOdds("L", t).toFixed(1)} %<br>Mythique ${tcOdds("M", t) >= 10 ? tcOdds("M", t).toFixed(0) : tcOdds("M", t).toFixed(1)} %</small><button data-tcbuy="${t}" ${s.gems >= pr ? "" : "disabled"}>${pr} ◆</button></div>`; }).join("")}</div></div>`;
+    const wait = left ? `${Math.floor(left / 36e5)} h ${String(Math.floor(left % 36e5 / 6e4)).padStart(2, "0")}` : "";
+    const oddsHTML = t => `<div class="tcodds">${["R", "E", "L", "M"].map(r => { const pr = tcOdds(r, t); return `<div class="r-${r}"><span>${TC_R[r][0]}${r === "M" ? "" : " ou mieux"}</span><i><u style="width:${Math.max(2, pr)}%"></u></i><b>${pr >= 10 ? pr.toFixed(0) : pr.toFixed(1)} %</b></div>`; }).join("")}</div>`;
+    html += `<div class="tcsub"><button class="${TC_SUB === "mine" ? "sel" : ""}" data-tcsub="mine">Gratuits et gagnés<small>${tcStock(s)}</small></button><button class="${TC_SUB === "shop" ? "sel" : ""}" data-tcsub="shop">Boutique<small>${s.gems} ◆</small></button></div>`;
+    if (TC_SUB === "mine"){
+      html += k ? (() => { const p = tcParse(real), T = TC_T[p.t], n = all.filter(c => p.u === "mix" || c.u === p.u).length;
+        return `<div class="tchero t${p.t}" style="--pc:${TC_PACKS[p.u][2]}"><div class="tcstage" id="tcStage">${tcPouch3D(real)}</div>
+          <div class="tcinfo"><div class="eyebrow">${k === "free" ? "Booster gratuit" : "Booster choisi"} <i>· 札</i></div><h2>${tcName(real)}</h2><p class="muted">${TC_PACKS[p.u][4]}</p>
+            <div class="tcfacts"><div><b>5</b><span>cartes</span></div><div><b>${T.g}</b><span>ou mieux, garantie</span></div><div><b>${n}</b><span>persos possibles</span></div></div>
+            ${oddsHTML(p.t)}
+            <div class="row"><button class="primary" id="tcOpen">Ouvrir ce booster</button><button data-tcdrop="${real}">Voir les ${n} persos et les taux</button></div>
+            <p class="small" style="margin-top:10px">Légendaire ou mieux garantie dans ${TC_PITY.L - s.pity.L} booster${TC_PITY.L - s.pity.L > 1 ? "s" : ""} au plus, Mythique dans ${TC_PITY.M - s.pity.M}.</p></div></div>`; })()
+        : `<p class="note-off">Aucun booster en stock. Gagne des parties pour des éclats, termine une mission, ou attends le prochain gratuit${wait ? ` (dans ${wait})` : ""}.</p>`;
+      html += inv.length > 1 ? `<h2 class="tch">Mes boosters</h2><div class="tcrail">${inv.map(x => { const r = x === "free" ? "mix:0" : x, p = tcParse(r); return `<button class="tcpk ${x === k ? "sel" : ""}" data-tcp="${x}" style="--pc:${TC_PACKS[p.u][2]}"><span class="cnt">${x === "free" ? s.free.n : s.packs[x]}</span>${tcPouch3D(r, "sm")}<span class="lb">${x === "free" ? "Gratuit" : tcName(r)}</span></button>`; }).join("")}</div>` : "";
+      html += `<div class="tcluck"><b>Gratuits : ${s.free.n}/${TC_FREE.max}${wait ? ` · le prochain dans ${wait}` : ""}</b><span>Un booster gratuit toutes les 8 heures. Série de victoires : <b>${s.streak}</b>. Prochaine victoire : <b>+${TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * s.streak)} ◆</b> et <b>${Math.round(tcDropChance(s.streak + 1) * 100)} %</b> de chance de booster (${od.map((p, t) => `<em class="q${t}">${TC_T[t].n} ${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</em>`).join(" · ")}). Un <b>record battu</b> donne +${TC_GAIN.record} ◆ et un booster Argent ou mieux. Boosters gagnés en victoire aujourd'hui : ${s.day.vp}/${TC_WINCAP}.</span></div>`;
+    } else {
+      html += `<div class="tcchips">${Object.keys(TC_PACKS).map(u => `<button class="${TC_SHOP.u === u ? "sel" : ""}" data-tcsu="${u}">${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</button>`).join("")}</div>
+        <div class="tcshop">${TC_T.map((T, t) => { const pr = tcPrice(TC_SHOP.u, t), key = tcKey(TC_SHOP.u, t), f = x => x >= 10 ? x.toFixed(0) : x.toFixed(1); return `<div class="tcsh q${t}" style="--pc:${TC_PACKS[TC_SHOP.u][2]}"><div class="pw">${tcPouch3D(key, "sm")}</div><b>${T.n}</b>
+          <ul><li>${T.g} garantie</li><li>Légendaire+ <em>${f(tcOdds("L", t))} %</em></li><li>Mythique <em>${f(tcOdds("M", t))} %</em></li><li>Éveil <em>${f(TC_XRATE[t])} %</em></li><li>Versions rares ×${TC_FINMUL[t]}</li></ul>
+          <button class="${s.gems >= pr ? "primary" : ""}" data-tcbuy="${t}" ${s.gems >= pr ? "" : "disabled"}>${pr} ◆</button><button class="ghost lk" data-tcdrop="${key}">Persos et taux</button></div>`; }).join("")}</div>
+        <p class="small" style="margin-top:12px">Tu as <b>${s.gems} ◆</b>. Les éclats se gagnent en remportant des parties, avec les missions, les cartes de visite et le recyclage des doublons.</p>`;
+    }
   } else if (TC_TAB === "album"){
-    const f = TC_F, list = all.filter(c => (f.u === "all" || c.u === f.u) && (f.r === "all" || c.r === f.r) && (!f.own || s.own[c.id]));
+    const f = TC_F, ver = f.f ?? "*", list = all.filter(c => (ver === "*" || tcVersOf(c).includes(ver)) && (f.u === "all" || c.u === f.u) && (f.r === "all" || c.r === f.r) && (!f.own || tcHas(s, c, ver)));
     const gain = all.reduce((a, c) => a + tcDups(s, c).g, 0), fins = all.reduce((a, c) => a + Object.keys(s.fin[c.id] || {}).length, 0);
     html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}<div class="tcbars">${["op", "db", "na"].map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
-      <p class="small" style="margin:-4px 0 12px">Finitions obtenues (Holo, AR, SAR, UR) : <b>${fins}</b>/${all.length * 4}. Touche une carte pour la regarder en 3D et lire sa fiche.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
+      <p class="small" style="margin:-4px 0 12px">Chaque personnage existe en plusieurs versions, chacune avec sa propre illustration, qui comptent chacune comme une carte : normale, Holo, AR, AR II, SAR et UR or (selon les illustrations disponibles pour lui). Tu en as <b>${vers}</b> sur ${versAll}. Touche une carte pour la regarder en 3D.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
       <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}<button class="${f.own ? "sel" : ""}" id="tcOwn">Obtenues</button></div>
+      <div class="tcchips">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["B", "AR II"], ["S", "SAR"], ["G", "UR or"]].map(([k, n]) => `<button class="${(f.f ?? "*") === k ? "sel" : ""}" data-tcv="${k}">${n}${k === "*" ? "" : " " + all.filter(c => tcHas(s, c, k)).length + "/" + all.filter(c => tcVersOf(c).includes(k)).length}</button>`).join("")}</div>
       <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes</button>${[...TC_ORDER].reverse().filter(r => all.some(c => c.r === r)).map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${all.filter(c => c.r === r && s.own[c.id]).length}/${all.filter(c => c.r === r).length}</button>`).join("")}</div>
-      <div class="tcgrid">${list.map(c => tcCard(c, {btn: true, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)})).join("") || `<p class="muted">Aucune carte ici pour l'instant.</p>`}</div>`;
+      <div class="tcgrid">${list.map(c => tcCard(c, ver === "*" ? {btn: true, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)} : {btn: true, no: !tcHas(s, c, ver), f: ver, x: ver ? (s.fin[c.id] || {})[ver] : 0})).join("") || `<p class="muted">Aucune carte ici pour l'instant.</p>`}</div>`;
   } else if (TC_TAB === "vitrine"){ html += vtHTML(s);
   } else {
     const all3 = mis.every(m => s.day.claimed.includes(m.k)), lr = tcLoginRw(s.login.n), nx = [1, 2, 3, 4, 5, 6, 7].map(k => s.login.n - ((s.login.n - 1) % 7) + k - 1);
-    html += `<div class="panel"><div class="eyebrow">Série de connexion <i>· 連続</i></div><h2 style="margin:6px 0 10px">Jour ${s.login.n}</h2>
+    const row = (m, cl, attr) => { const ok = m.cur >= m.g; return `<div class="tcm ${ok ? "done" : ""} ${ok || cl ? "" : "go"}" ${ok || cl ? "" : `data-tcgo="${m.k}" role="button" tabindex="0"`}><div><b>${esc(m.t)}</b><small>${m.cur}/${m.g} · récompense : ${tcRw(m.rw)}${ok || cl ? "" : " · touche pour y aller →"}</small></div><button class="${ok && !cl ? "primary" : ""}" ${attr}="${m.k}" ${ok && !cl ? "" : "disabled"}>${cl ? "✔ Réclamée" : ok ? "Réclamer" : "En cours"}</button><i><u style="width:${m.cur / m.g * 100}%"></u></i></div>`; };
+    html += `${claim ? `<div class="row" style="margin-bottom:14px"><button class="primary" id="tcClaimAll">Tout réclamer (${claim})</button></div>` : ""}<div class="panel"><div class="eyebrow">Série de connexion <i>· 連続</i></div><h2 style="margin:6px 0 10px">Jour ${s.login.n}</h2>
       <div class="tcweek">${nx.map(n => { const r = tcLoginRw(n); return `<div class="${n < s.login.n || (n === s.login.n && s.login.got) ? "ok" : n === s.login.n ? "now" : ""}"><small>J${n}</small><b>${r.g ? r.g + " ◆" : TC_T[tcParse(r.p).t].k}</b></div>`; }).join("")}</div>
       <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr)}</button></div><p class="small" style="margin-top:8px">Reviens chaque jour : booster Argent (銀) tous les 3 jours, booster Or (金) le 7e. Un jour manqué remet la série à 1.</p></div>
       <div class="panel"><div class="eyebrow">Missions du jour <i>· 任務</i></div><p class="muted" style="margin:6px 0 12px">Trois missions, renouvelées chaque jour à minuit. Les trois réclamées : un booster Argent en bonus.</p>
-      <div class="tcms">${mis.map(m => { const ok = m.cur >= m.g, cl = s.day.claimed.includes(m.k); return `<div class="tcm ${ok ? "done" : ""}"><div><b>${esc(m.t)}</b><small>${m.cur}/${m.g} · récompense : ${tcRw(m.rw)}</small></div><button class="${ok && !cl ? "primary" : ""}" data-tcm="${m.k}" ${ok && !cl ? "" : "disabled"}>${cl ? "✔ Réclamée" : ok ? "Réclamer" : "En cours"}</button><i><u style="width:${m.cur / m.g * 100}%"></u></i></div>`; }).join("")}
+      <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
         <div class="tcm ${all3 ? "done" : ""}"><div><b>Bonus : les trois missions</b><small>récompense : 1 booster Mélange Argent</small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / 3 * 100}%"></u></i></div></div></div>
+      <div class="panel"><div class="eyebrow">Missions de la semaine <i>· 週間</i></div><p class="muted" style="margin:6px 0 12px">Plus longues, mieux payées. Elles repartent de zéro chaque lundi.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}</div></div>
       <div class="panel"><b>Comment gagner des boosters</b><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster Argent au minimum, avec trois fois plus de chances d'un Or ou d'un Divin.</li><li><b>Boosters gratuits</b> : un toutes les 8 heures, ${TC_FREE.max} en réserve au maximum.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></div>`;
   }
   $("#tcBoard").innerHTML = html;
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
   document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); });
+  document.querySelectorAll("[data-tcsub]").forEach(b => b.onclick = () => { TC_SUB = b.dataset.tcsub; tcRender(); });
+  document.querySelectorAll("[data-tcdrop]").forEach(b => b.onclick = e => { e.stopPropagation(); tcDrops(b.dataset.tcdrop); });
+  { const st = $("#tcStage"), pk = st && st.querySelector(".pk3d-in"); if (pk){ st.onpointermove = e => { const r = st.getBoundingClientRect(); pk.style.setProperty("--ry", ((e.clientX - r.left) / r.width - .5) * 50 + "deg"); pk.style.setProperty("--rx", (.5 - (e.clientY - r.top) / r.height) * 26 + "deg"); pk.classList.add("live"); }; st.onpointerleave = () => { pk.classList.remove("live"); pk.style.removeProperty("--ry"); pk.style.removeProperty("--rx"); }; st.onclick = () => $("#tcOpen")?.click(); } }
   document.querySelectorAll("[data-tcp]").forEach(b => b.onclick = () => { TC_PICK = b.dataset.tcp; tcRender(); });
   document.querySelectorAll("[data-tcsu]").forEach(b => b.onclick = () => { TC_SHOP.u = b.dataset.tcsu; tcRender(); });
   document.querySelectorAll("[data-tcu]").forEach(b => b.onclick = () => { TC_F.u = b.dataset.tcu; tcRender(); });
+  document.querySelectorAll("[data-tcv]").forEach(b => b.onclick = () => { TC_F.f = b.dataset.tcv; tcRender(); });
   document.querySelectorAll("[data-tcr]").forEach(b => b.onclick = () => { TC_F.r = b.dataset.tcr; tcRender(); });
   $("#tcWipe") && ($("#tcWipe").onclick = () => { if ($("#tcWipe").dataset.sure){ try { localStorage.removeItem(TC_KEY); } catch {} tcRender(); } else { $("#tcWipe").dataset.sure = 1; $("#tcWipe").textContent = "Confirmer : tout effacer"; } });
   $("#tcOwn") && ($("#tcOwn").onclick = () => { TC_F.own = !TC_F.own; tcRender(); });
   $("#tcOpen") && ($("#tcOpen").onclick = () => { const s = tcLoad(), k = TC_PICK; let real = k;
     if (k === "free"){ if (s.free.n <= 0) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n--; real = "mix:0"; } else { if (!(s.packs[k] > 0)) return; s.packs[k]--; }
     const got = tcOpenPack(s, real); tcSave(s); tcOpening(real, got); });
-  document.querySelectorAll("[data-tcbuy]").forEach(b => b.onclick = () => { const s = tcLoad(), t = +b.dataset.tcbuy, c = tcPrice(TC_SHOP.u, t); if (s.gems < c) return; s.gems -= c; tcGive(s, tcKey(TC_SHOP.u, t)); TC_PICK = tcKey(TC_SHOP.u, t); tcSave(s); tcRender(); SFX.play("pop"); });
+  document.querySelectorAll("[data-tcbuy]").forEach(b => b.onclick = () => { const s = tcLoad(), t = +b.dataset.tcbuy, c = tcPrice(TC_SHOP.u, t); if (s.gems < c) return; s.gems -= c; tcGive(s, tcKey(TC_SHOP.u, t)); TC_PICK = tcKey(TC_SHOP.u, t); TC_SUB = "mine"; tcSave(s); tcRender(); SFX.play("pop"); });
   $("#tcRecycle") && ($("#tcRecycle").onclick = () => { const s = tcLoad(); tcRecycle(s); tcSave(s); tcRender(); SFX.play("pop"); });
   const pay = (s, rw) => { if (rw.g) s.gems += rw.g; else tcGive(s, rw.p); };
   document.querySelectorAll("[data-tcm]").forEach(b => b.onclick = () => { const s = tcLoad(), m = tcMissions(s).find(x => x.k === b.dataset.tcm); if (!m || m.cur < m.g || s.day.claimed.includes(m.k)) return; s.day.claimed.push(m.k); pay(s, m.rw); tcSave(s); tcRender(); SFX.play("win"); });
+  document.querySelectorAll("[data-tcw]").forEach(b => b.onclick = e => { e.stopPropagation(); const s = tcLoad(), w = tcWeek(s), m = TC_WK.find(x => x.k === b.dataset.tcw); if (!m || m.v(w) < m.g || w.claimed.includes(m.k)) return; w.claimed.push(m.k); pay(s, m.rw); tcSave(s); tcRender(); SFX.play("win"); });
+  document.querySelectorAll("[data-tcgo]").forEach(b => { b.onclick = () => tcGo(b.dataset.tcgo); b.onkeydown = e => { if (e.key === "Enter") tcGo(b.dataset.tcgo); }; });
+  $("#tcClaimAll") && ($("#tcClaimAll").onclick = () => { const s = tcLoad(), w = tcWeek(s); let n = 0;
+    if (!s.login.got){ s.login.got = true; pay(s, tcLoginRw(s.login.n)); n++; }
+    tcMissions(s).forEach(m => { if (m.cur >= m.g && !s.day.claimed.includes(m.k)){ s.day.claimed.push(m.k); pay(s, m.rw); n++; } });
+    if (!s.day.bonus && tcMissions(s).every(m => s.day.claimed.includes(m.k))){ s.day.bonus = true; tcGive(s, "mix:1"); n++; }
+    TC_WK.forEach(m => { if (m.v(w) >= m.g && !w.claimed.includes(m.k)){ w.claimed.push(m.k); pay(s, m.rw); n++; } });
+    if (n){ tcSave(s); tcRender(); SFX.play("fanfare"); } });
   $("#tcBonus") && ($("#tcBonus").onclick = () => { const s = tcLoad(); if (s.day.bonus || !tcMissions(s).every(m => s.day.claimed.includes(m.k))) return; s.day.bonus = true; tcGive(s, "mix:1"); tcSave(s); tcRender(); SFX.play("win"); });
   $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; pay(s, tcLoginRw(s.login.n)); tcSave(s); tcRender(); SFX.play("win"); });
   document.querySelectorAll("#tcBoard [data-tc]").forEach(b => b.onclick = () => { const c = tcCards().find(x => x.id === b.dataset.tc), s = tcLoad(); if (!c) return;
     const M = $("#modal"), close = () => { M.classList.add("hidden"); M.innerHTML = ""; };
+    const vsel = TC_F.f ?? "*";
+    if (vsel !== "*" && vsel !== "" && !tcHas(s, c, vsel)){ M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${s.own[c.id] ? esc(c.n) : "Carte #" + String(c.no).padStart(3, "0")} · ${TC_FIN[vsel][0]}</h2><button class="ghost" id="tcClose">✕ Fermer</button></div><p class="muted">Tu n'as pas encore cette version. Les finitions ne se forgent pas : elles sortent des boosters, plus souvent dans les Argent, Or et Divin (${(TC_FIN[vsel][2] * 1).toString().replace(".", ",")} % par carte dans un Classique, ${(TC_FIN[vsel][2] * TC_FINMUL[3]).toFixed(1).replace(".", ",")} % dans un Divin).</p></div>`; M.classList.remove("hidden"); $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); }; return; }
     if (!s.own[c.id]){   // carte manquante : on peut la forger avec des éclats
       const cost = TC_R[c.r][2];
       M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>Carte #${String(c.no).padStart(3, "0")}</h2><button class="ghost" id="tcClose">✕ Fermer</button></div><div class="tcbig">${tcCard(c, {no: true})}<div><p class="muted">${TC_PACKS[c.u][0]} · ${TC_R[c.r][0]}. Tu ne l'as pas encore : elle sort des boosters ${TC_PACKS[c.u][0]} et Mélange.</p><p style="margin:12px 0">Tu peux aussi la <b>forger</b> avec tes éclats, obtenus en recyclant tes doublons et avec les missions.</p><div class="row"><button class="primary" id="tcForge" ${s.gems >= cost ? "" : "disabled"}>Forger · ${cost} ◆</button></div><p class="small" style="margin-top:10px">Tu as ${s.gems} ◆.</p></div></div></div>`;
@@ -9326,10 +9570,10 @@ function tcSheet(c, s){
 }
 // carte en grand, qui s'incline sous le doigt ou la souris ; un toucher la retourne pour lire la fiche
 function tcView(c){
-  const s = tcLoad(), fins = ["", ...Object.keys(TC_FIN).filter(k => s.fin[c.id] && s.fin[c.id][k])]; let f = tcBestFin(s, c), back = false;
+  const s = tcLoad(), fins = ["", ...Object.keys(TC_FIN).filter(k => s.fin[c.id] && s.fin[c.id][k])]; let f = tcBestFin(s, c), back = false; if (TC_TAB === "album" && (TC_F.f ?? "*") !== "*" && tcHas(s, c, TC_F.f)) f = TC_F.f;
   document.querySelector(".tcview")?.remove();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcview r-${c.r}" role="dialog" aria-modal="true" aria-label="${esc(c.n)}"><button class="ghost vx" id="tcvX">✕ Fermer</button><div class="v3d"><div class="vcard"><div class="vf"></div><div class="vb">${tcSheet(c, s)}</div></div></div>
-    <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] : "Normale"}</button>`).join("")}</div>` : ""}<button class="primary" id="tcvFlip">Retourner la carte</button><p class="small">Fais glisser pour incliner la carte.</p></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcview r-${c.r}" role="dialog" aria-modal="true" aria-label="${esc(c.n)}"><button class="ghost vx" id="tcvX">✕ Fermer</button><div class="v3d"><div class="vcard"><div class="vf"></div><div class="vb">${tcBack(c.r)}<div class="tcfiche-w hidden">${tcSheet(c, s)}</div></div></div></div>
+    <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button class="primary" id="tcvFlip">Retourner la carte</button><button id="tcvSheet">Lire la fiche</button></div><p class="small">Fais glisser pour incliner la carte.</p></div></div>`);
   const V = document.querySelector(".tcview"), box = V.querySelector(".v3d"), card = V.querySelector(".vcard");
   const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
   const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); };
@@ -9338,27 +9582,43 @@ function tcView(c){
   box.onpointerleave = () => { card.classList.remove("live"); tilt(0, 0); };
   const flip = () => { back = !back; card.classList.remove("live"); tilt(0, 0); SFX.play("pop"); };
   box.onclick = flip; $("#tcvFlip").onclick = flip;
+  $("#tcvSheet").onclick = () => { const w = V.querySelector(".tcfiche-w"), on = w.classList.toggle("hidden") === false; if (on !== back) flip(); $("#tcvSheet").textContent = on ? "Voir le dos" : "Lire la fiche"; };
   V.querySelectorAll("[data-tcf]").forEach(b => b.onclick = () => { f = b.dataset.tcf; if (back) flip(); face(); });
   $("#tcvX").onclick = () => V.remove(); V.onclick = e => { if (e.target === V) V.remove(); };
 }
 const tcCalm = () => matchMedia("(prefers-reduced-motion:reduce)").matches;
-// grande scène pour une Légendaire ou une Mythique : éclair, rayons, sceau, puis la carte en grand. Se ferme au toucher.
-function tcCine(c){
+// révélation en plusieurs temps, façon « walkout » des packs de foot : tunnel en 3D, deux indices (univers, puis rareté),
+// la silhouette du personnage qui avance vers l'écran, puis l'éclair et la carte. Le décor change selon le style de la carte
+// (Légendaire or, Mythique orage rouge, Éveil foudre bleue, SAR cases de manga, UR pluie d'or). Un toucher saute à la carte, un second ferme.
+// o.mini : version courte (un indice, pas de silhouette) pour une Épique ou une AR.
+function tcCine(c, o = {}){
   return new Promise(res => {
-    const myth = c.r === "M" || c.r === "X" || c.f === "G" || c.f === "S";
-    document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${c.r}" role="dialog" aria-modal="true" aria-label="${TC_R[c.r][0]} : ${esc(c.n)}"><div class="fl"></div><div class="rays"></div>${myth ? `<div class="rays two"></div>` : ""}<div class="ring"></div>${myth ? `<div class="ring two"></div>` : ""}
+    const sty = c.f === "G" ? "G" : c.f === "S" ? "S" : c.r === "X" ? "X" : c.r === "M" ? "M" : c.r === "L" ? "L" : "E", myth = sty !== "L" && sty !== "E", calm = tcCalm(), mini = !!o.mini || sty === "E";
+    const img = tcArt(c, c.f);
+    document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${c.r} y${sty} ${mini ? "mini" : ""}" role="dialog" aria-modal="true" aria-label="${TC_R[c.r][0]} : ${esc(c.n)}">
+      <div class="tun" aria-hidden="true"><i class="floor"></i><i class="ceil"></i><i class="beam b1"></i><i class="beam b2"></i></div>
+      ${sty === "M" || sty === "X" ? `<div class="bolts" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "S" ? `<div class="pans" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "G" ? `<div class="rain" aria-hidden="true"></div>` : ""}
+      <div class="clue c1"><span class="kj">${TC_PACKS[c.u][1]}</span><b>${TC_PACKS[c.u][0]}</b></div>
+      <div class="clue c2"><b>${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][1] : ""}</b><span>Niveau ${c.p}</span></div>
+      <div class="hero" aria-hidden="true"><img src="${img}" alt=""></div>
+      <div class="fl"></div><div class="rays"></div>${myth ? `<div class="rays two"></div>` : ""}<div class="ring"></div>${myth ? `<div class="ring two"></div>` : ""}
       <div class="sp">${Array.from({length: myth ? 46 : 28}, (_, k) => `<i style="--a:${Math.round(Math.random() * 360)}deg;--d:${30 + Math.round(Math.random() * 46)}vmin;--t:${(.7 + Math.random() * 1.1).toFixed(2)}s;--w:${(Math.random() * .5).toFixed(2)}s"></i>`).join("")}</div>
-      <div class="seal">${c.r === "X" ? "覚醒" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : c.f === "G" ? "黄金" : "特別"}</div><div class="lab">${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle finition" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
-    const el = document.querySelector(".tccine"); SFX.play("fanfare"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
-    if (myth && !tcCalm()){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); }
-    const t0 = Date.now(); el.onclick = () => { if (Date.now() - t0 < (tcCalm() ? 300 : 1500)) return; el.remove(); res(); };
+      <div class="seal">${c.r === "X" ? "覚醒" : c.f === "G" ? "黄金" : c.f === "S" ? "特別" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : "叙事"}</div><div class="lab">${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle version" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
+    const el = document.querySelector(".tccine"), timers = []; let final = 0;
+    const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); el.classList.add("s1", "s2", "s3", "s4"); SFX.play("fanfare"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
+      if (myth && !calm){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); } };
+    const at = (ms, fn) => timers.push(setTimeout(fn, ms));
+    if (calm) end();
+    else if (mini){ at(250, () => { el.classList.add("s2"); SFX.play("pop"); }); at(1000, end); }
+    else { at(650, () => { el.classList.add("s1"); SFX.play("pop"); }); at(1500, () => { el.classList.add("s2"); SFX.play("pop"); }); at(2350, () => { el.classList.add("s3"); SFX.play("win"); }); at(3700, end); }
+    el.onclick = () => { if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; el.remove(); res(); };
   });
 }
 // ouverture : le sachet se charge et se déchire (la couleur de l'éclair annonce le meilleur tirage), puis on retourne les cinq cartes
 function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "G", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><h2>Booster ${tcName(key)}</h2><div class="mid"><div class="aura"></div>${tcPouch(key)}<p class="muted">Touche le sachet pour l'ouvrir</p></div><div class="bot"></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><h2>Booster ${tcName(key)}</h2><div class="mid"><div class="aura"></div><div class="tearw">${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const end = () => { O.remove(); tcRender(); };
   const done = () => { const nw = got.filter(c => c.isNew).length, s = tcLoad(), more = tcStock(s) > 0;
@@ -9369,13 +9629,17 @@ function tcOpening(key, got){
     if (got.ups.length) SFX.play("fanfare"); };
   const flip = async k => { if (seen[k] || busy) return; seen[k] = true; const c = got[k], ri = TC_ORDER.indexOf(c.r), el = mid.querySelector(`[data-k="${k}"]`);
     if (big(c)){ busy = true; await tcCine(c); busy = false; }
+    else if ((ri === 3 || c.f === "A" || c.f === "B") && k === got.length - 1){ busy = true; await tcCine(c, {mini: true}); busy = false; }
     el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!big(c) && (ri === 3 || c.f) ? " tcburst" : "")}); if (!big(c)) SFX.play(ri >= 3 || c.f ? "win" : "pop");
     if (seen.every(Boolean)) done(); };
   O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.onclick = null; p.classList.add("charge"); mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
-    setTimeout(() => { p.classList.add("tear"); O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
-      setTimeout(() => { O.querySelector(".burst")?.remove(); mid.innerHTML = `<div class="tcrow">${got.map((c, k) => `<button class="tcback ${big(c) ? "hot r-" + (TC_ORDER.indexOf(c.r) >= 4 ? c.r : "L") : TC_ORDER.indexOf(c.r) === 3 || c.f ? "warm" : ""}" data-k="${k}" style="--n:${k}" aria-label="Retourner la carte ${k + 1}">札</button>`).join("")}</div>`;
+    setTimeout(() => { p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement;
+      // la bande du haut part sur le côté, la lumière sort par l'ouverture, les cinq cartes montent
+      w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.map((c, k) => tcBack(c.r, {style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
+      O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); SFX.play("win"); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
+      setTimeout(() => { O.querySelector(".burst")?.remove(); mid.innerHTML = `<div class="tcrow">${got.map((c, k) => tcBack(c.r, {btn: true, cls: "tcback " + (big(c) ? "hot" : TC_ORDER.indexOf(c.r) === 3 || c.f ? "warm" : ""), attr: `data-k="${k}" aria-label="Retourner la carte ${k + 1}"`, style: `--n:${k};--rc:${TC_BKC[c.r][0]}`})).join("")}</div>`;
         mid.querySelectorAll(".tcback").forEach(b => b.onclick = () => flip(+b.dataset.k));
-        bot.innerHTML = `<button id="tcAll">Tout retourner</button>`; $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (let k = 0; k < got.length; k++){ await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : 260)); } }; }, calm ? 0 : 520); }, calm ? 0 : 900); };
+        bot.innerHTML = `<button id="tcAll">Tout retourner</button>`; $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (let k = 0; k < got.length; k++){ await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : 260)); } }; }, calm ? 0 : 1500); }, calm ? 0 : 800); };
 }
 // écran « Cartes », bandeau d'accueil
 document.querySelector(".wrap").insertAdjacentHTML("beforeend", `<section id="tcg" class="hidden"><div class="topbar"><h1>CARTES · 札</h1><button class="ghost" id="tcQuit">✕ Accueil</button></div><div id="tcBoard"></div></section>`);
@@ -9497,17 +9761,27 @@ const VT = [
   ["t1", "Marchand", "商人", 1, "Fais 1 échange", x => x.tr, 1], ["t2", "Négociant", "豪商", 2, "Fais 10 échanges", x => x.tr, 10],
   ["d1", "Régulier", "日課", 1, "Connecte-toi 3 jours de suite", x => x.login, 3], ["d2", "Assidu", "皆勤", 2, "Connecte-toi 7 jours de suite", x => x.login, 7], ["d3", "Sans faille", "不屈", 3, "Connecte-toi 30 jours de suite", x => x.login, 30],
   ["p1", "Curieux", "好奇", 1, "Joue à 5 jeux différents", x => x.modes, 5], ["p2", "Polyvalent", "万能", 2, "Joue à 10 jeux différents", x => x.modes, 10], ["p3", "Touche-à-tout", "全制覇", 3, "Joue aux 17 jeux", x => x.modes, 17],
+  // paliers Or et Légende supplémentaires : exploits par jeu, collection de versions, très longues séries
+  ["g5", "Grand Ordonnateur", "総帥", 4, "Termine 1 000 parties", x => x.g, 1000], ["s4", "Invaincu", "不敗", 4, "Série de 20 victoires", x => x.best, 20],
+  ["w5", "Stratège", "軍師", 3, "Gagne 25 parties de Mercato", x => x.mw("Mercato"), 25], ["w6", "Détective", "探偵", 3, "Gagne 25 parties d'Undercover", x => x.mw("Undercover"), 25],
+  ["w7", "Œil de lynx", "千里眼", 3, "Gagne 25 parties de Perso pixelisé ou Silhouettes", x => x.mw("Perso pixelisé") + x.mw("Silhouettes"), 25], ["w8", "Oreille absolue", "絶対音感", 3, "Gagne 15 Blind tests", x => x.mw("Blind test"), 15],
+  ["c6", "Galerie", "画廊", 3, "Obtiens 300 cartes, toutes versions comprises", x => x.vers, 300], ["c5", "Maître des versions", "極致", 4, "Obtiens 600 cartes, toutes versions comprises", x => x.vers, 600],
+  ["u4", "Trinité", "三界", 4, "Complète les trois univers", x => x.u.op + x.u.db + x.u.na, 3], ["x3", "Éveil total", "全覚醒", 4, "Obtiens toutes les cartes Éveil", x => x.ev, -2],
+  ["f5", "Illuminé", "光", 3, "Obtiens 50 cartes Holo", x => x.fin.H, 50], ["f6", "Collection d'art", "画商", 3, "Obtiens 25 cartes AR", x => x.fin.A + x.fin.B, 25], ["f7", "Mangaka", "漫画家", 3, "Obtiens 10 cartes SAR", x => x.fin.S, 10], ["f8", "Dragon doré", "金龍", 4, "Obtiens 15 cartes UR dorées", x => x.fin.G, 15],
+  ["d5", "Fidèle", "忠義", 3, "Connecte-toi 60 jours de suite", x => x.login, 60], ["d4", "Immortel", "不死", 4, "Connecte-toi 100 jours de suite", x => x.login, 100],
+  ["t3", "Roi du troc", "商王", 3, "Fais 30 échanges", x => x.tr, 30], ["a3", "Capitaine", "船長", 3, "Ajoute 10 amis", x => x.fr, 10], ["o4", "Baron des boosters", "大富豪", 4, "Ouvre 1 500 boosters", x => x.opened, 1500], ["l4", "Grand maître", "師範", 4, "Atteins le niveau 30", x => x.lv, 30],
   ["l1", "Apprenti", "見習", 1, "Atteins le niveau 3", x => x.lv, 3], ["l2", "Senpai", "先輩", 2, "Atteins le niveau 8", x => x.lv, 8], ["l3", "Sensei", "先生", 3, "Atteins le niveau 15", x => x.lv, 15]];
 // tout ce que mesurent les accomplissements
 function vtCtx(s){
   const all = tcCards(), has = c => !!s.own[c.id], st = s.stat || {g: 0, w: 0, modes: []}, base = all.filter(c => c.r !== "X");
-  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, S: 0, G: 0};
+  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, B: 0, S: 0, G: 0};
   Object.values(s.fin || {}).forEach(f => Object.keys(f).forEach(k => { if (f[k]) fin[k]++; }));
   return {g: st.g, w: st.w, modes: st.modes.length, best: s.best || 0, own: all.filter(has).length, total: all.length, u: {op: full("op"), db: full("db"), na: full("na")},
+    vers: (typeof tcVers === "function" ? tcVers(s) : 0), evAll: all.filter(c => c.r === "X").length, mw: k => (st.mw || {})[k] || 0,
     myth: all.filter(c => c.r === "M" && has(c)).length, mythAll: all.filter(c => c.r === "M").length, ev: all.filter(c => c.r === "X" && has(c)).length, fin,
     opened: s.opened || 0, fr: (typeof frList === "function" ? frList().length : 0), tr: s.trades || 0, login: Math.max(s.login?.n || 0, s.loginBest || 0), lv: tcLvl(s.xp || 0)};
 }
-const vtGoal = (v, x) => v[6] === 0 ? x.total : v[6] === -1 ? x.mythAll : v[6];
+const vtGoal = (v, x) => v[6] === 0 ? x.total : v[6] === -1 ? x.mythAll : v[6] === -2 ? x.evAll : v[6];
 // nouvelles cartes de visite : on les enregistre, on offre des éclats, et on prévient (appelé à chaque sauvegarde)
 function vtCheck(s){
   s.unl = s.unl || []; const x = vtCtx(s), neu = VT.filter(v => !s.unl.includes(v[0]) && v[5](x) >= vtGoal(v, x));
@@ -9524,7 +9798,11 @@ const VT_ART = {g: ["speed", ["op:Usopp", "na:Rock Lee", "db:Krilin", "op:Monkey
   c: ["grid", ["op:Nami", "op:Nico Robin", "na:Shikamaru Nara", "op:Gol D. Roger"]], u: ["wave", []], m: ["burst", ["db:Beerus", "db:Whis", "db:Zeno"]], x: ["bolt", ["db:Son Gohan", "db:Son Goku"]],
   f: ["dots", ["op:Boa Hancock", "na:Deidara", "op:Donquixote Doflamingo", "op:Shanks"]], o: ["grid", ["op:Franky", "db:Bulma", "op:Crocodile"]], a: ["wave", ["op:Tony Tony Chopper", "op:Sanji"]], t: ["dots", ["op:Buggy", "na:Kakuzu"]],
   d: ["speed", ["na:Hinata Hyûga", "na:Sakura Haruno", "na:Naruto Uzumaki"]], p: ["grid", ["na:Tenten", "na:Kakashi Hatake", "na:Itachi Uchiha"]], l: ["wave", ["na:Iruka Umino", "na:Jiraiya", "db:Tortue Géniale"]]};
-const VT_ONE = {uo: ["op:Monkey D. Luffy", "op:Roronoa Zoro"], un: ["na:Naruto Uzumaki", "na:Sasuke Uchiha"], ud: ["db:Son Goku", "db:Vegeta"], x1: ["db:Son Gohan (Beast)"], x2: ["db:Son Goku (Ultra Instinct)", "db:Vegeta (Ultra Ego)"], m3: ["db:Zeno", "op:Edward Newgate"], c4: ["op:Gol D. Roger", "na:Hashirama Senju"], w4: ["op:Kaido", "op:Shanks"], g4: ["op:Monkey D. Luffy", "db:Son Goku"]};
+const VT_ONE = {uo: ["op:Monkey D. Luffy", "op:Roronoa Zoro"], un: ["na:Naruto Uzumaki", "na:Sasuke Uchiha"], ud: ["db:Son Goku", "db:Vegeta"], x1: ["db:Son Gohan (Beast)"], x2: ["db:Son Goku (Ultra Instinct)", "db:Vegeta (Ultra Ego)"], m3: ["db:Zeno", "op:Edward Newgate"], c4: ["op:Gol D. Roger", "na:Hashirama Senju"], w4: ["op:Kaido", "op:Shanks"], g4: ["op:Monkey D. Luffy", "db:Son Goku"],
+  g5: ["op:Gol D. Roger", "op:Edward Newgate"], s4: ["db:Jiren", "db:Broly"], w5: ["na:Shikamaru Nara", "op:Nami"], w6: ["na:Kakashi Hatake", "na:Itachi Uchiha"], w7: ["na:Neji Hyûga", "na:Hinata Hyûga"], w8: ["op:Brook", "na:Killer B"],
+  c6: ["op:Nami", "op:Nico Robin"], c5: ["op:Nico Robin", "na:Orochimaru"], u4: ["op:Monkey D. Luffy", "db:Son Goku"], x3: ["db:Son Goku (Ultra Instinct)", "db:Gogeta (Super Saiyan Blue)"],
+  f5: ["na:Minato Namikaze", "op:Borsalino (Kizaru)"], f6: ["na:Deidara", "na:Sasori"], f7: ["na:Jiraiya", "na:Naruto Uzumaki"], f8: ["db:Freezer", "db:Zeno"], d5: ["na:Rock Lee", "na:Gaï Maito"], d4: ["na:Orochimaru", "na:Madara Uchiha"],
+  t3: ["op:Crocodile", "op:Buggy"], a3: ["op:Monkey D. Luffy", "op:Jinbe"], o4: ["op:Donquixote Doflamingo", "op:Crocodile"], l4: ["na:Hiruzen Sarutobi", "na:Hashirama Senju"]};
 function vtImg(id){ const [u, n] = [id.slice(0, 2), id.slice(3)]; try { return (DATA[u].find(c => c.n === n) || (GUESS[u] || []).find(c => c.n === n) || {}).i || ""; } catch { return ""; } }
 const vtCardHTML = (k, o = {}) => { const v = VT.find(z => z[0] === k); if (!v) return `<div class="slot">${o.empty || "Emplacement libre"}</div>`;
   const fam = VT_ART[k[0]] || ["dots", []], lst = VT_ONE[k] || [fam[1][Math.min(fam[1].length - 1, +k.slice(1) - 1)], v[3] >= 3 ? fam[1][Math.max(0, Math.min(fam[1].length - 1, +k.slice(1) - 1) - 1)] : null];
@@ -9767,7 +10045,7 @@ try { frHome(); } catch {}
 /* barre du haut dans une partie : le nom du jeu à gauche, « Quitter » à droite, collée en haut */
 section:not(#home):not(#game) > .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 0 16px;padding:12px 0;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .topbar h1{font-size:clamp(15px,3.6vw,20px);letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
-.topbar h1::before{content:"市";display:inline-grid;place-items:center;width:26px;height:26px;margin-right:10px;vertical-align:-5px;background:var(--accent);color:#0e0d12;font-family:var(--brand);font-weight:900;font-size:15px;border-radius:7px;letter-spacing:0}
+.topbar h1::before{content:"判";display:inline-grid;place-items:center;width:26px;height:26px;margin-right:10px;vertical-align:-5px;background:var(--accent);color:#0e0d12;font-family:var(--brand);font-weight:900;font-size:15px;border-radius:7px;letter-spacing:0}
 .topbar button{flex:none;border-radius:999px;padding:8px 14px;font-size:13.5px}
 /* panneaux, titres et textes */
 .panel h2{margin-bottom:6px}
@@ -10093,7 +10371,7 @@ input::placeholder{color:#716c7a}
   // premier lancement : trois phrases, une seule fois
   let seen = true; try { seen = !!localStorage.getItem("mercato-bienvenue"); } catch {}
   if (!seen && !/^[A-Z0-9]{4}$/.test(hash)){
-    document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Mercato Anime, en trois gestes</h2>
+    document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Hanko, en trois gestes</h2>
       <ol><li><i>01</i><span><b>Choisis un jeu</b>17 jeux rangés par famille : affrontement, connaissance, complicité, voix.</span></li>
       <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien avec un code à quatre caractères.</span></li>
       <li><i>03</i><span><b>Garde tes parties</b>Un pseudo suffit, sans mot de passe, pour retrouver tes records.</span></li></ol>
