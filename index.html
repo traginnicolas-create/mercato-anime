@@ -9490,16 +9490,26 @@ async function frInvite(id, code, btn){
 }
 
 // ---- affichage ----
+// choisir ou changer son pseudo depuis le panneau Amis : même effet que dans le profil, et le salon personnel suit le nouvel identifiant
+function frSetName(name){
+  const old = profGet(); lsSet(PROF_KEY, {name, since: old?.since || Date.now()});
+  if (old?.name && old.name !== name) histRename(old.name, name);
+  if (FR.host){ try { FR.host.leave(); } catch {} FR.host = null; }
+  SFX.play("pop"); profApply(old?.name || "");
+}
 function frHome(){
   const box = $("#frHome"); if (!box) return; const me = frMe(), n = frList().length;
   box.innerHTML = me ? `<div><b>Amis · 友</b><span>Ton identifiant : <b style="font-family:var(--mono);font-size:14px;color:var(--text)">${esc(me.name)}<i style="font-style:normal;color:var(--accent)">#${me.tag}</i></b> · ${n} ami${n > 1 ? "s" : ""}</span></div><button id="frGo">Mes amis</button>`
-    : `<div><b>Amis · 友</b><span>Crée ton pseudo (plus bas) pour recevoir un identifiant et ajouter des amis.</span></div>`;
+    : `<div style="flex:1 1 220px"><b>Amis · 友</b><span>Choisis ton pseudo : tu recevras un identifiant du type Pseudo#1234 pour ajouter des amis.</span></div><div class="row"><input id="frNew" maxlength="16" placeholder="Ton pseudo" autocomplete="off" style="min-width:140px;flex:1"><button class="primary" id="frNewGo">Valider</button></div>`;
   $("#frGo") && ($("#frGo").onclick = frShow);
+  const mk = () => { const name = cleanName($("#frNew").value, ""); if (!name || name.includes("#")) return $("#frNew").focus(); frSetName(name); };
+  $("#frNewGo") && ($("#frNewGo").onclick = mk); $("#frNew") && ($("#frNew").onkeydown = e => { if (e.key === "Enter") mk(); });
 }
 function frShow(msg){
   const me = frMe(); if (!me) return; frClose(); const M = $("#modal"), L = frList();
   M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>Amis</h2><button class="ghost" id="frX">✕ Fermer</button></div>
-    <label class="f">Ton identifiant</label><div class="row" style="align-items:center"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button class="ghost" id="frCopy">Copier</button></div>
+    <label class="f">Ton identifiant</label><div class="row" style="align-items:center"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button class="ghost" id="frCopy">Copier</button><button class="ghost" id="frEdit">Changer de pseudo</button></div>
+    <div id="frEditBox" class="hidden" style="margin-top:10px"><div class="row"><input id="frName" maxlength="16" value="${esc(me.name)}" autocomplete="off" style="flex:1;min-width:150px"><span class="frid" style="font-size:18px"><i>#${me.tag}</i></span><button class="primary" id="frNameGo">Enregistrer</button></div><p class="small" style="margin-top:6px">Tu choisis le pseudo ; les 4 chiffres sont attribués une fois pour toutes et ne changent pas. Tes amis devront t'ajouter à nouveau avec le nouvel identifiant.</p></div>
     <p class="small" style="margin:6px 0 16px">Donne-le à tes amis. Tout passe en direct entre vos appareils : profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert.</p>
     <label class="f" for="frAdd">Ajouter un ami</label><div class="row"><input id="frAdd" maxlength="22" placeholder="Pseudo#1234" autocomplete="off" style="flex:1;min-width:170px"><button class="primary" id="frAddGo">Ajouter</button></div><div class="err" id="frErr">${esc(typeof msg === "string" ? msg : "")}</div>
     <div class="frlist">${L.length ? L.map(f => { const on = Date.now() - (FR.online[f.id] || 0) < 12e4; return `<div class="frrow"><div><b>${esc(f.name)}<i>#${f.tag}</i></b><small class="${on ? "on" : ""}">${on ? "En ligne" : f.seen ? "Vu le " + new Date(f.seen).toLocaleDateString("fr-FR", {day: "numeric", month: "short"}) : "Jamais vu en ligne"}${f.last ? " · niveau " + f.last.lv + " · " + f.last.own.length + " cartes" : ""}</small></div><div class="row"><button class="primary" data-frv="${esc(f.id)}">Voir</button><button class="ghost" data-frd="${esc(f.id)}">Retirer</button></div></div>`; }).join("") : `<p class="muted">Aucun ami pour l'instant.</p>`}</div></div>`;
@@ -9507,6 +9517,9 @@ function frShow(msg){
   const close = () => { M.classList.add("hidden"); M.innerHTML = ""; frHome(); };
   $("#frX").onclick = close; M.onclick = e => { if (e.target === M) close(); };
   $("#frCopy").onclick = async () => { try { await navigator.clipboard.writeText(me.id); $("#frCopy").textContent = "Copié ✔"; } catch { $("#frCopy").textContent = me.id; } };
+  $("#frEdit").onclick = () => { $("#frEditBox").classList.toggle("hidden"); $("#frName").focus(); $("#frName").select(); };
+  const rename = () => { const name = cleanName($("#frName").value, ""); if (!name || name.includes("#")) return $("#frName").focus(); if (name === me.name) return $("#frEditBox").classList.add("hidden"); frSetName(name); frShow(); };
+  $("#frNameGo").onclick = rename; $("#frName").onkeydown = e => { if (e.key === "Enter") rename(); };
   const add = () => { const f = frParse($("#frAdd").value); if (!f) return $("#frErr").textContent = "Écris le pseudo suivi de # et de 4 chiffres, par exemple Zoro#4821.";
     if (f.id.toLowerCase() === me.id.toLowerCase()) return $("#frErr").textContent = "C'est ton propre identifiant.";
     if (!frList().some(x => x.id.toLowerCase() === f.id.toLowerCase())) lsSet(FR_KEY, [...frList(), {id: f.id, name: f.name, tag: f.tag}].slice(0, 50)); frView(f.id); };
