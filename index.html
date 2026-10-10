@@ -9511,7 +9511,10 @@ setInterval(voxRender, 2000);
 .tcopen .mid{grid-template-columns:minmax(0,1fr);align-content:safe center}
 /* ---- sachet three.js : le canvas déborde du sachet pour laisser tourner le volume ; le sachet CSS reste dessous, invisible mais cliquable ---- */
 .tearw .pkgl{position:absolute;left:50%;top:50%;width:160%;height:160%;translate:-50% -50%;pointer-events:none;z-index:2;filter:drop-shadow(0 26px 22px rgba(0,0,0,.55))}
-.tearw.gl > .pouch:not(.torn):not(.strip){opacity:0!important}
+.tearw.gl > .pouch{opacity:0!important}
+/* la languette doit toujours partir : le design du sachet Divin coupait les animations avec un sélecteur plus fort */
+@media (prefers-reduced-motion:no-preference){.tearw .pouch.pouch.pouch.strip{animation:tcstrip .75s cubic-bezier(.4,0,.7,.3) both}.tearw .pouch.pouch.pouch.torn{animation:tcsink .7s ease-in .95s both}}
+.tcdrops span small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:1px}
 </style>
 <script>
 /* =====================================================================
@@ -9825,12 +9828,16 @@ function tcDrops(key){
     const a = (R[0][c.r] || 0) / 100 / n, b = (R[1][c.r] || 0) / 100 * (1 - (pool.some(x => x.r === "X") ? xr : 0)) / n; return (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; };
   M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><h2>Booster ${tcName(key)}</h2><span class="small">${pool.length} personnages possibles · 5 cartes · ${TC_T[t].g} ou mieux garantie</span></div><button class="ghost" id="tcClose">✕ Fermer</button></div>
     <div class="tierh" style="--tc:var(--accent)">Versions <small>chance pour chaque carte tirée</small></div>
-    <div class="tcchips">${[["H", TC_FIN.H[2]], ["A", TC_FIN.A[2] + TC_FIN.B[2]], ["W", TC_FIN.W[2]], ["K", TC_FIN.K[2]], ["G", TC_FIN.G[2]], ["Z", TC_FIN.Z[2]]].map(([k, v]) => `<button disabled>${TC_FIN[k][0]} · ${pct(v * TC_FINMUL[t])}</button>`).join("")}</div><p class="small" style="margin:-4px 0 10px">Holo pour toutes les cartes. AR à partir d'Épique, Red Blood à partir de Légendaire, UR pour les Mythiques seulement, Wanted pour les pirates de One Piece qui ont une prime : sur une autre carte, le tirage donne une Holo.</p>
+    <div class="tcchips">${[["H", TC_FIN.H[2]], ["A", TC_FIN.A[2] + TC_FIN.B[2]], ["W", TC_FIN.W[2]], ["K", TC_FIN.K[2]], ["G", TC_FIN.G[2]], ["Z", TC_FIN.Z[2]]].map(([k, v]) => `<button disabled>${TC_FIN[k][0]} · ${pct(v * TC_FINMUL[t])}</button>`).join("")}</div><p class="small" style="margin:-4px 0 10px">Holo pour toutes les cartes. AR à partir d'Épique, Red Blood à partir de Légendaire, UR pour les Mythiques seulement, Wanted pour les pirates de One Piece qui ont une prime : sur une autre carte, le tirage donne une Holo. Les cartes de chaque version rare sont listées ci-dessous, puis toutes les cartes par rareté.</p>
+    ${[["Z", "#c9a2ff"], ["G", "#f5c84a"], ["K", "#ff3b3b"], ["W", "#c9a36a"], ["A", "#bfe9ff"]].map(([k, col]) => { const ks = k === "A" ? ["A", "B"] : [k], l = pool.flatMap(c => ks.filter(v => tcVersOf(c).includes(v)).map(v => [c, v])); if (!l.length) return "";
+      const odds = ([c, v]) => one(c) / 100 * TC_FIN[v][2] * TC_FINMUL[t] / 100, mn = Math.min(...l.map(odds)), mx = Math.max(...l.map(odds)), sur = p => "1 booster sur " + Math.max(1, Math.round(1 / p)).toLocaleString("fr-FR");
+      return `<div class="tierh" style="--tc:${col}">${k === "A" ? "AR" : TC_FIN[k][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${Math.round(1 / mx) === Math.round(1 / mn) ? sur(mx) : "de " + sur(mx) + " à " + sur(mn).replace("1 booster sur ", "1 sur ")} pour chacune</small></div>
+        <div class="tcdrops">${l.map(e => { const [c, v] = e, has = tcHas(s, c, v); return `<div class="${has ? "" : "miss"}" style="border-left-color:${col}"><img src="${tcArt(c, v)}" alt="" loading="lazy"><span>${esc(c.n)}<small>${TC_R[c.r][0]} · ${sur(odds(e)).replace("1 booster sur ", "1 sur ")}</small></span><em>${has ? "✔" : ""}</em></div>`; }).join("")}</div>`; }).join("")}
     ${[...TC_ORDER].reverse().filter(r => pool.some(c => c.r === r)).map(r => { const l = pool.filter(c => c.r === r), p = one(l[0]);
       return `<div class="tierh r-${r}" style="--tc:var(--rc)">${TC_R[r][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${pct(p)} par booster pour chacune${p > 0 ? `, soit 1 booster sur ${Math.max(1, Math.round(100 / p))}` : ""}</small></div>
         <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${c.i}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
     ${t === 0 ? `<div class="tierh" style="--tc:var(--accent)">Boosters secrets <small>un Classique peut en cacher un</small></div><div class="tcdrops" style="grid-template-columns:1fr">${[...TC_SECRET].reverse().map(sx => `<div style="border-left-color:${sx[4]};grid-template-columns:34px 1fr auto"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:${sx[4]};color:#0e0d12;font-family:var(--brand);font-weight:900">${sx[2]}</span><span><b>${sx[1]}</b> · ${sx[5]}</span><em style="color:var(--text);font-family:var(--mono)">1 sur ${sx[3]}</em></div>`).join("")}</div>` : ""}
-    <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage. ✔ = tu as déjà ce personnage.</p></div>`;
+    <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage. ✔ = tu as déjà cette carte.</p></div>`;
   M.classList.remove("hidden"); M.scrollTo(0, 0); const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); };
 }
 // dos de carte : un emblème et une couleur par rareté (cartes face cachée à l'ouverture, dos dans la vue 3D)
@@ -10090,25 +10097,38 @@ function tcPouchGL(O, key){ const T = window.THREE, wrap = O.querySelector(".tea
   const size = () => { const r = p.getBoundingClientRect(), w = r.width * K, h = r.height * K; rd.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); rd.setSize(w, h, false); }; size(); rd.outputEncoding = T.sRGBEncoding;
   const sc = new T.Scene(), cam = new T.PerspectiveCamera(30, 13 / 19, .1, 50); cam.position.z = 1.9 * K / (2 * Math.tan(15 * Math.PI / 180));
   sc.add(new T.AmbientLight(0xffffff, .42)); const key1 = new T.DirectionalLight(0xffffff, .62); key1.position.set(-2, 3, 4); sc.add(key1); const rim = new T.DirectionalLight(0xbfd8ff, .3); rim.position.set(3, -1, -2); sc.add(rim); const glint = new T.PointLight(0xffffff, .38, 9); glint.position.set(0, 0, 2.2); sc.add(glint);
-  // coussin : plan subdivisé, bombé au centre, écrasé et gaufré sur les deux soudures
-  const side = (back) => { const g = new T.PlaneGeometry(1.3, 1.9, 26, 40), a = g.attributes.position; for (let i = 0; i < a.count; i++){ const u = a.getX(i) / .65, v = a.getY(i) / .95, av = Math.abs(v), body = av < .82 ? Math.pow(1 - u * u, .55) * Math.pow(1 - (v / .82) * (v / .82), .55) : 0; a.setZ(i, (body * .12 + (av >= .82 ? Math.sin(u * 46) * .004 : 0) + Math.sin(u * 5 + v * 7) * .006 * body) * (back ? -1 : 1)); } g.computeVertexNormals();
-    const tx = new T.CanvasTexture(tcPouchTex(key, back)); tx.encoding = T.sRGBEncoding; tx.anisotropy = 4; if (back){ tx.wrapS = T.RepeatWrapping; tx.repeat.x = -1; tx.offset.x = 1; }
-    return new T.Mesh(g, new T.MeshPhysicalMaterial({map: tx, side: back ? T.BackSide : T.FrontSide, roughness: [.62, .34, .3, .28][t], metalness: [.02, .35, .55, .45][t], clearcoat: [.15, .7, .9, 1][t], clearcoatRoughness: .28, emissive: 0xffffff, emissiveMap: tx, emissiveIntensity: 0})); };
-  const grp = new T.Group(), front = side(false), bk = side(true); grp.add(front, bk); sc.add(grp);
-  let raf = 0, dead = false, t0 = performance.now(), last = t0, tx2 = 0, ty2 = 0, rx = 0, ry = 0, chg = 0, slow = 0, n = 0;
+  // coussin : plan subdivisé, bombé au centre, écrasé et gaufré sur les deux soudures. Il est fait de deux morceaux, le corps et la languette du haut,
+  // qui partagent le même bord en dents de scie : collés tant que le sachet est fermé, séparés à la déchirure.
+  const TY = .72, zig = x => (Math.abs(((x / 1.3 + .5) * 7) % 1 - .5) - .25) * .09, CY = (TY + .95) / 2, mats = [];
+  const tex = [false, true].map(back => { const tx = new T.CanvasTexture(tcPouchTex(key, back)); tx.encoding = T.sRGBEncoding; tx.anisotropy = 4; return tx; });
+  const piece = (back, top) => { const y0 = top ? TY : -.95, y1 = top ? .95 : TY, rows = top ? 8 : 34, g = new T.PlaneGeometry(1.3, y1 - y0, 26, rows), a = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < a.count; i++){ const x = a.getX(i), row = Math.floor(i / 27); let y = a.getY(i) + (y0 + y1) / 2; if (top ? row === rows : row === 0) y = TY + zig(x);
+      const u = x / .65, v = y / .95, av = Math.abs(v), body = av < .82 ? Math.pow(Math.max(0, 1 - u * u), .55) * Math.pow(1 - (v / .82) * (v / .82), .55) : 0;
+      a.setXYZ(i, x, y - (top ? CY : 0), (body * .12 + (av >= .82 ? Math.sin(u * 46) * .004 : 0) + Math.sin(u * 5 + v * 7) * .006 * body) * (back ? -1 : 1)); uv.setXY(i, back ? 1 - (x / 1.3 + .5) : x / 1.3 + .5, y / 1.9 + .5); }
+    g.computeVertexNormals(); const tx = tex[back ? 1 : 0], m = new T.MeshPhysicalMaterial({map: tx, side: back ? T.BackSide : T.FrontSide, roughness: [.62, .34, .3, .28][t], metalness: [.02, .35, .55, .45][t], clearcoat: [.15, .7, .9, 1][t], clearcoatRoughness: .28, emissive: 0xffffff, emissiveMap: tx, emissiveIntensity: 0}); mats.push(m); m.userData.top = top; return new T.Mesh(g, m); };
+  const grp = new T.Group(), bodyG = new T.Group(), stripG = new T.Group(); bodyG.add(piece(false, false), piece(true, false)); stripG.add(piece(false, true), piece(true, true)); stripG.position.y = CY; grp.add(bodyG, stripG); sc.add(grp);
+  const inner = new T.PointLight(0xfff0c2, 0, 5); inner.position.set(0, TY, .5); grp.add(inner);
+  let raf = 0, dead = false, t0 = performance.now(), last = t0, tx2 = 0, ty2 = 0, rx = 0, ry = 0, chg = 0, tear = 0, slow = 0, n = 0;
   const move = e => { const r = O.getBoundingClientRect(); ty2 = ((e.clientX - r.left) / r.width - .5) * 1.1; tx2 = ((e.clientY - r.top) / r.height - .5) * .6; glint.position.x = ty2 * 2.4; glint.position.y = -tx2 * 3; }; O.addEventListener("pointermove", move, {passive: true}); addEventListener("resize", size);
-  const stop = (keepCss) => { if (dead) return; dead = true; cancelAnimationFrame(raf); O.removeEventListener("pointermove", move); removeEventListener("resize", size); wrap.classList.remove("gl"); cv.remove(); [front, bk].forEach(m => { m.geometry.dispose(); m.material.map.dispose(); m.material.dispose(); }); rd.dispose(); try { rd.forceContextLoss(); } catch {} };
-  const loop = now => { if (dead) return; if (!O.isConnected){ stop(); return; } const dt = Math.min(.05, (now - last) / 1000), el = (now - t0) / 1000; last = now;
+  const stop = () => { if (dead) return; dead = true; cancelAnimationFrame(raf); O.removeEventListener("pointermove", move); removeEventListener("resize", size); wrap.classList.remove("gl"); cv.remove(); [...bodyG.children, ...stripG.children].forEach(m => { m.geometry.dispose(); m.material.dispose(); }); tex.forEach(x => x.dispose()); rd.dispose(); try { rd.forceContextLoss(); } catch {} };
+  const fade = (top, o) => mats.forEach(m => { if (m.userData.top !== top) return; if (!m.transparent){ m.transparent = true; m.needsUpdate = true; } m.opacity = o; });
+  const loop = now => { if (dead) return; if (!O.isConnected || !cv.isConnected){ stop(); return; } const dt = Math.min(.05, (now - last) / 1000), el = (now - t0) / 1000; last = now;
     // garde-fou : si l'appareil ne suit pas (moins de 25 images par seconde en moyenne sur les 45 premières), on revient au sachet CSS
     if (n < 45){ n++; slow += now - (loop.prev || now); loop.prev = now; if (n === 45 && slow / 44 > 40){ stop(); return; } }
     const inn = Math.min(1, el / .75), e3 = 1 - Math.pow(1 - inn, 3), back = 1 + 2.2 * Math.pow(inn - 1, 3) + 1.2 * Math.pow(inn - 1, 2);
     rx += (tx2 - rx) * Math.min(1, dt * 7); ry += (ty2 - ry) * Math.min(1, dt * 7);
-    const c = chg ? Math.min(1, (now - chg) / 780) : 0, sh = c * c * .11;
-    grp.rotation.x = rx + Math.sin(el * 1.3) * .035 + Math.sin(now * .061) * sh; grp.rotation.y = ry + Math.sin(el * .9) * .22 * (1 - c) + (1 - e3) * -4.2 + Math.sin(now * .083) * sh * 1.6; grp.rotation.z = Math.sin(el * 1.1) * .03 + Math.sin(now * .097) * sh;
+    const tr = tear ? (now - tear) / 1000 : -1, c = tear ? Math.max(0, 1 - tr / .22) : chg ? Math.min(1, (now - chg) / 780) : 0, sh = tear ? 0 : c * c * .11, calmY = tear ? Math.max(0, 1 - tr / .3) : 1 - c;
+    grp.rotation.x = rx * (tear ? .4 : 1) + Math.sin(el * 1.3) * .035 + Math.sin(now * .061) * sh; grp.rotation.y = ry * (tear ? .4 : 1) + Math.sin(el * .9) * .22 * calmY + (1 - e3) * -4.2 + Math.sin(now * .083) * sh * 1.6; grp.rotation.z = Math.sin(el * 1.1) * .03 + Math.sin(now * .097) * sh;
     grp.position.y = Math.sin(el * 1.6) * .035 + (1 - e3) * 1.4; grp.scale.setScalar((inn < 1 ? .4 + .6 * back : 1) * (1 + c * c * .16));
-    front.material.emissiveIntensity = bk.material.emissiveIntensity = c * c * c * 1.5; rd.render(sc, cam); raf = requestAnimationFrame(loop); };
+    mats.forEach(m => m.emissiveIntensity = c * c * c * 1.5);
+    if (tr >= 0){ // la languette se soulève par la gauche, part en vrille vers la droite et s'efface ; la lumière sort ; le corps s'enfonce
+      const e = Math.min(1, tr / .8), ee = e * e, lift = Math.sin(Math.min(1, e * 2.2) * Math.PI / 2);
+      stripG.position.set(ee * 2.5, CY + lift * .16 + ee * 1.0, lift * .18 + ee * .5); stripG.rotation.set(-lift * .5 - ee * 2.4, ee * 1.1, lift * .3 - ee * 1.5); if (e > .5) fade(true, 1 - (e - .5) / .5); stripG.visible = e < 1;
+      inner.intensity = 3.2 * Math.exp(-tr * 1.8) * Math.min(1, tr * 12);
+      const s2 = Math.max(0, Math.min(1, (tr - .95) / .5)); if (s2 > 0){ bodyG.position.y = -s2 * s2 * .95; fade(false, 1 - s2); } }
+    rd.render(sc, cam); raf = requestAnimationFrame(loop); };
   raf = requestAnimationFrame(loop);
-  return {charge: () => { chg = performance.now(); }, stop}; }
+  return {charge: () => { chg = performance.now(); }, tear: () => { tear = performance.now(); }, stop}; }
 function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "K" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1;
@@ -10146,7 +10166,7 @@ function tcOpening(key, got){
     if (seen.every(Boolean)) done(); };
   O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.onclick = null; p.classList.add("charge"); GL && GL.charge();
     if (G){ G.killTweensOf(p); G.to(p, {keyframes: [{x: -5, rotation: -3, scale: .95}, {x: 6, rotation: 3, scale: 1.02}, {x: -8, rotation: -5, scale: .96}, {x: 10, rotation: 5, scale: 1.07}, {x: -6, rotation: -3, scale: 1.1}, {x: 0, rotation: 0, scale: 1.15}], duration: .78, ease: "power2.in"}); G.to(p, {filter: "brightness(2.3)", duration: .78, ease: "power3.in"}); } mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
-    setTimeout(() => { GL && GL.stop(); if (G){ G.killTweensOf(p); G.set(p, {clearProps: "transform,filter,opacity"}); } p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement; tcBoom(bi >= 5 ? 3 : bi >= 4 ? 2 : 0, w);
+    setTimeout(() => { GL && GL.tear(); if (G){ G.killTweensOf(p); G.set(p, {clearProps: "transform,filter,opacity"}); } p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement; tcBoom(bi >= 5 ? 3 : bi >= 4 ? 2 : 0, w);
       // la bande du haut part sur le côté, la lumière sort par l'ouverture, les cinq cartes montent
       w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.slice(-5).map((c, k) => tcBack(c.r, {style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
       O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); SFX.play("win"); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
