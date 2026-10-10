@@ -11069,6 +11069,48 @@ button.primary{font-family:var(--title);font-weight:700;letter-spacing:-.01em;fo
 button.primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
 .row > button:not(.primary):not(.red):not(.ghost){background:rgba(23,21,28,.7);border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+/* =====================================================================
+   COULEURS D'ACCOMPAGNEMENT (15 oct. 2026) — le site était trop uniformément jade. On garde le jade pour agir, et on l'entoure d'un dégradé
+   « aurore » tiré du logo (jade → citron) prolongé vers le cyan et le violet, avec une pointe d'ambre. Rien ici ne touche aux cartes (.tc) ni aux raretés.
+   ===================================================================== */
+:root{--cyan:#3fd8ff;--violet:#8f7bff;--amber:#ffc45a;
+  --grad:linear-gradient(115deg,#3fe0a8,#c9f26b);                      /* dégradé du logo : boutons principaux, onglet actif */
+  --grad-cool:linear-gradient(115deg,#3fd8ff,#3fe0a8 55%,#c9f26b);     /* barres de progression */
+  --grad-aurora:linear-gradient(115deg,#8f7bff,#3fd8ff 38%,#3fe0a8 68%,#c9f26b)}   /* titres et filets d'apparat */
+/* fond : trois halos de couleurs différentes au lieu d'un seul halo jade */
+body{background-image:radial-gradient(ellipse 60% 38% at 18% -8%,rgba(63,224,168,.16),transparent 70%),radial-gradient(ellipse 55% 36% at 92% 4%,rgba(143,123,255,.15),transparent 70%),radial-gradient(ellipse 70% 30% at 60% 108%,rgba(63,216,255,.09),transparent 70%);background-repeat:no-repeat;background-attachment:fixed}
+/* boutons principaux et éléments actifs : dégradé du logo */
+button.primary{background:var(--grad);box-shadow:0 0 30px rgba(63,224,168,.26),0 0 60px rgba(201,242,107,.1)}
+button.primary:hover:not(:disabled){background:linear-gradient(115deg,#62ecbb,#d8f78c);box-shadow:0 0 40px rgba(63,224,168,.4)}
+.tctabs button.sel{background:var(--grad);border-color:transparent;color:#03140e}
+.tabbar .on,.tabbar [aria-current="page"],.tabbar .sel{background:linear-gradient(180deg,rgba(63,224,168,.2),rgba(143,123,255,.12))}
+.mode.sel{border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad-aurora) border-box;box-shadow:0 0 22px rgba(63,224,168,.14)}
+.opt:has(input:checked){border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad) border-box;box-shadow:none}
+/* nom du site et grands titres : dégradé aurore */
+.logo span{background:var(--grad-aurora);-webkit-background-clip:text;background-clip:text;color:transparent}
+#home .hero h1,.tcsec h3,.tcopen h2{background:linear-gradient(115deg,#ffffff 30%,#c9f26b 70%,#3fe0a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tcsec h3 i{-webkit-text-fill-color:var(--cyan);color:var(--cyan)}
+.tcsec em{background:var(--grad)}
+/* barres de progression */
+.bar i,.tcbars u,.tcstats .xp u,.tcm i u,.btbar i,.vt .pg u{background:var(--grad-cool)}
+.tcm.done i u{background:linear-gradient(115deg,#a6e35a,#c9f26b)}
+/* panneaux : un filet lumineux en haut, de couleur différente selon la place */
+.panel{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 86%,#16302a),var(--panel) 120px)}
+.tcstats div{position:relative;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--sc,var(--accent)) 12%,var(--panel)),var(--panel) 70%)}
+.tcstats div::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--sc,var(--accent))}
+.tcstats div:nth-child(1){--sc:#3fe0a8}.tcstats div:nth-child(2){--sc:#3fd8ff}.tcstats div:nth-child(3){--sc:#c9f26b}.tcstats div:nth-child(4){--sc:#8f7bff}
+.tcstats div:nth-child(2) b{color:#bff1ff}.tcstats div:nth-child(3) b{color:#e6fbb4}.tcstats div:nth-child(4) b{color:#d6cdff}
+.tcmhead > div:nth-child(1){border-color:color-mix(in srgb,#3fe0a8 45%,var(--line))}.tcmhead > div:nth-child(2){border-color:color-mix(in srgb,#ffc45a 45%,var(--line))}.tcmhead > div:nth-child(3){border-color:color-mix(in srgb,#3fd8ff 45%,var(--line))}
+.tcmhead > div:nth-child(2) b{color:var(--amber)}.tcmhead > div:nth-child(3) b{color:var(--cyan)}
+/* petites étiquettes : on alterne jade, cyan et violet plutôt que tout en jade */
+.eyebrow{color:var(--cyan)}
+.cath .eyebrow{color:var(--fc)}
+.tcsub small{color:var(--accent3)}
+.rules li::marker{color:var(--cyan)}
+.sitefoot span:first-child{background:var(--grad-aurora);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+/* barre du haut dans une partie : filet dégradé dessous */
+section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;background-image:linear-gradient(color-mix(in srgb,var(--bg) 94%,transparent),color-mix(in srgb,var(--bg) 94%,transparent)),var(--grad-aurora);background-size:100% calc(100% - 1.5px),100% 100%;background-repeat:no-repeat}
+.vox.on{border-color:var(--cyan)}
 </style>
 <script>
 /* Accueil : bloc « À la une », fiche du jeu choisi, onglets du bas. */
