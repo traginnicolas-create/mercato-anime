@@ -9559,6 +9559,27 @@ setInterval(voxRender, 2000);
 .tc.tc .tx{opacity:.04;-webkit-mask-image:repeating-linear-gradient(125deg,#000 0 .8px,transparent .8px 7px);mask-image:repeating-linear-gradient(125deg,#000 0 .8px,transparent .8px 7px)}
 .tc.tc.r-R .tx{opacity:.05}.tc.tc.r-E .tx{opacity:.07}.tc.tc.r-L .tx,.tc.tc.r-M .tx,.tc.tc.r-X .tx{opacity:.1}.tc.tc.f-G .tx{opacity:.12}
 .tc.tc .sk{opacity:.3}
+/* Épique et plus (demande du 11 oct. 2026) : texture « empreinte » à la place des hachures — de fines crêtes concentriques irisées, à peine visibles
+   au repos, qui s'allument sous la lumière quand on incline la carte. Les tailles sont en % pour suivre la taille de la carte. */
+.tc.tc:is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:.05;mix-blend-mode:screen;
+  background:linear-gradient(115deg,#ff9ac1,#ffe08a 20%,#8ff0c8 40%,#8fd0ff 60%,#c7a6ff 80%,#ff9ac1);background-size:260% 260%;background-position:var(--px,50%) var(--py,50%);
+  -webkit-mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.5) 22%,transparent 52%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.5) 22%,transparent 52%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);-webkit-mask-composite:source-in;mask-composite:intersect}
+.tc.tc.r-L:not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{background-image:linear-gradient(115deg,#fff6cf,#f7c64a 22%,#fff 42%,#ffb347 62%,#ffe9a8 82%,#fff6cf)}
+:is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:calc(.2 + var(--ph,0) * .14)}
+.tc.lx > .lsh{background:linear-gradient(180deg,rgba(0,0,0,.62) 0,transparent 20%,transparent 54%,rgba(0,0,0,.94) 92%)}
+/* relief et brillance à l'inclinaison : l'illustration glisse un peu derrière le cadre (profondeur), le texte glisse à l'inverse (il « sort » de la carte),
+   une bande irisée traverse la carte et le cadre métallique suit la lumière */
+.tc:is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.no) > img{transition:transform .25s ease-out}
+:is(.tc.hl,.vcard.live .tc,.tccine .tc.hl):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.no) > img{transform:scale(1.09) translate(calc((50% - var(--px,50%)) * .07),calc((50% - var(--py,50%)) * .05));transition:transform .08s linear}
+.tc.lx > :is(.lh,.ln,.ls){transition:transform .25s ease-out}
+:is(.tc.hl,.vcard.live .tc).lx > :is(.lh,.ln,.ls){transform:translate(calc((var(--px,50%) - 50%) * .035),calc((var(--py,50%) - 50%) * .12));transition:transform .08s linear}
+:is(.tc.hl,.vcard.live .tc).lx > .ln{filter:drop-shadow(calc((50% - var(--px,50%)) * .04) 3px 3px rgba(0,0,0,.7))}
+.tc:is(.r-E,.r-L,.r-M,.r-X) .fx::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s;mix-blend-mode:screen;
+  background:linear-gradient(115deg,transparent 43%,rgba(255,120,180,.34) 46%,rgba(255,236,130,.34) 48%,rgba(120,255,200,.34) 50%,rgba(120,190,255,.34) 52%,rgba(190,140,255,.34) 54%,transparent 57%);background-size:240% 240%;background-position:var(--px,50%) var(--py,50%)}
+:is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.no) .fx::before{opacity:calc(.22 + var(--ph,0) * .3)}
+:is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X) .fx.fx::after{opacity:.2}
+:is(.tc.hl,.vcard.live .tc).lx > .lfr{animation:none;background-position:0 0,var(--px,50%) var(--py,50%);filter:brightness(calc(1.05 + var(--ph,0) * .35)) saturate(1.2)}
+@media (prefers-reduced-motion:reduce){.tc > img,.tc.lx > :is(.lh,.ln,.ls){transform:none!important}}
 /* ---- célébration plein écran ---- */
 .tccele{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--cc) 22%,rgba(9,8,12,.9)),rgba(9,8,12,.94) 65%);overflow:hidden;cursor:pointer;padding:16px}
 .tccele .ray{position:absolute;left:50%;top:45%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;background:repeating-conic-gradient(color-mix(in srgb,var(--cc) 30%,transparent) 0 6deg,transparent 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 55%);mask-image:radial-gradient(circle,#000 0,transparent 55%);pointer-events:none}
