@@ -9555,6 +9555,10 @@ setInterval(voxRender, 2000);
 .tc.f-G .tx{background:linear-gradient(120deg,#fff6cf,#f2c230,#fff,#f2c230);opacity:.3}
 .tc.f-W .tx,.tc.f-S .tx,.tc.f-Z .tx,.tc.no .tx{display:none}
 .tcdrops .tx{display:none}
+/* texture allégée (11 oct. 2026) : les hachures et les points couvraient trop l'illustration */
+.tc.tc .tx{opacity:.04;-webkit-mask-image:repeating-linear-gradient(125deg,#000 0 .8px,transparent .8px 7px);mask-image:repeating-linear-gradient(125deg,#000 0 .8px,transparent .8px 7px)}
+.tc.tc.r-R .tx{opacity:.05}.tc.tc.r-E .tx{opacity:.07}.tc.tc.r-L .tx,.tc.tc.r-M .tx,.tc.tc.r-X .tx{opacity:.1}.tc.tc.f-G .tx{opacity:.12}
+.tc.tc .sk{opacity:.3}
 /* ---- célébration plein écran ---- */
 .tccele{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--cc) 22%,rgba(9,8,12,.9)),rgba(9,8,12,.94) 65%);overflow:hidden;cursor:pointer;padding:16px}
 .tccele .ray{position:absolute;left:50%;top:45%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;background:repeating-conic-gradient(color-mix(in srgb,var(--cc) 30%,transparent) 0 6deg,transparent 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 55%);mask-image:radial-gradient(circle,#000 0,transparent 55%);pointer-events:none}
