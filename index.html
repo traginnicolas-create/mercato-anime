@@ -9596,10 +9596,10 @@ setInterval(voxRender, 2000);
 @keyframes lxmetal3{to{background-position:0 0,0 0,0 0,300% 0}}
 /* paillettes fines (choix C de l'utilisateur, 11 oct. 2026) : à la place des points blancs réguliers — petits éclats colorés tirés au hasard (texture fabriquée par tcGlit),
    deux couches qui glissent en sens inverse avec l'inclinaison, visibles surtout autour de la lumière */
-.tc.tc:is(.r-L,.r-M,.r-X) .sk{animation:none;opacity:.22;mix-blend-mode:color-dodge;background-image:var(--glit,none),var(--glit,none);background-size:170px 170px,113px 113px;
+.tc.tc:is(.r-L,.r-M,.r-X,.f-G,.f-Z,.f-K,.f-W,.f-S):not(.no) .sk{display:block;animation:none;opacity:.22;mix-blend-mode:color-dodge;background-image:var(--glit,none),var(--glit,none);background-size:170px 170px,113px 113px;
   background-position:calc(var(--px,50%) * 1.4) calc(var(--py,50%) * 1.4),calc(100% - var(--px,50%) * 1.9) calc(100% - var(--py,50%) * 1.9);
   -webkit-mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.55) 30%,rgba(0,0,0,.12) 70%);mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.55) 30%,rgba(0,0,0,.12) 70%)}
-:is(.tc.hl,.vcard.live .tc):is(.r-L,.r-M,.r-X) .sk{opacity:calc(.25 + var(--ph,0) * .75)}
+:is(.tc.hl,.vcard.live .tc):is(.r-L,.r-M,.r-X,.f-G,.f-Z,.f-K,.f-W,.f-S) .sk{opacity:calc(.25 + var(--ph,0) * .75)}
 @media (prefers-reduced-motion:no-preference){.tc.lx > .lfr{animation-name:lxmetal3}}
 .tc.r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.no){border-width:2px;border-style:solid;border-color:color-mix(in srgb,var(--rc) 55%,#fff) color-mix(in srgb,var(--rc) 60%,#000) color-mix(in srgb,var(--rc) 45%,#000) color-mix(in srgb,var(--rc) 70%,#fff);box-shadow:0 1.5px 0 color-mix(in srgb,var(--rc) 45%,#000),0 3px 0 color-mix(in srgb,var(--rc) 22%,#000),0 0 14px color-mix(in srgb,var(--rc) 30%,transparent),0 8px 14px rgba(0,0,0,.45)}
 .tcview .vf .tc:is(.r-E,.r-L,.r-M,.r-X):not(.no){box-shadow:var(--ex,0px) var(--ey,0px) 0 0 color-mix(in srgb,var(--rc) 55%,#1a1208),calc(var(--ex,0px) * 2) calc(var(--ey,0px) * 2) 0 0 color-mix(in srgb,var(--rc) 32%,#0b0806),calc(var(--ex,0px) * 3) calc(var(--ey,0px) * 3) 0 0 color-mix(in srgb,var(--rc) 18%,#060404),calc(var(--ex,0px) * 9) calc(30px + var(--ey,0px) * 9) 60px rgba(0,0,0,.7),0 0 50px color-mix(in srgb,var(--rc) 40%,transparent)}
@@ -9739,17 +9739,17 @@ const TC_OBJ = [
   ["Kubikirib-ch-", "na", "Kubikiribôchô", "R", "Épée", "Zabuza Momochi", "Le « hachoir » de Zabuza, l'une des sept épées de Kiri. Elle se répare avec le fer du sang."],
   ["Scroll-of-Seals", "na", "Rouleau des techniques interdites", "R", "Rouleau", "Village de Konoha", "Le rouleau scellé par le Premier Hokage. Naruto y apprend le Multi-clonage."],
   ["Forehead-Protector", "na", "Bandeau frontal", "C", "Objet", "", "Le bandeau gravé du symbole du village, porté par les ninjas."]];
-const TC_XRATE = [2.7, 4, 7.2, 14.4];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
+const TC_XRATE = [2.4, 3.6, 6.5, 13];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
 const TC_ORDER = ["C", "P", "R", "E", "L", "M", "X"];
 // part de chaque rareté dans un univers (du plus rare au plus commun) : le reste est Commune
 const TC_QUOTA = [["M", .05], ["L", .10], ["E", .17], ["R", .24], ["P", .22]];
 // niveaux de booster : nom, kanji, prix de base en éclats, carte garantie, taux en % par emplacement (quatre emplacements normaux, puis le cinquième, garanti)
 // le Classique reste proche de Kyara (Épique ~21 %, Légendaire ~3 %, Mythique ~0,4 % par booster) : il y a peu de cartes, la collection doit rester longue à finir
 const TC_T = [
-  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.2, P: 24, R: 5, E: .72, L: .072, M: .008}, {R: 85.71, E: 11.9, L: 2.07, M: .32}]},
-  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.4, P: 33, R: 10, E: 1.44, L: .144, M: .016}, {R: 72.8, E: 21.6, L: 4.8, M: .8}]},
-  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 38.81, P: 38, R: 20, E: 2.79, L: .36, M: .04}, {E: 85.05, L: 12.6, M: 2.35}]},
-  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 47.15, R: 40, E: 11.25, L: 1.44, M: .16}, {L: 89.65, M: 10.35}]}];
+  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.28, P: 24, R: 5, E: .65, L: .063, M: .007}, {R: 87.15, E: 10.7, L: 1.86, M: .29}]},
+  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.556, P: 33, R: 10, E: 1.3, L: .13, M: .014}, {R: 75.56, E: 19.4, L: 4.32, M: .72}]},
+  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 39.129, P: 38, R: 20, E: 2.51, L: .325, M: .036}, {E: 86.57, L: 11.3, M: 2.13}]},
+  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 48.43, R: 40, E: 10.13, L: 1.3, M: .14}, {L: 90.7, M: 9.3}]}];
 const TC_WIN = [80, 17, 2.7, .3];   // niveau du booster gagné sur une victoire, en %, avant bonus de série et de record
 // victoire : éclats gagnés (+ bonus par victoire de suite, + bonus de record), limités aux `cap` premières victoires du jour ; chance de booster en plus
 const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 40, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
@@ -9837,7 +9837,7 @@ const TC_SECRET = [["divin", "Divin caché", "神", 500, "#c9a2ff", "Légendaire
 const tcSecretRoll = () => { for (const sx of TC_SECRET) if (Math.random() < 1 / sx[3]) return sx[0]; return ""; };
 // Versions rares : avant, la version était tirée pour chaque carte puis annulée si la carte n'y avait pas droit, ce qui rendait une UR précise quasi impossible (1 booster Or sur 150 000).
 // Désormais un tirage par booster : en % de chance (booster Classique, multiplié par TC_FINMUL selon le niveau) que la 4e carte soit une version rare, dont la carte est choisie parmi celles qui existent dans cette version.
-const TC_VHIT = {A: 5.9, W: 2.35, K: 2, G: .51, Z: .36}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
+const TC_VHIT = {A: 5.3, W: 2.1, K: 1.8, G: .46, Z: .32}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
 const tcVList = (pool, k) => pool.flatMap(c => (k === "A" ? ["A", "B"] : [k]).filter(v => tcVersOf(c).includes(v)).map(v => [c, v]));
 // tirage au hasard, doublons compris (choix de l'utilisateur : les doublons font partie du jeu, ils se recyclent en éclats qui servent à forger)
 const tcVPick = l => { let x = Math.random() * l.reduce((a, [c]) => a + TC_VW[c.r], 0); for (const e of l){ x -= TC_VW[e[0].r]; if (x <= 0) return e; } return l[l.length - 1]; };
