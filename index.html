@@ -10063,7 +10063,7 @@ const tcLuxCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc lx r-${
   <img src="${tcBase(c)}" alt="" loading="lazy"><span class="lsh" aria-hidden="true"></span><span class="lfr" aria-hidden="true"></span><span class="lf2" aria-hidden="true"></span>
   <span class="lh"><span>#${String(c.no).padStart(3, "0")} · ${TC_R[c.r][0]}${o.f === "H" ? " · Holo" : ""}</span><i class="sl" aria-hidden="true">${c.r === "X" ? "覚" : c.r === "M" ? "神" : "伝"}</i></span>
   <span class="ln">${o.no ? "???" : esc(c.n)}</span>
-  <span class="ls"><span>NIV <b>${o.no ? "??" : c.p}</b></span><span><span class="kj">${TC_PACKS[c.u][1]}</span> ${TC_PACKS[c.u][0]}</span><span>RANG <b>${o.no ? "?" : c.pop || "B"}</b></span></span><span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
+  <span class="ls"><span>NIV <b>${o.no ? "??" : c.p}</b></span><span><span class="kj">${TC_PACKS[c.u][1]}</span> ${TC_PACKS[c.u][0]}</span></span><span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
 const tcPouch = key => { const {u, t} = tcParse(key); return `<div class="pouch px t${t}" style="--pc:${TC_PACKS[u][2]};background-image:url(${tcPouchImg(key)})"><span class="vol" aria-hidden="true"></span></div>`; };
 function tcHome(s){
   const box = document.querySelector("#tcHome"); if (!box) return; s = s || tcLoad();
