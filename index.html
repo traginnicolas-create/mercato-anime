@@ -9032,6 +9032,18 @@ setInterval(voxRender, 2000);
 .tcweek b{font-family:var(--mono);font-weight:500;font-size:11px}
 .tcweek .ok{border-color:color-mix(in srgb,var(--ok) 55%,transparent);opacity:.6}
 .tcweek .now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+/* cadeaux de connexion en clair (12 oct. 2026) : chaque case dit ce qu'on gagne ; quatre par ligne, le 7e jour sur deux colonnes */
+.tcweek.wk7{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.tcweek.wk7 div{gap:3px;padding:9px 4px 10px;text-align:center;align-content:start}
+.tcweek.wk7 small{font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.tcweek.wk7 i{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;font-style:normal;font-family:var(--brand);font-weight:900;font-size:15px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.tcweek.wk7 b{font-family:var(--body,inherit);font-weight:700;font-size:12px;line-height:1.15}
+.tcweek.wk7 u{text-decoration:none;font-family:var(--mono);font-size:9.5px;color:var(--muted);line-height:1.2}
+.tcweek.wk7 .pk{--kc:#dfe5ee}.tcweek.wk7 .pk.t2{--kc:#f2c230}.tcweek.wk7 .pk.t3{--kc:#c9a2ff}
+.tcweek.wk7 .pk i{color:#0e0d12;background:var(--kc)}.tcweek.wk7 .pk b{color:var(--kc)}
+.tcweek.wk7 .big{grid-column:span 2;border-color:color-mix(in srgb,var(--kc) 60%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--kc) 16%,#0b0a0e),#0b0a0e 70%);box-shadow:0 0 22px color-mix(in srgb,var(--kc) 22%,transparent)}
+.tcweek.wk7 .big i{width:38px;height:38px;font-size:19px}.tcweek.wk7 .big b{font-size:14px}.tcweek.wk7 .big u{font-size:10.5px;color:var(--kc)}
+.tcweek.wk7 .ok{opacity:.5}
 .tctoast.t1{border-color:#cfd6e0}.tctoast.t2{border-color:#f5b53a;box-shadow:0 0 30px rgba(245,181,58,.45)}.tctoast.t3{border-color:#c9a2ff;box-shadow:0 0 36px rgba(176,124,255,.6)}
 .tctoast.t1 i{color:#cfd6e0}.tctoast.t2 i{color:#f5b53a}.tctoast.t3 i{color:#c9a2ff}
 /* ---- ouverture : aura, charge, éclair, cartes distribuées ---- */
@@ -9556,6 +9568,27 @@ setInterval(voxRender, 2000);
 .tc.f-G .tx{background:linear-gradient(120deg,#fff6cf,#f2c230,#fff,#f2c230);opacity:.3}
 .tc.f-W .tx,.tc.f-S .tx,.tc.f-Z .tx,.tc.no .tx{display:none}
 .tcdrops .tx{display:none}
+/* « les persos » d'un booster (refonte du 12 oct. 2026, inspirée de l'écran équivalent de Kyara) : compteur, filtre Tous / Manquants, une section par rareté avec sa
+   chance par booster à côté du nom, et des vignettes en forme de carte (grisées avec un « ? » quand on ne les a pas) */
+.tcdbox .dctop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
+.tcdbox .dctop p{margin:0;font-family:var(--mono);font-size:15px;color:var(--muted)}.tcdbox .dctop p b{font-size:19px;color:var(--text)}
+.tcdbox .dcseg{display:flex;padding:3px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);background:#0b0a0e}
+.tcdbox .dcseg button{all:unset;cursor:pointer;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}.tcdbox .dcseg button.on{background:var(--text);color:#0e0d12}
+.tcdbox .dch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:20px 0 9px}
+.tcdbox .dch .gem{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-family:var(--brand);font-weight:900;font-size:13px;color:#0e0d12;background:var(--rc);box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.tcdbox .dch b{font-family:var(--title);font-weight:900;font-size:18px;color:var(--rc)}
+.tcdbox .dch em{font-style:normal;font-family:var(--mono);font-weight:700;font-size:13px;padding:3px 9px;border-radius:999px;color:var(--rc);background:color-mix(in srgb,var(--rc) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 55%,transparent)}
+.tcdbox .dch small{font-family:var(--mono);font-size:10.5px;color:var(--muted)}.tcdbox .dch .cnt{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.tcdbox .dcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+@media (max-width:520px){.tcdbox .dcg{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}}
+.tcdbox .dc{position:relative;aspect-ratio:5/7;border-radius:9px;overflow:hidden;background:#0b0a0e;box-shadow:inset 0 0 0 1.5px var(--rc),0 0 12px color-mix(in srgb,var(--rc) 22%,transparent);content-visibility:auto;contain-intrinsic-size:auto 130px}
+.tcdbox .dc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+.tcdbox .dc::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,transparent 55%,rgba(8,7,11,.92));box-shadow:inset 0 0 0 1.5px var(--rc)}
+.tcdbox .dc b{position:absolute;left:6px;right:6px;bottom:5px;z-index:1;font-size:10.5px;font-weight:700;line-height:1.15;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #000}
+.tcdbox .dc.miss img{filter:grayscale(1) brightness(.5) contrast(1.1)}
+.tcdbox .dc i{position:absolute;inset:0;z-index:1;display:grid;place-items:center;padding-bottom:14%;font-style:normal;font-family:var(--title);font-weight:900;font-size:26px;color:var(--rc);text-shadow:0 2px 8px #000}
+.tcdbox.onlymiss .dc:not(.miss){display:none}
+.tcdbox .dcsep{margin:28px 0 0;padding-top:16px;border-top:1px solid var(--line);font-family:var(--title);font-weight:900;font-size:16px}.tcdbox .dcsep small{display:block;font-family:var(--mono);font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
 /* texture allégée (11 oct. 2026) : les hachures et les points couvraient trop l'illustration */
 .tc.tc .tx{opacity:.04;-webkit-mask-image:repeating-linear-gradient(125deg,#000 0 .8px,transparent .8px 7px);mask-image:repeating-linear-gradient(125deg,#000 0 .8px,transparent .8px 7px)}
 .tc.tc.r-R .tx{opacity:.05}.tc.tc.r-E .tx{opacity:.07}.tc.tc.r-L .tx,.tc.tc.r-M .tx,.tc.tc.r-X .tx{opacity:.1}.tc.tc.f-G .tx{opacity:.12}
@@ -9994,9 +10027,10 @@ function tcGo(k){ if (/days/.test(k) || k === "tlogin") return;
   if (k === "tfriend"){ try { if (frMe()) frShow(); else { show("home"); setTimeout(() => document.querySelector("#frHome")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); } } catch {} return; }
   if (k === "tname" || k === "tacc"){ show("home"); setTimeout(() => document.querySelector(k === "tacc" ? "#cpBox" : "#profBox")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); return; } if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
 const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + tcName(rw.p);
-// cadeau de connexion : éclats chaque jour, booster Argent tous les 3 jours, Or le 7e jour de chaque semaine de série
 const TC_LOGIN_PACKS = 2;   // boosters Classique offerts chaque jour avec le cadeau de connexion, en plus de la récompense du jour
-const tcLoginRw = n => n % 7 === 0 ? {p: "mix:2"} : n % 3 === 0 ? {p: "mix:1"} : {g: 20 * Math.min(5, n)};
+// cadeau de connexion : un cycle de sept jours, toujours le même et toujours écrit en clair ; le 7e jour donne un booster Divin (Légendaire garantie)
+const TC_LOGIN7 = [{g: 20}, {g: 40}, {p: "mix:1"}, {g: 60}, {g: 80}, {p: "mix:2"}, {p: "mix:3"}];
+const tcLoginRw = n => TC_LOGIN7[(Math.max(1, n) - 1) % 7];
 
 // ---- affichage ----
 // chaque version d'une carte (normale, Holo, AR, SAR, UR) est une carte à part dans la collection
@@ -10041,18 +10075,25 @@ function tcDrops(key){
   // chance qu'une carte précise sorte dans le booster : quatre emplacements normaux et l'emplacement garanti, partagés entre les cartes de sa rareté
   const one = c => { const n = pool.filter(x => x.r === c.r).length || 1, xr = TC_XRATE[t] / 100; if (c.r === "X") return xr / n * 100;
     const a = (R[0][c.r] || 0) / 100 / n, b = (R[1][c.r] || 0) / 100 * (1 - (pool.some(x => x.r === "X") ? xr : 0)) / n; return (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; };
-  M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><h2>Booster ${tcName(key)}</h2><span class="small">${pool.length} personnages possibles · 5 cartes · ${TC_T[t].g} ou mieux garantie</span></div><button class="ghost" id="tcClose">✕ Fermer</button></div>
-    <div class="tierh" style="--tc:var(--accent)">Versions <small>Holo : par carte · les autres : par booster</small></div>
-    <div class="tcchips"><button disabled>Holo · ${pct(TC_FIN.H[2] * TC_FINMUL[t])} par carte</button>${["A", "W", "K", "G", "Z"].filter(k => tcVList(pool, k).length).map(k => `<button disabled>${k === "A" ? "AR" : TC_FIN[k][0]} · ${pct(TC_VHIT[k] * TC_FINMUL[t])}</button>`).join("")}</div><p class="small" style="margin:-4px 0 10px">Chaque booster a ces chances de contenir une version rare, en plus de ses cartes normales ; la carte est alors tirée parmi celles listées ci-dessous (les Légendaires et Mythiques y sortent moins souvent que les Épiques). Les doublons se recyclent en éclats, qui servent à forger la version qui te manque (touche-la dans la collection). Red Blood ou mieux garantie après ${TC_VPITY} boosters sans, UR ou Légende après ${TC_UPITY}. Holo existe pour toutes les cartes.</p>
-    ${[["Z", "#c9a2ff"], ["G", "#f5c84a"], ["K", "#ff3b3b"], ["W", "#c9a36a"], ["A", "#bfe9ff"]].map(([k, col]) => { const ks = k === "A" ? ["A", "B"] : [k], l = pool.flatMap(c => ks.filter(v => tcVersOf(c).includes(v)).map(v => [c, v])); if (!l.length) return "";
-      const tw = l.reduce((a, [c]) => a + TC_VW[c.r], 0), odds = ([c]) => TC_VHIT[k] * TC_FINMUL[t] / 100 * TC_VW[c.r] / tw, mn = Math.min(...l.map(odds)), mx = Math.max(...l.map(odds)), sur = p => "1 booster sur " + Math.max(1, Math.round(1 / p)).toLocaleString("fr-FR");
-      return `<div class="tierh" style="--tc:${col}">${k === "A" ? "AR" : TC_FIN[k][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${Math.round(1 / mx) === Math.round(1 / mn) ? sur(mx) : "de " + sur(mx) + " à " + sur(mn).replace("1 booster sur ", "1 sur ")} pour chacune</small></div>
-        <div class="tcdrops">${l.map(e => { const [c, v] = e, has = tcHas(s, c, v); return `<div class="${has ? "" : "miss"}" style="border-left-color:${col}"><img src="${tcArt(c, v)}" alt="" loading="lazy"><span>${esc(c.n)}<small>${TC_R[c.r][0]} · ${sur(odds(e)).replace("1 booster sur ", "1 sur ")}</small></span><em>${has ? "✔" : ""}</em></div>`; }).join("")}</div>`; }).join("")}
+  // chance qu'un booster contienne au moins une carte de cette rareté (affichée à côté du nom de la rareté)
+  const rar = r => { const xr = pool.some(x => x.r === "X") ? TC_XRATE[t] / 100 : 0; if (r === "X") return xr * 100; const a = (R[0][r] || 0) / 100, b = (R[1][r] || 0) / 100 * (1 - xr); return (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; };
+  const KJ = {C: "並", P: "良", R: "稀", E: "叙", L: "伝", M: "神", X: "覚"}, sur = p => "1 sur " + Math.max(1, Math.round(1 / p)).toLocaleString("fr-FR");
+  const thumb = (c, v, has, sub) => `<div class="dc r-${tcER(c, v)} ${has ? "" : "miss"}"><img src="${v ? tcArt(c, v) : tcBase(c)}" alt="" loading="lazy">${has ? "" : `<i aria-hidden="true">?</i>`}<b>${esc(c.n)}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
+  const head = (cls, col, kj, name, p, note, own, tot) => `<div class="dch ${cls}" style="${col ? "--rc:" + col : ""}"><span class="gem" aria-hidden="true">${kj}</span><b>${name}</b><em title="Chance par booster">${pct(p)}</em><small>${note}</small><span class="cnt">${own}/${tot}</span></div>`;
+  const ownAll = pool.filter(c => s.own[c.id]).length;
+  M.innerHTML = `<div class="box tcdbox" style="max-width:820px"><div class="head"><div><h2>Booster ${tcName(key)} : les persos</h2><span class="small">5 cartes · ${TC_T[t].g} ou mieux garantie</span></div><button class="ghost" id="tcClose">✕ Fermer</button></div>
+    <div class="dctop"><p><b>${ownAll}</b> / ${pool.length} possédés</p><div class="dcseg" role="group" aria-label="Filtre"><button class="on" data-dcf="all">Tous</button><button data-dcf="miss">Manquants</button></div></div>
+    <p class="small" style="margin:0 0 6px">Le pourcentage à côté de chaque rareté est la chance qu'un booster en contienne au moins une carte.</p>
     ${[...TC_ORDER].reverse().filter(r => pool.some(c => c.r === r)).map(r => { const l = pool.filter(c => c.r === r), p = one(l[0]);
-      return `<div class="tierh r-${r}" style="--tc:var(--rc)">${TC_R[r][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${pct(p)} par booster pour chacune${p > 0 ? `, soit 1 booster sur ${Math.max(1, Math.round(100 / p))}` : ""}</small></div>
-        <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${tcBase(c)}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
-    ${t === 0 ? `<div class="tierh" style="--tc:var(--accent)">Boosters secrets <small>un Classique peut en cacher un</small></div><div class="tcdrops" style="grid-template-columns:1fr">${[...TC_SECRET].reverse().map(sx => `<div style="border-left-color:${sx[4]};grid-template-columns:34px 1fr auto"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:${sx[4]};color:#0e0d12;font-family:var(--brand);font-weight:900">${sx[2]}</span><span><b>${sx[1]}</b> · ${sx[5]}</span><em style="color:var(--text);font-family:var(--mono)">1 sur ${sx[3]}</em></div>`).join("")}</div>` : ""}
-    <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage. ✔ = tu as déjà cette carte.</p></div>`;
+      return head("r-" + r, "", KJ[r], TC_R[r][0], rar(r), p > 0 ? "chaque carte : " + sur(p / 100) : "", l.filter(c => s.own[c.id]).length, l.length) + `<div class="dcg">${l.map(c => thumb(c, "", !!s.own[c.id])).join("")}</div>`; }).join("")}
+    <div class="dcsep">Versions rares <small>une chance par booster, en plus des cartes normales</small></div>
+    ${[["Z", "#c9a2ff", "極"], ["G", "#f5c84a", "金"], ["K", "#ff3b3b", "血"], ["W", "#c9a36a", "賞"], ["A", "#bfe9ff", "彩"]].map(([k, col, kj]) => { const ks = k === "A" ? ["A", "B"] : [k], l = pool.flatMap(c => ks.filter(v => tcVersOf(c).includes(v)).map(v => [c, v])); if (!l.length) return "";
+      const tw = l.reduce((a, [c]) => a + TC_VW[c.r], 0), odds = ([c]) => TC_VHIT[k] * TC_FINMUL[t] / 100 * TC_VW[c.r] / tw, mn = Math.min(...l.map(odds)), mx = Math.max(...l.map(odds));
+      return head("", col, kj, k === "A" ? "AR" : TC_FIN[k][0], TC_VHIT[k] * TC_FINMUL[t], "chaque carte : " + (Math.round(1 / mx) === Math.round(1 / mn) ? sur(mx) : "de " + sur(mx) + " à " + sur(mn)), l.filter(([c, v]) => tcHas(s, c, v)).length, l.length) + `<div class="dcg">${l.map(([c, v]) => thumb(c, v, tcHas(s, c, v))).join("")}</div>`; }).join("")}
+    <p class="small" style="margin:10px 0 0">Holo : ${pct(TC_FIN.H[2] * TC_FINMUL[t])} par carte, sur n'importe quelle carte. Les doublons se recyclent en éclats, qui servent à forger ce qui te manque. Red Blood ou mieux garantie après ${TC_VPITY} boosters sans, UR ou Légende après ${TC_UPITY}.</p>
+    ${t === 0 ? `<div class="dcsep">Boosters secrets <small>un Classique peut en cacher un</small></div><div class="tcdrops" style="grid-template-columns:1fr">${[...TC_SECRET].reverse().map(sx => `<div style="border-left-color:${sx[4]};grid-template-columns:34px 1fr auto"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:${sx[4]};color:#0e0d12;font-family:var(--brand);font-weight:900">${sx[2]}</span><span><b>${sx[1]}</b> · ${sx[5]}</span><em style="color:var(--text);font-family:var(--mono)">1 sur ${sx[3]}</em></div>`).join("")}</div>` : ""}
+    <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage.</p></div>`;
+  M.querySelectorAll("[data-dcf]").forEach(b => b.onclick = () => { M.querySelectorAll("[data-dcf]").forEach(x => x.classList.toggle("on", x === b)); M.querySelector(".tcdbox").classList.toggle("onlymiss", b.dataset.dcf === "miss"); });
   M.classList.remove("hidden"); M.scrollTo(0, 0); const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); };
 }
 // dos de carte : un emblème et une couleur par rareté (cartes face cachée à l'ouverture, dos dans la vue 3D)
@@ -10158,8 +10199,9 @@ function tcRender(){
       <p class="tcsecp">Tes premiers pas sur Hanko. Termine-les toutes pour un booster Or en cadeau.</p><div class="tcms">${tut.map(m => row(m, s.tuto.claimed.includes(m.k), "data-tcd")).join("")}
         <div class="tcm tcm2 ${tutDone ? "done" : ""}">${rwt({p: "mix:2"})}<div><b>Bonus : toutes les missions Découverte</b><i><u style="width:${dn(tut, s.tuto.claimed) / tut.length * 100}%"></u></i><small><span>${dn(tut, s.tuto.claimed)}/${tut.length}</span><span>1 booster Mélange Or</span></small></div><button class="${tutDone ? "primary" : ""}" id="tcTutoBonus" ${tutDone ? "" : "disabled"}>${tutDone ? "Réclamer" : "En cours"}</button></div></div>`}
       ${sec("Connexion", "連続", "Jour " + s.login.n, "nouveau cadeau · " + inT(tDay))}
-      <div class="tcweek">${nx.map(n => { const r = tcLoginRw(n); return `<div class="${n < s.login.n || (n === s.login.n && s.login.got) ? "ok" : n === s.login.n ? "now" : ""}"><small>J${n}</small><b>${r.g ? r.g + " ◆" : TC_T[tcParse(r.p).t].k}</b></div>`; }).join("")}</div>
-      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour : ${TC_LOGIN_PACKS} boosters Classique, plus la récompense du jour (booster Argent 銀 tous les 3 jours, booster Or 金 le 7e). Un jour manqué remet la série à 1.</p>
+      <div class="tcweek wk7">${nx.map((n, k) => { const r = tcLoginRw(n), tt = r.p ? tcParse(r.p).t : -1, done = n < s.login.n || (n === s.login.n && s.login.got);
+        return `<div class="${done ? "ok" : n === s.login.n ? "now" : ""} ${k === 6 ? "big" : ""} ${tt >= 0 ? "pk t" + tt : ""}"><small>Jour ${k + 1}${done ? " ✔" : ""}</small>${tt >= 0 ? `<i aria-hidden="true">${TC_T[tt].k}</i><b>Booster ${TC_T[tt].n}</b><u>${TC_T[tt].g} garantie</u>` : `<i aria-hidden="true">◆</i><b>${r.g} éclats</b>`}</div>`; }).join("")}</div>
+      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour, en plus de la récompense affichée : ${TC_LOGIN_PACKS} boosters Classique. Le 7e jour, un booster Divin avec une Légendaire garantie, puis la semaine recommence. <b>Un seul jour manqué et la série repart au jour 1.</b></p>
       ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/" + mis.length, inT(tDay))}
       <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
         <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : toutes les missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / mis.length * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/${mis.length}</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
