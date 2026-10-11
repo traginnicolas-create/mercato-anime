@@ -9739,17 +9739,17 @@ const TC_OBJ = [
   ["Kubikirib-ch-", "na", "Kubikiribôchô", "R", "Épée", "Zabuza Momochi", "Le « hachoir » de Zabuza, l'une des sept épées de Kiri. Elle se répare avec le fer du sang."],
   ["Scroll-of-Seals", "na", "Rouleau des techniques interdites", "R", "Rouleau", "Village de Konoha", "Le rouleau scellé par le Premier Hokage. Naruto y apprend le Multi-clonage."],
   ["Forehead-Protector", "na", "Bandeau frontal", "C", "Objet", "", "Le bandeau gravé du symbole du village, porté par les ninjas."]];
-const TC_XRATE = [3.5, 5, 9, 18];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
+const TC_XRATE = [3, 4.4, 8, 16];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
 const TC_ORDER = ["C", "P", "R", "E", "L", "M", "X"];
 // part de chaque rareté dans un univers (du plus rare au plus commun) : le reste est Commune
 const TC_QUOTA = [["M", .05], ["L", .10], ["E", .17], ["R", .24], ["P", .22]];
 // niveaux de booster : nom, kanji, prix de base en éclats, carte garantie, taux en % par emplacement (quatre emplacements normaux, puis le cinquième, garanti)
 // le Classique reste proche de Kyara (Épique ~21 %, Légendaire ~3 %, Mythique ~0,4 % par booster) : il y a peu de cartes, la collection doit rester longue à finir
 const TC_T = [
-  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70, P: 24, R: 5, E: .9, L: .09, M: .01}, {R: 82, E: 15, L: 2.6, M: .4}]},
-  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55, P: 33, R: 10, E: 1.8, L: .18, M: .02}, {R: 66, E: 27, L: 6, M: 1}]},
-  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 38, P: 38, R: 20, E: 3.5, L: .45, M: .05}, {E: 81, L: 16, M: 3}]},
-  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 44, R: 40, E: 14, L: 1.8, M: .2}, {L: 87, M: 13}]}];
+  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.111, P: 24, R: 5, E: .8, L: .08, M: .009}, {R: 84.15, E: 13.2, L: 2.3, M: .35}]},
+  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.222, P: 33, R: 10, E: 1.6, L: .16, M: .018}, {R: 69.8, E: 24, L: 5.3, M: .9}]},
+  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 38.455, P: 38, R: 20, E: 3.1, L: .4, M: .045}, {E: 83.4, L: 14, M: 2.6}]},
+  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 45.72, R: 40, E: 12.5, L: 1.6, M: .18}, {L: 88.5, M: 11.5}]}];
 const TC_WIN = [80, 17, 2.7, .3];   // niveau du booster gagné sur une victoire, en %, avant bonus de série et de record
 // victoire : éclats gagnés (+ bonus par victoire de suite, + bonus de record), limités aux `cap` premières victoires du jour ; chance de booster en plus
 const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 40, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
@@ -9837,7 +9837,7 @@ const TC_SECRET = [["divin", "Divin caché", "神", 500, "#c9a2ff", "Légendaire
 const tcSecretRoll = () => { for (const sx of TC_SECRET) if (Math.random() < 1 / sx[3]) return sx[0]; return ""; };
 // Versions rares : avant, la version était tirée pour chaque carte puis annulée si la carte n'y avait pas droit, ce qui rendait une UR précise quasi impossible (1 booster Or sur 150 000).
 // Désormais un tirage par booster : en % de chance (booster Classique, multiplié par TC_FINMUL selon le niveau) que la 4e carte soit une version rare, dont la carte est choisie parmi celles qui existent dans cette version.
-const TC_VHIT = {A: 7.5, W: 3, K: 2.5, G: .65, Z: .45}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
+const TC_VHIT = {A: 6.6, W: 2.6, K: 2.2, G: .57, Z: .4}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
 const tcVList = (pool, k) => pool.flatMap(c => (k === "A" ? ["A", "B"] : [k]).filter(v => tcVersOf(c).includes(v)).map(v => [c, v]));
 // tirage au hasard, doublons compris (choix de l'utilisateur : les doublons font partie du jeu, ils se recyclent en éclats qui servent à forger)
 const tcVPick = l => { let x = Math.random() * l.reduce((a, [c]) => a + TC_VW[c.r], 0); for (const e of l){ x -= TC_VW[e[0].r]; if (x <= 0) return e; } return l[l.length - 1]; };
