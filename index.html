@@ -9953,7 +9953,8 @@ const tcAlt = c => { try { return ((window.__MA && window.__MA.TCALT) || {})[c.u
 ["op", "db", "na"].forEach(u => { const e = document.createElement("script"); e.src = "ma-alt-" + u + ".js"; e.async = true; e.onerror = () => {}; document.head.appendChild(e); });
 window.addEventListener("tcalt", () => { try { if (!$("#tcg").classList.contains("hidden") && !document.querySelector(".tcopen,.tcview,.tccine")) tcRender(); } catch {} });
 const tcWant = c => { try { return (window.__MA.TCWANT || {})[c.n] || ""; } catch { return ""; } };   // photo du vrai avis de recherche, quand on l'a
-const tcArt = (c, f) => f === "W" ? tcWant(c) || [...tcAlt(c)].reverse()[0] || c.i : (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || c.i;
+const tcBase = c => ((window.__MA || {}).TCBASE || {})[c.n] || c.i;   // image de base propre à la carte, si elle existe (data/cardbase)
+const tcArt = (c, f) => f === "W" ? tcWant(c) || [...tcAlt(c)].reverse()[0] || tcBase(c) : (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || tcBase(c);
 // versions qui existent pour une carte : normale et Holo toujours, les autres seulement avec leur propre illustration
 // Les versions illustrées sont réservées aux personnages forts et populaires, pour rester rares : AR à partir d'Épique,
 // seconde AR (autre illustration, même nom « AR ») et SAR à partir de Légendaire (ou tête d'affiche), UR pour les Mythiques.
@@ -9986,7 +9987,7 @@ function tcDrops(key){
         <div class="tcdrops">${l.map(e => { const [c, v] = e, has = tcHas(s, c, v); return `<div class="${has ? "" : "miss"}" style="border-left-color:${col}"><img src="${tcArt(c, v)}" alt="" loading="lazy"><span>${esc(c.n)}<small>${TC_R[c.r][0]} · ${sur(odds(e)).replace("1 booster sur ", "1 sur ")}</small></span><em>${has ? "✔" : ""}</em></div>`; }).join("")}</div>`; }).join("")}
     ${[...TC_ORDER].reverse().filter(r => pool.some(c => c.r === r)).map(r => { const l = pool.filter(c => c.r === r), p = one(l[0]);
       return `<div class="tierh r-${r}" style="--tc:var(--rc)">${TC_R[r][0]} <small>${l.length} carte${l.length > 1 ? "s" : ""} · ${pct(p)} par booster pour chacune${p > 0 ? `, soit 1 booster sur ${Math.max(1, Math.round(100 / p))}` : ""}</small></div>
-        <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${c.i}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
+        <div class="tcdrops">${l.map(c => `<div class="r-${c.r} ${s.own[c.id] ? "" : "miss"}"><img src="${tcBase(c)}" alt="" loading="lazy"><span>${esc(c.n)}</span><em>${s.own[c.id] ? "✔" : ""}</em></div>`).join("")}</div>`; }).join("")}
     ${t === 0 ? `<div class="tierh" style="--tc:var(--accent)">Boosters secrets <small>un Classique peut en cacher un</small></div><div class="tcdrops" style="grid-template-columns:1fr">${[...TC_SECRET].reverse().map(sx => `<div style="border-left-color:${sx[4]};grid-template-columns:34px 1fr auto"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:${sx[4]};color:#0e0d12;font-family:var(--brand);font-weight:900">${sx[2]}</span><span><b>${sx[1]}</b> · ${sx[5]}</span><em style="color:var(--text);font-family:var(--mono)">1 sur ${sx[3]}</em></div>`).join("")}</div>` : ""}
     <p class="small" style="margin-top:12px">Les taux ne comptent pas les garanties après une longue série sans gros tirage. ✔ = tu as déjà cette carte.</p></div>`;
   M.classList.remove("hidden"); M.scrollTo(0, 0); const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#tcClose").onclick = close; M.onclick = e => { if (e.target === M) close(); };
@@ -10019,7 +10020,7 @@ const TC_LUX = true;
 // carte « prestige » des personnages les plus rares (Légendaire, Mythique, Éveil, en version normale ou Holo) :
 // large contour de métal gravé de fines hachures, en-tête avec sceau, illustration dans une fenêtre, plaque de statistiques
 const tcLuxCard = (c, o = {}) => `<${o.btn ? "button" : "div"} class="tc lx r-${c.r} u-${c.u} ${o.f === "H" ? "f-H" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}>
-  <img src="${c.i}" alt="" loading="lazy"><span class="lsh" aria-hidden="true"></span><span class="lfr" aria-hidden="true"></span><span class="lf2" aria-hidden="true"></span>
+  <img src="${tcBase(c)}" alt="" loading="lazy"><span class="lsh" aria-hidden="true"></span><span class="lfr" aria-hidden="true"></span><span class="lf2" aria-hidden="true"></span>
   <span class="lh"><span>#${String(c.no).padStart(3, "0")} · ${TC_R[c.r][0]}${o.f === "H" ? " · Holo" : ""}</span><i class="sl" aria-hidden="true">${c.r === "X" ? "覚" : c.r === "M" ? "神" : "伝"}</i></span>
   <span class="ln">${o.no ? "???" : esc(c.n)}</span>
   <span class="ls"><span>NIV <b>${o.no ? "??" : c.p}</b></span><span><span class="kj">${TC_PACKS[c.u][1]}</span> ${TC_PACKS[c.u][0]}</span><span>RANG <b>${o.no ? "?" : c.pop || "B"}</b></span></span><span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
