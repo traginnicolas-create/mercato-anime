@@ -2115,6 +2115,7 @@ function inviteBtn(){
 function onlineErr(t){ $("#onlineErr").textContent = t; }
 
 function leaveOnline(){
+  try { sessionStorage.removeItem("mercato-reprise"); } catch {}   // partie quittée volontairement : on ne propose plus de la reprendre
   NET.timers.forEach(clearInterval); NET.timers = [];
   NET.unsub.forEach(f => { try { f(); } catch {} }); NET.unsub = [];
   if (NET.game) NET.game.leave().catch(() => {});
@@ -9585,6 +9586,13 @@ setInterval(voxRender, 2000);
 /* contour fin (demande de l'utilisateur) : le relief vient de la brillance et des reflets, plus de la tranche sous la carte */
 .tc.lx:not(.no){box-shadow:0 1px 0 var(--m2),0 2.2px 0 var(--m3),0 3.6px 0 color-mix(in srgb,var(--m3) 50%,#000),0 0 24px var(--gl),0 14px 26px rgba(0,0,0,.55)}
 .tc.lx > .lsh{box-shadow:inset 0 0 max(9px,6cqw) max(5px,3.4cqw) rgba(0,0,0,.62)}
+/* allègement (12 oct. 2026, plantage au bas de la Vitrine sur téléphone) : hors survol, vue en grand et cinématique, les calques d'effets
+   (empreinte, paillettes : fusion + masque + filtre) ne sont pas dessinés ; sur écran tactile ou étroit, le cadre et le balayage ne s'animent pas dans les grilles */
+.tc:not(.hl):not(.vcard .tc):not(.tccine .tc) > :is(.tx,.sk){display:none!important}
+@media (hover:none),(max-width:700px){
+  .tc:not(.hl):not(.vcard .tc):not(.tccine .tc) > .lfr,.tc:not(.hl):not(.vcard .tc):not(.tccine .tc) .fx{animation:none!important}
+  .vtpick .tc,.vtpick .tc *{animation:none!important;transition:none!important}
+}
 @keyframes lxmetal3{to{background-position:0 0,0 0,0 0,300% 0}}
 /* paillettes fines (choix C de l'utilisateur, 11 oct. 2026) : à la place des points blancs réguliers — petits éclats colorés tirés au hasard (texture fabriquée par tcGlit),
    deux couches qui glissent en sens inverse avec l'inclinaison, visibles surtout autour de la lumière */
@@ -10638,6 +10646,9 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vt.lock small{color:#e9e5ee}
 .vtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .vtitem{display:grid;gap:6px}
+/* allègement : une carte de visite verrouillée ne s'anime pas ; sur écran tactile ou étroit, celles qui sont hors de l'écran ne sont pas dessinées */
+.vt.lock,.vt.lock *{animation:none!important}
+@media (hover:none),(max-width:700px){.vtitem{content-visibility:auto;contain-intrinsic-size:auto 170px}.vtgrid .vt4 .art img.g,.vtgrid .vt4 .bolt{display:none}}
 .vtitem .row{gap:6px}
 .vtitem .row button{flex:1;border-radius:999px;padding:6px 10px;font-size:12.5px}
 .vtitem button.on{border-color:var(--accent);color:var(--accent)}
@@ -11511,18 +11522,27 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   try { const us = Object.keys(DATA), u = us[day % us.length], three = DATA[u].filter(c => c.i).slice(0, 14).sort(() => Math.random() - .5).slice(0, 3);
     if (three.length === 3){ F.classList.add("hasfan"); F.insertAdjacentHTML("afterbegin", `<div class="fan" aria-hidden="true">${three.map(c => `<img src="${c.i}" alt="">`).join("")}</div>`); } } catch {}
   // lien d'invitation : l'adresse se termine par #CODE, on pré-remplit « Rejoindre » (et on rejoint si le pseudo est connu)
-  const hash = (location.hash || "").slice(1).toUpperCase();
-  if (/^[A-Z0-9]{4}$/.test(hash)){ const c = document.querySelector("#qjCode"), n = document.querySelector("#qjName"); c.value = hash;
-    setTimeout(() => { document.querySelector("#joinBox").scrollIntoView({block: "center"}); if (n.value.trim() || n.classList.contains("hidden")) document.querySelector("#qjGo").click(); else n.focus({preventScroll: true}); }, 900); }
+  // (si l'écran de connexion est affiché, le code attend dans la session le rechargement qui suit la connexion, quinze minutes au plus)
+  let hash = (location.hash || "").slice(1).toUpperCase();
+  try { const pd = JSON.parse(sessionStorage.getItem("hanko-lien") || "null"); sessionStorage.removeItem("hanko-lien"); if (!/^[A-Z0-9]{4}$/.test(hash) && pd && Date.now() - pd.t < 9e5) hash = pd.c; } catch {}
+  // le code est retiré de l'adresse dès qu'il est lu, et un même code n'est rejoué que pendant deux heures : sinon une vieille adresse
+  // (onglet gardé ouvert, favori, raccourci d'écran d'accueil) relançait la même ancienne partie à chaque ouverture du site
+  let hashOk = /^[A-Z0-9]{4}$/.test(hash);
+  if (hashOk){ try { history.replaceState(null, "", location.pathname + location.search); } catch {}
+    try { const seen = JSON.parse(localStorage.getItem("hanko-lien-vu") || "null"); if (seen && seen.c === hash && Date.now() - seen.t > 72e5) hashOk = false; else if (!seen || seen.c !== hash) localStorage.setItem("hanko-lien-vu", JSON.stringify({c: hash, t: Date.now()})); } catch {} }
+  if (hashOk){ const c = document.querySelector("#qjCode"), n = document.querySelector("#qjName"); c.value = hash;
+    setTimeout(() => { if (document.querySelector(".cpgate")){ try { sessionStorage.setItem("hanko-lien", JSON.stringify({c: hash, t: Date.now()})); } catch {} return; }
+      document.querySelector("#joinBox").scrollIntoView({block: "center"}); if (n.value.trim() || n.classList.contains("hidden")) document.querySelector("#qjGo").click(); else n.focus({preventScroll: true}); }, 900); }
   // reprise après coupure : la dernière partie rejointe depuis cet onglet, pendant deux heures
   try { const r = JSON.parse(sessionStorage.getItem("mercato-reprise") || "null");
-    if (r && Date.now() - r.t < 72e5 && !/^[A-Z0-9]{4}$/.test(hash)){
+    if (r && Date.now() - r.t >= 18e5) sessionStorage.removeItem("mercato-reprise");   // proposée 30 minutes seulement, et jamais rejointe d'office
+    if (r && Date.now() - r.t < 18e5 && !hashOk){
       document.querySelector(".steps").insertAdjacentHTML("beforebegin", `<div class="resume"><span>Tu étais dans la partie <b>${r.code}</b>. La reprendre ?</span><span class="row"><button class="primary" id="resGo">Reprendre</button><button class="ghost" id="resNo">Non</button></span></div>`);
-      document.querySelector("#resGo").onclick = () => { const n = document.querySelector("#qjName"); if (!n.value) n.value = r.name || ""; document.querySelector("#qjCode").value = r.code; document.querySelector("#qjGo").click(); };
+      document.querySelector("#resGo").onclick = () => { sessionStorage.removeItem("mercato-reprise"); document.querySelector(".resume")?.remove(); const n = document.querySelector("#qjName"); if (!n.value) n.value = r.name || ""; document.querySelector("#qjCode").value = r.code; document.querySelector("#qjGo").click(); };
       document.querySelector("#resNo").onclick = () => { sessionStorage.removeItem("mercato-reprise"); document.querySelector(".resume").remove(); }; } } catch {}
   // premier lancement : trois phrases, une seule fois
   let seen = true; try { seen = !!localStorage.getItem("mercato-bienvenue"); } catch {}
-  if (!seen && !/^[A-Z0-9]{4}$/.test(hash)){
+  if (!seen && !hashOk){
     document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Hanko, en trois gestes</h2>
       <ol><li><i>01</i><span><b>Choisis un jeu</b>17 jeux rangés par famille : affrontement, connaissance, complicité, voix.</span></li>
       <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien avec un code à quatre caractères.</span></li>
