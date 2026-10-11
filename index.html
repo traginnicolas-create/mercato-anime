@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Hanko</title>
+<script>
+/* Mode invité (« Jouer sans compte » sur l'écran de connexion) : doit s'installer avant tout le reste. Tant que l'onglet est ouvert en invité,
+   tout ce que le jeu écrit sous « mercato-… » reste en mémoire vive et disparaît au rechargement ; les données déjà présentes sur l'appareil ne sont ni lues ni modifiées. */
+try { if (sessionStorage.getItem("hanko-invite") === "1"){ const mem = {}, P = Storage.prototype, g = P.getItem, st = P.setItem, rm = P.removeItem, is = (t, k) => t === localStorage && typeof k === "string" && k.indexOf("mercato-") === 0;
+  P.getItem = function(k){ return is(this, k) ? (k in mem ? mem[k] : null) : g.apply(this, arguments); };
+  P.setItem = function(k, v){ if (is(this, k)){ mem[k] = String(v); return; } return st.apply(this, arguments); };
+  P.removeItem = function(k){ if (is(this, k)){ delete mem[k]; return; } return rm.apply(this, arguments); };
+  window.__INVITE = true; } } catch (e) {}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='hlg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233fe0a8'/%3E%3Cstop offset='1' stop-color='%23c9f26b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z' fill='url(%23hlg)'/%3E%3Cpath d='M50 12l32.9 19v38L50 88 17.1 69V31z' fill='%230c1312'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Cpath d='M27 60l46-21v10L27 70z' fill='%233fe0a8'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Shippori+Mincho+B1:wght@800&family=Rye&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -10819,6 +10828,9 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
 .cpgate .gst{min-height:20px;font-size:13.5px;color:var(--muted)}.cpgate .gst.ko{color:var(--danger)}.cpgate .gst.ok{color:var(--ok)}
 .cpgate small{color:var(--muted);font-size:12px;max-width:40ch}
 body.cplock{overflow:hidden}
+.cpguest{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top,0px));translate:-50% 0;z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 20px);padding:7px 8px 7px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--amber,#ffc45a) 55%,var(--line));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);font-size:12.5px;font-weight:500;color:var(--amber,#ffc45a);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.cpguest span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpguest b{flex:none;background:var(--amber,#ffc45a);color:#1a1205;border-radius:999px;padding:5px 11px;font-size:12px}
 </style>
 <script>
 /* =====================================================================
@@ -10877,7 +10889,10 @@ function cpAsk(remote, rT, local, tags){ const M = $("#modal"); cpSet("run", "De
     try { if (this === localStorage && !CP.mute && typeof k === "string" && k.startsWith("mercato-") && !CP_SKIP.test(k)){ set.call(localStorage, "mercato-compte-dirty", "true"); if (CP.user){ clearTimeout(CP.timer); CP.timer = setTimeout(() => { if (!CP.syncing) cpPush(); }, 4000); } } } catch {} return r; };
   addEventListener("visibilitychange", () => { if (document.hidden && CP.user && lsGet("mercato-compte-dirty", false)){ clearTimeout(CP.timer); cpPush(); } }); }
 // ---- affichage ----
-function cpRender(){ const box = $("#cpBox"); if (!box) return; const acc = cpReady() && cpOnSite(), u = CP.user;
+const cpLeaveGuest = () => { try { sessionStorage.removeItem("hanko-invite"); } catch {} location.reload(); };
+function cpRender(){ const box = $("#cpBox"); if (!box) return;
+  if (window.__INVITE){ box.innerHTML = `<label class="f">Mode invité · 客</label><p class="muted" style="margin:4px 0 10px">Tu joues sans compte : rien n'est sauvegardé, et tout repartira de zéro en fermant ou en rechargeant la page.</p><div class="cprow"><button class="primary" id="cpJoin">Créer un compte ou me connecter</button></div>`; $("#cpJoin").onclick = cpLeaveGuest; return; }
+  const acc = cpReady() && cpOnSite(), u = CP.user;
   const manual = `<details ${acc ? "" : "open"}><summary>Sauvegarde manuelle (code ou fichier)</summary><p class="small" style="margin-top:8px">Un code qui contient toute ta progression. Garde-le dans tes notes ou envoie-le-toi : il se recolle ici, sur n'importe quel appareil.</p>
       <div class="cprow" style="margin-top:8px"><button id="svCopy">Copier ma sauvegarde</button>${cpOnSite() ? `<button class="ghost" id="svFile">Télécharger le fichier</button>` : ""}<button class="ghost" id="svShow">Restaurer une sauvegarde</button></div>
       <div id="svIn" class="hidden"><textarea id="svTxt" placeholder="Colle ici ton code de sauvegarde (il commence par HANKO1.)" spellcheck="false"></textarea><div class="cprow" style="margin-top:8px"><button class="primary" id="svGo">Restaurer</button><span class="small" id="svMsg"></span></div></div></details>`;
@@ -10906,7 +10921,7 @@ function cpRender(){ const box = $("#cpBox"); if (!box) return; const acc = cpRe
     M.classList.remove("hidden"); M.scrollTo(0, 0); M.onclick = null; $("#svNo").onclick = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#svYes").onclick = () => svApply(b, {"mercato-compte-dirty": true}); }; }
 // ---- porte d'entrée (demande de l'utilisateur, 16 oct. 2026) : sur le site, on crée un compte ou on se connecte avant d'accéder au jeu.
 // Elle ne s'affiche pas sur claude.ai, où le compte ne peut pas fonctionner. Une session déjà ouverte est relue dans le navigateur, sans réseau.
-function cpGate(loading){ if (!cpReady() || !cpOnSite()) return; let g = document.querySelector(".cpgate");
+function cpGate(loading){ if (!cpReady() || !cpOnSite() || window.__INVITE) return; let g = document.querySelector(".cpgate");
   if (CP.user){ if (g){ g.remove(); document.body.classList.remove("cplock"); } return; }
   if (!g){ document.body.insertAdjacentHTML("beforeend", `<div class="cpgate" role="dialog" aria-modal="true" aria-label="Connexion"><div class="in"></div></div>`); g = document.querySelector(".cpgate"); document.body.classList.add("cplock"); }
   const logo = document.querySelector(".hlogo")?.outerHTML.replace(/hlg/g, "hlg2") || "";
@@ -10917,7 +10932,9 @@ function cpGate(loading){ if (!cpReady() || !cpOnSite()) return; let g = documen
       <div><label for="cgPass">Mot de passe</label><input id="cgPass" type="password" autocomplete="current-password" minlength="8" required placeholder="8 caractères au minimum"></div>
       <div class="row2"><button type="submit" class="primary" id="cgIn">Se connecter</button><button type="button" id="cgUp">Créer un compte</button></div>
       <div class="gst" id="cgSt" role="status"></div><button type="button" class="lk" id="cgForgot">Mot de passe oublié</button></form>
-    <small>${Object.keys(svPack().keys).length > 2 ? "La progression déjà présente sur cet appareil sera rattachée au compte que tu crées." : "Un compte suffit : pas de confirmation par e-mail."}</small>`;
+    <button type="button" class="ghost" id="cgGuest" style="border-radius:999px;width:100%">Jouer sans compte</button>
+    <small>Sans compte, rien n'est gardé : ni cartes, ni éclats, ni historique. Tout repart de zéro à chaque visite.</small><small>${Object.keys(svPack().keys).length > 2 ? "La progression déjà présente sur cet appareil sera rattachée au compte que tu crées." : "Un compte suffit : pas de confirmation par e-mail."}</small>`;
+  $("#cgGuest").onclick = () => { try { sessionStorage.setItem("hanko-invite", "1"); } catch {} location.reload(); };
   const st = (c, t) => { const e = $("#cgSt"); if (e){ e.className = "gst " + c; e.textContent = t; } };
   const cred = () => { const email = $("#cgMail").value.trim(), password = $("#cgPass").value; if (!/^\S+@\S+\.\S+$/.test(email)){ st("ko", "Écris une adresse e-mail valide."); return null; } if (password.length < 8){ st("ko", "Le mot de passe doit faire au moins 8 caractères."); return null; } return {email, password}; };
   const run = async fn => { try { st("", "Un instant…"); const sb = await cpClient(); if (!sb) return st("ko", "Connexion impossible."); await fn(sb); } catch (e){ st("ko", cpErr(e)); } };
@@ -10925,10 +10942,12 @@ function cpGate(loading){ if (!cpReady() || !cpOnSite()) return; let g = documen
   $("#cgUp").onclick = () => { const c = cred(); if (c) run(async sb => { const {data, error} = await sb.auth.signUp({...c, options: {emailRedirectTo: FR_SITE}}); if (error) return st("ko", cpErr(error)); if (!data.session) st("ok", "Compte créé : ouvre le lien reçu par e-mail pour le confirmer, puis connecte-toi."); }); };
   $("#cgForgot").onclick = () => { const email = $("#cgMail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) return st("ko", "Écris d'abord ton e-mail ci-dessus."); run(async sb => { const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: FR_SITE}); st(error ? "ko" : "ok", error ? cpErr(error) : "Si un compte existe, un lien de réinitialisation vient d'être envoyé."); }); }; }
 try { cpRender(); cpGate(true); } catch {}
+// bandeau permanent du mode invité
+if (window.__INVITE){ document.body.insertAdjacentHTML("beforeend", `<button class="cpguest" id="cpGuestBar"><span>Mode invité : rien n'est sauvegardé</span><b>Créer un compte</b></button>`); document.querySelector("#cpGuestBar").onclick = cpLeaveGuest; document.body.classList.add("hasguest"); }
 // demande au navigateur de ne pas effacer ces données de lui-même (sans effet en navigation privée)
 addEventListener("pointerdown", () => { try { navigator.storage?.persist?.(); } catch {} }, {once: true});
 // au chargement : si une session existe, on vérifie la sauvegarde
-if (cpReady() && cpOnSite()) cpClient().then(sb => { cpRender(); cpGate(); if (sb && CP.user) cpSync(); }).catch(() => { cpGate(); const e = document.querySelector("#cgSt"); if (e){ e.className = "gst ko"; e.textContent = "Connexion au serveur impossible : vérifie ton accès à internet, puis recharge la page."; } });
+if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRender(); cpGate(); if (sb && CP.user) cpSync(); }).catch(() => { cpGate(); const e = document.querySelector("#cgSt"); if (e){ e.className = "gst ko"; e.textContent = "Connexion au serveur impossible : vérifie ton accès à internet, puis recharge la page."; } });
 </script>
 
 <style>
