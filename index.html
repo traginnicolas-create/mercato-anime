@@ -9562,10 +9562,10 @@ setInterval(voxRender, 2000);
 .tc.tc .sk{opacity:.3}
 /* Épique et plus (demande du 11 oct. 2026) : texture « empreinte » à la place des hachures — de fines crêtes concentriques irisées, à peine visibles
    au repos, qui s'allument sous la lumière quand on incline la carte. Les tailles sont en % pour suivre la taille de la carte. */
-.tc.tc:is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:.07;mix-blend-mode:color-dodge;filter:brightness(.7) contrast(1.8) saturate(1.5);
+.tc.tc:is(.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:.07;mix-blend-mode:color-dodge;filter:brightness(.7) contrast(1.8) saturate(1.5);
   background:repeating-linear-gradient(125deg,#ff3d3d 0,#ffcc33 4%,#54f434 8%,#29edff 12%,#775cff 16%,#ff47e0 20%,#ff3d3d 24%);background-size:500% 500%;background-position:var(--px,50%) var(--py,50%);
   -webkit-mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.6) 30%,rgba(0,0,0,.18) 72%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.6) 30%,rgba(0,0,0,.18) 72%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);-webkit-mask-composite:source-in;mask-composite:intersect;transition:opacity .3s}
-:is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:calc(.26 + var(--ph,0) * .3)}
+:is(.tc.hl,.vcard.live .tc):is(.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:calc(.26 + var(--ph,0) * .3)}
 .tc.lx > .lsh{background:linear-gradient(180deg,rgba(0,0,0,.62) 0,transparent 20%,transparent 54%,rgba(0,0,0,.94) 92%)}
 /* relief et brillance à l'inclinaison : l'illustration glisse un peu derrière le cadre (profondeur), le texte glisse à l'inverse (il « sort » de la carte),
    une bande irisée traverse la carte et le cadre métallique suit la lumière */
@@ -9594,6 +9594,14 @@ setInterval(voxRender, 2000);
   .vtpick .tc,.vtpick .tc *{animation:none!important;transition:none!important}
 }
 @keyframes lxmetal3{to{background-position:0 0,0 0,0 0,300% 0}}
+/* Épiques (12 oct. 2026) : même rendu holo que les Épiques de Kyara quand on incline la carte — une feuille métallique à fines crêtes (texture fabriquée
+   par tcFoil, aucune image reprise) multipliée par un arc-en-ciel répété, en fusion color-dodge sur toute la carte, plus un éclairage clair/sombre qui suit la lumière */
+.tc.tc.r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.f-K):not(.no) .tx{opacity:0;mix-blend-mode:color-dodge;filter:saturate(1.3);
+  /* la feuille sert de masque (et non de fond sombre) : dans la vue 3D le navigateur n'applique pas toujours la fusion, et un fond sombre assombrirait alors l'image */
+  -webkit-mask-image:var(--foil,none);mask-image:var(--foil,none);-webkit-mask-size:256px 256px;mask-size:256px 256px;-webkit-mask-position:calc(var(--px,50%) * .3) calc(var(--py,50%) * .3);mask-position:calc(var(--px,50%) * .3) calc(var(--py,50%) * .3);-webkit-mask-composite:source-over;mask-composite:add;
+  background:repeating-linear-gradient(110deg,#ff3d6e 0,#ffcf3d 7%,#3dffa0 14%,#3dc8ff 21%,#a65bff 28%,#ff3d6e 35%);background-size:400% 400%;background-position:var(--px,50%) var(--py,50%);transition:opacity .3s}
+:is(.tc.hl,.vcard.live .tc).r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.f-K):not(.no) .tx{opacity:.5}
+:is(.tc.hl,.vcard.live .tc).r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.f-K):not(.no) .fx.fx::after{opacity:.6;mix-blend-mode:overlay;background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),rgba(255,255,255,.6) 0,rgba(255,255,255,.14) 28%,rgba(0,0,0,.12) 90%)}
 /* paillettes fines (choix C de l'utilisateur, 11 oct. 2026) : à la place des points blancs réguliers — petits éclats colorés tirés au hasard (texture fabriquée par tcGlit),
    deux couches qui glissent en sens inverse avec l'inclinaison, visibles surtout autour de la lumière */
 .tc.tc:is(.r-L,.r-M,.r-X,.f-G,.f-Z,.f-K,.f-W,.f-S):not(.no) .sk{display:block;animation:none;opacity:.22;mix-blend-mode:color-dodge;background-image:var(--glit,none),var(--glit,none);background-size:170px 170px,113px 113px;
@@ -9999,6 +10007,11 @@ const tcAlt = c => { try { return ((window.__MA && window.__MA.TCALT) || {})[c.u
 window.addEventListener("tcalt", () => { try { if (!$("#tcg").classList.contains("hidden") && !document.querySelector(".tcopen,.tcview,.tccine")) tcRender(); } catch {} });
 const tcWant = c => { try { return (window.__MA.TCWANT || {})[c.n] || ""; } catch { return ""; } };   // photo du vrai avis de recherche, quand on l'a
 // texture des paillettes : un petit canevas d'éclats colorés tirés au hasard, rangé dans la variable CSS --glit
+// feuille métallique des Épiques : fines crêtes diagonales qui ondulent (comme une empreinte), en niveaux de gris, raccordable bord à bord ; rangée dans --foil
+(function tcFoil(){ try { const N = 256, cv = document.createElement("canvas"); cv.width = cv.height = N; const g = cv.getContext("2d"), im = g.createImageData(N, N), d = im.data, T = Math.PI * 2 / N;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){ const w = 2.6 * Math.sin(T * 2 * x + 1.3 * Math.sin(T * 3 * y)) + 2.2 * Math.cos(T * 2 * y + Math.sin(T * 2 * x)), r = .5 + .5 * Math.sin(T * 56 * (x + y) + w);
+    const v = Math.max(0, Math.min(255, 14 + 225 * Math.pow(r, 5) + (Math.random() - .5) * 22)), o = (y * N + x) * 4; d[o] = d[o + 1] = d[o + 2] = 255; d[o + 3] = v; }   /* la texture est dans la transparence : elle sert de masque */
+  g.putImageData(im, 0, 0); document.documentElement.style.setProperty("--foil", `url(${cv.toDataURL()})`); } catch {} })();
 (function tcGlit(){ try { const cv = document.createElement("canvas"); cv.width = cv.height = 170; const g = cv.getContext("2d");
   for (let k = 0; k < 520; k++){ const r = Math.random() < .08 ? 1.1 : Math.random() * .6 + .25; g.fillStyle = `hsla(${Math.random() * 360},90%,${75 + Math.random() * 25}%,${Math.random() * .8 + .2})`; g.beginPath(); g.arc(Math.random() * 170, Math.random() * 170, r, 0, 7); g.fill(); }
   document.documentElement.style.setProperty("--glit", `url(${cv.toDataURL()})`); } catch {} })();
