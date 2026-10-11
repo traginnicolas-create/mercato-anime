@@ -9739,17 +9739,17 @@ const TC_OBJ = [
   ["Kubikirib-ch-", "na", "Kubikiribôchô", "R", "Épée", "Zabuza Momochi", "Le « hachoir » de Zabuza, l'une des sept épées de Kiri. Elle se répare avec le fer du sang."],
   ["Scroll-of-Seals", "na", "Rouleau des techniques interdites", "R", "Rouleau", "Village de Konoha", "Le rouleau scellé par le Premier Hokage. Naruto y apprend le Multi-clonage."],
   ["Forehead-Protector", "na", "Bandeau frontal", "C", "Objet", "", "Le bandeau gravé du symbole du village, porté par les ninjas."]];
-const TC_XRATE = [2.4, 3.6, 6.5, 13];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
+const TC_XRATE = [2.2, 3.2, 5.9, 11.7];   // chance en % que la carte garantie soit un Éveil, selon le niveau du booster
 const TC_ORDER = ["C", "P", "R", "E", "L", "M", "X"];
 // part de chaque rareté dans un univers (du plus rare au plus commun) : le reste est Commune
 const TC_QUOTA = [["M", .05], ["L", .10], ["E", .17], ["R", .24], ["P", .22]];
 // niveaux de booster : nom, kanji, prix de base en éclats, carte garantie, taux en % par emplacement (quatre emplacements normaux, puis le cinquième, garanti)
 // le Classique reste proche de Kyara (Épique ~21 %, Légendaire ~3 %, Mythique ~0,4 % par booster) : il y a peu de cartes, la collection doit rester longue à finir
 const TC_T = [
-  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.28, P: 24, R: 5, E: .65, L: .063, M: .007}, {R: 87.15, E: 10.7, L: 1.86, M: .29}]},
-  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.556, P: 33, R: 10, E: 1.3, L: .13, M: .014}, {R: 75.56, E: 19.4, L: 4.32, M: .72}]},
-  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 39.129, P: 38, R: 20, E: 2.51, L: .325, M: .036}, {E: 86.57, L: 11.3, M: 2.13}]},
-  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 48.43, R: 40, E: 10.13, L: 1.3, M: .14}, {L: 90.7, M: 9.3}]}];
+  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.353, P: 24, R: 5, E: .585, L: .056, M: .006}, {R: 88.44, E: 9.63, L: 1.67, M: .26}]},
+  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.7, P: 33, R: 10, E: 1.17, L: .117, M: .013}, {R: 78, E: 17.46, L: 3.89, M: .65}]},
+  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 39.42, P: 38, R: 20, E: 2.26, L: .29, M: .03}, {E: 87.91, L: 10.17, M: 1.92}]},
+  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 49.58, R: 40, E: 9.12, L: 1.17, M: .13}, {L: 91.63, M: 8.37}]}];
 const TC_WIN = [80, 17, 2.7, .3];   // niveau du booster gagné sur une victoire, en %, avant bonus de série et de record
 // victoire : éclats gagnés (+ bonus par victoire de suite, + bonus de record), limités aux `cap` premières victoires du jour ; chance de booster en plus
 const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 40, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
@@ -9837,7 +9837,7 @@ const TC_SECRET = [["divin", "Divin caché", "神", 500, "#c9a2ff", "Légendaire
 const tcSecretRoll = () => { for (const sx of TC_SECRET) if (Math.random() < 1 / sx[3]) return sx[0]; return ""; };
 // Versions rares : avant, la version était tirée pour chaque carte puis annulée si la carte n'y avait pas droit, ce qui rendait une UR précise quasi impossible (1 booster Or sur 150 000).
 // Désormais un tirage par booster : en % de chance (booster Classique, multiplié par TC_FINMUL selon le niveau) que la 4e carte soit une version rare, dont la carte est choisie parmi celles qui existent dans cette version.
-const TC_VHIT = {A: 5.3, W: 2.1, K: 1.8, G: .46, Z: .32}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
+const TC_VHIT = {A: 4.8, W: 1.9, K: 1.6, G: .41, Z: .29}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
 const tcVList = (pool, k) => pool.flatMap(c => (k === "A" ? ["A", "B"] : [k]).filter(v => tcVersOf(c).includes(v)).map(v => [c, v]));
 // tirage au hasard, doublons compris (choix de l'utilisateur : les doublons font partie du jeu, ils se recyclent en éclats qui servent à forger)
 const tcVPick = l => { let x = Math.random() * l.reduce((a, [c]) => a + TC_VW[c.r], 0); for (const e of l){ x -= TC_VW[e[0].r]; if (x <= 0) return e; } return l[l.length - 1]; };
