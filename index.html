@@ -9601,7 +9601,7 @@ setInterval(voxRender, 2000);
   -webkit-mask-image:var(--foil,none);mask-image:var(--foil,none);-webkit-mask-size:256px 256px;mask-size:256px 256px;-webkit-mask-position:calc(var(--px,50%) * .3) calc(var(--py,50%) * .3);mask-position:calc(var(--px,50%) * .3) calc(var(--py,50%) * .3);-webkit-mask-composite:source-over;mask-composite:add;
   /* couleurs à 70 % de luminosité et aucun voile entre les crêtes : sur un fond noir la fusion ne teinte plus toute la carte */
   background:repeating-linear-gradient(110deg,#b82c4f 0,#b8952c 7%,#2cb873 14%,#2c90b8 21%,#7841b8 28%,#b82c4f 35%);background-size:400% 400%;background-position:var(--px,50%) var(--py,50%);transition:opacity .3s}
-:is(.tc.hl,.vcard.live .tc).r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.f-K):not(.no) .tx{opacity:.5}
+:is(.tc.hl,.vcard.live .tc).r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.f-K):not(.no) .tx{opacity:.42}
 :is(.tc.hl,.vcard.live .tc).r-E:not(.lx):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.f-K):not(.no) .fx.fx::after{opacity:.6;mix-blend-mode:overlay;background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),rgba(255,255,255,.6) 0,rgba(255,255,255,.14) 28%,rgba(0,0,0,.12) 90%)}
 /* paillettes fines (choix C de l'utilisateur, 11 oct. 2026) : à la place des points blancs réguliers — petits éclats colorés tirés au hasard (texture fabriquée par tcGlit),
    deux couches qui glissent en sens inverse avec l'inclinaison, visibles surtout autour de la lumière */
@@ -10011,7 +10011,7 @@ const tcWant = c => { try { return (window.__MA.TCWANT || {})[c.n] || ""; } catc
 // feuille métallique des Épiques : fines crêtes diagonales qui ondulent (comme une empreinte), en niveaux de gris, raccordable bord à bord ; rangée dans --foil
 (function tcFoil(){ try { const N = 256, cv = document.createElement("canvas"); cv.width = cv.height = N; const g = cv.getContext("2d"), im = g.createImageData(N, N), d = im.data, T = Math.PI * 2 / N;
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){ const w = 2.6 * Math.sin(T * 2 * x + 1.3 * Math.sin(T * 3 * y)) + 2.2 * Math.cos(T * 2 * y + Math.sin(T * 2 * x)), r = .5 + .5 * Math.sin(T * 56 * (x + y) + w);
-    const v = Math.max(0, Math.min(255, 235 * Math.pow(r, 7) + (Math.random() - .5) * 10)), o = (y * N + x) * 4; d[o] = d[o + 1] = d[o + 2] = 255; d[o + 3] = v; }   /* la texture est dans la transparence : elle sert de masque */
+    const v = Math.max(0, Math.min(255, 175 * Math.pow(r, 7) + (Math.random() - .5) * 8)), o = (y * N + x) * 4; d[o] = d[o + 1] = d[o + 2] = 255; d[o + 3] = v; }   /* la texture est dans la transparence : elle sert de masque */
   g.putImageData(im, 0, 0); document.documentElement.style.setProperty("--foil", `url(${cv.toDataURL()})`); } catch {} })();
 (function tcGlit(){ try { const cv = document.createElement("canvas"); cv.width = cv.height = 170; const g = cv.getContext("2d");
   for (let k = 0; k < 520; k++){ const r = Math.random() < .08 ? 1.1 : Math.random() * .6 + .25; g.fillStyle = `hsla(${Math.random() * 360},90%,${75 + Math.random() * 25}%,${Math.random() * .8 + .2})`; g.beginPath(); g.arc(Math.random() * 170, Math.random() * 170, r, 0, 7); g.fill(); }
