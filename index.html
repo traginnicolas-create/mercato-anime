@@ -9594,12 +9594,19 @@ setInterval(voxRender, 2000);
 .tctour.wait{display:none}
 @media (prefers-reduced-motion:no-preference){.tctour .ring{animation:tctring 1.6s ease-in-out infinite}}
 @keyframes tctring{50%{box-shadow:0 0 0 2px var(--accent),0 0 0 10px color-mix(in srgb,var(--accent) 16%,transparent),0 0 44px color-mix(in srgb,var(--accent) 70%,transparent)}}
-/* doigt du didacticiel : il tapote l'endroit à toucher pendant l'ouverture d'un booster */
-.tcfinger{position:fixed;z-index:96;translate:-50% 0;display:grid;justify-items:center;gap:6px;pointer-events:none;transition:left .3s,top .3s}
-.tcfinger span{font-size:46px;line-height:1;margin-left:calc(var(--dx,0px) * 2);filter:drop-shadow(0 4px 10px rgba(0,0,0,.7))}
-.tcfinger b{font-family:var(--title);font-weight:900;font-size:13.5px;white-space:nowrap;background:var(--accent);color:#03140e;border-radius:999px;padding:6px 13px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
-@keyframes tcfing{0%,100%{translate:0 10px;scale:1}45%{translate:0 -4px;scale:.9}60%{translate:0 -4px;scale:.86}}
-@media (prefers-reduced-motion:no-preference){.tcfinger span{animation:tcfing 1.1s ease-in-out infinite}}
+/* repère de toucher du didacticiel : un point lumineux d'où partent deux ondes, et une étiquette dessous (remplace l'emoji de doigt, jugé bas de gamme) */
+.tcfinger{position:fixed;z-index:96;translate:-50% -28px;display:grid;justify-items:center;gap:10px;pointer-events:none;transition:left .3s,top .3s}
+.tcfinger span{position:relative;display:block;width:56px;height:56px;margin-left:calc(var(--dx,0px) * 2)}
+.tcfinger span i{position:absolute;inset:0;border-radius:50%;border:1.5px solid #fff;opacity:0}
+.tcfinger span i:first-child{inset:19px;border:0;background:#fff;opacity:1;box-shadow:0 0 0 4px rgba(255,255,255,.22),0 0 22px var(--accent),0 0 44px var(--accent)}
+.tcfinger b{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:#fff;background:rgba(8,13,12,.78);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 13px;backdrop-filter:blur(6px)}
+@keyframes tcfdot{0%,100%{scale:1}40%{scale:.72}}
+@keyframes tcfwave{0%{scale:.34;opacity:.9}100%{scale:1.25;opacity:0}}
+@media (prefers-reduced-motion:no-preference){.tcfinger span i:first-child{animation:tcfdot 1.5s ease-in-out infinite}.tcfinger span i:nth-child(2){animation:tcfwave 1.5s ease-out infinite}.tcfinger span i:nth-child(3){animation:tcfwave 1.5s ease-out .5s infinite}}
+@media (prefers-reduced-motion:reduce){.tcfinger span i:nth-child(2){opacity:.6}}
+.tccine .odds{position:relative;display:none;justify-items:center;gap:3px;font-family:var(--title);font-weight:900;font-size:clamp(14px,4vw,18px);color:#fff;text-align:center;text-shadow:0 0 18px var(--yc)}
+.tccine .odds small{font-family:var(--mono);font-weight:500;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#c9c5ce;text-shadow:none}
+.tccine.s4 .odds{display:grid}
 </style>
 <script>
 /* =====================================================================
@@ -9786,23 +9793,27 @@ function tcOpenPack(s, key, sec){
   const P = tcParse(key), u = P.u, t = sec === "divin" ? 3 : sec === "dore" ? 2 : P.t, pool = tcCards().filter(c => u === "mix" || c.u === u), got = [], lv0 = tcLvl(s.xp || 0);
   const pickOf = r => { for (let k = r === "X" ? 6 : Math.min(5, TC_ORDER.indexOf(r)); k >= 0; k--){ const l = pool.filter(c => c.r === TC_ORDER[k] && !got.some(g => g.id === c.id)); if (l.length) return l[Math.floor(Math.random() * l.length)]; } return pool[0]; };
   // tirage de la version rare du booster (ou garantie)
-  let vhit = null; { const forceV = (s.pity.V || 0) + 1 >= TC_VPITY; let x = Math.random() * 100;
+  // tout premier booster du joueur : pas de booster secret ni de version rare, quatre cartes plafonnées à Rare, et une Épique connue pour finir
+  const first = !sec && !(s.opened || 0) && !s.firstDone;
+  let vhit = null; if (!first){ const forceV = (s.pity.V || 0) + 1 >= TC_VPITY; let x = Math.random() * 100;
     for (const k of ["Z", "G", "K", "W", "A"]){ const l = tcVList(pool, k); if (!l.length) continue; x -= TC_VHIT[k] * TC_FINMUL[t]; if (x <= 0){ vhit = tcVPick(l, s); break; } }
     if (forceV && !(vhit && "KGZ".includes(vhit[1]))){ const ks = ["K", "G", "Z"].filter(k => tcVList(pool, k).length); let y = Math.random() * ks.reduce((a, k) => a + TC_VHIT[k], 0); for (const k of ks){ y -= TC_VHIT[k]; if (y <= 0){ vhit = tcVPick(tcVList(pool, k), s); break; } } }
     if ((s.pity.U || 0) + 1 >= TC_UPITY && !(vhit && "GZ".includes(vhit[1]))){ const ks = ["G", "Z"].filter(k => tcVList(pool, k).length); let y = Math.random() * ks.reduce((a, k) => a + TC_VHIT[k], 0); for (const k of ks){ y -= TC_VHIT[k]; if (y <= 0){ vhit = tcVPick(tcVList(pool, k), s); break; } } } }
   for (let slot = 0; slot < 5; slot++){
-    let r = tcRoll(TC_T[t].rate[slot === 4 ? 1 : 0]);
+    let r = tcRoll(TC_T[t].rate[slot === 4 ? 1 : 0]); if (first && TC_ORDER.indexOf(r) > 2) r = "R";
     if (slot === 4){ if (s.pity.M + 1 >= TC_PITY.M) r = "M"; else if (s.pity.L + 1 >= TC_PITY.L && r !== "M") r = "L"; }
-    if (slot === 4 && (sec === "eveil" || Math.random() * 100 < TC_XRATE[t]) && pool.some(c => c.r === "X")) r = "X";
-    let c = pickOf(r), force = "";
+    if (slot === 4 && !first && (sec === "eveil" || Math.random() * 100 < TC_XRATE[t]) && pool.some(c => c.r === "X")) r = "X";
+    let c = pickOf(r), force = "", hype = false;
     if (slot === 4 && sec === "tresor"){ const l = pool.filter(x => x.obj && (x.r === "L" || x.r === "M") && !got.some(g => g.id === x.id)); if (l.length) c = l[Math.floor(Math.random() * l.length)]; }
     if (slot === 4 && sec === "rouge"){ const l = pool.filter(x => tcVersOf(x).some(v => "ABWK".includes(v) && v) && !got.some(g => g.id === x.id)); if (l.length){ c = l[Math.floor(Math.random() * l.length)]; const vs = tcVersOf(c).filter(v => v && "ABWK".includes(v)); force = vs[Math.floor(Math.random() * vs.length)]; } }
     // Holo : tirée à part pour chaque carte ; la version rare du booster prend la 4e place
     let f = Math.random() * 100 < TC_FIN.H[2] * TC_FINMUL[t] ? "H" : "";
     if (slot === 3 && vhit && !got.some(g => g.id === vhit[0].id)){ c = vhit[0]; f = vhit[1]; }
     if (force) f = force;
+    // premier booster : la dernière carte est une Épique très connue (ni Légendaire ni Mythique), mise en scène avec la grande cinématique, pour donner envie de continuer
+    if (slot === 4 && first){ s.firstDone = 1; const TOP = ["Nami", "Nico Robin", "Freezer", "Trunks", "Piccolo", "Son Gohan", "Tsunade", "Orochimaru", "Rock Lee", "Sakura Haruno", "Deidara", "Killer B"], fam = pool.filter(x => x.r === "E" && !x.obj && (x.pop === "S" || TOP.includes(x.n)) && !got.some(g => g.id === x.id)), l2 = fam.length ? fam : pool.filter(x => x.r === "E" && !x.obj); if (l2.length){ c = l2[Math.floor(Math.random() * l2.length)]; f = ""; hype = true; } }
     const newFin = !!f && !(s.fin[c.id] && s.fin[c.id][f]);
-    got.push({...c, f, isNew: !s.own[c.id], newFin}); s.own[c.id] = (s.own[c.id] || 0) + 1;
+    got.push({...c, f, isNew: !s.own[c.id], newFin, ...(hype ? {hype: true} : {})}); s.own[c.id] = (s.own[c.id] || 0) + 1;
     if (f){ s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; }
   }
   const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
@@ -9937,11 +9948,14 @@ const tcArt = (c, f) => f === "W" ? [...tcAlt(c)].reverse()[0] || c.i : (f in TC
 // seconde AR (autre illustration, même nom « AR ») et SAR à partir de Légendaire (ou tête d'affiche), UR pour les Mythiques.
 // personnages sans version Red Blood (retirés à la demande de l'utilisateur)
 const TC_NOK = ["Nico Robin", "Nami"];
+// Rareté AFFICHÉE selon la version : les Wanted sont présentées comme Légendaires (leur or va avec le jaune de l'affiche, pas avec le violet des Épiques).
+// Le tirage, le recyclage et les taux gardent la rareté réelle du personnage (c.r).
+const tcER = (c, v) => v === "W" ? "L" : c.r;
 function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 4 && r <= 5 || (c.pop === "S" && r >= 3), v = ["", "H"];
   if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[5]) v.push("S"); if (top && a[1] && !TC_NOK.includes(c.n)) v.push("K"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
 const tcBestFin = (s, c) => ["Z", "G", "K", "S", "W", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
-const tcCard = (c, o = {}) => c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${c.r} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>
-  <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][3] || TC_R[c.r][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
+const tcCard = (c, o = {}) => c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${tcER(c, o.f)} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy">${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>
+  <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[tcER(c, o.f)][3] || TC_R[tcER(c, o.f)][0]}</b></div>${o.isNew ? `<span class="nw">初</span>` : ""}${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
 // sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
 const tcPouch3D = (key, size = "") => `<div class="pk3d ${size}"><div class="pk3d-in">${tcPouch(key)}<i class="edge"></i></div><i class="sha"></i></div>`;
@@ -10046,14 +10060,14 @@ function tcRender(){
     const f = TC_F, ver = f.f ?? "*", vks = ver === "A" ? ["A", "B"] : [ver];
     // toutes les cartes de la version et de l'univers choisis ; les raretés se comptent là-dessus, pour qu'aucun filtre ne mène à une page vide
     const inV = all.filter(c => f.u === "all" || c.u === f.u).flatMap(c => ver === "*" ? [[c, "*"]] : vks.filter(x => tcVersOf(c).includes(x)).map(x => [c, x])), hasV = ([c, v]) => v === "*" ? !!s.own[c.id] : tcHas(s, c, v);
-    if (f.r !== "all" && !inV.some(([c]) => c.r === f.r)) f.r = "all";
-    const list = inV.filter(e => (f.r === "all" || e[0].r === f.r) && (!f.own || hasV(e)));
+    if (f.r !== "all" && !inV.some(([c, v]) => tcER(c, v) === f.r)) f.r = "all";
+    const list = inV.filter(e => (f.r === "all" || tcER(e[0], e[1]) === f.r) && (!f.own || hasV(e)));
     const gain = all.reduce((a, c) => a + tcDups(s, c).g, 0), fins = all.reduce((a, c) => a + Object.keys(s.fin[c.id] || {}).length, 0);
     html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}<div class="tcbars">${["op", "db", "na"].map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
       <p class="small" style="margin:-4px 0 12px">Chaque personnage existe en plusieurs versions, chacune avec sa propre illustration, qui comptent chacune comme une carte : normale et Holo pour tous ; AR à partir d'Épique (parfois deux illustrations différentes), Red Blood à partir de Légendaire, UR or pour les Mythiques, l'avis de recherche « Wanted » des pirates de One Piece, et Légende pour sept personnages. Chaque booster a une chance de contenir une de ces versions rares. Tu en as <b>${vers}</b> sur ${versAll}. Touche une carte pour la regarder en 3D.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
       <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}<button class="${f.own ? "sel" : ""}" id="tcOwn">Obtenues</button></div>
       <div class="tcchips">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].filter(([k]) => k === "*" || all.some(c => tcVersOf(c).includes(k))).map(([k, n]) => { const ks = k === "A" ? ["A", "B"] : [k]; return `<button class="${(f.f ?? "*") === k ? "sel" : ""}" data-tcv="${k}">${n}${k === "*" ? "" : " " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</button>`; }).join("")}</div>
-      <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes ${inV.filter(hasV).length}/${inV.length}</button>${[...TC_ORDER].reverse().filter(r => inV.some(([c]) => c.r === r)).map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${inV.filter(e => e[0].r === r && hasV(e)).length}/${inV.filter(e => e[0].r === r).length}</button>`).join("")}</div>
+      <div class="tcchips"><button class="${f.r === "all" ? "sel" : ""}" data-tcr="all">Toutes ${inV.filter(hasV).length}/${inV.length}</button>${[...TC_ORDER].reverse().filter(r => inV.some(([c, v]) => tcER(c, v) === r)).map(r => `<button class="r-${r} ${f.r === r ? "sel" : ""}" data-tcr="${r}">${TC_R[r][0]} ${inV.filter(e => tcER(e[0], e[1]) === r && hasV(e)).length}/${inV.filter(e => tcER(e[0], e[1]) === r).length}</button>`).join("")}</div>
       <div class="tcgrid">${list.map(([c, v]) => tcCard(c, v === "*" ? {btn: true, v, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)} : {btn: true, v, no: !tcHas(s, c, v), f: v, x: v ? (s.fin[c.id] || {})[v] : 0})).join("") || `<p class="muted">${f.own ? "Tu n'as encore aucune de ces cartes. Désactive « Obtenues » pour voir toutes celles qui existent." : "Aucune carte ici pour l'instant."}</p>`}</div>`;
   } else if (TC_TAB === "vitrine"){ html += vtHTML(s);
   } else {
@@ -10096,7 +10110,7 @@ function tcRender(){
   // ouvrir un booster, ou plusieurs du même type d'un coup (même mise en scène, toutes les cartes à la suite)
   const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
-    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 ? tcSecretRoll() : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
+    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll() : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
     const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
@@ -10203,19 +10217,26 @@ function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) re
     rd.render(sc, cam); raf = requestAnimationFrame(loop); };
   raf = requestAnimationFrame(loop);
   return {stage: k => { stage = Math.max(stage, Math.min(3, k)); kick = 1; }, reveal: () => { if (!rev){ rev = performance.now(); kick = 0; } }, stop}; }
+// chance, en %, qu'un booster de ce niveau contienne au moins une carte de cette rareté (ou cette version rare) : affichée au-dessus de la rareté dans la cinématique
+function tcOddsOf(c, key){ try { const {t} = tcParse(key), R = TC_T[t].rate; let p;
+    if (c.f && c.f !== "H" && TC_VHIT[c.f === "B" ? "A" : c.f] != null) p = TC_VHIT[c.f === "B" ? "A" : c.f] * TC_FINMUL[t];
+    else if (c.r === "X") p = TC_XRATE[t];
+    else { const a = (R[0][c.r] || 0) / 100, b = (R[1][c.r] || 0) / 100; p = (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; }
+    if (!(p > 0)) return ""; const txt = p >= 10 ? p.toFixed(0) : p >= 1 ? p.toFixed(1).replace(".", ",") : p.toFixed(2).replace(".", ",");
+    return `<div class="odds">${txt} % de chance dans ce booster<small>${c.f && c.f !== "H" ? "version " + TC_FIN[c.f][1] : TC_R[c.r][0]}${p < 5 ? " · environ 1 booster sur " + Math.max(2, Math.round(100 / p)) : ""}</small></div>`; } catch { return ""; } }
 function tcCine(c, o = {}){
   return new Promise(res => {
-    const sty = c.f === "Z" ? "Z" : c.f === "G" ? "G" : c.f === "K" ? "M" : c.f === "S" ? "S" : c.f === "W" ? "L" : c.r === "X" ? "X" : c.r === "M" ? "M" : c.r === "L" ? "L" : "E", myth = sty !== "L" && sty !== "E", calm = tcCalm(), mini = !!o.mini || sty === "E";
+    const sty = c.f === "Z" ? "Z" : c.f === "G" ? "G" : c.f === "K" ? "M" : c.f === "S" ? "S" : c.f === "W" ? "L" : c.r === "X" ? "X" : c.r === "M" ? "M" : c.r === "L" ? "L" : "E", myth = sty !== "L" && sty !== "E", calm = tcCalm(), mini = !!o.mini || (sty === "E" && !o.full);
     const img = tcArt(c, c.f);
-    document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${c.r} y${sty} ${mini ? "mini" : ""}" role="dialog" aria-modal="true" aria-label="${TC_R[c.r][0]} : ${esc(c.n)}">
+    document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${tcER(c, c.f)} y${sty} ${mini ? "mini" : ""}" role="dialog" aria-modal="true" aria-label="${TC_R[tcER(c, c.f)][0]} : ${esc(c.n)}">
       <div class="tun" aria-hidden="true"><i class="floor"></i><i class="ceil"></i><i class="beam b1"></i><i class="beam b2"></i></div>
       ${sty === "M" || sty === "X" || sty === "Z" ? `<div class="bolts" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "S" ? `<div class="pans" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "G" ? `<div class="rain" aria-hidden="true"></div>` : ""}
       <div class="clue c1"><span class="kj">${TC_PACKS[c.u][1]}</span><b>${TC_PACKS[c.u][0]}</b></div>
-      <div class="clue c2"><b>${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][1] : ""}</b><span>${c.obj ? esc(c.obj.t) : "Niveau " + c.p}</span></div>
+      <div class="clue c2"><b>${TC_R[tcER(c, c.f)][0]}${c.f ? " · " + TC_FIN[c.f][1] : ""}</b><span>${c.obj ? esc(c.obj.t) : "Niveau " + c.p}</span></div>
       <div class="hero" aria-hidden="true"><img src="${img}" alt=""></div>
       <div class="fl"></div><div class="rays"></div>${myth ? `<div class="rays two"></div>` : ""}<div class="ring"></div>${myth ? `<div class="ring two"></div>` : ""}
       <div class="sp">${Array.from({length: myth ? 46 : 28}, (_, k) => `<i style="--a:${Math.round(Math.random() * 360)}deg;--d:${30 + Math.round(Math.random() * 46)}vmin;--t:${(.7 + Math.random() * 1.1).toFixed(2)}s;--w:${(Math.random() * .5).toFixed(2)}s"></i>`).join("")}</div>
-      <div class="seal">${c.f === "Z" ? "伝説" : c.r === "X" ? "覚醒" : c.f === "G" ? "黄金" : c.f === "K" ? "鮮血" : c.f === "S" ? "特別" : c.f === "W" ? "手配" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : "叙事"}</div><div class="lab">${TC_R[c.r][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle version" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
+      <div class="seal">${c.f === "Z" ? "伝説" : c.r === "X" ? "覚醒" : c.f === "G" ? "黄金" : c.f === "K" ? "鮮血" : c.f === "S" ? "特別" : c.f === "W" ? "手配" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : "叙事"}</div>${o.key ? tcOddsOf(c, o.key) : ""}<div class="lab">${TC_R[tcER(c, c.f)][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle version" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
     const el = document.querySelector(".tccine"), timers = []; let final = 0;
     const GLc = tcCineGL(el, TC_YC[sty] || "#b07cff", myth), G = !calm && window.gsap;
     // révélation : la carte arrive du fond en tournant sur elle-même, puis flotte et suit le doigt ou la souris (reflets compris)
@@ -10397,9 +10418,9 @@ function tcOpening(key, got){
       const bl = Math.max(...got.map(lvlOf)); if (bl >= 2) setTimeout(() => tcBoom(bl, mid.querySelector(".tcrow .best") || mid.querySelector(".tcrow")), 350); }
     if (got.ups.length){ SFX.play("fanfare"); const [l, tt] = got.ups[got.ups.length - 1]; setTimeout(() => tcCele("Niveau " + l, "Booster " + TC_T[tt].n + " offert", "昇", ["#c9a36a", "#dfe5ee", "#f2c230", "#c9a2ff"][tt]), 900); } };
   const flip = async k => { if (seen[k] || busy) return; seen[k] = true; const c = got[k], ri = TC_ORDER.indexOf(c.r), el = mid.querySelector(`[data-k="${k}"]`);
-    const show = big(c) && (got.length <= 5 || k >= last - 2);
-    if (show){ busy = true; await tcCine(c); busy = false; }
-    else if ((ri === 3 || c.f === "A" || c.f === "B") && k === last && got.length <= 5){ busy = true; await tcCine(c, {mini: true}); busy = false; }
+    const show = (big(c) || c.hype) && (got.length <= 5 || k >= last - 2);
+    if (show){ busy = true; await tcCine(c, {key, full: !!c.hype}); busy = false; }
+    else if ((ri === 3 || c.f === "A" || c.f === "B") && k === last && got.length <= 5){ busy = true; await tcCine(c, {mini: true, key}); busy = false; }
     const par = el.parentElement, ix = [...par.children].indexOf(el);
     el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); tcSnd("flip" + lvlOf(c));
     if (G){ const ne = par.children[ix]; G.fromTo(ne, {rotationY: -100, scale: .82, y: -14, transformPerspective: 700}, {rotationY: 0, scale: 1, y: 0, duration: .55, ease: "back.out(1.9)", clearProps: "transform"}); if (lvlOf(c)) tcBoom(Math.min(lvlOf(c), got.length > 5 ? 1 : 3), ne); }
@@ -10462,9 +10483,9 @@ function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T
   const busy = !!document.querySelector(".tcopen,.tcview,.tccine,.tccele"); T.el.classList.toggle("wait", busy);
   // pendant l'ouverture du booster : un doigt montre où toucher (le sachet, puis chaque carte face cachée, une par une)
   { let fg = document.querySelector(".tcfinger"); const O = $(".tcopen"), cine = !!$(".tccine,.tccele,.tcview");
-    const pz = O && !O.classList.contains("res") && O.querySelector(".tearw .pouch:not(.torn):not(.strip):not(.charge)"), bk = O && !O.classList.contains("res") && O.querySelector(".tcrow .tcback"), tg2 = cine ? null : (bk || pz);
-    if (!tg2){ fg && fg.remove(); } else { if (!fg){ document.body.insertAdjacentHTML("beforeend", `<div class="tcfinger" aria-hidden="true"><span>👆</span><b></b></div>`); fg = document.querySelector(".tcfinger"); }
-      const r2 = tg2.getBoundingClientRect(); fg.querySelector("b").textContent = bk ? "Touche chaque carte pour la retourner" : "Touche le sachet"; { const cx = r2.left + r2.width / 2, half = fg.offsetWidth / 2 + 8, x = Math.min(innerWidth - half, Math.max(half, cx)); fg.style.left = x + "px"; fg.style.setProperty("--dx", (cx - x) + "px"); } fg.style.top = (r2.top + r2.height * (bk ? .62 : .7)) + "px"; } }
+    const pz = O && !O.classList.contains("res") && O.querySelector(".tearw .pouch:not(.torn):not(.strip):not(.charge)"), bk0 = O && !O.classList.contains("res") && O.querySelector(".tcrow .tcback"), bk = bk0 && !O.querySelector(".tcrow .tc") ? bk0 : null, tg2 = cine ? null : (bk || pz);   // le repère ne montre que la première carte : dès qu'une carte est retournée, le joueur continue seul
+    if (!tg2){ fg && fg.remove(); } else { if (!fg){ document.body.insertAdjacentHTML("beforeend", `<div class="tcfinger" aria-hidden="true"><span><i></i><i></i><i></i></span><b></b></div>`); fg = document.querySelector(".tcfinger"); }
+      const r2 = tg2.getBoundingClientRect(); fg.querySelector("b").textContent = bk ? "Touche une carte pour la retourner" : ""; fg.querySelector("b").style.display = bk ? "" : "none"; /* sur le sachet, la consigne est déjà écrite dessous */ { const cx = r2.left + r2.width / 2, half = fg.offsetWidth / 2 + 8, x = Math.min(innerWidth - half, Math.max(half, cx)); fg.style.left = x + "px"; fg.style.setProperty("--dx", (cx - x) + "px"); } fg.style.top = (r2.top + r2.height * .5) + "px"; } }
   if (st.mark && st.mark()) T.seen = true;
   if (busy) return;
   if (st.done && !st.next && st.done() && !(st.mark && !T.seen)) return tcTourGo(T.k + 1);
