@@ -9594,6 +9594,12 @@ setInterval(voxRender, 2000);
 .tctour.wait{display:none}
 @media (prefers-reduced-motion:no-preference){.tctour .ring{animation:tctring 1.6s ease-in-out infinite}}
 @keyframes tctring{50%{box-shadow:0 0 0 2px var(--accent),0 0 0 10px color-mix(in srgb,var(--accent) 16%,transparent),0 0 44px color-mix(in srgb,var(--accent) 70%,transparent)}}
+/* doigt du didacticiel : il tapote l'endroit à toucher pendant l'ouverture d'un booster */
+.tcfinger{position:fixed;z-index:96;translate:-50% 0;display:grid;justify-items:center;gap:6px;pointer-events:none;transition:left .3s,top .3s}
+.tcfinger span{font-size:46px;line-height:1;margin-left:calc(var(--dx,0px) * 2);filter:drop-shadow(0 4px 10px rgba(0,0,0,.7))}
+.tcfinger b{font-family:var(--title);font-weight:900;font-size:13.5px;white-space:nowrap;background:var(--accent);color:#03140e;border-radius:999px;padding:6px 13px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+@keyframes tcfing{0%,100%{translate:0 10px;scale:1}45%{translate:0 -4px;scale:.9}60%{translate:0 -4px;scale:.86}}
+@media (prefers-reduced-motion:no-preference){.tcfinger span{animation:tcfing 1.1s ease-in-out infinite}}
 </style>
 <script>
 /* =====================================================================
@@ -10454,6 +10460,11 @@ function tcTourGo(k){ const T = TC_TOUR; while (k < TC_TSTEPS.length && TC_TSTEP
 function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T.k];
   if ($("#tcg").classList.contains("hidden")){ show("tcg"); tcRender(); }                                          // on ne quitte pas la rubrique pendant le didacticiel
   const busy = !!document.querySelector(".tcopen,.tcview,.tccine,.tccele"); T.el.classList.toggle("wait", busy);
+  // pendant l'ouverture du booster : un doigt montre où toucher (le sachet, puis chaque carte face cachée, une par une)
+  { let fg = document.querySelector(".tcfinger"); const O = $(".tcopen"), cine = !!$(".tccine,.tccele,.tcview");
+    const pz = O && !O.classList.contains("res") && O.querySelector(".tearw .pouch:not(.torn):not(.strip):not(.charge)"), bk = O && !O.classList.contains("res") && O.querySelector(".tcrow .tcback"), tg2 = cine ? null : (bk || pz);
+    if (!tg2){ fg && fg.remove(); } else { if (!fg){ document.body.insertAdjacentHTML("beforeend", `<div class="tcfinger" aria-hidden="true"><span>👆</span><b></b></div>`); fg = document.querySelector(".tcfinger"); }
+      const r2 = tg2.getBoundingClientRect(); fg.querySelector("b").textContent = bk ? "Touche chaque carte pour la retourner" : "Touche le sachet"; { const cx = r2.left + r2.width / 2, half = fg.offsetWidth / 2 + 8, x = Math.min(innerWidth - half, Math.max(half, cx)); fg.style.left = x + "px"; fg.style.setProperty("--dx", (cx - x) + "px"); } fg.style.top = (r2.top + r2.height * (bk ? .62 : .7)) + "px"; } }
   if (st.mark && st.mark()) T.seen = true;
   if (busy) return;
   if (st.done && !st.next && st.done() && !(st.mark && !T.seen)) return tcTourGo(T.k + 1);
@@ -10466,7 +10477,7 @@ function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T
   a.style.cssText = `left:0;top:0;width:100%;height:${y0}px`; b.style.cssText = `left:0;top:${y1}px;width:100%;bottom:0`; c.style.cssText = `left:0;top:${y0}px;width:${x0}px;height:${y1 - y0}px`; d.style.cssText = `left:${x1}px;top:${y0}px;right:0;height:${y1 - y0}px`;
   ring.style.cssText = `display:block;left:${x0}px;top:${y0}px;width:${x1 - x0}px;height:${y1 - y0}px`; tip.style.translate = "-50% 0";
   if (y1 + 190 < H){ tip.style.top = (y1 + 14) + "px"; tip.style.bottom = "auto"; } else { tip.style.top = "auto"; tip.style.bottom = (H - y0 + 14) + "px"; } }
-function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.timer); T.el.remove(); TC_TOUR = null; const s = tcLoad(); s.tuto = s.tuto || {claimed: []}; s.tuto.tour = 1; if (gift) tcGive(s, "mix:1"); tcSave(s); TC_F.own = false; TC_TAB = "packs"; tcRender(); window.scrollTo(0, 0); if (gift){ SFX.play("fanfare"); tcCele("Didacticiel terminé", "1 booster Argent offert", "学", "#dfe5ee"); } }
+function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.timer); T.el.remove(); document.querySelector(".tcfinger")?.remove(); TC_TOUR = null; const s = tcLoad(); s.tuto = s.tuto || {claimed: []}; s.tuto.tour = 1; if (gift) tcGive(s, "mix:1"); tcSave(s); TC_F.own = false; TC_TAB = "packs"; tcRender(); window.scrollTo(0, 0); if (gift){ SFX.play("fanfare"); tcCele("Didacticiel terminé", "1 booster Argent offert", "学", "#dfe5ee"); } }
 </script>
 
 <style>
@@ -10914,8 +10925,8 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
 .cpgate .gst{min-height:20px;font-size:13.5px;color:var(--muted)}.cpgate .gst.ko{color:var(--danger)}.cpgate .gst.ok{color:var(--ok)}
 .cpgate small{color:var(--muted);font-size:12px;max-width:40ch}
 body.cplock{overflow:hidden}
-.cpguest{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top,0px));translate:-50% 0;z-index:60;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 20px);padding:7px 8px 7px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--amber,#ffc45a) 55%,var(--line));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);font-size:12.5px;font-weight:500;color:var(--amber,#ffc45a);box-shadow:0 8px 24px rgba(0,0,0,.45)}
-.cpguest span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* bandeau du mode invité : une simple bande en haut de page, dans le flux (elle pousse le contenu au lieu de le recouvrir, sur téléphone comme sur ordinateur) */
+.cpguest{position:static;display:flex;width:100%;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:7px 12px;border:0;border-bottom:1px solid color-mix(in srgb,var(--amber,#ffc45a) 40%,var(--line));border-radius:0;background:color-mix(in srgb,var(--amber,#ffc45a) 9%,var(--bg));font-size:12.5px;font-weight:500;color:var(--amber,#ffc45a);text-align:center}
 .cpguest b{flex:none;background:var(--amber,#ffc45a);color:#1a1205;border-radius:999px;padding:5px 11px;font-size:12px}
 .cpgate .ggl{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:12px 16px;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:700}
 .cpgate .ggl:hover:not(:disabled){background:#f3f4f6;border-color:#c6c9ce}
@@ -11036,7 +11047,7 @@ function cpGate(loading){ if (!cpReady() || !cpOnSite() || window.__INVITE) retu
   $("#cgForgot").onclick = () => { const email = $("#cgMail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) return st("ko", "Écris d'abord ton e-mail ci-dessus."); run(async sb => { const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: FR_SITE}); st(error ? "ko" : "ok", error ? cpErr(error) : "Si un compte existe, un lien de réinitialisation vient d'être envoyé."); }); }; }
 try { cpRender(); cpGate(true); } catch {}
 // bandeau permanent du mode invité
-if (window.__INVITE){ document.body.insertAdjacentHTML("beforeend", `<button class="cpguest" id="cpGuestBar"><span>Mode invité : rien n'est sauvegardé</span><b>Créer un compte</b></button>`); document.querySelector("#cpGuestBar").onclick = cpLeaveGuest; document.body.classList.add("hasguest"); }
+if (window.__INVITE){ document.body.insertAdjacentHTML("afterbegin", `<button class="cpguest" id="cpGuestBar"><span>Mode invité : rien n'est sauvegardé</span><b>Créer un compte</b></button>`); document.querySelector("#cpGuestBar").onclick = cpLeaveGuest; document.body.classList.add("hasguest"); }
 // demande au navigateur de ne pas effacer ces données de lui-même (sans effet en navigation privée)
 addEventListener("pointerdown", () => { try { navigator.storage?.persist?.(); } catch {} }, {once: true});
 // au chargement : si une session existe, on vérifie la sauvegarde
