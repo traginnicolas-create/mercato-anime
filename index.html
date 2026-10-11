@@ -10816,7 +10816,7 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
    La configuration (adresse du projet et clé publique) vient de supabase.txt à la construction ; sans elle, seul le point 1 s'affiche.
    Limite connue : la progression reste calculée sur l'appareil, le compte la conserve mais ne la vérifie pas (pas un anti-triche).
    ===================================================================== */
-const CP = {url: "", key: "", sb: null, user: null, state: "", note: "", timer: 0, recov: false};
+const CP = {url: "https://irgvouylvyjxiqlhbltu.supabase.co", key: "sb_publishable_PZhmhnctXPNMqebBRVZI8w_LCExtiy7", sb: null, user: null, state: "", note: "", timer: 0, recov: false};
 const CP_SKIP = /^mercato-compte/, CP_MAX = 900000;
 const cpReady = () => !!CP.url && !!CP.key && !CP.url.includes("%%") && /^https:\/\//.test(CP.url);
 const cpOnSite = () => /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
