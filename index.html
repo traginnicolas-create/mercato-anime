@@ -10804,6 +10804,21 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
 .cpduel > div{border:1px solid var(--line);border-radius:14px;background:var(--panel2);padding:14px;display:grid;gap:6px;align-content:start}
 .cpduel b{font-family:var(--title);font-size:15px}
 .cpduel span{font-size:13.5px;color:var(--muted)}
+/* porte d'entrée : sur le site, il faut un compte pour jouer */
+.cpgate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:auto;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse 60% 40% at 18% 0,rgba(63,224,168,.2),transparent 70%),radial-gradient(ellipse 55% 38% at 92% 6%,rgba(143,123,255,.18),transparent 70%),radial-gradient(ellipse 70% 34% at 60% 104%,rgba(63,216,255,.12),transparent 70%),var(--bg)}
+.cpgate .in{width:min(100%,420px);display:grid;gap:14px;justify-items:center;text-align:center}
+.cpgate svg{width:76px;height:76px}
+.cpgate h1{font-family:var(--title);font-weight:900;font-size:clamp(34px,10vw,46px);letter-spacing:-.03em;line-height:1;background:var(--grad-aurora,linear-gradient(115deg,#3fe0a8,#c9f26b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cpgate p{color:var(--muted);font-size:15px;max-width:34ch}
+.cpgate form{width:100%;display:grid;gap:10px;margin-top:6px;border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:18px;text-align:left}
+.cpgate label{font-family:var(--mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.cpgate input{width:100%;font-size:16px}
+.cpgate .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.cpgate .row2 button{padding:13px 10px}
+.cpgate .lk{background:none;border:0;padding:4px;color:var(--muted);font-size:13px;font-weight:500;text-decoration:underline;justify-self:center}
+.cpgate .gst{min-height:20px;font-size:13.5px;color:var(--muted)}.cpgate .gst.ko{color:var(--danger)}.cpgate .gst.ok{color:var(--ok)}
+.cpgate small{color:var(--muted);font-size:12px;max-width:40ch}
+body.cplock{overflow:hidden}
 </style>
 <script>
 /* =====================================================================
@@ -10833,7 +10848,7 @@ const cpErr = e => { const m = String(e?.message || e || ""); return /Invalid lo
 async function cpClient(){ if (CP.sb) return CP.sb; if (!cpReady() || !cpOnSite()) return null;
   if (!window.supabase) await new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"; sc.onload = ok; sc.onerror = () => ko(new Error("Failed to load")); document.head.appendChild(sc); });
   CP.sb = window.supabase.createClient(CP.url, CP.key, {auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "mercato-compte-session"}});
-  CP.sb.auth.onAuthStateChange((ev, sess) => { const was = CP.user?.id; CP.user = sess?.user || null; if (ev === "PASSWORD_RECOVERY") CP.recov = true; cpRender(); if (CP.user && CP.user.id !== was && ev !== "TOKEN_REFRESHED") cpSync(); });
+  CP.sb.auth.onAuthStateChange((ev, sess) => { const was = CP.user?.id; CP.user = sess?.user || null; if (ev === "PASSWORD_RECOVERY") CP.recov = true; cpRender(); cpGate(); if (CP.user && CP.user.id !== was && ev !== "TOKEN_REFRESHED") cpSync(); });
   const {data} = await CP.sb.auth.getSession(); CP.user = data?.session?.user || null; return CP.sb; }
 const cpSet = (state, note) => { CP.state = state; CP.note = note || ""; const el = document.querySelector("#cpBox .cpst"); if (el){ el.className = "cpst " + state; el.querySelector("span").textContent = CP.note; } };
 async function cpPush(){ const sb = await cpClient(); if (!sb || !CP.user) return false; const b = svPack(); if (!svValid(b)){ cpSet("ko", "Sauvegarde trop volumineuse : elle n'a pas été envoyée."); return false; }
@@ -10889,11 +10904,31 @@ function cpRender(){ const box = $("#cpBox"); if (!box) return; const acc = cpRe
   $("#svGo").onclick = () => { const b = svDecode($("#svTxt").value); if (!b) return $("#svMsg").textContent = "Ce code n'est pas une sauvegarde valide.";
     const M = $("#modal"); M.innerHTML = `<div class="box" style="max-width:520px"><div class="head"><h2>Restaurer cette sauvegarde ?</h2></div><p class="muted">Elle remplacera la progression de cet appareil.</p><div class="cpduel"><div><b>Sauvegarde</b><span>${svLine(b)}</span><span>Faite le ${new Date(b.t).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"})}</span></div><div><b>Cet appareil</b><span>${svLine(svPack())}</span></div></div><div class="row"><button class="primary" id="svYes">Restaurer</button><button class="ghost" id="svNo">Annuler</button></div></div>`;
     M.classList.remove("hidden"); M.scrollTo(0, 0); M.onclick = null; $("#svNo").onclick = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#svYes").onclick = () => svApply(b, {"mercato-compte-dirty": true}); }; }
-try { cpRender(); } catch {}
+// ---- porte d'entrée (demande de l'utilisateur, 16 oct. 2026) : sur le site, on crée un compte ou on se connecte avant d'accéder au jeu.
+// Elle ne s'affiche pas sur claude.ai, où le compte ne peut pas fonctionner. Une session déjà ouverte est relue dans le navigateur, sans réseau.
+function cpGate(loading){ if (!cpReady() || !cpOnSite()) return; let g = document.querySelector(".cpgate");
+  if (CP.user){ if (g){ g.remove(); document.body.classList.remove("cplock"); } return; }
+  if (!g){ document.body.insertAdjacentHTML("beforeend", `<div class="cpgate" role="dialog" aria-modal="true" aria-label="Connexion"><div class="in"></div></div>`); g = document.querySelector(".cpgate"); document.body.classList.add("cplock"); }
+  const logo = document.querySelector(".hlogo")?.outerHTML.replace(/hlg/g, "hlg2") || "";
+  if (loading){ g.querySelector(".in").innerHTML = `${logo}<h1>HANKO</h1><p>Chargement…</p>`; return; }
+  if (g.querySelector("form")) return;
+  g.querySelector(".in").innerHTML = `${logo}<h1>HANKO</h1><p>Connecte-toi ou crée ton compte pour jouer. Ta progression est sauvegardée et te suit sur tous tes appareils.</p>
+    <form id="cgForm" novalidate><div><label for="cgMail">E-mail</label><input id="cgMail" type="email" autocomplete="email" inputmode="email" required></div>
+      <div><label for="cgPass">Mot de passe</label><input id="cgPass" type="password" autocomplete="current-password" minlength="8" required placeholder="8 caractères au minimum"></div>
+      <div class="row2"><button type="submit" class="primary" id="cgIn">Se connecter</button><button type="button" id="cgUp">Créer un compte</button></div>
+      <div class="gst" id="cgSt" role="status"></div><button type="button" class="lk" id="cgForgot">Mot de passe oublié</button></form>
+    <small>${Object.keys(svPack().keys).length > 2 ? "La progression déjà présente sur cet appareil sera rattachée au compte que tu crées." : "Un compte suffit : pas de confirmation par e-mail."}</small>`;
+  const st = (c, t) => { const e = $("#cgSt"); if (e){ e.className = "gst " + c; e.textContent = t; } };
+  const cred = () => { const email = $("#cgMail").value.trim(), password = $("#cgPass").value; if (!/^\S+@\S+\.\S+$/.test(email)){ st("ko", "Écris une adresse e-mail valide."); return null; } if (password.length < 8){ st("ko", "Le mot de passe doit faire au moins 8 caractères."); return null; } return {email, password}; };
+  const run = async fn => { try { st("", "Un instant…"); const sb = await cpClient(); if (!sb) return st("ko", "Connexion impossible."); await fn(sb); } catch (e){ st("ko", cpErr(e)); } };
+  $("#cgForm").onsubmit = e => { e.preventDefault(); const c = cred(); if (c) run(async sb => { const {error} = await sb.auth.signInWithPassword(c); if (error) st("ko", cpErr(error)); }); };
+  $("#cgUp").onclick = () => { const c = cred(); if (c) run(async sb => { const {data, error} = await sb.auth.signUp({...c, options: {emailRedirectTo: FR_SITE}}); if (error) return st("ko", cpErr(error)); if (!data.session) st("ok", "Compte créé : ouvre le lien reçu par e-mail pour le confirmer, puis connecte-toi."); }); };
+  $("#cgForgot").onclick = () => { const email = $("#cgMail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) return st("ko", "Écris d'abord ton e-mail ci-dessus."); run(async sb => { const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: FR_SITE}); st(error ? "ko" : "ok", error ? cpErr(error) : "Si un compte existe, un lien de réinitialisation vient d'être envoyé."); }); }; }
+try { cpRender(); cpGate(true); } catch {}
 // demande au navigateur de ne pas effacer ces données de lui-même (sans effet en navigation privée)
 addEventListener("pointerdown", () => { try { navigator.storage?.persist?.(); } catch {} }, {once: true});
 // au chargement : si une session existe, on vérifie la sauvegarde
-if (cpReady() && cpOnSite()) cpClient().then(sb => { cpRender(); if (sb && CP.user) cpSync(); }).catch(() => {});
+if (cpReady() && cpOnSite()) cpClient().then(sb => { cpRender(); cpGate(); if (sb && CP.user) cpSync(); }).catch(() => { cpGate(); const e = document.querySelector("#cgSt"); if (e){ e.className = "gst ko"; e.textContent = "Connexion au serveur impossible : vérifie ton accès à internet, puis recharge la page."; } });
 </script>
 
 <style>
