@@ -10646,9 +10646,10 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vt.lock small{color:#e9e5ee}
 .vtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .vtitem{display:grid;gap:6px}
-/* allègement : une carte de visite verrouillée ne s'anime pas ; sur écran tactile ou étroit, celles qui sont hors de l'écran ne sont pas dessinées */
-.vt.lock,.vt.lock *{animation:none!important}
-@media (hover:none),(max-width:700px){.vtitem{content-visibility:auto;contain-intrinsic-size:auto 170px}.vtgrid .vt4 .art img.g,.vtgrid .vt4 .bolt{display:none}}
+/* allègement sans perdre le mouvement (12 oct. 2026) : toutes les cartes de visite gardent leurs animations, mais seules celles qui sont à l'écran
+   (classe .on posée par vtWatch, avec une marge) sont dessinées et animées ; les autres gardent leur place, sans rien coûter au téléphone */
+.vtgrid .vtitem:not(.on) .vt{visibility:hidden}
+.vtgrid .vtitem:not(.on) .vt,.vtgrid .vtitem:not(.on) .vt *{animation:none!important}
 .vtitem .row{gap:6px}
 .vtitem .row button{flex:1;border-radius:999px;padding:6px 10px;font-size:12.5px}
 .vtitem button.on{border-color:var(--accent);color:var(--accent)}
@@ -10755,7 +10756,14 @@ function vtHTML(s){
     <h2 class="tch" style="margin-top:20px">Mes cartes épinglées <small style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px">${(sh.c || []).length}/3</small></h2>
     ${owned.length ? `<div class="vtpick">${owned.map(c => tcCard(c, {btn: true, f: tcBestFin(s, c), cls: (sh.c || []).includes(c.id) ? "pick" : ""})).join("")}</div>` : `<p class="muted">Ouvre des boosters pour avoir des cartes à épingler.</p>`}`;
 }
+// cartes de visite à l'écran : calcul direct à chaque défilement (une fois par image), au plus dix fois par seconde, sans dépendre d'IntersectionObserver ni de requestAnimationFrame
+let VT_RAF = 0;
+function vtWatch(){ const L = document.querySelectorAll(".vtgrid .vtitem"); if (!L.length) return; const H = innerHeight || 800;
+  L.forEach(x => { const r = x.getBoundingClientRect(); x.classList.toggle("on", r.bottom > -60 && r.top < H + 60); }); }
+{ let last = 0; const run = () => { last = Date.now(); clearTimeout(VT_RAF); VT_RAF = 0; try { vtWatch(); } catch {} }, tick = () => { if (Date.now() - last > 90) run(); else if (!VT_RAF) VT_RAF = setTimeout(run, 100); };
+  addEventListener("scroll", tick, {passive: true, capture: true}); addEventListener("resize", tick, {passive: true}); setInterval(() => { if (document.querySelector(".vtgrid")) run(); }, 600); }   // filet de sécurité : jamais de carte restée vide
 function vtBind(){
+  vtWatch();
   const upd = fn => { const s = tcLoad(); s.show = s.show || {b: "", t: [], c: []}; s.show.t = s.show.t || []; s.show.c = s.show.c || []; fn(s.show); tcSave(s); tcRender(); SFX.play("pop"); };
   const tog = (l, k) => { const i = l.indexOf(k); if (i >= 0) l.splice(i, 1); else { if (l.length >= 3) l.shift(); l.push(k); } };
   document.querySelectorAll("[data-vtb]").forEach(b => b.onclick = () => upd(sh => { sh.b = b.dataset.vtb; }));
