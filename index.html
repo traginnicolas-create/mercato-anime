@@ -10667,6 +10667,13 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 @media (prefers-reduced-motion:no-preference){.vtnote .vn-in{animation:vnin .55s cubic-bezier(.2,.9,.25,1.15) both}.vtnote .vn-in::before{animation:vnsweep 1.1s ease-out .45s both}
   .vtnote.out .vn-in{transition:transform .35s ease-in,opacity .35s;transform:translateY(-120%);opacity:0}}
 .vtnote.out .vn-in{opacity:0}
+/* les autres annonces (booster gagné en partie, message d'un ami) prennent le même habillage : panneau en haut de l'écran, plus de pastille en bas */
+.tctoast.tctoast{--nc:var(--accent);left:12px;right:12px;bottom:auto;top:calc(12px + env(safe-area-inset-top,0px));transform:none;margin:0 auto;width:fit-content;max-width:min(calc(100vw - 24px),440px);z-index:9999;gap:12px;padding:11px 16px 11px 11px;border:0;border-radius:16px;cursor:pointer;
+  background:linear-gradient(180deg,rgba(26,24,32,.96),rgba(14,13,18,.97));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-weight:600;line-height:1.3;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--nc) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.14),0 20px 50px rgba(0,0,0,.6),0 0 36px color-mix(in srgb,var(--nc) 24%,transparent)}
+.tctoast.tctoast.t1{--nc:#dfe5ee}.tctoast.tctoast.t2{--nc:#f2c230}.tctoast.tctoast.t3{--nc:#c9a2ff}
+.tctoast.tctoast i{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:11px;font-size:19px;color:#0e0d12;background:var(--nc);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 10px rgba(0,0,0,.4)}
+@media (prefers-reduced-motion:no-preference){.tctoast.tctoast{animation:vnin .5s cubic-bezier(.2,.9,.25,1.15) both}}
 /* allègement sans perdre le mouvement (12 oct. 2026) : toutes les cartes de visite gardent leurs animations, mais seules celles qui sont à l'écran
    (classe .on posée par vtWatch, avec une marge) sont dessinées et animées ; les autres gardent leur place, sans rien coûter au téléphone */
 .vtgrid .vtitem:not(.on) .vt{visibility:hidden}
