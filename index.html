@@ -9561,11 +9561,10 @@ setInterval(voxRender, 2000);
 .tc.tc .sk{opacity:.3}
 /* Épique et plus (demande du 11 oct. 2026) : texture « empreinte » à la place des hachures — de fines crêtes concentriques irisées, à peine visibles
    au repos, qui s'allument sous la lumière quand on incline la carte. Les tailles sont en % pour suivre la taille de la carte. */
-.tc.tc:is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:.05;mix-blend-mode:screen;
-  background:linear-gradient(115deg,#ff9ac1,#ffe08a 20%,#8ff0c8 40%,#8fd0ff 60%,#c7a6ff 80%,#ff9ac1);background-size:260% 260%;background-position:var(--px,50%) var(--py,50%);
-  -webkit-mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.5) 22%,transparent 52%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.5) 22%,transparent 52%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);-webkit-mask-composite:source-in;mask-composite:intersect}
-.tc.tc.r-L:not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{background-image:linear-gradient(115deg,#fff6cf,#f7c64a 22%,#fff 42%,#ffb347 62%,#ffe9a8 82%,#fff6cf)}
-:is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:calc(.2 + var(--ph,0) * .14)}
+.tc.tc:is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:.07;mix-blend-mode:color-dodge;filter:brightness(.7) contrast(1.8) saturate(1.5);
+  background:repeating-linear-gradient(125deg,#ff3d3d 0,#ffcc33 4%,#54f434 8%,#29edff 12%,#775cff 16%,#ff47e0 20%,#ff3d3d 24%);background-size:500% 500%;background-position:var(--px,50%) var(--py,50%);
+  -webkit-mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.6) 30%,rgba(0,0,0,.18) 72%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);mask-image:radial-gradient(circle at var(--px,50%) var(--py,50%),#000 0,rgba(0,0,0,.6) 30%,rgba(0,0,0,.18) 72%),repeating-radial-gradient(ellipse 150% 120% at calc(-18% + (var(--px,50%) - 50%) * .5) calc(112% + (var(--py,50%) - 50%) * .5),#000 0 .17%,transparent .17% .85%);-webkit-mask-composite:source-in;mask-composite:intersect;transition:opacity .3s}
+:is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.f-S):not(.f-Z):not(.f-G):not(.no) .tx{opacity:calc(.26 + var(--ph,0) * .3)}
 .tc.lx > .lsh{background:linear-gradient(180deg,rgba(0,0,0,.62) 0,transparent 20%,transparent 54%,rgba(0,0,0,.94) 92%)}
 /* relief et brillance à l'inclinaison : l'illustration glisse un peu derrière le cadre (profondeur), le texte glisse à l'inverse (il « sort » de la carte),
    une bande irisée traverse la carte et le cadre métallique suit la lumière */
