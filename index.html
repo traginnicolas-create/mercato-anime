@@ -10646,6 +10646,27 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vt.lock small{color:#e9e5ee}
 .vtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .vtitem{display:grid;gap:6px}
+/* annonce d'une carte de visite débloquée : panneau en haut de l'écran (remplace l'ancienne bulle du bas) */
+.vtnote{--nc:#c9a36a;position:fixed;left:0;right:0;top:0;z-index:9999;display:grid;justify-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 0;pointer-events:none}
+.vtnote.t2{--nc:#dfe5ee}.vtnote.t3{--nc:#f2c230}.vtnote.t4{--nc:#c9a2ff}
+.vtnote .vn-in{position:relative;pointer-events:auto;width:min(100%,440px);display:grid;gap:10px;padding:12px 12px 14px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(26,24,32,.96),rgba(14,13,18,.97));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--nc) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.14),0 24px 60px rgba(0,0,0,.65),0 0 44px color-mix(in srgb,var(--nc) 26%,transparent)}
+.vtnote .vn-in::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--nc) 34%,transparent) 50%,transparent 65%);background-size:260% 100%;background-position:120% 0;mix-blend-mode:screen}
+.vtnote .vn-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.vtnote .vn-e{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--nc)}.vtnote .vn-e i{font-style:normal;font-family:var(--brand);letter-spacing:.06em;color:var(--muted)}
+.vtnote .vn-x{all:unset;cursor:pointer;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;font-size:12px;color:var(--muted);background:rgba(255,255,255,.06)}
+.vtnote .vt{width:100%}
+.vtnote .vn-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vtnote .vn-g{font-family:var(--title);font-weight:900;font-size:17px;color:var(--nc)}
+.vtnote .vn-m{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);padding:3px 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line)}
+.vtnote .vn-go{margin-left:auto;padding:9px 16px;border-radius:999px;border:0;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;color:#0e0d12;background:var(--nc)}
+.vtnote .vn-bar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--nc);transform-origin:0 50%;opacity:.8}
+@keyframes vnin{from{transform:translateY(-120%) scale(.96);opacity:0}to{transform:none;opacity:1}}
+@keyframes vnbar{to{transform:scaleX(0)}}@keyframes vnsweep{to{background-position:-120% 0}}
+.vtnote .vn-bar{animation:vnbar 7s linear both}
+@media (prefers-reduced-motion:no-preference){.vtnote .vn-in{animation:vnin .55s cubic-bezier(.2,.9,.25,1.15) both}.vtnote .vn-in::before{animation:vnsweep 1.1s ease-out .45s both}
+  .vtnote.out .vn-in{transition:transform .35s ease-in,opacity .35s;transform:translateY(-120%);opacity:0}}
+.vtnote.out .vn-in{opacity:0}
 /* allègement sans perdre le mouvement (12 oct. 2026) : toutes les cartes de visite gardent leurs animations, mais seules celles qui sont à l'écran
    (classe .on posée par vtWatch, avec une marge) sont dessinées et animées ; les autres gardent leur place, sans rien coûter au téléphone */
 .vtgrid .vtitem:not(.on) .vt{visibility:hidden}
@@ -10717,9 +10738,18 @@ function vtCheck(s){
   neu.forEach(v => { s.unl.push(v[0]); s.gems += VT_GEMS[v[3]]; });
   s.show = s.show || {b: "", t: [], c: []}; if (!s.show.b) s.show.b = neu[0][0];
   const top = neu.sort((a, b) => b[3] - a[3])[0];
-  setTimeout(() => { document.querySelector(".tctoast")?.remove();
-    document.body.insertAdjacentHTML("beforeend", `<div class="tctoast t${Math.min(3, top[3] - 1)}" role="status"><i>${top[2]}</i><span>Carte de visite ${VT_T[top[3]]} débloquée : ${esc(top[1])}${neu.length > 1 ? " (+" + (neu.length - 1) + ")" : ""} · +${neu.reduce((a, v) => a + VT_GEMS[v[3]], 0)} ◆</span></div>`);
-    const el = document.querySelector(".tctoast"); el.onclick = () => { el.remove(); tcShow("vitrine"); }; setTimeout(() => el.remove(), 8000); SFX.play(top[3] >= 3 ? "fanfare" : "win"); }, 2600);
+  const gems = neu.reduce((a, v) => a + VT_GEMS[v[3]], 0), more = neu.length - 1;
+  // annonce : un panneau qui descend du haut de l'écran avec la carte de visite elle-même (animée), sa récompense et un accès à la vitrine.
+  // Il attend la fin d'une ouverture de booster ou d'une cinématique pour ne pas passer par-dessus.
+  let tries = 0; const showIt = () => { if (document.querySelector(".tccine,.tccele,.tcopen:not(.res)") && ++tries < 30) return setTimeout(showIt, 700);
+    document.querySelector(".vtnote")?.remove();
+    document.body.insertAdjacentHTML("beforeend", `<div class="vtnote t${top[3]}" role="status" aria-live="polite"><div class="vn-in"><div class="vn-h"><span class="vn-e">Carte de visite débloquée <i>· 解放</i></span><button class="vn-x" aria-label="Fermer">✕</button></div>
+      ${vtCardHTML(top[0], {cls: "main"})}
+      <div class="vn-f"><span class="vn-g">+${gems} ◆</span>${more > 0 ? `<span class="vn-m">+${more} autre${more > 1 ? "s" : ""}</span>` : ""}<button class="vn-go">Voir ma vitrine</button></div><i class="vn-bar"></i></div></div>`);
+    const el = document.querySelector(".vtnote"), bye = () => { if (!el.isConnected) return; el.classList.add("out"); setTimeout(() => el.remove(), 380); };
+    el.querySelector(".vn-x").onclick = e => { e.stopPropagation(); bye(); }; el.querySelector(".vn-go").onclick = e => { e.stopPropagation(); el.remove(); tcShow("vitrine"); };
+    setTimeout(bye, 7000); SFX.play(top[3] >= 3 ? "fanfare" : "win"); try { navigator.vibrate?.(top[3] >= 3 ? [40, 30, 90] : 35); } catch {} };
+  setTimeout(showIt, 2600);
 }
 // illustration de chaque famille de cartes : motif de fond et personnages (pris dans les images du jeu), du palier le plus bas au plus haut
 const VT_ART = {g: ["speed", ["op:Usopp", "na:Rock Lee", "db:Krilin", "op:Monkey D. Luffy"]], w: ["burst", ["na:Neji Hyûga", "op:Roronoa Zoro", "db:Vegeta", "op:Kaido"]], s: ["flame", ["op:Portgas D. Ace", "op:Sabo", "na:Gaï Maito"]],
