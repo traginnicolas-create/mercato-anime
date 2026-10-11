@@ -9577,17 +9577,15 @@ setInterval(voxRender, 2000);
   background:linear-gradient(115deg,transparent 43%,rgba(255,120,180,.34) 46%,rgba(255,236,130,.34) 48%,rgba(120,255,200,.34) 50%,rgba(120,190,255,.34) 52%,rgba(190,140,255,.34) 54%,transparent 57%);background-size:240% 240%;background-position:var(--px,50%) var(--py,50%)}
 :is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X):not(.f-W):not(.no) .fx::before{opacity:calc(.22 + var(--ph,0) * .3)}
 :is(.tc.hl,.vcard.live .tc):is(.r-E,.r-L,.r-M,.r-X) .fx.fx::after{opacity:.2}
-:is(.tc.hl,.vcard.live .tc).lx > .lfr{animation:none;background-position:0 0,0 0,var(--px,50%) var(--py,50%);filter:brightness(calc(1.05 + var(--ph,0) * .25)) saturate(1.2)}
+:is(.tc.hl,.vcard.live .tc).lx > .lfr{animation:none;background-position:0 0,0 0,0 0,var(--px,50%) var(--py,50%);filter:brightness(calc(1.1 + var(--ph,0) * .35)) saturate(1.25) drop-shadow(0 0 calc(1.5px + var(--ph,0) * 2.5px) var(--m1))}
 /* contours en relief des cartes rares (11 oct. 2026) : cadre métallique plus épais et biseauté (arête claire en haut à gauche, sombre en bas à droite,
    aussi sur le bord intérieur), reflet qui court le long du cadre avec la lumière, illustration légèrement enfoncée, et tranche visible dans la vue en grand */
-.tc.lx > .lfr{padding:max(3.5px,2.8cqw);background:radial-gradient(circle at var(--px,28%) var(--py,0%),rgba(255,255,255,.95),rgba(255,255,255,.22) 20%,transparent 44%),repeating-linear-gradient(135deg,rgba(255,255,255,.28) 0 .7px,transparent .7px 2.2px),linear-gradient(135deg,var(--m1),var(--m2) 28%,var(--m3) 52%,var(--m2) 74%,var(--m1));background-size:auto,auto,300% 300%}
-.tc.lx > .lfr::before{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 1.2px 1.2px .6px rgba(255,255,255,.8),inset -1.2px -1.2px .9px rgba(0,0,0,.65)}
-.tc.lx > .lfr::after{content:"";position:absolute;inset:max(3.5px,2.8cqw);border-radius:9px;box-shadow:-1.2px -1.2px 1px rgba(0,0,0,.7),1.2px 1.2px .7px rgba(255,255,255,.65)}
-/* gorge gravée au milieu du cadre, et tranche de la carte sous le bord (épaisseur) */
-.tc.lx > .lf2{inset:max(1.7px,1.35cqw);border-radius:11px;box-shadow:inset .7px .7px .5px rgba(0,0,0,.75),inset -.7px -.7px .5px rgba(255,255,255,.6),0 0 0 .5px rgba(0,0,0,.3)}
+.tc.lx > .lfr{padding:2.5px;background:radial-gradient(circle at var(--px,28%) var(--py,0%),#fff,rgba(255,255,255,.55) 12%,rgba(255,255,255,.12) 30%,transparent 48%),radial-gradient(circle at calc(100% - var(--px,28%)) calc(100% - var(--py,0%)),rgba(255,255,255,.55),transparent 26%),repeating-linear-gradient(135deg,rgba(255,255,255,.28) 0 .7px,transparent .7px 2.2px),linear-gradient(135deg,var(--m1),var(--m2) 28%,var(--m3) 52%,var(--m2) 74%,var(--m1));background-size:auto,auto,auto,300% 300%}
+.tc.lx > .lfr::before{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset .7px .7px .4px rgba(255,255,255,.85),inset -.7px -.7px .5px rgba(0,0,0,.55)}
+/* contour fin (demande de l'utilisateur) : le relief vient de la brillance et des reflets, plus de la tranche sous la carte */
 .tc.lx:not(.no){box-shadow:0 1px 0 var(--m2),0 2.2px 0 var(--m3),0 3.6px 0 color-mix(in srgb,var(--m3) 50%,#000),0 0 24px var(--gl),0 14px 26px rgba(0,0,0,.55)}
 .tc.lx > .lsh{box-shadow:inset 0 0 max(9px,6cqw) max(5px,3.4cqw) rgba(0,0,0,.62)}
-@keyframes lxmetal3{to{background-position:0 0,0 0,300% 0}}
+@keyframes lxmetal3{to{background-position:0 0,0 0,0 0,300% 0}}
 /* paillettes fines (choix C de l'utilisateur, 11 oct. 2026) : à la place des points blancs réguliers — petits éclats colorés tirés au hasard (texture fabriquée par tcGlit),
    deux couches qui glissent en sens inverse avec l'inclinaison, visibles surtout autour de la lumière */
 .tc.tc:is(.r-L,.r-M,.r-X) .sk{animation:none;opacity:.22;mix-blend-mode:color-dodge;background-image:var(--glit,none),var(--glit,none);background-size:170px 170px,113px 113px;
