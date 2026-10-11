@@ -9790,10 +9790,10 @@ const TC_QUOTA = [["M", .05], ["L", .10], ["E", .17], ["R", .24], ["P", .22]];
 // niveaux de booster : nom, kanji, prix de base en éclats, carte garantie, taux en % par emplacement (quatre emplacements normaux, puis le cinquième, garanti)
 // le Classique reste proche de Kyara (Épique ~21 %, Légendaire ~3 %, Mythique ~0,4 % par booster) : il y a peu de cartes, la collection doit rester longue à finir
 const TC_T = [
-  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.353, P: 24, R: 5, E: .585, L: .056, M: .006}, {R: 88.44, E: 9.63, L: 1.67, M: .26}]},
-  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.7, P: 33, R: 10, E: 1.17, L: .117, M: .013}, {R: 78, E: 17.46, L: 3.89, M: .65}]},
-  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 39.42, P: 38, R: 20, E: 2.26, L: .29, M: .03}, {E: 87.91, L: 10.17, M: 1.92}]},
-  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 49.58, R: 40, E: 9.12, L: 1.17, M: .13}, {L: 91.63, M: 8.37}]}];
+  {n: "Classique", k: "", price: 100, g: "Rare", rate: [{C: 70.3537, P: 24, R: 5, E: .585, L: .056, M: .0053}, {R: 88.47, E: 9.63, L: 1.67, M: .23}]},
+  {n: "Argent", k: "銀", price: 240, g: "Rare", rate: [{C: 55.7015, P: 33, R: 10, E: 1.17, L: .117, M: .0115}, {R: 78.08, E: 17.46, L: 3.89, M: .57}]},
+  {n: "Or", k: "金", price: 600, g: "Épique", rate: [{C: 39.423, P: 38, R: 20, E: 2.26, L: .29, M: .027}, {E: 88.13, L: 10.17, M: 1.7}]},
+  {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 49.595, R: 40, E: 9.12, L: 1.17, M: .115}, {L: 92.6, M: 7.4}]}];
 const TC_WIN = [80, 17, 2.7, .3];   // niveau du booster gagné sur une victoire, en %, avant bonus de série et de record
 // victoire : éclats gagnés (+ bonus par victoire de suite, + bonus de record), limités aux `cap` premières victoires du jour ; chance de booster en plus
 const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 40, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
@@ -10030,8 +10030,8 @@ function tcGo(k){ if (/days/.test(k) || k === "tlogin") return;
   if (k === "tname" || k === "tacc"){ show("home"); setTimeout(() => document.querySelector(k === "tacc" ? "#cpBox" : "#profBox")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); return; } if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
 const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + tcName(rw.p);
 const TC_LOGIN_PACKS = 2;   // boosters Classique offerts chaque jour avec le cadeau de connexion, en plus de la récompense du jour
-// cadeau de connexion : un cycle de sept jours, toujours le même et toujours écrit en clair ; le 7e jour donne un booster Or (Épique garantie)
-const TC_LOGIN7 = [{g: 20}, {g: 40}, {p: "mix:1"}, {g: 60}, {g: 80}, {g: 100}, {p: "mix:2"}];   // pas de Divin (refusé par l'utilisateur) : Or au maximum
+// cadeau de connexion : un cycle de sept jours, toujours le même et toujours écrit en clair ; le 7e jour donne un booster Divin (Légendaire garantie)
+const TC_LOGIN7 = [{g: 20}, {g: 40}, {p: "mix:1"}, {g: 60}, {g: 80}, {g: 100}, {p: "mix:3"}];   // Divin le 7e jour (accepté par l'utilisateur le 12 oct. 2026, en échange d'une Mythique un peu plus rare)
 const tcLoginRw = n => TC_LOGIN7[(Math.max(1, n) - 1) % 7];
 
 // ---- affichage ----
@@ -10209,7 +10209,7 @@ function tcRender(){
       ${sec("Connexion", "連続", "Jour " + s.login.n, "nouveau cadeau · " + inT(tDay))}
       <div class="tcweek wk7">${nx.map((n, k) => { const r = tcLoginRw(n), tt = r.p ? tcParse(r.p).t : -1, done = n < s.login.n || (n === s.login.n && s.login.got);
         return `<div class="${done ? "ok" : n === s.login.n ? "now" : ""} ${k === 6 ? "big" : ""} ${tt >= 0 ? "pk t" + tt : ""}"><small>Jour ${k + 1}${done ? " ✔" : ""}</small>${tt >= 0 ? `<i aria-hidden="true">${TC_T[tt].k}</i><b>Booster ${TC_T[tt].n}</b><u>${TC_T[tt].g} garantie</u>` : `<i aria-hidden="true">◆</i><b>${r.g} éclats</b>`}</div>`; }).join("")}</div>
-      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour, en plus de la récompense affichée : ${TC_LOGIN_PACKS} boosters Classique. Le 7e jour, un booster Or avec une Épique garantie, puis la semaine recommence. <b>Un seul jour manqué et la série repart au jour 1.</b></p>
+      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour, en plus de la récompense affichée : ${TC_LOGIN_PACKS} boosters Classique. Le 7e jour, un booster Divin avec une Légendaire garantie, puis la semaine recommence. <b>Un seul jour manqué et la série repart au jour 1.</b></p>
       ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/" + mis.length, inT(tDay))}
       <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
         <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : toutes les missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / mis.length * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/${mis.length}</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
