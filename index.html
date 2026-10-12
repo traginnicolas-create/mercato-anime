@@ -13314,6 +13314,49 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   try { const secs = [...document.querySelectorAll("#home section.cat")]; document.querySelectorAll("#famNav button").forEach((b, k) => { if (secs[k]) b.style.setProperty("--fc", getComputedStyle(secs[k]).getPropertyValue("--fb").trim() || getComputedStyle(secs[k]).getPropertyValue("--f1")); }); } catch {}
 })();
 </script>
+<style>
+/* =====================================================================
+   ÉCRAN DE LANCEMENT (étape 2 de la refonte) : un clic sur un jeu ouvre une page dédiée, dans la couleur de sa famille.
+   Les réglages de tous les jeux, qui vivaient sous la liste, sont déplacés tels quels dans #launch : la page des jeux ne garde que les jeux.
+   ===================================================================== */
+#launch{--f1:#ff1e2d;--fb:var(--f1);--fn:color-mix(in srgb,var(--f1) 45%,#fff);max-width:980px;margin:0 auto}
+#launch .lnin{position:relative;isolation:isolate}
+#launch .cfgh{padding-top:8px;margin-bottom:16px}
+#launch .cfgh .eyebrow{color:var(--fb);text-shadow:0 0 7px color-mix(in srgb,var(--f1) 70%,transparent)}
+#launch #modeName{font-family:var(--title);font-weight:900;font-size:clamp(32px,7vw,56px);line-height:.98;color:var(--fb);text-shadow:0 0 14px color-mix(in srgb,var(--f1) 60%,transparent),0 0 34px color-mix(in srgb,var(--f1) 35%,transparent)}
+#launch .gmeta span{border-color:color-mix(in srgb,var(--f1) 45%,var(--line))}#launch .gmeta span b{color:var(--fb)}
+#launch .panel{border-radius:22px;border-color:transparent;background:radial-gradient(ellipse 80% 260px at 0 0,color-mix(in srgb,var(--f1) 10%,#070708),#070708 70%);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--f1) 55%,transparent),0 0 12px color-mix(in srgb,var(--f1) 22%,transparent)}
+#launch .panel .panel{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--f1) 30%,transparent);background:#0b0b0c!important}
+#launch label.f.step i{background:color-mix(in srgb,var(--f1) 20%,#070708);color:var(--fb);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--f1) 60%,transparent)}
+#launch .mode:not(.uni){border-color:transparent;box-shadow:inset 0 0 0 1px var(--line);background:#0b0b0c}
+#launch .mode.sel:not(.uni){background:color-mix(in srgb,var(--f1) 12%,#0b0b0c);box-shadow:inset 0 0 0 2px var(--fb)}
+/* le bouton de la refonte : pastille arrondie, capitales larges et grasses, simple contour dans la couleur de la famille, sans halo */
+#launch button.primary{font-family:var(--title);font-weight:900;font-size:13.5px!important;letter-spacing:.06em;text-transform:uppercase;padding:14px 26px!important;border-radius:999px;border:0;background:color-mix(in srgb,var(--f1) 26%,#050505);color:#fff;box-shadow:inset 0 0 0 2px var(--fb);text-shadow:none}
+#launch button.primary:hover{background:color-mix(in srgb,var(--f1) 40%,#050505)}
+#launch button.primary:disabled{opacity:.45}
+#launch a{color:var(--fb)}
+@media (max-width:640px){#launch .panel{border-radius:18px}}
+</style>
+<script>
+(function(){
+  const home = document.querySelector("#home"), cfg = document.querySelector("#modeCfg"); if (!home || !cfg) return;
+  document.querySelector("#end").insertAdjacentHTML("afterend", `<section id="launch" class="hidden"><div class="topbar"><h1 id="lnTitle">JEU</h1><button class="ghost" id="lnBack">← Jeux</button></div><div class="lnin"></div></section>`);
+  const L = document.querySelector("#launch"), box = L.querySelector(".lnin");
+  /* tout ce qui se trouvait sous la dernière famille (en-tête des réglages, panneaux et règles de chaque jeu) part dans l'écran de lancement */
+  for (let n = cfg; n && !n.matches("footer.sitefoot");){ const nx = n.nextElementSibling; box.appendChild(n); n = nx; }
+  { const base = show; show = function(id){ base(id); L.classList.toggle("hidden", id !== "launch"); }; }
+  const open = card => { const sec = card.closest("section.cat"), cs = sec ? getComputedStyle(sec) : null;
+    if (cs){ L.style.setProperty("--f1", cs.getPropertyValue("--f1").trim() || "#ff1e2d"); L.style.setProperty("--fb", cs.getPropertyValue("--fb").trim() || cs.getPropertyValue("--f1").trim()); }
+    document.querySelector("#lnTitle").textContent = (card.querySelector("b")?.textContent || "Jeu").toUpperCase();
+    show("launch"); window.scrollTo(0, 0); };
+  window.lnOpen = open;
+  /* seul un vrai clic ouvre l'écran : les sélections faites par le code (code d'invitation, menu, démarrage) ne doivent pas changer d'écran */
+  document.querySelectorAll("#home .gcards .mode").forEach(c => c.addEventListener("click", e => { if (e.isTrusted || e.detail === 7) open(c); }));
+  document.querySelector("#lnBack").onclick = () => show("home");
+  /* un message d'erreur écrit dans les réglages alors qu'on a été renvoyé à la page des jeux (code introuvable, connexion refusée) : on rouvre l'écran du jeu pour qu'il soit lu */
+  try { new MutationObserver(ms => { for (const m of ms){ const t = m.target.nodeType === 1 ? m.target : m.target.parentElement, e = t && t.closest && t.closest(".err"); if (e && e.textContent.trim() && L.classList.contains("hidden") && !home.classList.contains("hidden")){ const c = document.querySelector("#home .gcards .mode.sel"); if (c) open(c); return; } } }).observe(box, {subtree: true, childList: true, characterData: true}); } catch {}
+})();
+</script>
 
 </body>
 </html>
