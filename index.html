@@ -11275,6 +11275,83 @@ addEventListener("pointerdown", () => { try { navigator.storage?.persist?.(); } 
 // au chargement : si une session existe, on vérifie la sauvegarde
 if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRender(); cpGate(); if (sb && CP.user) cpSync(); }).catch(() => { cpGate(); const e = document.querySelector("#cgSt"); if (e){ e.className = "gst ko"; e.textContent = "Connexion au serveur impossible : vérifie ton accès à internet, puis recharge la page."; } });
 </script>
+<style>
+/* menu du joueur (12 oct. 2026) : bouton en haut à droite de l'accueil et de l'écran Cartes, qui ouvre un volet avec le profil
+   (pseudo, ratio V/D en ligne, cartes, éclats) et les raccourcis rangés par rubrique */
+.mnbtn{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;gap:8px;height:42px;padding:0 12px 0 5px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-weight:700;font-size:13.5px;color:var(--text)}
+.mnbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mnbtn .av,.mnsheet .av{flex:none;display:grid;place-items:center;aspect-ratio:1;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--grad,linear-gradient(135deg,#3fe0a8,#c9f26b));color:#0c1312;font-family:var(--title);font-weight:900;line-height:1}
+.mnbtn .av{width:32px;font-size:14px}
+.mnbtn .nm{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mnbtn .bg{display:grid;gap:3.5px;width:16px}.mnbtn .bg i{height:2px;border-radius:2px;background:currentColor}
+.mnbtn .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);margin-left:-3px}
+@media (max-width:640px){.mnbtn .nm{display:none}.mnbtn{padding-right:11px}.sitebar .sitenav{display:none}}
+#tcg .topbar .mnbtn{margin-left:auto}#tcg .topbar .mnbtn + button{margin-left:0}
+.mnveil{position:fixed;inset:0;z-index:9990;background:rgba(5,6,8,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;justify-content:flex-end}
+.mnsheet{width:min(100%,400px);height:100%;overflow:auto;display:grid;align-content:start;gap:14px;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px));background:var(--bg);box-shadow:-1px 0 0 var(--line),-30px 0 60px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:no-preference){.mnveil{animation:mnfade .2s ease-out both}.mnsheet{animation:mnin .28s cubic-bezier(.2,.9,.25,1) both}}
+@keyframes mnfade{from{opacity:0}}@keyframes mnin{from{transform:translateX(40px);opacity:0}}
+.mnsheet .mntop{display:flex;justify-content:space-between;align-items:center}
+.mnsheet .mntop span{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.mnsheet .mnx{all:unset;cursor:pointer;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-size:14px}
+.mnsheet .mncard{display:grid;gap:14px;padding:16px;border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.mnsheet .mnwho{all:unset;cursor:pointer;display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;border-radius:12px}
+.mnsheet .mnwho:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.mnsheet .mnwho .av{width:56px;font-size:24px}
+.mnsheet .mnwho b{display:block;font-family:var(--title);font-weight:900;font-size:20px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mnsheet .mnwho small{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mnsheet .mnwho em{font-style:normal;color:var(--muted);font-size:18px}
+.mnsheet .mnst{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mnsheet .mnst div{padding:10px 11px;border-radius:12px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line);min-width:0}
+.mnsheet .mnst span{display:block;font-size:11.5px;color:var(--muted)}.mnsheet .mnst b{display:block;font-family:var(--mono);font-weight:700;font-size:16px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mnsheet .mnst small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mnsheet h3{margin:4px 2px -6px;font-family:var(--mono);font-weight:500;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.mnsheet .mngrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mnsheet .mngrid button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:52px;padding:0 12px;border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-weight:700;font-size:14.5px}
+.mnsheet .mngrid button:hover{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 60%,transparent)}.mnsheet .mngrid button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mnsheet .mngrid i{flex:none;font-style:normal;font-family:var(--brand);font-weight:900;font-size:17px;color:var(--muted);width:20px;text-align:center}
+.mnsheet .mngrid u{text-decoration:none;margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 7px;border-radius:999px;color:#0c1312;background:var(--accent)}
+.mnsheet .mnfoot{display:grid;gap:2px;padding:6px 16px;border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.mnsheet .mnfoot button{all:unset;cursor:pointer;padding:13px 0;font-size:14.5px;font-weight:600;color:var(--text)}.mnsheet .mnfoot button + button{border-top:1px solid var(--line)}
+.mnsheet .mnfoot .a{color:var(--accent)}.mnsheet .mnfoot .q{color:var(--muted)}
+</style>
+<script>
+// ---- menu du joueur ----
+function mnData(){ let name = "", s = null, own = 0, tot = 0, w = 0, l = 0, stock = 0, todo = 0;
+  try { name = profGet()?.name || ""; } catch {}
+  try { s = tcLoad(); const all = tcCards(); tot = all.length; own = all.filter(c => s.own[c.id]).length; stock = tcStock(s); todo = tcMissions(s).filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login.got ? 0 : 1); } catch {}
+  try { Object.values(histStats(name)).forEach(x => { w += x.w; l += x.l; }); } catch {}
+  return {name, s, own, tot, w, l, stock, todo, mail: (typeof CP !== "undefined" && CP.user && CP.user.email) || "", guest: !!window.__INVITE}; }
+function mnBtnHTML(){ const d = mnData(); return `<span class="av" aria-hidden="true">${esc((d.name || "?").slice(0, 1).toUpperCase())}</span><span class="nm">${esc(d.name || "Menu")}</span>${d.todo || d.stock ? `<span class="dot" aria-hidden="true"></span>` : ""}<span class="bg" aria-hidden="true"><i></i><i></i><i></i></span>`; }
+function mnRefresh(){ document.querySelectorAll(".mnbtn").forEach(b => { b.innerHTML = mnBtnHTML(); }); }
+function mnClose(){ document.querySelector(".mnveil")?.remove(); document.removeEventListener("keydown", mnKey); mnRefresh(); }
+function mnKey(e){ if (e.key === "Escape") mnClose(); }
+function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFixed(2) : d.w ? d.w + ".00" : "—";
+  const acc = d.guest ? "Mode invité · rien n'est sauvegardé" : d.mail ? d.mail : "Non connecté";
+  document.body.insertAdjacentHTML("beforeend", `<div class="mnveil" role="dialog" aria-modal="true" aria-label="Menu"><div class="mnsheet">
+    <div class="mntop"><span>Menu · 名</span><button class="mnx" aria-label="Fermer le menu">✕</button></div>
+    <div class="mncard"><button class="mnwho" data-mn="profil"><span class="av" aria-hidden="true">${esc((d.name || "?").slice(0, 1).toUpperCase())}</span><span style="min-width:0"><b>${esc(d.name || "Choisis un pseudo")}</b><small>${esc(acc)}</small></span><em aria-hidden="true">→</em></button>
+      <div class="mnst"><div><span>V/D en ligne</span><b>${ratio}</b><small>${d.w} V · ${d.l} D</small></div><div><span>Cartes</span><b>${d.own}</b><small>sur ${d.tot}</small></div><div><span>Éclats</span><b>${d.s ? d.s.gems : 0} ◆</b><small>niveau ${d.s ? tcLvl(d.s.xp || 0) : 0}</small></div></div></div>
+    <h3>Cartes</h3><div class="mngrid"><button data-mn="packs"><i>札</i>Boosters${d.stock ? `<u>${d.stock}</u>` : ""}</button><button data-mn="album"><i>集</i>Collection</button><button data-mn="missions"><i>務</i>Missions${d.todo ? `<u>${d.todo}</u>` : ""}</button><button data-mn="vitrine"><i>飾</i>Vitrine</button></div>
+    <h3>Profil</h3><div class="mngrid"><button data-mn="profil"><i>名</i>Mon profil</button><button data-mn="amis"><i>友</i>Amis</button></div>
+    <h3>Jouer</h3><div class="mngrid"><button data-mn="jeux"><i>遊</i>Tous les jeux</button><button data-mn="join"><i>参</i>Rejoindre</button></div>
+    <div class="mnfoot"><button class="a" data-mn="compte">${d.mail ? "Mon compte et ma sauvegarde" : d.guest ? "Créer un compte" : "Se connecter ou créer un compte"} →</button>${d.mail ? `<button class="q" data-mn="out">Se déconnecter</button>` : ""}</div></div></div>`);
+  const V = document.querySelector(".mnveil"); V.onclick = e => { if (e.target === V) mnClose(); }; V.querySelector(".mnx").onclick = mnClose; document.addEventListener("keydown", mnKey);
+  const scrollTo = sel => { show("home"); setTimeout(() => document.querySelector(sel)?.scrollIntoView({behavior: "smooth", block: "center"}), 80); };
+  V.querySelectorAll("[data-mn]").forEach(b => b.onclick = () => { const k = b.dataset.mn; mnClose();
+    if (["packs", "album", "missions", "vitrine"].includes(k)) return tcShow(k);
+    if (k === "profil") return d.name ? profShow() : scrollTo("#profBox");
+    if (k === "amis") return d.name ? frShow() : scrollTo("#profBox");
+    if (k === "jeux"){ show("home"); return window.scrollTo({top: 0, behavior: "smooth"}); }
+    if (k === "join") return scrollTo("#joinBox");
+    if (k === "compte"){ if (d.guest && typeof cpLeaveGuest === "function") return cpLeaveGuest(); return scrollTo("#cpBox"); }
+    if (k === "out"){ show("home"); setTimeout(() => { const o = document.querySelector("#cpOut"); if (o) o.click(); else document.querySelector("#cpBox")?.scrollIntoView({block: "center"}); }, 80); } });
+  V.querySelector(".mnx").focus(); }
+// le bouton : dans la barre de l'accueil et dans celle de l'écran Cartes
+try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", `<button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
+  document.querySelector("#tcQuit")?.insertAdjacentHTML("beforebegin", `<button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
+  document.querySelectorAll(".mnbtn").forEach(b => { b.onclick = mnOpen; }); mnRefresh(); setInterval(() => { if (!document.querySelector(".mnveil")) mnRefresh(); }, 4000); } catch {}
+</script>
 
 <style>
 /* =====================================================================
