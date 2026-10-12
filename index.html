@@ -13472,6 +13472,12 @@ body:has(#home:not(.hidden)) .mnsheet .mnwho .av{background:var(--hc);background
 <style>
 .welcome button:focus-visible,.welcome button:hover,body:has(#home:not(.hidden)) .hudpop button:focus-visible,body:has(#home:not(.hidden)) .hudpop button:hover{outline-color:var(--hc)!important;border-color:transparent!important}
 </style>
+<style>
+/* bouton « C'est parti » : pas de contour, un fond rouge plein et un halo rouge diffus derrière (comme l'ancien halo vert) */
+.welcome button.primary,.welcome button.primary:hover:not(:disabled),.welcome button.primary:focus-visible{outline:0!important;background:color-mix(in srgb,var(--hc) 56%,#050505);box-shadow:0 0 26px color-mix(in srgb,var(--hc) 50%,transparent),0 0 60px color-mix(in srgb,var(--hc) 24%,transparent)}
+.welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 68%,#050505)}
+.welcome button.primary:focus-visible{box-shadow:0 0 0 2px #fff,0 0 30px color-mix(in srgb,var(--hc) 34%,transparent)}
+</style>
 
 </body>
 </html>
