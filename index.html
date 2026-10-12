@@ -332,7 +332,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
   <nav class="famnav" id="famNav" aria-label="Familles de jeux"></nav>
   <section class="cat" id="cat1">
     <div class="cath"><div class="eyebrow">Famille 01 <i>· 対戦</i></div><h2>Affrontement</h2><small>Enchères, bluff et déduction</small></div>
-    <div class="gcards"><button class="mode sel" data-g="mercato"><i class="k" aria-hidden="true">競</i><b>Mercato</b><span>Enchéris, compose ton équipe, gagne le combat 5 contre 5.</span></button><button class="mode" data-g="uc"><i class="k" aria-hidden="true">潜</i><b>Undercover</b><span>Un intrus se cache parmi vous. Trouvez-le.</span></button><button class="mode" data-g="liar"><i class="k" aria-hidden="true">嘘</i><b>Le Menteur</b><span>Une affirmation est fausse. Repère-la avant les autres.</span></button><button class="mode" data-g="rl"><i class="k" aria-hidden="true">則</i><b>Trouve la règle</b><span>Propose des personnages pour deviner ta règle secrète.</span></button><button class="mode" data-g="wh"><i class="k" aria-hidden="true">誰</i><b>Devine le perso</b><span>Pose des questions pour trouver qui tu es.</span></button><button class="mode" data-g="jg"><i class="k" aria-hidden="true">審</i><b>Mon perso</b><span>Un juge, des catégories, un personnage à ne pas dévoiler.</span></button><button class="mode" data-g="pc"><i class="k" aria-hidden="true">率</i><b>Pourcentage</b><span>Un pourcentage secret chacun. Le meilleur classement gagne.</span></button></div>
+    <div class="gcards"><button class="mode sel" data-g="mercato"><i class="k" aria-hidden="true">競</i><b>Mercato</b><span>Enchéris, compose ton équipe, gagne le combat 5 contre 5.</span></button><button class="mode" data-g="gt"><i class="k" aria-hidden="true">大</i><b>Grand Tournoi</b><span>Le Mercato en tableau à élimination directe, à 4 ou 8 joueurs.</span></button><button class="mode" data-g="uc"><i class="k" aria-hidden="true">潜</i><b>Undercover</b><span>Un intrus se cache parmi vous. Trouvez-le.</span></button><button class="mode" data-g="liar"><i class="k" aria-hidden="true">嘘</i><b>Le Menteur</b><span>Une affirmation est fausse. Repère-la avant les autres.</span></button><button class="mode" data-g="rl"><i class="k" aria-hidden="true">則</i><b>Trouve la règle</b><span>Propose des personnages pour deviner ta règle secrète.</span></button><button class="mode" data-g="wh"><i class="k" aria-hidden="true">誰</i><b>Devine le perso</b><span>Pose des questions pour trouver qui tu es.</span></button><button class="mode" data-g="jg"><i class="k" aria-hidden="true">審</i><b>Mon perso</b><span>Un juge, des catégories, un personnage à ne pas dévoiler.</span></button><button class="mode" data-g="pc"><i class="k" aria-hidden="true">率</i><b>Pourcentage</b><span>Un pourcentage secret chacun. Le meilleur classement gagne.</span></button></div>
   </section>
   <section class="cat" id="cat2">
     <div class="cath"><div class="eyebrow">Famille 02 <i>· 知識</i></div><h2>Connaissance</h2><small>Reconnaître, classer, se souvenir</small></div>
@@ -5615,7 +5615,7 @@ function quickJoin(){
   const code = $("#qjCode").value.trim().toUpperCase(), name = $("#qjName").value;
   if (!/^[A-Z0-9]{4}$/.test(code)) return err("Le code fait 4 caractères (lettres et chiffres).");
   const m = QJ[code[0]];
-  if (!m) return err("Ce code ne correspond à aucun jeu. Vérifie la première lettre (M, U, G, P, T, N, F, E, R, D, B, V ou C).");
+  if (!m) return err("Ce code ne correspond à aucun jeu. Vérifie la première lettre (M, K, U, G, P, T, N, F, E, R, D, B, V ou C).");
   if (!NET.ready) return err("Connexion en cours de préparation : réessaie dans quelques secondes.");
   if (!NET.room) return err("Le jeu en ligne n'est pas disponible sur cet appareil : ouvre le jeu depuis le site (lien Netlify).");
   document.querySelector(`[data-g="${m.tab}"]`).click();
@@ -11369,12 +11369,12 @@ if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRende
    (pseudo, ratio V/D en ligne, cartes, éclats) et les raccourcis rangés par rubrique */
 .mnbtn{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;gap:8px;height:42px;padding:0 12px 0 5px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-weight:700;font-size:13.5px;color:var(--text)}
 .mnbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.hud{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;height:42px;padding:0 4px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-family:var(--mono);font-weight:700;font-size:13px;color:var(--text);white-space:nowrap}
-.hud:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.hud span{display:flex;align-items:center;gap:6px;padding:0 10px}.hud span + span{box-shadow:-1px 0 0 var(--line)}
-.hud .f i{display:block;width:22px;height:6px;border-radius:6px;background:var(--line);overflow:hidden}.hud .f i u{display:block;height:100%;border-radius:6px;background:var(--accent)}
-.hud .g{color:#e6fbb4}.hud .l{color:#bff1ff}
-.hud + .mnbtn{margin-left:8px}
+.hpill{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;height:42px;padding:0 4px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-family:var(--mono);font-weight:700;font-size:13px;color:var(--text);white-space:nowrap}
+.hpill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hpill span{display:flex;align-items:center;gap:6px;padding:0 10px}.hpill span + span{box-shadow:-1px 0 0 var(--line)}
+.hpill .f i{display:block;width:22px;height:6px;border-radius:6px;background:var(--line);overflow:hidden}.hpill .f i u{display:block;height:100%;border-radius:6px;background:var(--accent)}
+.hpill .g{color:#e6fbb4}.hpill .l{color:#bff1ff}
+.hpill + .mnbtn{margin-left:8px}
 .hudpop{position:fixed;z-index:9980;width:min(340px,calc(100vw - 16px));padding:16px;border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line),0 24px 60px rgba(0,0,0,.65)}
 @media (prefers-reduced-motion:no-preference){.hudpop{animation:hpin .18s ease-out both}}@keyframes hpin{from{opacity:0;transform:translateY(-8px)}}
 .hudpop .hp-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.hudpop .hp-h span{font-weight:700;font-size:15px;color:var(--muted)}
@@ -11385,12 +11385,12 @@ if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRende
 .hudpop .hp-g span{display:block;font-size:11.5px;color:var(--muted)}.hudpop .hp-g b{display:block;font-family:var(--mono);font-size:17px;margin-top:3px}.hudpop .hp-g b.g{color:#e6fbb4}
 @media (max-width:520px){.hudpop{left:8px!important;right:8px!important;width:auto}}
 .hudpop button{width:100%;margin-top:14px;padding:11px;border-radius:999px;font-size:14.5px}
-#tcg .topbar .hud{margin-left:auto;padding:0 4px;font-size:13px}#tcg .topbar .hud + .mnbtn{margin-left:0}#tcg .topbar .mnbtn{padding:0 12px 0 5px;font-size:13.5px}
-@media (max-width:640px){.hud{height:38px;font-size:11.5px;padding:0 2px;min-width:0;flex:0 1 auto;overflow:hidden}.hud span{padding:0 6px;gap:4px}.hud .f i{width:13px}
+#tcg .topbar .hpill{margin-left:auto;padding:0 4px;font-size:13px}#tcg .topbar .hpill + .mnbtn{margin-left:0}#tcg .topbar .mnbtn{padding:0 12px 0 5px;font-size:13.5px}
+@media (max-width:640px){.hpill{height:38px;font-size:11.5px;padding:0 2px;min-width:0;flex:0 1 auto;overflow:hidden}.hpill span{padding:0 6px;gap:4px}.hpill .f i{width:13px}
   #tcg .topbar{gap:6px}#tcg .topbar h1 .lbl,#tcg #tcQuit .lbl{display:none}#tcg .topbar h1{flex:none;min-width:26px}#tcg .topbar h1::before{margin-right:0}#tcg #tcQuit{display:none}   /* sur téléphone le logo ramène à l'accueil : le bouton ✕ laisse sa place au niveau dans la pastille */
   .mnbtn .nm,.mnbtn .dot{display:none}.mnbtn,#tcg .topbar .mnbtn{height:38px;padding:0 9px 0 3px;gap:6px}.mnbtn .av{width:30px}.mnbtn .bg{width:14px}
-  #tcg .topbar .hud{padding:0 2px;font-size:11.5px}}
-@media (max-width:350px){.hud .f i{display:none}.hud span{padding:0 6px}}
+  #tcg .topbar .hpill{padding:0 2px;font-size:11.5px}}
+@media (max-width:350px){.hpill .f i{display:none}.hpill span{padding:0 6px}}
 .mnbtn .av,.mnsheet .av{flex:none;display:grid;place-items:center;aspect-ratio:1;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--grad,linear-gradient(135deg,#3fe0a8,#c9f26b));color:#0c1312;font-family:var(--title);font-weight:900;line-height:1}
 .mnbtn .av{width:32px;font-size:14px}
 .mnbtn .nm{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -11446,7 +11446,7 @@ function hudHTML(){ let n = 0, mx = 3, g = 0, lv = 0, wait = ""; try { const s =
 // volet qui se déroule sous la pastille (comme chez Kyara) : réserve de boosters gratuits et compte à rebours, boosters gagnés, éclats, niveau
 let HUD_T = 0;
 function hudClose(){ clearInterval(HUD_T); HUD_T = 0; document.querySelector(".hudpop")?.remove(); document.removeEventListener("click", hudOut, true); document.removeEventListener("keydown", hudKey); }
-function hudOut(e){ if (!e.target.closest || !e.target.closest(".hudpop,.hud")) hudClose(); }
+function hudOut(e){ if (!e.target.closest || !e.target.closest(".hudpop,.hpill")) hudClose(); }
 function hudKey(e){ if (e.key === "Escape") hudClose(); }
 function hudPop(btn){ if (document.querySelector(".hudpop")) return hudClose(); let s; try { s = tcLoad(); } catch { return; }
   const fill = () => { const s = tcLoad(), n = s.free.n, mx = TC_FREE.max, full = n >= mx, ms = full ? 0 : Math.max(0, s.free.t + TC_FREE.every - Date.now()), mm = Math.floor(ms / 6e4), ss = Math.floor(ms % 6e4 / 1e3), lv = tcLvl(s.xp || 0), x0 = tcLvlNeed(lv), x1 = tcLvlNeed(lv + 1), won = Object.values(s.packs || {}).reduce((a, b) => a + b, 0);
@@ -11459,7 +11459,7 @@ function hudPop(btn){ if (document.querySelector(".hudpop")) return hudClose(); 
   P.style.top = Math.round(r.bottom + 8) + "px"; P.style.right = Math.max(8, Math.round(innerWidth - r.right - 60)) + "px";
   const draw = () => { if (!P.isConnected) return hudClose(); P.innerHTML = fill(); P.querySelector('[data-hp="go"]').onclick = () => { hudClose(); tcShow("packs"); }; }; draw(); HUD_T = setInterval(draw, 1000);
   setTimeout(() => { document.addEventListener("click", hudOut, true); document.addEventListener("keydown", hudKey); }, 0); }
-function mnRefresh(){ try { window.tabDot && window.tabDot(); } catch {} document.querySelectorAll(".mnbtn").forEach(b => { b.innerHTML = mnBtnHTML(); }); const h = hudHTML(); document.querySelectorAll(".hud").forEach(b => { if (b.dataset.h !== h.html){ b.dataset.h = h.html; b.innerHTML = h.html; } b.title = h.label; b.setAttribute("aria-label", h.label); }); }
+function mnRefresh(){ try { window.tabDot && window.tabDot(); } catch {} document.querySelectorAll(".mnbtn").forEach(b => { b.innerHTML = mnBtnHTML(); }); const h = hudHTML(); document.querySelectorAll(".hpill").forEach(b => { if (b.dataset.h !== h.html){ b.dataset.h = h.html; b.innerHTML = h.html; } b.title = h.label; b.setAttribute("aria-label", h.label); }); }
 function mnClose(){ document.querySelector(".mnveil")?.remove(); document.removeEventListener("keydown", mnKey); mnRefresh(); }
 function mnKey(e){ if (e.key === "Escape") mnClose(); }
 function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFixed(2) : d.w ? d.w + ".00" : "—";
@@ -11489,9 +11489,9 @@ function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFi
     if (k === "out"){ show("home"); setTimeout(() => { const o = document.querySelector("#cpOut"); if (o) o.click(); else document.querySelector("#cpBox")?.scrollIntoView({block: "center"}); }, 80); } });
   V.querySelector(".mnx").focus(); }
 // le bouton : dans la barre de l'accueil et dans celle de l'écran Cartes
-try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", `<button class="hud"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
-  document.querySelector("#tcQuit")?.insertAdjacentHTML("beforebegin", `<button class="hud"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
-  document.querySelectorAll(".hud").forEach(b => { b.setAttribute("aria-haspopup", "dialog"); b.onclick = e => { e.stopPropagation(); hudPop(b); }; });
+try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", `<button class="hpill"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
+  document.querySelector("#tcQuit")?.insertAdjacentHTML("beforebegin", `<button class="hpill"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
+  document.querySelectorAll(".hpill").forEach(b => { b.setAttribute("aria-haspopup", "dialog"); b.onclick = e => { e.stopPropagation(); hudPop(b); }; });
   { const base = tcRender; tcRender = function(){ const r = base.apply(this, arguments); try { mnRefresh(); } catch {} return r; }; }
   document.querySelectorAll(".mnbtn").forEach(b => { b.onclick = mnOpen; }); mnRefresh(); setInterval(() => { if (!document.querySelector(".mnveil")) mnRefresh(); }, 4000); } catch {}
 </script>
@@ -11739,6 +11739,365 @@ function hccHook(room){ if (!room || room.__hcc || typeof room.on !== "function"
       R.join = async function(...a){ const room = await base.apply(this, a); try { if (!/^(fr|ami)/.test(String(a[0]))) hccHook(room); } catch {} return room; }; } catch {} };
   wrap(); setInterval(wrap, 1500);
   try { const box = document.querySelector("#lobbyBox"); if (box) new MutationObserver(() => { try { hccPaint(); } catch {} }).observe(box, {childList: true, subtree: true}); } catch {} }
+</script>
+
+<style>
+/* ---- Grand Tournoi Mercato ---- */
+.gth{display:none}
+body:has(.gcards [data-g="gt"].sel) .gth{display:block}
+.gtseg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.gtseg button{padding:11px 12px;border-radius:12px;text-align:left;font-weight:700}
+.gtseg button small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+.gtseg button.sel{box-shadow:inset 0 0 0 2px var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--panel2))}
+#gt{max-width:1180px;margin:0 auto}
+#gt .topbar h1 i{font-style:normal}
+.gthead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 18px;margin-bottom:14px}
+.gthead .eb{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.gthead h2{font-family:var(--title);font-weight:900;font-size:clamp(24px,5vw,38px);letter-spacing:-.02em;line-height:1.05;margin:2px 0 0}
+.gthead p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.gtcode{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gtcode b{font-family:var(--mono);font-size:26px;letter-spacing:6px;padding:6px 8px 6px 14px;border-radius:12px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line)}
+.gtme{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:14px 16px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);margin-bottom:14px}
+.gtme.go{box-shadow:inset 0 0 0 2px var(--accent)}
+.gtme b{display:block;font-size:16px}.gtme span{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
+.gtme > div{min-width:0;flex:1 1 220px}
+.gtpl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:12px 0}
+.gtpl div{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line);font-weight:700;min-width:0}
+.gtpl div span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gtpl div.empty{color:var(--muted);font-weight:500;border:1px dashed var(--line);box-shadow:none;background:none}
+.gtdot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--ok,#3fb950)}.gtdot.off{background:#6b6672}
+.gtbr{display:grid;gap:14px 12px;align-items:stretch}
+.gtbr[data-n="8"]{grid-template-columns:repeat(5,minmax(0,1fr))}
+.gtbr[data-n="4"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gtcol{display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-width:0}
+.gtcol h3{font-family:var(--mono);font-weight:700;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin:0;text-align:center}
+.gtcol.fin{justify-content:center}
+.gtm{border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);padding:9px 10px;min-width:0}
+.gtm.live{box-shadow:inset 0 0 0 1.5px #ff5a6a}
+.gtm.mine{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.gtm.final{background:linear-gradient(160deg,color-mix(in srgb,#f7c64a 13%,var(--panel)),var(--panel) 60%)}
+.gtm .lb{display:flex;justify-content:space-between;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.gtm .lb em{font-style:normal;color:#ff5a6a;font-weight:700}
+.gtm .pr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:9px;background:#0b0a0e;font-weight:700;font-size:14px;min-width:0}
+.gtm .pr + .pr{margin-top:4px}
+.gtm .pr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.gtm .pr i{font-style:normal;font-family:var(--mono);font-size:13px;color:var(--muted);flex:none}
+.gtm .pr.w{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 70%,transparent)}.gtm .pr.w i{color:var(--accent)}
+.gtm .pr.l span{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25)}
+.gtm .pr.tbd span{color:var(--muted);font-weight:500;font-style:italic}
+.gtm .pr.me span::after{content:" · toi";color:var(--accent);font-weight:500;font-size:12px}
+.gtm .ac{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.gtm .ac button{padding:6px 10px;font-size:12.5px;border-radius:999px}
+.gtm .nt{font-size:11.5px;color:var(--muted);margin-top:6px}
+.gtpod{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.gtpod div{padding:14px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);text-align:center}
+.gtpod div i{display:block;font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.gtpod div b{display:block;font-family:var(--title);font-weight:900;font-size:20px;margin-top:4px;overflow:hidden;text-overflow:ellipsis}
+.gtpod div.p1{background:linear-gradient(160deg,color-mix(in srgb,#f7c64a 22%,var(--panel)),var(--panel));box-shadow:inset 0 0 0 1.5px #f7c64a}.gtpod div.p1 i{color:#f7c64a}
+.gtlog{margin-top:14px;font-size:13px;color:var(--muted);display:grid;gap:4px}
+.gtwarn{padding:10px 14px;border-radius:12px;background:color-mix(in srgb,#ff5a6a 12%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,#ff5a6a 45%,transparent);font-size:13.5px;margin-bottom:12px}
+.gtstrip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;margin:0 0 10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 9%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent);font-size:13.5px}
+.gtstrip b{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-right:8px}
+.gtstrip button{padding:6px 12px;font-size:13px;border-radius:999px}
+body.gtwatch #board button,body.gtwatch #board input,body.gtwatch #board .bidbox{pointer-events:none}
+@media (max-width:860px){
+  .gtbr[data-n]{grid-template-columns:1fr}
+  .gtcol{order:var(--o)}
+  .gtcol h3{text-align:left}
+  .gtcode b{font-size:22px;letter-spacing:5px}
+  #gt .topbar h1 i{display:none}
+}
+</style>
+<script>
+/* =====================================================================
+   GRAND TOURNOI MERCATO (4 ou 8 joueurs, en ligne, hors claude.ai)
+   - Un salon « gt-CODE » tenu par l'organisateur (code commençant par K) : il garde le tableau (GT.T) et le diffuse (sujet tstate).
+     Les joueurs s'y signalent toutes les 2 s (thello : présence), annoncent leur match (tlive) et son résultat (tres).
+   - Chaque match est une partie de Mercato ordinaire dans son propre salon « mercato-gtCODE-match-manche » : le joueur A du match héberge,
+     le joueur B rejoint. Le moteur du Mercato n'est pas modifié : on réutilise newGame / apply / sendState / render.
+   - Spectateurs : ils rejoignent le salon du match sans y jouer (NET.role = "watch", ME = 2) et reçoivent « wstate », une vue neutre
+     (en mode bluff, le personnage reste caché tant que l'enchère n'est pas finie).
+   - Égalité parfaite au combat : la manche est rejouée. Joueur absent 90 s alors que son match peut se jouer : forfait.
+   ===================================================================== */
+const GT = {room: null, role: null, code: null, T: null, name: "", pid: "", peers: new Map(), seen: new Map(), timers: [], cur: null, watch: null, pending: null, last: 0, sent: null, cfg: {u: "op", mode: "live", size: 4}, ask: null};
+GT.pid = (() => { let p = lsGet("hanko-gt-pid", ""); if (!/^[a-z0-9]{8,14}$/.test(p)){ p = Math.random().toString(36).slice(2, 12); lsSet("hanko-gt-pid", p); } return p; })();
+const GT_ABSENT = 90000, GT_KEY = "hanko-gt-host", GT_LAST = "hanko-gt-last";
+const GT_RN = {q: "Quart de finale", s: "Demi-finale", f: "Finale", t: "Petite finale"};
+const gtP = pid => GT.T && GT.T.players.find(p => p.pid === pid);
+const gtName = pid => pid ? esc(gtP(pid)?.name || "?") : "";
+const gtM = id => GT.T && GT.T.matches.find(m => m.id === id);
+const gtReady = m => !!(m.a && m.b) && m.winner == null;
+const gtNeed = m => m.best === 3 ? 2 : 1;
+const gtMine = () => GT.T && GT.T.phase === "run" ? GT.T.matches.find(m => gtReady(m) && (m.a === GT.pid || m.b === GT.pid)) : null;
+const gtRoomName = (m, g) => ("mercato-gt" + GT.code + "-" + m.id + "-" + g).toLowerCase();
+const gtLabel = m => GT_RN[m.r] + (m.r === "q" || m.r === "s" ? (m.side === "L" ? " · côté gauche" : " · côté droit") : "") + (m.best === 3 ? " · en 2 manches gagnantes" : "");
+
+/* ---------- le tableau (chez l'organisateur) ---------- */
+function gtBuild(T){
+  const o = T.players.map(p => p.pid); for (let i = o.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; }
+  const mk = (id, r, side, x) => ({id, r, side, a: null, b: null, best: 1, wins: [0, 0], winner: null, game: 0, live: null, ff: null, draws: 0, ...x});
+  if (T.size === 4) T.matches = [mk(0, "s", "L", {a: o[0], b: o[1]}), mk(1, "s", "R", {a: o[2], b: o[3]}), mk(2, "f", "", {fa: [0, "w"], fb: [1, "w"], best: 3}), mk(3, "t", "", {fa: [0, "l"], fb: [1, "l"]})];
+  else T.matches = [mk(0, "q", "L", {a: o[0], b: o[1]}), mk(1, "q", "L", {a: o[2], b: o[3]}), mk(2, "q", "R", {a: o[4], b: o[5]}), mk(3, "q", "R", {a: o[6], b: o[7]}),
+    mk(4, "s", "L", {fa: [0, "w"], fb: [1, "w"]}), mk(5, "s", "R", {fa: [2, "w"], fb: [3, "w"]}), mk(6, "f", "", {fa: [4, "w"], fb: [5, "w"], best: 3}), mk(7, "t", "", {fa: [4, "l"], fb: [5, "l"]})];
+  const now = Date.now(); T.matches.forEach(m => { if (m.a && m.b) m.readyAt = now; });
+  T.phase = "run"; gtLog("Tirage au sort effectué : le tournoi commence.");
+}
+function gtLog(t){ const T = GT.T; if (!T) return; T.log.unshift(t); T.log.length = Math.min(T.log.length, 8); }
+// résultat d'une manche : w = 0 (joueur A), 1 (joueur B) ou -1 (égalité parfaite : manche rejouée)
+function gtResult(m, w, ff){
+  const T = GT.T; if (!T || m.winner != null) return;
+  const pid = k => k === 0 ? m.a : m.b;
+  if (w < 0){ m.game++; m.draws++; m.live = null; gtLog(`${GT_RN[m.r]} : égalité parfaite entre ${gtName(m.a)} et ${gtName(m.b)}, la manche est rejouée.`); return gtPush(); }
+  if (ff){ m.winner = w; m.ff = 1 - w; gtLog(`${GT_RN[m.r]} : ${gtName(pid(1 - w))} est forfait, ${gtName(pid(w))} passe.`); }
+  else { m.wins[w]++; if (m.wins[w] >= gtNeed(m)){ m.winner = w; gtLog(`${GT_RN[m.r]} : ${gtName(pid(w))} bat ${gtName(pid(1 - w))}${m.best === 3 ? " " + m.wins[w] + " à " + m.wins[1 - w] : ""}.`); } else { m.game++; gtLog(`${GT_RN[m.r]} : ${gtName(pid(w))} gagne la manche (${m.wins[0]}-${m.wins[1]}).`); } }
+  m.live = null;
+  if (m.winner != null) for (const x of T.matches){ let ch = false;
+    if (x.fa && x.fa[0] === m.id){ x.a = pid(x.fa[1] === "w" ? m.winner : 1 - m.winner); ch = true; }
+    if (x.fb && x.fb[0] === m.id){ x.b = pid(x.fb[1] === "w" ? m.winner : 1 - m.winner); ch = true; }
+    if (ch && x.a && x.b) x.readyAt = Date.now(); }
+  if (T.matches.every(x => x.winner != null)){ T.phase = "done"; const f = T.matches.find(x => x.r === "f"); gtLog(`${gtName(f.winner === 0 ? f.a : f.b)} remporte le Grand Tournoi !`); }
+  gtPush();
+}
+function gtPush(){
+  const T = GT.T; if (GT.role !== "host" || !T) return; T.seq++;
+  try { lsSet(GT_KEY, {T, name: GT.name, t: Date.now()}); } catch {}
+  GT.room?.emit("tstate", T).catch(() => {});
+  gtOnState(T);
+}
+// présence et forfaits : l'organisateur regarde qui donne encore signe de vie
+function gtTick(){
+  const T = GT.T; if (GT.role !== "host" || !T) return; const now = Date.now(); let ch = false;
+  GT.seen.set(GT.pid, now);
+  for (const p of T.players){ const on = now - (GT.seen.get(p.pid) || 0) < 9000; if (on !== p.on){ p.on = on; ch = true; } }
+  if (T.phase === "lobby"){ const n = T.players.length; T.players = T.players.filter(p => p.pid === GT.pid || now - (GT.seen.get(p.pid) || 0) < 20000); if (T.players.length !== n) ch = true; }
+  if (T.phase === "run") for (const m of T.matches){ if (!gtReady(m)) continue;
+    const gone = pid => now - Math.max(GT.seen.get(pid) || 0, m.readyAt || 0) > GT_ABSENT, ga = gone(m.a), gb = gone(m.b);
+    if (ga || gb){ gtResult(m, ga ? 1 : 0, true); return; } }
+  if (ch) gtPush(); else GT.room?.emit("tstate", T).catch(() => {});
+}
+
+/* ---------- salon du tournoi ---------- */
+function gtErr(t){ const e = $("#gtErr"); if (e) e.textContent = t || ""; }
+function gtReset(){ GT.timers.forEach(clearInterval); GT.timers = []; try { GT.room?.leave().catch(() => {}); } catch {} Object.assign(GT, {room: null, role: null, code: null, T: null, cur: null, watch: null, pending: null, sent: null, ask: null}); GT.peers.clear(); GT.seen.clear(); document.body.classList.remove("gtwatch"); try { p2pRoom.current = null; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {} }
+function gtQuit(){ gtLeaveMatch(); if (GT.role === "host") try { localStorage.removeItem(GT_KEY); } catch {} try { localStorage.removeItem(GT_LAST); } catch {} gtReset(); show("home"); }
+async function gtHost(resume){
+  if (!NET.p2p || GT.role) return; gtErr("");
+  GT.name = cleanName($("#gtMe").value, "Joueur 1"); let room = null, code = "";
+  $("#gtHost").disabled = true;
+  for (let i = 0; i < (resume ? 6 : 3) && !room; i++){
+    code = resume ? resume.T.code : mkCode("K");
+    try { room = await p2pRoom.join("gt-" + code.toLowerCase(), true); } catch (e) { if (e?.type !== "unavailable-id") break; if (resume) await new Promise(r => setTimeout(r, 1500)); }
+  }
+  $("#gtHost").disabled = false;
+  if (!room) return gtErr(resume ? "Impossible de reprendre le tournoi pour le moment. Réessaie dans quelques secondes." : "Impossible de créer le tournoi pour le moment. Vérifie ta connexion internet puis réessaie.");
+  Object.assign(GT, {room, role: "host", code});
+  if (resume){ GT.T = resume.T; GT.name = resume.name || GT.name; const now = Date.now(); GT.T.players.forEach(p => GT.seen.set(p.pid, now)); GT.T.matches.forEach(m => { if (gtReady(m)) m.readyAt = now; m.live = null; }); }
+  else GT.T = {code, u: GT.cfg.u, mode: GT.cfg.mode, size: GT.cfg.size, phase: "lobby", players: [{pid: GT.pid, name: GT.name, on: true}], matches: [], seq: 0, log: []};
+  room.on("thello", msg => { if (GT.role !== "host") return; const d = msg.data || {}, pid = String(d.pid || ""), T = GT.T; if (!/^[a-z0-9]{8,14}$/.test(pid) || pid === GT.pid) return;
+    GT.peers.set(msg.peer, pid); GT.seen.set(pid, Date.now());
+    let p = T.players.find(x => x.pid === pid);
+    if (!p && T.phase === "lobby" && T.players.length < T.size){ let n = cleanName(d.name, "Joueur"); while (T.players.some(x => x.name === n)) n = (n.slice(0, 12) + " " + (T.players.length + 1)); p = {pid, name: n, on: true}; T.players.push(p); return gtPush(); }
+    if (p && !p.on){ p.on = true; return gtPush(); } });
+  room.on("tres", msg => { if (GT.role !== "host") return; const d = msg.data || {}, m = gtM(Number(d.mid)), pid = GT.peers.get(msg.peer); if (!m || !pid) return; gtOnRes(m, pid, Number(d.game), Number(d.w)); });
+  room.on("tlive", msg => { if (GT.role !== "host") return; const d = msg.data || {}, m = gtM(Number(d.mid)), pid = GT.peers.get(msg.peer); if (!m || m.a !== pid || m.winner != null || m.game !== Number(d.game) || m.live === m.game) return; m.live = m.game; gtPush(); });
+  GT.timers.push(setInterval(gtTick, 3000));
+  try { p2pRoom.current = room; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {}
+  gtPush(); gtShow();
+}
+function gtOnRes(m, pid, game, w){ if (m.winner != null || m.game !== game || (m.a !== pid && m.b !== pid) || ![0, 1, -1].includes(w)) return; gtResult(m, w); }
+async function gtJoin(){
+  if (!NET.p2p || GT.role) return; gtErr("");
+  const code = $("#gtCode").value.trim().toUpperCase(); if (!/^K[A-Z0-9]{3}$/.test(code)) return gtErr("Le code d'un tournoi fait 4 caractères et commence par K.");
+  GT.name = cleanName($("#gtMe").value, "Joueur"); let room;
+  $("#gtJoin").disabled = true;
+  try { room = await p2pRoom.join("gt-" + code.toLowerCase(), false); } catch { $("#gtJoin").disabled = false; return gtErr("Impossible de rejoindre le tournoi pour le moment. Vérifie ta connexion internet puis réessaie."); }
+  $("#gtJoin").disabled = false;
+  Object.assign(GT, {room, role: "guest", code, last: 0}); const t0 = Date.now();
+  lsSet(GT_LAST, {code, name: GT.name, t: Date.now()});
+  room.on("tstate", msg => { if (GT.role !== "guest") return; const T = msg.data; if (!T || T.code !== code || !Array.isArray(T.players)) return; GT.last = Date.now(); if (GT.T && T.seq < GT.T.seq) return; const first = !GT.T; gtOnState(T); if (first) gtShow(); });
+  const hello = () => { if (GT.role !== "guest") return;
+    if (!GT.T && Date.now() - t0 > 14000){ gtReset(); show("home"); document.querySelector('[data-g="gt"]')?.click(); return gtErr(`Aucun tournoi trouvé avec le code ${code}. Vérifie le code, et que l'organisateur a bien créé le tournoi.`); }
+    room.emit("thello", {pid: GT.pid, name: GT.name}).catch(() => {});
+    const pd = GT.pending; if (pd) room.emit("tres", pd).catch(() => {});
+    if (GT.T && !$("#gt").classList.contains("hidden")) gtLost(); };
+  hello(); GT.timers.push(setInterval(hello, 2000));
+  try { p2pRoom.current = room; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {}
+  $("#lobbyBox").innerHTML = `<h2>Connexion au tournoi ${esc(code)}</h2>${waitHTML("Recherche de l'organisateur…")}<button class="ghost" id="gtCancelJoin">Annuler</button>`; show("lobby");
+  $("#gtCancelJoin").onclick = gtQuit;
+}
+// l'état du tournoi arrive (ou vient de changer chez l'organisateur)
+function gtOnState(T){
+  GT.T = T; const pd = GT.pending;
+  if (pd){ const m = gtM(pd.mid); if (!m || m.winner != null || m.game !== pd.game) GT.pending = null; }
+  // mon match a été tranché sans moi (forfait décidé par l'organisateur) : retour au tableau
+  if (GT.cur){ const [mid, g] = GT.cur.split(":").map(Number), m = gtM(mid); if (m && m.ff != null && (!G || !G.over)){ gtLeaveMatch(); gtShow(); } else if (m && (m.winner != null || m.game !== g) && (!G || !G.over) && $("#game").classList.contains("hidden") && $("#end").classList.contains("hidden")){ gtLeaveMatch(); gtShow(); } }
+  if (!$("#gt").classList.contains("hidden")) gtRender();
+  gtStrip();
+}
+function gtLost(){ const el = $("#gtLost"); if (!el) return; el.classList.toggle("hidden", !(GT.role === "guest" && Date.now() - GT.last > 12000)); }
+
+/* ---------- un match : partie de Mercato ordinaire, dans son salon ---------- */
+function gtLeaveMatch(){ if (NET.role) leaveOnline(); GT.cur = GT.watch = null; G = null; document.body.classList.remove("gtwatch"); try { if (GT.room){ p2pRoom.current = GT.room; p2pRoom.onVoice && p2pRoom.onVoice(); } } catch {} gtStrip(); }
+function gtWaitBox(title, sub, txt){ $("#lobbyBox").innerHTML = `<h2>${title}</h2><p class="muted">${sub}</p>${waitHTML(txt)}<button class="ghost" id="gtBackL">Retour au tableau</button>`; show("lobby"); $("#gtBackL").onclick = () => { gtLeaveMatch(); gtShow(); }; }
+function gtEmo(game, relay){ NET.unsub.push(game.on("emoji", msg => { const d = msg.data || {}; if (msg.sameTab || !EMOJIS.includes(d.e)) return; if (relay) game.emit("emoji", {e: d.e, name: d.name, r: 1}).catch(() => {}); if (d.r && d.name === NET.myName) return; floatEmoji(d.e, cleanName(d.name, ""), false); })); }
+async function gtPlay(mid){
+  const T = GT.T, m = gtM(mid); if (!T || !m || !gtReady(m) || (m.a !== GT.pid && m.b !== GT.pid)) return;
+  if (NET.role && NET.role !== "watch" && GT.cur === mid + ":" + m.game){ if (!G) return show("lobby"); show(G.over ? "end" : "game"); render(); return; }
+  gtLeaveMatch(); const g = m.game, key = mid + ":" + g, asHost = m.a === GT.pid, names = [gtP(m.a).name, gtP(m.b).name];
+  GT.cur = key; NET.myName = GT.name;
+  gtWaitBox(gtLabel(m), `${esc(names[0])} contre ${esc(names[1])}${m.best === 3 ? ` · manche ${m.wins[0] + m.wins[1] + 1}` : ""}`, `En attente de ${esc(names[asHost ? 1 : 0])}…`);
+  let game = null;
+  for (let i = 0; i < 6 && !game && GT.cur === key; i++){ try { game = await p2pRoom.join(gtRoomName(m, g), asHost); } catch (e) { if (e?.type !== "unavailable-id") break; await new Promise(r => setTimeout(r, 1500)); } }
+  if (GT.cur !== key){ try { game?.leave(); } catch {} return; }
+  if (!game){ GT.cur = null; gtShow(); return; }
+  try { p2pRoom.current = GT.room; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {}
+  NET.code = "Tournoi"; G = null;
+  if (asHost){
+    NET.role = "host"; ME = 0;
+    // l'état complet ne part qu'à l'adversaire ; les spectateurs reçoivent une vue où le personnage mystère du bluff reste caché
+    NET.game = {...game, emit: (t, d) => { if (t !== "state") return game.emit(t, d); if (NET.guestPeer) game.emitTo(NET.guestPeer, "state", d); const ph = d.phase || {}; return game.emit("wstate", {...d, cur: d.mode === "bluff" && (ph.k === "open" || ph.k === "counter") ? -1 : d.cur}); }};
+    NET.unsub.push(game.on("hello", msg => { if (msg.sameTab || NET.role !== "host" || msg.data?.pid !== m.b) return; NET.guestPeer = msg.peer; setNet("En ligne · tournoi", true);
+      if (!G){ newGame(T.u, T.mode, names[0], names[1], {order: false}); if (GT.role === "host"){ const x = gtM(mid); if (x && x.winner == null && x.game === g){ x.live = g; gtPush(); } } else GT.room.emit("tlive", {mid, game: g}).catch(() => {}); } else sendState(); }));
+    NET.unsub.push(game.on("act", msg => { if (msg.sameTab || msg.peer !== NET.guestPeer || !G) return; const a = msg.data || {}; apply(1, {t: String(a.t), v: Number(a.v), seq: Number(a.seq)}); }));
+    NET.unsub.push(game.onPeers(ch => { if (ch.left.some(p => p.peer === NET.guestPeer)){ NET.guestPeer = null; setNet("Ton adversaire s'est déconnecté", false); } if (ch.joined.length && G) sendState(); }));
+    NET.timers.push(setInterval(() => G && sendState(), 4000));
+    gtEmo(game, true);
+  } else {
+    NET.role = "guest"; ME = 1; NET.game = game; let lastState = 0;
+    NET.unsub.push(game.on("state", msg => { if (msg.sameTab || NET.role !== "guest") return; const s = msg.data; if (!s || !DATA[s.u] || !Array.isArray(s.players)) return; NET.hostPeer = msg.peer; lastState = Date.now(); G = s; setNet("En ligne · tournoi", true); render(); }));
+    NET.unsub.push(game.onPeers(ch => { if (NET.hostPeer && ch.left.some(p => p.peer === NET.hostPeer)){ NET.hostPeer = null; setNet("Ton adversaire s'est déconnecté", false); } }));
+    const hello = () => { if (Date.now() - lastState > 9000) game.emit("hello", {name: GT.name, pid: GT.pid}).catch(() => {}); };
+    hello(); NET.timers.push(setInterval(hello, 2000));
+    gtEmo(game, false);
+  }
+  gtStrip();
+}
+async function gtWatch(mid){
+  const m = gtM(mid); if (!m || m.winner != null || m.a === GT.pid || m.b === GT.pid) return;
+  gtLeaveMatch(); const g = m.game, key = mid + ":" + g; GT.watch = key; NET.myName = GT.name;
+  gtWaitBox(gtLabel(m), `${gtName(m.a)} contre ${gtName(m.b)}`, "Connexion au direct…");
+  let game; try { game = await p2pRoom.join(gtRoomName(m, g), false); } catch { GT.watch = null; return gtShow(); }
+  if (GT.watch !== key){ try { game.leave(); } catch {} return; }
+  try { p2pRoom.current = GT.room; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {}
+  NET.role = "watch"; ME = 2; NET.game = game; NET.code = "Tournoi"; G = null; document.body.classList.add("gtwatch");
+  NET.unsub.push(game.on("wstate", msg => { if (msg.sameTab || NET.role !== "watch") return; const s = msg.data; if (!s || !DATA[s.u] || !Array.isArray(s.players)) return; G = s; setNet("En direct · tournoi", true); render(); gtStrip(); }));
+  gtEmo(game, false); gtStrip();
+}
+// bandeau en haut de la partie : rappelle qu'on est dans le tournoi ; un spectateur peut revenir au tableau
+function gtStrip(){
+  document.querySelectorAll(".gtstrip").forEach(e => e.remove()); if (!GT.T || (!GT.cur && !GT.watch)) return;
+  const m = gtM(Number((GT.cur || GT.watch).split(":")[0])); if (!m) return;
+  const h = `<div class="gtstrip"><span><b>Grand Tournoi</b>${GT.watch ? "Tu regardes : " : ""}${GT_RN[m.r]} · ${gtName(m.a)} contre ${gtName(m.b)}${m.best === 3 ? ` (${m.wins[0]}-${m.wins[1]})` : ""}</span>${GT.watch ? `<button class="ghost" data-gtback>Retour au tableau</button>` : ""}</div>`;
+  ["#game", "#end"].forEach(s => { const el = $(s); if (!el) return; const tb = el.querySelector(".topbar"); tb ? tb.insertAdjacentHTML("afterend", h) : el.insertAdjacentHTML("afterbegin", h); });
+  document.querySelectorAll("[data-gtback]").forEach(b => b.onclick = () => { gtLeaveMatch(); gtShow(); });
+}
+// fin d'une manche : chaque joueur annonce le vainqueur à l'organisateur ; l'écran de fin ramène au tableau au lieu de proposer une revanche
+function gtAfterEnd(){
+  if (!GT.T || (!GT.cur && !GT.watch) || !G || !G.over) return;
+  if (GT.cur && G.fight && GT.sent !== G.id){ GT.sent = G.id; const [mid, game] = GT.cur.split(":").map(Number), w = G.fight.winner < 0 ? -1 : G.fight.winner;
+    if (GT.role === "host"){ const m = gtM(mid); if (m) gtOnRes(m, GT.pid, game, w); } else { GT.pending = {mid, game, w}; GT.room?.emit("tres", GT.pending).catch(() => {}); } }
+  const row = $("#home2")?.parentElement; if (row){ row.innerHTML = `<button class="primary" id="gtBack">Retour au tableau du tournoi</button>`; $("#gtBack").onclick = () => { gtLeaveMatch(); gtShow(); }; }
+  gtStrip();
+}
+{ const base = renderEnd; renderEnd = function(){ base(); try { gtAfterEnd(); } catch (e) { console.error(e); } }; }
+{ const base = act; act = function(t, v, who){ if (NET.role === "watch") return; return base(t, v, who); }; }
+{ const base = histAdd; histAdd = function(...a){ if (typeof NET !== "undefined" && NET.role === "watch") return; return base.apply(this, a); }; }
+// pendant un tournoi, « Quitter » dans une partie ramène au tableau, pas à l'accueil (on ne sort du tournoi que par son propre bouton)
+{ const base = show; show = function(id){ if (id === "home" && GT.role && GT.T){ GT.cur = GT.watch = null; G = null; document.body.classList.remove("gtwatch"); id = "gt"; setTimeout(() => { try { gtStrip(); gtRender(); } catch {} }); }
+    base(id); const el = $("#gt"); if (el) el.classList.toggle("hidden", id !== "gt"); }; }
+
+/* ---------- écran du tournoi ---------- */
+function gtShow(){ show("gt"); gtRender(); }
+function gtCard(m){
+  const T = GT.T, me = GT.pid, mine = m.a === me || m.b === me, ready = gtReady(m), live = ready && m.live === m.game, done = m.winner != null;
+  const row = k => { const pid = k === 0 ? m.a : m.b, src = k === 0 ? m.fa : m.fb;
+    if (!pid) return `<div class="pr tbd"><span>${src ? (src[1] === "w" ? "Vainqueur" : "Perdant") + " · " + GT_RN[gtM(src[0]).r].toLowerCase() : "À venir"}</span></div>`;
+    const p = gtP(pid); return `<div class="pr ${done ? (m.winner === k ? "w" : "l") : ""} ${pid === me ? "me" : ""}"><span>${!done && p && !p.on ? `<u class="gtdot off" style="display:inline-block;margin-right:6px" title="Déconnecté"></u>` : ""}${gtName(pid)}</span><i>${m.best === 3 ? m.wins[k] : done ? (m.winner === k ? "✓" : m.ff === k ? "forfait" : "") : ""}</i></div>`; };
+  let ac = "";
+  if (ready && mine) ac += `<button class="primary" data-gtplay="${m.id}">${GT.cur === m.id + ":" + m.game ? "Revenir à mon match" : m.best === 3 && m.wins[0] + m.wins[1] ? "Jouer la manche " + (m.wins[0] + m.wins[1] + 1) : "Jouer mon match"}</button>`;
+  if (live && !mine && !gtMine()) ac += `<button data-gtwatch="${m.id}">Regarder en direct</button>`;
+  if (ready && GT.role === "host") ac += [0, 1].map(k => { const pid = k === 0 ? m.a : m.b, key = m.id + ":" + k; return GT.ask === key ? `<button class="red" data-gtff="${key}" data-ok="1">Confirmer le forfait de ${gtName(pid)}</button><button class="ghost" data-gtff="">Annuler</button>` : GT.ask && GT.ask.startsWith(m.id + ":") ? "" : `<button class="ghost" data-gtff="${key}">Forfait de ${gtName(pid)}</button>`; }).join("");
+  return `<div class="gtm ${live ? "live" : ""} ${mine && ready ? "mine" : ""} ${m.r === "f" ? "final" : ""}"><div class="lb"><span>${GT_RN[m.r]}${m.best === 3 ? " · 2 manches gagnantes" : ""}</span>${live ? "<em>● En direct</em>" : done ? "<span>Terminé</span>" : ready ? "<span>À jouer</span>" : ""}</div>${row(0)}${row(1)}${m.draws && !done ? `<div class="nt">Égalité parfaite : manche rejouée.</div>` : ""}${ac ? `<div class="ac">${ac}</div>` : ""}</div>`;
+}
+function gtRender(){
+  const el = $("#gt"), T = GT.T; if (!el || !T) return; const host = GT.role === "host", iAm = !!gtP(GT.pid), u = UNI[T.u];
+  const link = location.href.split("#")[0] + "#" + T.code;
+  let body = "";
+  if (T.phase === "lobby"){
+    const n = T.players.length, slots = Array.from({length: T.size}, (_, k) => T.players[k] ? `<div><u class="gtdot ${T.players[k].on ? "" : "off"}"></u><span>${esc(T.players[k].name)}${T.players[k].pid === GT.pid ? " (toi)" : ""}</span></div>` : `<div class="empty">Place libre</div>`).join("");
+    body = `<div class="panel"><p class="muted" style="margin:0 0 8px">Envoie ce code ou le lien aux autres joueurs. Ils ouvrent le site, choisissent « Grand Tournoi » puis « Rejoindre ».</p>
+        <div class="gtcode"><b>${esc(T.code)}</b><button id="gtCopy">Copier le lien d'invitation</button></div>
+        <label class="f" style="margin-top:16px">Joueurs inscrits · ${n}/${T.size}</label><div class="gtpl">${slots}</div>
+        ${!iAm ? `<p class="small">Le tournoi est complet : tu pourras le suivre en spectateur.</p>` : ""}
+        ${host ? `<div class="row" style="margin-top:6px"><button class="primary" id="gtStart" ${n === T.size ? "" : "disabled"}>Lancer le tirage au sort</button>${T.size === 8 && n >= 4 && n < 8 ? `<button id="gtTo4" ${n === 4 ? "" : "disabled"}>Passer à 4 joueurs</button>` : ""}</div><p class="small" style="margin-top:8px">${n === T.size ? "Tout le monde est là : le placement dans le tableau est tiré au sort." : `Il manque ${T.size - n} joueur${T.size - n > 1 ? "s" : ""}. Un tournoi se joue à 4 ou à 8, pas autrement.`}</p>` : waitHTML(n === T.size ? "L'organisateur va lancer le tirage au sort…" : "En attente des autres joueurs…")}</div>`;
+  } else {
+    const my = gtMine(), F = T.matches.find(m => m.r === "f"), S3 = T.matches.find(m => m.r === "t");
+    let me = "";
+    if (T.phase === "done"){ const w = k => k.winner === 0 ? k.a : k.b, l = k => k.winner === 0 ? k.b : k.a;
+      me = `<div class="gtpod"><div class="p1"><i>Vainqueur</i><b>${gtName(w(F))}</b></div><div><i>Finaliste</i><b>${gtName(l(F))}</b></div><div><i>3e place</i><b>${gtName(w(S3))}</b></div><div><i>4e place</i><b>${gtName(l(S3))}</b></div></div>`; }
+    else if (my){ const opp = my.a === GT.pid ? my.b : my.a, inIt = GT.cur === my.id + ":" + my.game;
+      me = `<div class="gtme go"><div><b>${inIt ? "Ton match est en cours" : "À toi de jouer"} · ${GT_RN[my.r]}${my.best === 3 ? ` (${my.wins[my.a === GT.pid ? 0 : 1]}-${my.wins[my.a === GT.pid ? 1 : 0]})` : ""}</b><span>Contre ${gtName(opp)}. Nouvelle équipe à recruter, 300M chacun.</span></div><button class="primary" data-gtplay="${my.id}">${inIt ? "Revenir à mon match" : my.best === 3 && my.wins[0] + my.wins[1] ? "Jouer la manche " + (my.wins[0] + my.wins[1] + 1) : "Jouer mon match"}</button></div>`; }
+    else if (iAm){ const next = T.matches.find(m => m.winner == null && (m.a === GT.pid || m.b === GT.pid)), still = next || T.matches.some(m => m.winner == null && [m.fa, m.fb].some(s => s && (() => { const x = gtM(s[0]); return x.winner == null && (x.a === GT.pid || x.b === GT.pid); })()));
+      me = `<div class="gtme"><div><b>${next ? "Ton prochain match attend son adversaire" : still ? "Ton match est enregistré" : "Tu as terminé ton tournoi"}</b><span>${T.matches.some(m => gtReady(m) && m.live === m.game) ? "En attendant, regarde un match en direct : touche « Regarder en direct » dans le tableau." : "Les matchs en cours apparaîtront en direct dans le tableau."}</span></div></div>`; }
+    else me = `<div class="gtme"><div><b>Tu suis ce tournoi en spectateur</b><span>Touche « Regarder en direct » sur un match en cours.</span></div></div>`;
+    const col = (h, ms, o, cls = "") => `<div class="gtcol ${cls}" style="--o:${o}"><h3>${h}</h3>${ms.map(gtCard).join("")}</div>`, by = (r, s) => T.matches.filter(m => m.r === r && (!s || m.side === s));
+    const br = T.size === 8 ? col("Quarts · côté gauche", by("q", "L"), 1) + col("Demi · côté gauche", by("s", "L"), 3) + col("Finale", [F, S3], 5, "fin") + col("Demi · côté droit", by("s", "R"), 4) + col("Quarts · côté droit", by("q", "R"), 2)
+      : col("Demi · côté gauche", by("s", "L"), 1) + col("Finale", [F, S3], 3, "fin") + col("Demi · côté droit", by("s", "R"), 2);
+    body = `${me}<div class="gtbr" data-n="${T.size}">${br}</div>`;
+  }
+  el.innerHTML = `<div class="topbar"><h1>GRAND TOURNOI<i> · 大会</i></h1><button class="ghost" id="gtQuit">${GT.ask === "quit" ? "" : "✕ Quitter"}</button></div>
+    <div class="gtwarn hidden" id="gtLost">L'organisateur ne répond plus. Le tableau se remettra à jour dès son retour ; les matchs déjà lancés continuent.</div>
+    ${GT.ask === "quit" ? `<div class="gtwarn">${host ? "Tu es l'organisateur : si tu quittes, le tournoi s'arrête pour tout le monde." : "Si tu quittes, tes prochains matchs seront perdus par forfait."} <span class="row" style="display:inline-flex;margin-left:8px"><button class="red" id="gtQuitOk">Quitter le tournoi</button><button class="ghost" id="gtQuitNo">Rester</button></span></div>` : ""}
+    <div class="gthead"><div><div class="eb">${u.name} · ${MODES[T.mode]} · ${T.size} joueurs</div><h2>${T.phase === "lobby" ? "Salle d'attente" : T.phase === "done" ? "Tournoi terminé" : "Tableau du tournoi"}</h2><p>Élimination directe, une nouvelle équipe à chaque match. Finale en deux manches gagnantes, petite finale pour la 3e place.</p></div>${T.phase !== "lobby" ? `<div class="gtcode"><b style="font-size:16px;letter-spacing:3px">${esc(T.code)}</b></div>` : ""}</div>
+    ${body}${T.log.length ? `<div class="gtlog">${T.log.map(t => `<div>${t}</div>`).join("")}</div>` : ""}`;
+  $("#gtQuit").onclick = () => { if (T.phase === "done" || (T.phase === "lobby" && !host)) return gtQuit(); GT.ask = "quit"; gtRender(); };
+  $("#gtQuitOk") && ($("#gtQuitOk").onclick = gtQuit); $("#gtQuitNo") && ($("#gtQuitNo").onclick = () => { GT.ask = null; gtRender(); });
+  $("#gtCopy") && ($("#gtCopy").onclick = async () => { const b = $("#gtCopy"); try { await navigator.clipboard.writeText(link); b.textContent = "Lien copié ✔"; } catch { b.outerHTML = `<input readonly value="${esc(link)}" style="max-width:340px;font-size:13px" onfocus="this.select()">`; } });
+  $("#gtStart") && ($("#gtStart").onclick = () => { if (GT.role !== "host" || T.players.length !== T.size) return; gtBuild(T); gtPush(); });
+  $("#gtTo4") && ($("#gtTo4").onclick = () => { if (GT.role !== "host" || T.players.length !== 4) return; T.size = 4; gtPush(); });
+  el.querySelectorAll("[data-gtplay]").forEach(b => b.onclick = () => gtPlay(+b.dataset.gtplay));
+  el.querySelectorAll("[data-gtwatch]").forEach(b => b.onclick = () => gtWatch(+b.dataset.gtwatch));
+  el.querySelectorAll("[data-gtff]").forEach(b => b.onclick = () => { const k = b.dataset.gtff; if (!b.dataset.ok){ GT.ask = k || null; return gtRender(); } GT.ask = null; const [mid, loser] = k.split(":").map(Number), m = gtM(mid); if (m && gtReady(m)) gtResult(m, 1 - loser, true); else gtRender(); });
+  gtLost();
+}
+
+/* ---------- accueil : réglages du tournoi ---------- */
+(function gtInit(){
+  const anchor = document.querySelector(".panel.mh"); if (!anchor) return;
+  document.querySelector("#end").insertAdjacentHTML("afterend", `<section id="gt" class="hidden"></section>`);
+  const seg = (attr, items, cur) => `<div class="gtseg">${items.map(([v, t, s]) => `<button class="${String(v) === String(cur) ? "sel" : ""}" ${attr}="${v}">${t}${s ? `<small>${s}</small>` : ""}</button>`).join("")}</div>`;
+  anchor.insertAdjacentHTML("beforebegin", `<div class="panel gth" id="gtCfg"></div>
+    <div class="panel rules gth" style="margin-top:14px"><b style="color:var(--text)">Règles du Grand Tournoi</b><ul style="margin-top:6px">
+      <li><b>4 ou 8 joueurs</b>, chacun sur son appareil. Le placement dans le tableau (côté gauche, côté droit) est <b>tiré au sort</b>.</li>
+      <li>Chaque match est un <b>Mercato en duel, en une manche</b> : nouvelle équipe et 300M pour tout le monde à chaque match. Rien ne se garde d'un match à l'autre.</li>
+      <li>La <b>finale</b> oppose les vainqueurs des deux côtés, en <b>deux manches gagnantes</b>. Les deux demi-finalistes battus jouent la <b>petite finale</b> pour la 3e place.</li>
+      <li>Égalité parfaite au combat : la manche est rejouée.</li>
+      <li>Les joueurs éliminés (ou en attente) peuvent <b>regarder les matchs en direct</b> et envoyer des réactions.</li>
+      <li>Un joueur déconnecté plus de 90 secondes alors que son match peut se jouer est <b>forfait</b>. L'organisateur peut aussi déclarer un forfait.</li>
+    </ul></div>`);
+  const draw = () => { const box = $("#gtCfg"), me = box.querySelector("#gtMe")?.value ?? (profGet()?.name || ""), code = box.querySelector("#gtCode")?.value ?? "";
+    if (!NET.p2p && NET.ready){ box.innerHTML = `<b>Le Grand Tournoi se joue sur le site Hanko</b><p class="muted" style="margin:6px 0 12px">Il a besoin de plusieurs salons en même temps, ce que claude.ai ne permet pas. Ouvre le site, tout le reste y est identique.</p><a class="primary" style="display:inline-block;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:800" href="${FR_SITE}" target="_blank" rel="noopener">Ouvrir le site Hanko</a>`; return; }
+    const sv = lsGet(GT_KEY, null), back = sv && sv.T && sv.T.phase !== "done" && Date.now() - sv.t < 144e5 ? sv : null, lastJ = lsGet(GT_LAST, null), backJ = !back && lastJ && Date.now() - lastJ.t < 144e5 ? lastJ : null;
+    box.innerHTML = `${back ? `<div class="gtme go"><div><b>Tu organisais le tournoi ${esc(back.T.code)}</b><span>Il n'est pas terminé : tu peux le reprendre là où il en était.</span></div><span class="row"><button class="primary" id="gtResume">Reprendre</button><button class="ghost" id="gtDrop">Abandonner</button></span></div>` : ""}
+      ${backJ ? `<div class="gtme go"><div><b>Tu étais dans le tournoi ${esc(backJ.code)}</b><span>Tu retrouves ta place en le rejoignant de nouveau.</span></div><span class="row"><button class="primary" id="gtRejoin">Y retourner</button><button class="ghost" id="gtDropJ">Oublier</button></span></div>` : ""}
+      <label class="f step"><i>01</i>Univers</label>${seg("data-gtu", Object.keys(UNI).map(k => [k, UNI[k].name]), GT.cfg.u)}
+      <label class="f step" style="margin-top:16px"><i>02</i>Mode d'enchère</label>${seg("data-gtm", [["live", "Classique", "Chacun voit le personnage tiré."], ["bluff", "Bluff", "Seul le tireur sait qui est tombé."]], GT.cfg.mode)}
+      <label class="f step" style="margin-top:16px"><i>03</i>Taille du tableau</label>${seg("data-gts", [[4, "4 joueurs", "Demi-finales puis finale."], [8, "8 joueurs", "Quarts, demi-finales puis finale."]], GT.cfg.size)}
+      <div class="online" style="margin-top:16px"><div><label class="f" for="gtMe">Ton pseudo</label><input id="gtMe" maxlength="16" placeholder="Ton pseudo" value="${esc(me)}"></div>
+        <div class="grid2"><div class="panel" style="background:var(--panel2)"><b>Créer un tournoi</b><p class="small" style="margin:4px 0 10px">Tu es l'organisateur : tu reçois un code à envoyer aux autres, et tu joues aussi.</p><button class="primary" id="gtHost">Créer le tournoi</button></div>
+        <div class="panel" style="background:var(--panel2)"><b>Rejoindre un tournoi</b><p class="small" style="margin:4px 0 10px">Entre le code envoyé par l'organisateur (il commence par K).</p><div class="row"><input id="gtCode" maxlength="4" placeholder="CODE" autocomplete="off" value="${esc(code)}" style="flex:1;min-width:100px;text-transform:uppercase;letter-spacing:4px"><button class="primary" id="gtJoin">Rejoindre</button></div></div></div>
+        <div class="err" id="gtErr"></div></div>`;
+    box.querySelectorAll("[data-gtu]").forEach(b => b.onclick = () => { GT.cfg.u = b.dataset.gtu; draw(); });
+    box.querySelectorAll("[data-gtm]").forEach(b => b.onclick = () => { GT.cfg.mode = b.dataset.gtm; draw(); });
+    box.querySelectorAll("[data-gts]").forEach(b => b.onclick = () => { GT.cfg.size = +b.dataset.gts; draw(); });
+    $("#gtHost").onclick = () => gtHost(); $("#gtJoin").onclick = gtJoin; $("#gtCode").onkeydown = e => { if (e.key === "Enter") gtJoin(); };
+    $("#gtResume") && ($("#gtResume").onclick = () => gtHost(back)); $("#gtDrop") && ($("#gtDrop").onclick = () => { try { localStorage.removeItem(GT_KEY); } catch {} draw(); });
+    $("#gtRejoin") && ($("#gtRejoin").onclick = () => { if (!$("#gtMe").value) $("#gtMe").value = backJ.name || ""; $("#gtCode").value = backJ.code; gtJoin(); }); $("#gtDropJ") && ($("#gtDropJ").onclick = () => { try { localStorage.removeItem(GT_LAST); } catch {} draw(); });
+  };
+  draw(); const t = setInterval(() => { if (NET.ready){ clearInterval(t); draw(); } }, 400);
+  document.querySelector('[data-g="gt"]')?.addEventListener("click", () => { if (!GT.role) draw(); });
+  try { QJ.K = {tab: "gt", online: null, name: "#gtMe", code: "#gtCode", go: "#gtJoin"}; } catch {}
+})();
 </script>
 
 <style>
@@ -12106,7 +12465,7 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
 (function(){
   const cards = [...document.querySelectorAll(".gcards .mode")]; if (!cards.length) return;
   // qui joue, où, quel genre : affiché sous le nom du jeu choisi
-  const META = {mercato: ["2 joueurs", "Un téléphone ou en ligne", "Duel"], uc: ["3 à 8 joueurs", "Un téléphone ou en ligne", "Bluff"], liar: ["Seul ou à plusieurs", "Un téléphone ou en ligne", "Rapidité"],
+  const META = {mercato: ["2 joueurs", "Un téléphone ou en ligne", "Duel"], gt: ["4 ou 8 joueurs", "En ligne, chacun sur son appareil", "Tournoi"], uc: ["3 à 8 joueurs", "Un téléphone ou en ligne", "Bluff"], liar: ["Seul ou à plusieurs", "Un téléphone ou en ligne", "Rapidité"],
     rl: ["2 à 4 joueurs", "Un téléphone ou en ligne à 2", "Déduction"], wh: ["2 à 4 joueurs", "Un téléphone ou en ligne à 2", "Déduction"], jg: ["3 à 8 joueurs", "Un seul téléphone", "Bluff"],
     guess: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Rapidité"], sil: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Rapidité"], top: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Mémoire"],
     fx: ["Seul ou jusqu'à 8", "Un téléphone ou en ligne", "Observation"], bt: ["1 à 8 joueurs", "Seul ou en ligne, équipes possibles", "Musique"], vs: ["2 joueurs", "Un téléphone ou en ligne", "Coopératif"],
