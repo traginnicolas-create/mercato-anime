@@ -9796,7 +9796,7 @@ const TC_T = [
   {n: "Divin", k: "神", price: 1800, g: "Légendaire", rate: [{P: 49.595, R: 40, E: 9.12, L: 1.17, M: .115}, {L: 92.6, M: 7.4}]}];
 const TC_WIN = [80, 17, 2.7, .3];   // niveau du booster gagné sur une victoire, en %, avant bonus de série et de record
 // victoire : éclats gagnés (+ bonus par victoire de suite, + bonus de record), limités aux `cap` premières victoires du jour ; chance de booster en plus
-const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 40, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
+const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 20, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
 const TC_XP = {C: 5, P: 8, R: 15, E: 40, L: 120, M: 400, X: 300};   // expérience pour une nouvelle carte (1 pour un doublon)
 const TC_PITY = {M: 120, L: 25};   // Mythique sûre au 120e booster sans Mythique ; Légendaire ou mieux au 25e sans
 const TC_PACKS = {mix: ["Mélange", "混", "#f5c518", 100, "Les trois univers"], op: ["One Piece", "海", "#ff5a36", 120, "Pirates et Marine"], db: ["Dragon Ball", "龍", "#ff9f1c", 120, "Guerriers et dieux"], na: ["Naruto", "忍", "#5aa9ff", 120, "Shinobi"]};
@@ -9931,7 +9931,7 @@ function tcOdds(r, t = 0){ const k = TC_ORDER.indexOf(r), p = x => TC_ORDER.slic
 function tcWinOdds(streak, record){
   const w = [...TC_WIN], m = 1 + .25 * Math.min(6, Math.max(0, streak - 1));
   for (let t = 1; t < 4; t++) w[t] *= m;
-  if (record){ w[0] = 0; w[2] *= 3; w[3] *= 3; }
+  /* record battu : le booster est garanti (voir tcOnGame), mais son niveau est tiré comme pour une victoire normale (demande du 12 oct. 2026) */
   const tot = w.reduce((a, b) => a + b, 0); return w.map(x => x / tot * 100);
 }
 
@@ -10217,7 +10217,7 @@ function tcRender(){
       <p class="tcsecp">Plus longues, mieux payées. Elles repartent de zéro chaque lundi. Les parties en solo comptent, comme pour les quotidiennes.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}</div>
       ${sec("Mensuelles", "月間", dn(mos, mo.claimed) + "/" + mos.length, inT(tMo))}
       <p class="tcsecp">Les plus dures, pour les plus belles récompenses : boosters Divin et Or, gros lots d'éclats. Elles repartent de zéro le 1er du mois.</p><div class="tcms">${mos.map(m => row(m, mo.claimed.includes(m.k), "data-tcmo")).join("")}</div>
-      <details class="tchelp"><summary>Comment gagner des boosters</summary><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster Argent au minimum, avec trois fois plus de chances d'un Or ou d'un Divin.</li><li><b>Boosters gratuits</b> : un par heure, il ne se cumule pas.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
+      <details class="tchelp"><summary>Comment gagner des boosters</summary><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster garanti.</li><li><b>Boosters gratuits</b> : un par heure, il ne se cumule pas.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
   }
   $("#tcBoard").innerHTML = html;
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
