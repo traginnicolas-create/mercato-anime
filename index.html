@@ -13565,6 +13565,24 @@ body .welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,v
 .cpgate{background:radial-gradient(ellipse 60% 40% at 18% 0,color-mix(in srgb,var(--hc) 20%,transparent),transparent 70%),#050505}
 .cpgate h1{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hc);text-shadow:0 0 14px color-mix(in srgb,var(--hc) 50%,transparent)}
 </style>
+<style>
+/* écran de connexion : logo noir et rouge, et davantage de blanc (titre, libellés, contours) pour que le bouton Google ne soit plus le seul élément clair */
+.cpgate .hlogo [fill^="url("],.cpgate .hlogo [fill="#3fe0a8"]{fill:#e0162f}
+.cpgate .hlogo [fill="#0c1312"]{fill:#050505}
+.cpgate .hlogo{filter:drop-shadow(0 0 10px color-mix(in srgb,#e0162f 45%,transparent))}
+.cpgate h1{color:#fff;text-shadow:none}
+.cpgate p{color:#d9d6de}
+.cpgate form{background:#0b0b0c;border-color:rgba(255,255,255,.22)}
+.cpgate label{color:#fff}
+.cpgate input{background:#050505;border-color:rgba(255,255,255,.3);color:#fff}
+.cpgate input:focus{border-color:#fff;outline:0}
+.cpgate #cgIn,.cpgate #cgIn:hover:not(:disabled){background:#d1122c;background-image:none;color:#fff;box-shadow:none;border-color:transparent}
+.cpgate #cgIn:hover:not(:disabled){background:#e8203a}
+.cpgate #cgUp,.cpgate #cgGuest{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.75)}
+.cpgate #cgUp:hover:not(:disabled),.cpgate #cgGuest:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:#fff}
+.cpgate .lk{color:#fff}
+.cpgate small a{color:#ff4d5e!important}
+</style>
 
 </body>
 </html>
