@@ -11290,7 +11290,16 @@ if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRende
 .mnsheet .mntop span{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .mnsheet .mnx{all:unset;cursor:pointer;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-size:14px}
 .mnsheet .mncard{display:grid;gap:14px;padding:16px;border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
-.mnsheet .mnwho{all:unset;cursor:pointer;display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;border-radius:12px}
+.mnsheet .mnwho{position:relative;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border-radius:12px}
+.mnsheet .mnwho .who{min-width:0;position:relative}.mnsheet .mnwho .pfav{--sz:56px;position:relative}
+.mnsheet .mnwho .ti{display:inline-block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;margin-top:5px;color:#ffe9e2;background:linear-gradient(135deg,#d63a2c,#8f1710)}
+/* carte d'appel : la carte de visite active sert de fond, le pseudo se lit par-dessus */
+.mnsheet .mnwho.cc{margin:-16px -16px 0;padding:18px 16px;min-height:104px;border-radius:18px 18px 0 0;overflow:hidden;isolation:isolate}
+.mnsheet .mnwho.cc .ccbg{position:absolute;inset:0;z-index:-1}
+.mnsheet .mnwho.cc .ccbg .vt{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;min-height:0;border:0;border-radius:0;padding:0}
+.mnsheet .mnwho.cc .ccbg .vt > b,.mnsheet .mnwho.cc .ccbg .vt > small,.mnsheet .mnwho.cc .ccbg .vt > .tr,.mnsheet .mnwho.cc .ccbg .vt > .pg{display:none}
+.mnsheet .mnwho.cc .ccbg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,8,10,.86) 0,rgba(6,8,10,.62) 46%,rgba(6,8,10,.12) 100%),linear-gradient(0deg,rgba(6,8,10,.5),transparent 60%)}
+.mnsheet .mnwho.cc b{text-shadow:0 2px 10px #000}.mnsheet .mnwho.cc small{color:#d6d2cc;text-shadow:0 1px 6px #000}.mnsheet .mnwho.cc em{color:#fff;text-shadow:0 1px 6px #000}
 .mnsheet .mnwho:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 .mnsheet .mnwho .av{width:56px;font-size:24px}
 .mnsheet .mnwho b{display:block;font-family:var(--title);font-weight:900;font-size:20px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -11325,7 +11334,11 @@ function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFi
   const acc = d.guest ? "Mode invité · rien n'est sauvegardé" : d.mail ? d.mail : "Non connecté";
   document.body.insertAdjacentHTML("beforeend", `<div class="mnveil" role="dialog" aria-modal="true" aria-label="Menu"><div class="mnsheet">
     <div class="mntop"><span>Menu · 名</span><button class="mnx" aria-label="Fermer le menu">✕</button></div>
-    <div class="mncard"><button class="mnwho" data-mn="profil"><span class="av" aria-hidden="true">${esc((d.name || "?").slice(0, 1).toUpperCase())}</span><span style="min-width:0"><b>${esc(d.name || "Choisis un pseudo")}</b><small>${esc(acc)}</small></span><em aria-hidden="true">→</em></button>
+    <div class="mncard">${(() => { let card = "", av = `<span class="av" aria-hidden="true">${esc((d.name || "?").slice(0, 1).toUpperCase())}</span>`, ti = "";
+        try { const k = d.s && d.s.show && d.s.show.b; if (k && (d.s.unl || []).includes(k)) card = vtCardHTML(k, {cls: "main"}).replaceAll('loading="lazy"', ""); } catch {}
+        try { if (d.name){ const pf = pfPublic(d.s); av = pfAvatar(pf, d.name); const t = pf.ti && VT.find(v => v[0] === pf.ti); if (t) ti = `<i class="ti">${t[2]} ${esc(t[1])}</i>`; } } catch {}
+        // carte d'appel : le pseudo se pose sur la carte de visite choisie en bannière (comme une « calling card »)
+        return `<div class="mnwho ${card ? "cc" : ""}" data-mn="profil" role="button" tabindex="0" aria-label="Ouvrir mon profil">${card ? `<div class="ccbg" aria-hidden="true">${card}</div>` : ""}${av}<span class="who"><b>${esc(d.name || "Choisis un pseudo")}</b>${ti}<small>${esc(acc)}</small></span><em aria-hidden="true">→</em></div>`; })()}
       <div class="mnst"><div><span>V/D en ligne</span><b>${ratio}</b><small>${d.w} V · ${d.l} D</small></div><div><span>Cartes</span><b>${d.own}</b><small>sur ${d.tot}</small></div><div><span>Éclats</span><b>${d.s ? d.s.gems : 0} ◆</b><small>niveau ${d.s ? tcLvl(d.s.xp || 0) : 0}</small></div></div></div>
     <h3>Cartes</h3><div class="mngrid"><button data-mn="packs"><i>札</i>Boosters${d.stock ? `<u>${d.stock}</u>` : ""}</button><button data-mn="album"><i>集</i>Collection</button><button data-mn="missions"><i>務</i>Missions${d.todo ? `<u>${d.todo}</u>` : ""}</button><button data-mn="vitrine"><i>飾</i>Vitrine</button></div>
     <h3>Profil</h3><div class="mngrid"><button data-mn="profil"><i>名</i>Mon profil</button><button data-mn="amis"><i>友</i>Amis</button></div>
@@ -11333,6 +11346,7 @@ function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFi
     <div class="mnfoot"><button class="a" data-mn="compte">${d.mail ? "Mon compte et ma sauvegarde" : d.guest ? "Créer un compte" : "Se connecter ou créer un compte"} →</button>${d.mail ? `<button class="q" data-mn="out">Se déconnecter</button>` : ""}</div></div></div>`);
   const V = document.querySelector(".mnveil"); V.onclick = e => { if (e.target === V) mnClose(); }; V.querySelector(".mnx").onclick = mnClose; document.addEventListener("keydown", mnKey);
   const scrollTo = sel => { show("home"); setTimeout(() => document.querySelector(sel)?.scrollIntoView({behavior: "smooth", block: "center"}), 80); };
+  V.querySelectorAll('.mnwho[role="button"]').forEach(b => b.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); b.click(); } });
   V.querySelectorAll("[data-mn]").forEach(b => b.onclick = () => { const k = b.dataset.mn; mnClose();
     if (["packs", "album", "missions", "vitrine"].includes(k)) return tcShow(k);
     if (k === "profil") return d.name ? pfShow() : scrollTo("#profBox");
