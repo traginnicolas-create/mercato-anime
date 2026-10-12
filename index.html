@@ -13594,6 +13594,11 @@ body .cpgate #cgUp:hover:not(:disabled){background:rgba(255,255,255,.1)!importan
 .cpgate input::placeholder{color:#fff;opacity:.85}
 .cpgate .ggl svg{display:block;width:20px;height:20px;filter:none}
 </style>
+<style>
+/* écran de connexion : un peu plus de fond rouge (deux lueurs, en haut à gauche et en bas à droite), petites lignes du bas en blanc gras */
+.cpgate{background:radial-gradient(ellipse 70% 48% at 14% 0,color-mix(in srgb,var(--hc) 34%,transparent),transparent 72%),radial-gradient(ellipse 60% 42% at 92% 100%,color-mix(in srgb,var(--hc) 22%,transparent),transparent 72%),#050505}
+.cpgate small{color:#fff;font-weight:700}
+</style>
 
 </body>
 </html>
