@@ -13194,7 +13194,7 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
     document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Hanko, en trois gestes</h2>
       <ol><li><i>01</i><span><b>Choisis un jeu</b>17 jeux rangés par famille : duel, connaissance, complicité, voix.</span></li>
       <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien avec un code à quatre caractères.</span></li>
-      <li><i>03</i><span><b>Garde tes parties</b>Un pseudo suffit, sans mot de passe, pour retrouver tes records.</span></li></ol>
+      <li><i>03</i><span><b>Remplis ta collection</b>Chaque partie rapporte des boosters. Ouvre-les dans l'onglet Cartes et complète ta collection, carte après carte.</span></li></ol>
       <button class="primary" id="welGo">C'est parti</button></div></div>`);
     const close = () => { try { localStorage.setItem("mercato-bienvenue", "1"); } catch {} document.querySelector(".welcome")?.remove(); };
     document.querySelector("#welGo").onclick = close; document.querySelector(".welcome").onclick = e => { if (e.target.classList.contains("welcome")) close(); };
@@ -13439,7 +13439,7 @@ body:has(#home:not(.hidden)) .hudpop .hp-bar{background:color-mix(in srgb,var(--
 body:has(#home:not(.hidden)) .hudpop .hp-bar u,body:has(#home:not(.hidden)) .hudpop .hp-bar.lv u{background:var(--hc);transition:background .35s}
 body:has(#home:not(.hidden)) .hudpop .hp-g div{background:#050505;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hc) 35%,transparent)}
 body:has(#home:not(.hidden)) .hudpop button.primary{font-family:var(--title);font-weight:900;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;padding:14px 20px;border:0;background:color-mix(in srgb,var(--hc) 26%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px var(--hc);text-shadow:none;transition:background .35s,box-shadow .35s}
-body:has(#home:not(.hidden)) .hudpop button.primary:hover{background:color-mix(in srgb,var(--hc) 40%,#050505)}
+body:has(#home:not(.hidden)) .hudpop button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 40%,#050505);box-shadow:inset 0 0 0 2px var(--hc);filter:none;transform:none}
 </style>
 <style>
 /* menu (panneau de droite) ouvert depuis la page des jeux : noir + couleur de la famille affichée, comme la barre du haut et la fenêtre des boosters */
@@ -13464,10 +13464,13 @@ body:has(#home:not(.hidden)) .mnsheet .mnwho .av{background:var(--hc);background
 <style>
 /* fenêtre de bienvenue : elle s'ouvre sur la page des jeux, en haut (famille Duel), donc noir + rouge comme la barre du haut */
 .welcome{background:rgba(5,5,5,.84)}
-.welcome > div{background:#050505;border:0;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc) 70%,#fff),0 0 14px color-mix(in srgb,var(--hc) 45%,transparent),0 24px 60px rgba(0,0,0,.7)}
+.welcome > div{background:#050505;border:0;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc) 70%,#fff),0 0 4px color-mix(in srgb,var(--hc) 80%,#fff),0 0 16px color-mix(in srgb,var(--hc) 60%,transparent),0 0 38px color-mix(in srgb,var(--hc) 28%,transparent),0 24px 60px rgba(0,0,0,.7)}
 .welcome .eyebrow,.welcome li i{color:var(--hc)}
 .welcome button.primary{font-family:var(--title);font-weight:900;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;padding:14px 20px;border:0;border-radius:999px;background:color-mix(in srgb,var(--hc) 26%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px var(--hc);text-shadow:none}
-.welcome button.primary:hover{background:color-mix(in srgb,var(--hc) 40%,#050505)}
+.welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 40%,#050505);box-shadow:inset 0 0 0 2px var(--hc);filter:none;transform:none}
+</style>
+<style>
+.welcome button:focus-visible,.welcome button:hover,body:has(#home:not(.hidden)) .hudpop button:focus-visible,body:has(#home:not(.hidden)) .hudpop button:hover{outline-color:var(--hc)!important;border-color:transparent!important}
 </style>
 
 </body>
