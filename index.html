@@ -13346,6 +13346,7 @@ body:has(#home:not(.hidden)),body:has(#launch:not(.hidden)){--bg:#050505;backgro
   const find = (u, n) => { try { const l = DATA[u] || (typeof JGX !== "undefined" && JGX[u] && JGX[u].chars) || []; const c = l.find(x => x.n === n); return c && c.i; } catch { return ""; } };
   const mic = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
   document.querySelectorAll("#home .gcards .mode").forEach(c => { const g = c.dataset.g, art = c.querySelector(".art"); if (!art) return;
+    if (g === "bt"){ art.classList.add("mic", "disc"); art.innerHTML = `<div class="vin"></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.500" cy="18" r="2.500" fill="currentColor"/><circle cx="17.500" cy="16" r="2.500" fill="currentColor"/></svg>`; return; }
     if (g === "mm"){ art.classList.add("mic"); art.innerHTML = `<div class="eq">${Array.from({length: 9}, (_, x) => `<u style="height:${24 + Math.round(70 * Math.abs(Math.sin(x * 1.7 + .6)))}%"></u>`).join("")}</div>${mic}`; return; }
     const w = WHO[g], src = w && find(w[0], w[1]); if (src) art.innerHTML = `<img src="${src}" alt="" loading="lazy">${g === "sil" ? `<i class="tint"></i>` : ""}`; });
   // la couleur du haut du site suit la famille qui occupe le haut de l'écran
@@ -13454,6 +13455,11 @@ body:has(#home:not(.hidden)) .mnsheet .mngrid u{background:var(--hc);color:#fff}
 body:has(#home:not(.hidden)) .mnsheet .mnfoot .a{color:color-mix(in srgb,var(--hc) 60%,#fff)}
 body:has(#home:not(.hidden)) .mnsheet .mnfoot button + button{border-top-color:color-mix(in srgb,var(--hc) 30%,transparent)}
 body:has(#home:not(.hidden)) .mnsheet .mnwho .av{background:var(--hc);background-image:none}
+</style>
+<style>
+/* Blind test (famille Voix) : un disque et une note à la place d'un personnage */
+#home .gcards .mode .art.disc .vin{position:absolute;left:50%;top:50%;width:86%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 7px,color-mix(in srgb,var(--f1) 55%,transparent) 7px 8px);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--f1) 70%,transparent);opacity:.6}
+#home .gcards .mode .art.disc svg{width:40%}
 </style>
 
 </body>
