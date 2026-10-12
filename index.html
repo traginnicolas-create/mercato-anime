@@ -11084,6 +11084,7 @@ async function frView(id){
     document.querySelectorAll("#frHis .tc").forEach(e => e.onclick = () => { $("#frWant").value = all.find(x => x.id === e.dataset.tc).no; deal(); SFX.play("pop"); });
     deal();
     $("#frBack").onclick = () => frShow();
+    document.querySelectorAll("[data-pfhide]").forEach(b => b.onclick = () => { pfMark(PF_KO, b.dataset.pfhide); draw(c, live); });
     $("#frSend") && ($("#frSend").onclick = () => { const me = frMe(), give = +$("#frGive").value, want = +$("#frWant").value, k = Math.random().toString(36).slice(2, 8), a = all.find(x => x.no === give), b = all.find(x => x.no === want), room = FR.conn; if (!room) return;
       $("#frSend").disabled = true; $("#frTErr").textContent = "Proposition envoyée, en attente de sa réponse…"; let done = false;
       room.on("ftres", m => { const d = m.data; if (m.sameTab || done || d?.to !== me.id || d.k !== k) return; done = true;
@@ -11392,7 +11393,14 @@ try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", 
 .pfed .pfopt{display:flex;flex-wrap:wrap;gap:8px}
 .pfed .pfopt button{all:unset;box-sizing:border-box;cursor:pointer;padding:9px 13px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:inset 0 0 0 1px var(--line);background:#0b0a0e}
 .pfed .pfopt button.on{box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--accent)}.pfed .pfopt button[disabled]{opacity:.45;cursor:not-allowed}
-.pfed .pfavs{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;max-height:196px;overflow:auto;padding:4px}
+.pfed .pfavs{display:flex;flex-wrap:wrap;gap:10px;padding:4px}.pfed .pfavs button{width:58px}
+.pfhide{all:unset;cursor:pointer;text-decoration:underline;color:var(--text)}
+.pfcrop{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:16px;background:rgba(5,6,8,.86);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pfcrop .pc-in{width:min(100%,360px);display:grid;gap:12px;padding:18px;border-radius:20px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--line),0 30px 70px rgba(0,0,0,.6)}
+.pfcrop b{font-family:var(--title);font-size:18px}.pfcrop p{margin:-6px 0 0;font-size:13px;color:var(--muted)}
+.pfcrop .pc-view{position:relative;width:min(240px,70vw);aspect-ratio:1;margin:4px auto;border-radius:50%;overflow:hidden;background:#10151a;cursor:grab;touch-action:none;box-shadow:0 0 0 3px var(--accent),0 0 0 9px rgba(63,224,168,.14)}
+.pfcrop .pc-view:active{cursor:grabbing}.pfcrop .pc-view img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;user-select:none;-webkit-user-select:none;pointer-events:none}
+.pfcrop .pc-z{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-family:var(--mono);font-size:18px;color:var(--muted)}.pfcrop .pc-z input{width:100%;accent-color:var(--accent)}
 .pfed .pfavs button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#10151a;box-shadow:inset 0 0 0 1px var(--line);font-family:var(--title);font-weight:900}
 .pfed .pfavs button img{width:100%;height:100%;object-fit:cover;object-position:50% 14%}.pfed .pfavs button.on{box-shadow:0 0 0 3px var(--accent)}
 .pfed .pffr{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
@@ -11424,21 +11432,65 @@ const PF_VS = [["flat", "Classeur", "Les cartes à plat, sans décor."], ["glass
 const PF_KEYS = PF_BLOCKS.map(b => b[0]);
 // réglages enregistrés avec la progression (s.pf), toujours remis en forme à la lecture
 function pfGet(s){ const p = (s && s.pf) || {}, bl = (Array.isArray(p.bl) ? p.bl : []).filter((k, i, a) => PF_KEYS.includes(k) && a.indexOf(k) === i); PF_KEYS.forEach(k => { if (!bl.includes(k)) bl.push(k); });
-  return {bio: String(p.bio || "").slice(0, 160), av: +p.av || 0, fr: PF_FRAMES.some(f => f[0] === p.fr) ? p.fr : "auto", ti: typeof p.ti === "string" ? p.ti : "", bl: [...PF_KEYS], hide: [],   /* l'ordre et le masquage des blocs ont été retirés à la demande de l'utilisateur : ordre fixe */
+  return {bio: String(p.bio || "").slice(0, 160), av: +p.av || 0, img: pfImgOk(p.img) ? p.img : "", fr: PF_FRAMES.some(f => f[0] === p.fr) ? p.fr : "auto", ti: typeof p.ti === "string" ? p.ti : "", bl: [...PF_KEYS], hide: [],   /* l'ordre et le masquage des blocs ont été retirés à la demande de l'utilisateur : ordre fixe */
     vs: PF_VS.some(v => v[0] === p.vs) ? p.vs : "flat", sl: PF_SLEEVES.some(v => v[0] === p.sl) ? p.sl : "", pv: {all: p.pv && p.pv.all === 0 ? 0 : 1, col: p.pv && p.pv.col === 0 ? 0 : 1, tr: p.pv && p.pv.tr === 0 ? 0 : 1}}; }
 // ce qui part vers les amis : seulement ce qui est débloqué et affiché
 function pfPublic(s){ const p = pfGet(s), all = tcCards(), a = p.av && all.find(c => c.no === p.av && s.own[c.id]);
-  return {bio: p.bio, av: a ? [a.no, tcBestFin(s, a)] : null, fr: (PF_FRAMES.find(f => f[0] === p.fr) || PF_FRAMES[0])[3](s) ? p.fr : "auto", ti: (s.unl || []).includes(p.ti) ? p.ti : "", bl: p.bl.filter(k => !p.hide.includes(k)), vs: p.vs, sl: (PF_SLEEVES.find(f => f[0] === p.sl) || PF_SLEEVES[0])[3](s) ? p.sl : ""}; }
+  return {bio: p.bio, av: a ? [a.no, tcBestFin(s, a)] : null, img: p.av === -1 && p.img ? p.img : "", fr: (PF_FRAMES.find(f => f[0] === p.fr) || PF_FRAMES[0])[3](s) ? p.fr : "auto", ti: (s.unl || []).includes(p.ti) ? p.ti : "", bl: p.bl.filter(k => !p.hide.includes(k)), vs: p.vs, sl: (PF_SLEEVES.find(f => f[0] === p.sl) || PF_SLEEVES[0])[3](s) ? p.sl : ""}; }
 // ce qui arrive d'un ami : rien n'est repris tel quel
 function pfClean(x){ x = x && typeof x === "object" ? x : {}; const av = Array.isArray(x.av) && Number.isFinite(+x.av[0]) ? [+x.av[0], typeof x.av[1] === "string" ? x.av[1].slice(0, 1) : ""] : null;
-  return {bio: String(x.bio || "").slice(0, 160), av, fr: PF_FRAMES.some(f => f[0] === x.fr) ? x.fr : "auto", ti: VT.some(v => v[0] === x.ti) ? x.ti : "", bl: Array.isArray(x.bl) ? x.bl.filter((k, i, a) => PF_KEYS.includes(k) && a.indexOf(k) === i) : [...PF_KEYS], vs: PF_VS.some(v => v[0] === x.vs) ? x.vs : "flat", sl: PF_SLEEVES.some(v => v[0] === x.sl) ? x.sl : ""}; }
-function pfAvatar(pf, name){ const c = pf.av && tcCards().find(x => x.no === pf.av[0]); return `<span class="pfav fr-${pf.fr}">${c ? `<img src="${tcArt(c, pf.av[1] || "")}" alt="">` : `<b>${esc((name || "?").slice(0, 1).toUpperCase())}</b>`}</span>`; }
+  return {bio: String(x.bio || "").slice(0, 160), av, img: pfImgOk(x.img) ? x.img : "", fr: PF_FRAMES.some(f => f[0] === x.fr) ? x.fr : "auto", ti: VT.some(v => v[0] === x.ti) ? x.ti : "", bl: Array.isArray(x.bl) ? x.bl.filter((k, i, a) => PF_KEYS.includes(k) && a.indexOf(k) === i) : [...PF_KEYS], vs: PF_VS.some(v => v[0] === x.vs) ? x.vs : "flat", sl: PF_SLEEVES.some(v => v[0] === x.sl) ? x.sl : ""}; }
+// ---- photo d'avatar importée ----
+// Une photo n'est jamais affichée sans avoir été analysée SUR L'APPAREIL QUI L'AFFICHE (celui qui l'importe, puis celui de chaque ami qui la reçoit) :
+// modifier sa sauvegarde à la main ne suffit donc pas à imposer une image aux autres. L'analyse (nsfwjs, modèle MobileNetV2 chargé à la demande)
+// reconnaît la nudité et le contenu sexuel, pas la violence ni les symboles haineux : d'où le bouton « Masquer cet avatar » en complément.
+const pfImgOk = x => typeof x === "string" && x.length < 40000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(x);
+const pfHash = x => { let h = 5381; for (let i = 0; i < x.length; i += 3) h = ((h << 5) + h + x.charCodeAt(i)) >>> 0; return h.toString(36) + x.length.toString(36); };
+const PF_OK = "hanko-av-ok", PF_KO = "hanko-av-ko", PF_PEND = {};
+const pfList = k => { try { const l = JSON.parse(localStorage.getItem(k) || "[]"); return Array.isArray(l) ? l : []; } catch { return []; } }, pfMark = (k, h) => { try { const l = pfList(k).filter(x => x !== h); l.push(h); localStorage.setItem(k, JSON.stringify(l.slice(-200))); } catch {} };
+let PF_MODEL = null;
+function pfModel(){ if (PF_MODEL) return PF_MODEL; const ld = (g, src) => window[g] ? Promise.resolve() : new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = src; sc.onload = ok; sc.onerror = () => ko(new Error("script")); document.head.appendChild(sc); });
+  PF_MODEL = ld("tf", "https://cdnjs.cloudflare.com/ajax/libs/tensorflow/3.21.0/tf.min.js").then(() => ld("nsfwjs", "https://cdn.jsdelivr.net/npm/nsfwjs@2.4.2/dist/nsfwjs.min.js")).then(() => nsfwjs.load("https://cdn.jsdelivr.net/gh/infinitered/nsfwjs@v4.2.1/models/mobilenet_v2/")); PF_MODEL.catch(() => { PF_MODEL = null; }); return PF_MODEL; }
+// vrai : image acceptée ; faux : refusée ; exception : analyse impossible (on n'affiche alors rien)
+async function pfScan(img){ const h = pfHash(img); if (pfList(PF_KO).includes(h)) return false; if (pfList(PF_OK).includes(h)) return true; const m = await pfModel(), el = new Image(); el.src = img; await el.decode();
+  const P = {}; (await m.classify(el)).forEach(x => { P[x.className] = x.probability; }); const bad = (P.Porn || 0) >= .45 || (P.Hentai || 0) >= .5 || (P.Porn || 0) + (P.Hentai || 0) >= .6 || (P.Sexy || 0) >= .8; pfMark(bad ? PF_KO : PF_OK, h); return !bad; }
+// les avatars reçus en attente d'analyse : l'initiale s'affiche d'abord, la photo la remplace si elle passe
+function pfPendRun(){ document.querySelectorAll(".pfav[data-pfpend]").forEach(el => { const h = el.dataset.pfpend, img = PF_PEND[h]; el.removeAttribute("data-pfpend"); if (!img) return; pfScan(img).then(ok => { if (ok && el.isConnected) el.innerHTML = `<img src="${img}" alt="">`; }).catch(() => {}); }); }
+function pfAvatar(pf, name){ const c = pf.av && tcCards().find(x => x.no === pf.av[0]), ini = `<b>${esc((name || "?").slice(0, 1).toUpperCase())}</b>`;
+  if (pf.img && pfImgOk(pf.img)){ const h = pfHash(pf.img); if (pfList(PF_KO).includes(h)) return `<span class="pfav fr-${pf.fr}">${ini}</span>`; if (pfList(PF_OK).includes(h)) return `<span class="pfav fr-${pf.fr}" data-pfcustom="${h}"><img src="${pf.img}" alt=""></span>`;
+    PF_PEND[h] = pf.img; setTimeout(pfPendRun, 60); return `<span class="pfav fr-${pf.fr}" data-pfpend="${h}" data-pfcustom="${h}">${ini}</span>`; }
+  return `<span class="pfav fr-${pf.fr}">${c ? `<img src="${tcArt(c, pf.av[1] || "")}" alt="">` : ini}</span>`; }
+// cadrage de la photo, comme pour une photo de profil : on la déplace au doigt ou à la souris et on zoome (curseur, molette ou pincement) dans le rond
+// qui montre le rendu final. La validation produit un carré de 160 px (JPEG léger) : c'est cette version, et elle seule, qui est analysée, enregistrée et envoyée.
+function pfCrop(file){ return new Promise((done, fail) => { const url = URL.createObjectURL(file), el = new Image(); el.onerror = () => { URL.revokeObjectURL(url); fail(new Error("image")); };
+  el.onload = () => { const w = el.naturalWidth, h = el.naturalHeight; if (!w || !h){ URL.revokeObjectURL(url); return fail(new Error("image")); }
+    document.body.insertAdjacentHTML("beforeend", `<div class="pfcrop" role="dialog" aria-modal="true" aria-label="Cadrer la photo"><div class="pc-in"><b>Cadre ta photo</b><p>Déplace-la et zoome : le rond montre le rendu final.</p>
+      <div class="pc-view"><img alt="" draggable="false"></div><label class="pc-z"><span aria-hidden="true">−</span><input type="range" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><span aria-hidden="true">+</span></label>
+      <div class="row" style="justify-content:flex-end"><button class="ghost" data-pc="no">Annuler</button><button class="primary" data-pc="ok">Utiliser cette photo</button></div></div></div>`);
+    const O = document.querySelector(".pfcrop"), view = O.querySelector(".pc-view"), im = view.querySelector("img"), rng = O.querySelector("input"); im.src = url;
+    let V = view.clientWidth || 240, s0 = V / Math.min(w, h), z = 1, x = (V - w * s0) / 2, y = (V - h * s0) / 2;
+    const put = () => { const sc = s0 * z; x = Math.min(0, Math.max(V - w * sc, x)); y = Math.min(0, Math.max(V - h * sc, y)); im.style.width = w * sc + "px"; im.style.height = h * sc + "px"; im.style.transform = `translate(${x}px,${y}px)`; };
+    const zoom = (nz, cx = V / 2, cy = V / 2) => { nz = Math.min(4, Math.max(1, nz)); const k = nz / z; x = cx - (cx - x) * k; y = cy - (cy - y) * k; z = nz; rng.value = z; put(); };
+    put(); rng.oninput = () => zoom(+rng.value);
+    const pts = new Map(); let pd = 0;
+    view.onpointerdown = e => { view.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 2){ const [a, b] = [...pts.values()]; pd = Math.hypot(a[0] - b[0], a[1] - b[1]); } };
+    view.onpointermove = e => { const p = pts.get(e.pointerId); if (!p) return; const nx = e.clientX, ny = e.clientY;
+      if (pts.size === 1){ x += nx - p[0]; y += ny - p[1]; put(); } pts.set(e.pointerId, [nx, ny]);
+      if (pts.size === 2){ const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = view.getBoundingClientRect(); if (pd > 0) zoom(z * d / pd, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top); pd = d; } };
+    view.onpointerup = view.onpointercancel = e => { pts.delete(e.pointerId); pd = 0; };
+    view.onwheel = e => { e.preventDefault(); const r = view.getBoundingClientRect(); zoom(z * (e.deltaY < 0 ? 1.08 : 1 / 1.08), e.clientX - r.left, e.clientY - r.top); };
+    const end = () => { O.remove(); URL.revokeObjectURL(url); document.removeEventListener("keydown", key); }, key = e => { if (e.key === "Escape"){ end(); done(""); } }; document.addEventListener("keydown", key);
+    O.querySelector('[data-pc="no"]').onclick = () => { end(); done(""); };
+    O.querySelector('[data-pc="ok"]').onclick = () => { try { const S = 160, cv = document.createElement("canvas"); cv.width = cv.height = S; const g = cv.getContext("2d"), sc = s0 * z; g.fillStyle = "#10151a"; g.fillRect(0, 0, S, S); g.drawImage(el, -x / sc, -y / sc, V / sc, V / sc, 0, 0, S, S);
+        let q = .82, out = cv.toDataURL("image/jpeg", q); while (out.length > 38000 && q > .4){ q -= .1; out = cv.toDataURL("image/jpeg", q); } end(); done(out); } catch (e){ end(); fail(e); } }; };
+  el.src = url; }); }
 function pfHead(name, tag, c, pf, o = {}){ const ti = pf.ti && VT.find(v => v[0] === pf.ti), since = c.since ? new Date(c.since).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"}) : "";
   return `<div class="pfhead">${pfAvatar(pf, name)}<div class="pfid"><span class="eb">Collectionneur · niveau ${c.lv || 0}</span><h2>${esc(name)}${tag ? `<small>#${esc(String(tag))}</small>` : ""}</h2>${ti ? `<span class="pfti"><i>${ti[2]}</i>${esc(ti[1])}</span>` : ""}
     <p class="mt">${since ? "Membre depuis le " + since : ""}${o.me ? `<em>c'est toi</em>` : o.live != null ? ` · <span style="color:${o.live ? "var(--ok)" : "var(--muted)"}">${o.live ? "en ligne" : "hors ligne"}</span>` : ""}</p>${pf.bio ? `<p class="bio">${esc(pf.bio)}</p>` : ""}</div></div>`; }
 // le corps du profil : en-tête puis blocs, dans l'ordre choisi par son propriétaire
 function pfBody(name, tag, c, o = {}){ const all = tcCards(), pf = pfClean(c.pf), own = c.own || [], ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]);
-  if (c.priv) return pfHead(name, tag, c, pf, o) + `<p class="pfnote">Ce profil est privé : seuls le pseudo, l'avatar, le niveau et le titre sont visibles.</p>`;
+  if (!o.me && pf.img && !pfList(PF_KO).includes(pfHash(pf.img))) o = {...o, bar: (o.bar || "") + `<p class="small" style="margin:-6px 0 12px"><button class="pfhide" data-pfhide="${pfHash(pf.img)}">Masquer cet avatar</button> si la photo te gêne : elle ne s'affichera plus chez toi.</p>`};
+  if (c.priv) return pfHead(name, tag, c, pf, o) + (o.bar || "") + `<p class="pfnote">Ce profil est privé : seuls le pseudo, l'avatar, le niveau et le titre sont visibles.</p>`;
   const by = r => own.filter(([n]) => all.find(x => x.no === n)?.r === r).length, nOwn = c.hc ? c.ownN || 0 : own.length;
   const B = {
     vit: () => c.show ? `<div class="pfvit vs-${pf.vs} sl-${pf.sl}">${vtShowcase(c.show)}</div><p class="small" style="margin:-8px 0 12px">${c.unl || 0}/${VT.length} cartes de visite débloquées</p>` : "",
@@ -11470,10 +11522,11 @@ function pfShow(){ const me = frMe(); if (!me){ show("home"); setTimeout(() => d
   $("#pfEdit").onclick = () => pfEdit(); $("#pfLink").onclick = e => pfCopyLink(e.currentTarget); $("#pfVit").onclick = () => { close(); tcShow("vitrine"); }; $("#pfRec").onclick = () => { close(); profShow(); }; }
 // fenêtre « Personnaliser » : trois onglets, un brouillon, rien n'est enregistré avant « Enregistrer »
 function pfEdit(tab = "look", draft){ const me = frMe(); if (!me) return; const s = tcLoad(), d = draft || pfGet(s), M = $("#modal"), all = tcCards();
-  const owned = all.filter(c => s.own[c.id]).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p).slice(0, 60), titles = VT.filter(v => (s.unl || []).includes(v[0]));
-  const prevPf = () => { const a = d.av && all.find(c => c.no === d.av && s.own[c.id]); return {bio: d.bio, av: a ? [a.no, tcBestFin(s, a)] : null, fr: d.fr, ti: d.ti, bl: [], vs: d.vs, sl: d.sl}; };
+  const owned = all.filter(c => s.own[c.id]).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p).slice(0, 5), titles = VT.filter(v => (s.unl || []).includes(v[0]));
+  const prevPf = () => { const a = d.av && all.find(c => c.no === d.av && s.own[c.id]); return {bio: d.bio, av: a ? [a.no, tcBestFin(s, a)] : null, img: d.av === -1 ? d.img : "", fr: d.fr, ti: d.ti, bl: [], vs: d.vs, sl: d.sl}; };
   const look = () => `<h3>Bio</h3><textarea id="pfBio" maxlength="160" placeholder="Une phrase sur toi : tes animés préférés, ce que tu cherches…">${esc(d.bio)}</textarea><span class="cnt" id="pfCnt">${d.bio.length}/160</span>
-    <h3>Avatar <small>une carte de ta collection, ou ton initiale</small></h3><div class="pfavs"><button class="${d.av ? "" : "on"}" data-pfav="0" aria-label="Initiale">${esc(me.name.slice(0, 1).toUpperCase())}</button>${owned.map(c => `<button class="${d.av === c.no ? "on" : ""}" data-pfav="${c.no}" aria-label="${esc(c.n)}"><img src="${tcBase(c)}" alt="" loading="lazy"></button>`).join("")}</div>${owned.length ? "" : `<p class="small">Ouvre des boosters pour avoir des cartes à choisir.</p>`}
+    <h3>Avatar <small>ton initiale, une de tes cinq meilleures cartes, ou ta photo</small></h3><div class="pfavs"><button class="${d.av ? "" : "on"}" data-pfav="0" aria-label="Initiale">${esc(me.name.slice(0, 1).toUpperCase())}</button>${owned.map(c => `<button class="${d.av === c.no ? "on" : ""}" data-pfav="${c.no}" aria-label="${esc(c.n)}"><img src="${tcBase(c)}" alt="" loading="lazy"></button>`).join("")}${d.img ? `<button class="${d.av === -1 ? "on" : ""}" data-pfav="-1" aria-label="Ma photo"><img src="${d.img}" alt=""></button>` : ""}</div>
+    <div class="row" style="margin-top:10px;align-items:center"><button id="pfUp">${d.img ? "Changer de photo" : "Importer une photo"}</button>${d.img ? `<button class="ghost" id="pfUpDel">Supprimer ma photo</button>` : ""}<input type="file" id="pfFile" accept="image/*" hidden></div><p class="small" id="pfUpSt" style="margin-top:8px">La photo est réduite à un petit carré, puis analysée automatiquement sur ton appareil avant d'être acceptée. Elle est analysée de nouveau chez chaque ami avant de s'afficher. Les images à caractère sexuel sont refusées.</p>
     <h3>Cadre d'avatar <small>${PF_FRAMES.filter(f => f[3](s)).length} débloqués sur ${PF_FRAMES.length}</small></h3><div class="pffr">${PF_FRAMES.map(f => { const ok = f[3](s); return `<button class="${d.fr === f[0] ? "on" : ""}" data-pffr="${f[0]}" ${ok ? "" : "disabled"}><span class="pfav fr-${f[0]}"><b></b></span><span><b>${ok ? "" : "🔒 "}${f[1]}</b><small>${f[2]}</small></span></button>`; }).join("")}</div>
     <h3>Titre <small>${titles.length} débloqués sur ${VT.length} · chaque carte de visite débloquée donne son titre</small></h3><div class="pfopt"><button class="${d.ti ? "" : "on"}" data-pfti="">Aucun</button>${titles.map(v => `<button class="${d.ti === v[0] ? "on" : ""}" data-pfti="${v[0]}">${v[2]} ${esc(v[1])}</button>`).join("")}</div>`;
   const blocks = () => `
@@ -11491,12 +11544,19 @@ function pfEdit(tab = "look", draft){ const me = frMe(); if (!me) return; const 
     <div class="pfend"><button class="ghost" id="pfCancel">Annuler</button><button class="primary" id="pfSave">Enregistrer</button></div></div>`;
   M.classList.remove("hidden"); M.onclick = null; const re = t => { const y = M.scrollTop; pfEdit(t || tab, d); M.scrollTop = y; }, q = (sel, fn) => M.querySelectorAll(sel).forEach(b => b.onclick = () => fn(b.dataset));
   const bio = $("#pfBio"); if (bio) bio.oninput = () => { d.bio = bio.value.slice(0, 160); $("#pfCnt").textContent = d.bio.length + "/160"; const b = M.querySelector("#pfPrev .bio"); if (b) b.textContent = d.bio; else if (d.bio) M.querySelector("#pfPrev .pfid").insertAdjacentHTML("beforeend", `<p class="bio">${esc(d.bio)}</p>`); };
-  q("[data-pftab]", x => { M.scrollTop = 0; pfEdit(x.pftab, d); }); q("[data-pfav]", x => { d.av = +x.pfav; re(); }); q("[data-pffr]", x => { d.fr = x.pffr; re(); }); q("[data-pfti]", x => { d.ti = x.pfti; re(); });
+  q("[data-pftab]", x => { M.scrollTop = 0; pfEdit(x.pftab, d); }); q("[data-pfav]", x => { d.av = +x.pfav; re(); });
+  if ($("#pfUp")){ const st = t => { const e = $("#pfUpSt"); if (e) e.innerHTML = t; }; $("#pfUp").onclick = () => $("#pfFile").click(); $("#pfUpDel") && ($("#pfUpDel").onclick = () => { d.img = ""; if (d.av === -1) d.av = 0; re(); });
+    $("#pfFile").onchange = async e => { const f = e.target.files && e.target.files[0]; if (!f) return; if (!/^image\//.test(f.type) || f.size > 15e6) return st(`<b style="color:var(--danger)">Choisis une image (15 Mo au plus).</b>`); $("#pfUp").disabled = true; pfModel().catch(() => {});   /* le modèle d'analyse se charge pendant le cadrage */
+      let img = ""; try { img = await pfCrop(f); } catch { $("#pfUp").disabled = false; return st(`<b style="color:var(--danger)">Cette image n'a pas pu être lue.</b> Essaie avec un fichier JPEG ou PNG.`); }
+      e.target.value = ""; if (!img){ $("#pfUp").disabled = false; return st("Import annulé."); }
+      st("Analyse de l'image en cours… La première fois, cela peut prendre une dizaine de secondes."); let ok; try { ok = await pfScan(img); } catch { $("#pfUp").disabled = false; return st(`<b style="color:var(--danger)">L'analyse automatique n'est pas disponible ici</b> (connexion coupée, ou version claude.ai du jeu) : l'import de photo est désactivé par sécurité. Réessaie depuis le site.`); }
+      if (!ok){ $("#pfUp").disabled = false; return st(`<b style="color:var(--danger)">Image refusée</b> : l'analyse y a détecté un contenu inapproprié. Choisis-en une autre.`); }
+      d.img = img; d.av = -1; re(); }; } q("[data-pffr]", x => { d.fr = x.pffr; re(); }); q("[data-pfti]", x => { d.ti = x.pfti; re(); });
   q("[data-pfup]", x => { const i = d.bl.indexOf(x.pfup); if (i > 0){ [d.bl[i - 1], d.bl[i]] = [d.bl[i], d.bl[i - 1]]; re(); } }); q("[data-pfdn]", x => { const i = d.bl.indexOf(x.pfdn); if (i < d.bl.length - 1){ [d.bl[i + 1], d.bl[i]] = [d.bl[i], d.bl[i + 1]]; re(); } });
   q("[data-pftg]", x => { const i = d.hide.indexOf(x.pftg); if (i >= 0) d.hide.splice(i, 1); else d.hide.push(x.pftg); re(); }); q("[data-pfvs]", x => { d.vs = x.pfvs; re(); }); q("[data-pfsl]", x => { d.sl = x.pfsl; re(); });
   q("[data-pfpv]", x => { const [k, v] = x.pfpv.split(":"); d.pv[k] = +v; re(); });
   $("#pfCancel").onclick = $("#pfCancelX").onclick = () => pfShow();
-  $("#pfSave").onclick = () => { const st = tcLoad(); st.pf = {bio: d.bio.trim(), av: d.av, fr: d.fr, ti: d.ti, bl: d.bl, hide: d.hide, vs: d.vs, sl: d.sl, pv: d.pv}; tcSave(st); try { SFX.play("win"); } catch {} pfShow(); }; }
+  $("#pfSave").onclick = () => { const st = tcLoad(); st.pf = {bio: d.bio.trim(), av: d.av, img: d.img || "", fr: d.fr, ti: d.ti, bl: d.bl, hide: d.hide, vs: d.vs, sl: d.sl, pv: d.pv}; tcSave(st); try { SFX.play("win"); } catch {} pfShow(); }; }
 </script>
 
 <style>
