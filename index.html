@@ -13532,6 +13532,21 @@ body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:h
 /* fin du Mercato : la liste du verdict respire (les puces touchaient le bord du cadre) */
 .fgsum{margin:10px 0 4px;padding-left:24px;display:grid;gap:6px}.fgsum li{padding-left:4px}.fgsum li::marker{color:var(--accent)}
 </style>
+<style>
+/* menu : quand une bannière (carte de visite) coiffe la carte du profil, elle recouvrait le filet du cadre. Le filet est donc redessiné par-dessus, sur tout le tour. */
+.mnsheet .mncard{position:relative}
+.mnsheet .mncard::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1px var(--line)}
+body:has(#home:not(.hidden)) .mnsheet .mncard::after{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc) 60%,transparent)}
+.mnsheet .mnwho.cc{border-radius:17px 17px 0 0}
+.mnsheet{overflow-x:hidden}.mnsheet > *{min-width:0}
+</style>
+<script>
+/* menu : si le voile déborde sous la barre de défilement de la page (fenêtre étroite sur ordinateur), le bord droit du menu était coupé ; on le ramène à la largeur réellement visible */
+(() => { const fit = v => { try { v.style.right = ""; const d = Math.round(v.getBoundingClientRect().right - document.documentElement.clientWidth); if (d > 0) v.style.right = d + "px"; } catch {} };
+  try { new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains("mnveil")) fit(n); }).observe(document.body, {childList: true}); } catch {}
+  addEventListener("resize", () => { const v = document.querySelector(".mnveil"); if (v) fit(v); });
+})();
+</script>
 
 </body>
 </html>
