@@ -11459,7 +11459,7 @@ function hudPop(btn){ if (document.querySelector(".hudpop")) return hudClose(); 
   P.style.top = Math.round(r.bottom + 8) + "px"; P.style.right = Math.max(8, Math.round(innerWidth - r.right - 60)) + "px";
   const draw = () => { if (!P.isConnected) return hudClose(); P.innerHTML = fill(); P.querySelector('[data-hp="go"]').onclick = () => { hudClose(); tcShow("packs"); }; }; draw(); HUD_T = setInterval(draw, 1000);
   setTimeout(() => { document.addEventListener("click", hudOut, true); document.addEventListener("keydown", hudKey); }, 0); }
-function mnRefresh(){ document.querySelectorAll(".mnbtn").forEach(b => { b.innerHTML = mnBtnHTML(); }); const h = hudHTML(); document.querySelectorAll(".hud").forEach(b => { if (b.dataset.h !== h.html){ b.dataset.h = h.html; b.innerHTML = h.html; } b.title = h.label; b.setAttribute("aria-label", h.label); }); }
+function mnRefresh(){ try { window.tabDot && window.tabDot(); } catch {} document.querySelectorAll(".mnbtn").forEach(b => { b.innerHTML = mnBtnHTML(); }); const h = hudHTML(); document.querySelectorAll(".hud").forEach(b => { if (b.dataset.h !== h.html){ b.dataset.h = h.html; b.innerHTML = h.html; } b.title = h.label; b.setAttribute("aria-label", h.label); }); }
 function mnClose(){ document.querySelector(".mnveil")?.remove(); document.removeEventListener("keydown", mnKey); mnRefresh(); }
 function mnKey(e){ if (e.key === "Escape") mnClose(); }
 function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFixed(2) : d.w ? d.w + ".00" : "—";
@@ -11993,6 +11993,8 @@ body.scrolled .sitebar .logo,body.scrolled section:not(#home):not(#game) > .topb
   .tabbar a{display:grid;justify-items:center;gap:2px;padding:6px 4px;border-radius:12px;color:#b7b2bd;text-decoration:none;font-size:12px;font-weight:700}
   .tabbar a i{font-style:normal;font-family:var(--brand);font-weight:900;font-size:18px;line-height:1;color:var(--text)}
   .tabbar a:active{background:var(--panel2)}
+  .tabbar a i{position:relative}
+  .tabbar .tdot{position:absolute;top:-7px;left:calc(100% - 3px);min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#ff3b4e;color:#fff;font-family:var(--mono);font-weight:700;font-size:10.5px;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--bg)}
   body:has(#home:not(.hidden)) .wrap{padding-bottom:96px}
   body:has(#home:not(.hidden)) #vox{bottom:76px}
 }
@@ -12176,7 +12178,11 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
     h.setAttribute("role", "button"); h.tabIndex = 0; const tog = () => p.classList.toggle("open"); h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
   // téléphone : onglets en bas de l'accueil
   document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#" id="tabTcg"><i>札</i>Cartes</a></nav>`);   // « Rejoindre » et « Profil » sont dans le menu en haut à droite
-  document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); tcShow(); };
+  /* « Cartes » ouvre toujours les boosters : ceux à ouvrir s'il y en a (gratuits ou gagnés), sinon la boutique */
+  document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); try { const s = tcLoad(), n = s.free.n, won = Object.keys(s.packs).find(k => s.packs[k] > 0); TC_SUB = n || won ? "mine" : "shop"; if (n) TC_PICK = "free"; else if (won) TC_PICK = won; } catch {} tcShow("packs"); window.scrollTo(0, 0); };
+  /* pastille rouge sur « Cartes » tant qu'il reste des boosters gratuits à ouvrir (ils reviennent avec le temps : on revérifie régulièrement) */
+  const tabDot = () => { try { const a = document.querySelector("#tabTcg"), n = tcLoad().free.n; let d = a.querySelector(".tdot"); if (!n){ d && d.remove(); a.setAttribute("aria-label", "Cartes"); return; } if (!d){ a.querySelector("i").insertAdjacentHTML("beforeend", `<b class="tdot"></b>`); d = a.querySelector(".tdot"); } d.textContent = n; a.setAttribute("aria-label", "Cartes, " + n + (n > 1 ? " boosters gratuits à ouvrir" : " booster gratuit à ouvrir")); } catch {} };
+  tabDot(); setInterval(tabDot, 5000); window.tabDot = tabDot;
   { const sc = () => document.body.classList.toggle("scrolled", (window.scrollY || document.documentElement.scrollTop || 0) > 6); addEventListener("scroll", sc, {passive: true}); sc(); }
   // le logo ramène à l'accueil : celui de l'accueil remonte en haut de page, celui des autres écrans passe par leur bouton « Accueil » (pour quitter proprement)
   document.addEventListener("click", e => { const t = e.target.closest && e.target.closest(".sitebar .logo, section:not(#home):not(#game) > .topbar h1"); if (!t) return;
