@@ -13394,6 +13394,28 @@ body:has(#home:not(.hidden)),body:has(#launch:not(.hidden)){--bg:#050505;backgro
   try { new MutationObserver(ms => { for (const m of ms){ const t = m.target.nodeType === 1 ? m.target : m.target.parentElement, e = t && t.closest && t.closest(".err"); if (e && e.textContent.trim() && L.classList.contains("hidden") && !home.classList.contains("hidden")){ const c = document.querySelector("#home .gcards .mode.sel"); if (c) open(c); return; } } }).observe(box, {subtree: true, childList: true, characterData: true}); } catch {}
 })();
 </script>
+<style>
+/* raccourcis des familles épinglés (téléphone) : dès qu'on touche un raccourci, la barre des familles reste en haut à la place de la barre Hanko,
+   jusqu'au retour tout en haut de la page. La barre Hanko reste dans la page (elle défile avec), pour ne provoquer aucun saut. */
+@media (max-width:640px){
+  body.fampin #home > .sitebar{position:relative}
+  body.fampin #home > #famNav{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;padding:10px 16px;background:color-mix(in srgb,#050505 90%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid color-mix(in srgb,var(--hc) 35%,transparent)}
+  body.fampin #home section.cat{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 70px)}
+  #famNav button.on{background:color-mix(in srgb,var(--fc) 26%,#050505)}
+}
+</style>
+<script>
+(() => { const nav = document.querySelector("#famNav"); if (!nav) return;
+  const secs = () => [...document.querySelectorAll("#home section.cat")]; let armed = false;
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#famNav button") && matchMedia("(max-width:640px)").matches) document.body.classList.add("fampin"); }, true);
+  const sc = () => { if (!document.body.classList.contains("fampin")) return;
+    const y = window.scrollY || document.documentElement.scrollTop || 0; if (y > 80) armed = true;
+    if (y <= 6 && armed){ armed = false; document.body.classList.remove("fampin"); nav.querySelectorAll("button.on").forEach(b => b.classList.remove("on")); return; }
+    let k = 0; secs().forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * .45) k = i; });
+    nav.querySelectorAll("button").forEach((b, i) => { const on = i === k; if (b.classList.contains("on") !== on){ b.classList.toggle("on", on); if (on) nav.scrollTo({left: b.offsetLeft - (nav.clientWidth - b.offsetWidth) / 2, behavior: "smooth"}); } }); };
+  addEventListener("scroll", sc, {passive: true});
+})();
+</script>
 
 </body>
 </html>
