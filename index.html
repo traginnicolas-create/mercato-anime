@@ -10978,6 +10978,26 @@ document.addEventListener("pointermove", e => { const v = e.target.closest && e.
 .frrow button{border-radius:999px;padding:8px 14px;font-size:13px}
 .frid{font-family:var(--mono);font-size:clamp(18px,5vw,24px);letter-spacing:.5px}
 .frid i{font-style:normal;color:var(--accent)}
+/* rubrique Amis refaite (12 oct. 2026) */
+.frbox .freb{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.frbox .head h2{font-size:clamp(24px,7vw,34px);line-height:1}
+.frbox .frdesc{margin:2px 0 14px;font-size:14.5px;line-height:1.45;color:var(--muted);max-width:56ch}
+.frtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 16px;overflow-x:auto;scrollbar-width:none}
+.frtabs button{all:unset;cursor:pointer;flex:none;padding:11px 14px;font-weight:700;font-size:14.5px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.frtabs button.on{color:var(--text);border-bottom-color:var(--accent)}.frtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.frtabs small{font-family:var(--mono);font-size:11px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--panel2,var(--panel));color:var(--muted)}
+.frempty{display:grid;justify-items:center;gap:10px;padding:34px 10px 26px;text-align:center}.frempty i{font-style:normal;font-family:var(--brand);font-size:44px;color:var(--muted);opacity:.6;line-height:1}.frempty p{margin:0;color:var(--muted)}
+.frrow .frwho{all:unset;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr);gap:11px;align-items:center;min-width:0;flex:1 1 180px}
+.frrow .frwho .pfav{--sz:44px;box-shadow:none}.frrow .frwho span{min-width:0;display:block}.frrow .frwho > span:not(.pfav) > b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frrow .frwho .pfti{display:inline-block;margin:3px 0 1px;padding:1px 6px;font-size:9.5px;font-style:normal;transform:none;border-radius:4px}
+.frshare{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line)}
+.frshare > span{flex:1 1 150px;min-width:0}.frshare .frlink{font-family:var(--mono);font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frshare button{border-radius:999px;padding:9px 15px;font-size:13.5px;flex:none}
+.frbox .frqr{display:grid;grid-template-columns:minmax(0,200px) 1fr;gap:14px;align-items:center;padding:12px;border-radius:14px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line)}
+.frbox .frqr #frQr{background:#fff;border-radius:10px;padding:6px;line-height:0;min-height:120px;color:#111;font-size:13px;display:grid;place-items:center}.frbox .frqr #frQr svg{width:100%;height:auto;display:block}
+@media (max-width:480px){.frbox .frqr{grid-template-columns:1fr;justify-items:center;text-align:center}.frbox .frqr #frQr{width:min(100%,220px)}}
+.frok{margin:0 0 12px;padding:9px 12px;border-radius:12px;font-size:13.5px;color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ok) 40%,transparent)}
+.frbox .frfoot{margin:18px 0 0;padding-top:12px;border-top:1px solid var(--line)}
 .frrec{display:grid;grid-template-columns:1fr auto;gap:5px 14px;font-size:13.5px;margin:8px 0}
 .frrec span:nth-child(even){font-family:var(--mono);text-align:right}
 .frtrade{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
@@ -11093,31 +11113,46 @@ function frHome(){
   $("#frNewGo") && ($("#frNewGo").onclick = mk); $("#frNew") && ($("#frNew").onkeydown = e => { if (e.key === "Enter") mk(); });
 }
 const FR_SITE = "https://traginnicolas-create.github.io/mercato-anime/", FR_PEND = "mercato-ami-qr";
+let FR_TAB = "list";
 function frShow(msg){
   const me = frMe(); if (!me) return; try { tcLibs(); } catch {}
   // ami reçu par code QR : ajouté à l'ouverture de la liste
   { const pd = frParse(lsGet(FR_PEND, "")); if (pd){ lsSet(FR_PEND, ""); if (pd.id.toLowerCase() !== me.id.toLowerCase()){ if (!frList().some(x => x.id.toLowerCase() === pd.id.toLowerCase())) lsSet(FR_KEY, [...frList(), {id: pd.id, name: pd.name, tag: pd.tag}].slice(0, 50)); if (typeof msg !== "string") msg = pd.id + " a été ajouté à tes amis."; } } } frClose(); const M = $("#modal"), L = frList();
-  M.innerHTML = `<div class="box" style="max-width:640px"><div class="head"><h2>Amis</h2><button class="ghost" id="frX">✕ Fermer</button></div>
-    <label class="f">Ton identifiant</label><div class="row" style="align-items:center"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button class="ghost" id="frCopy">Copier</button><button class="ghost" id="frQrGo">Code QR</button><button class="ghost" id="frEdit">Changer de pseudo</button></div>
-    <div id="frEditBox" class="hidden" style="margin-top:10px"><div class="row"><input id="frName" maxlength="16" value="${esc(me.name)}" autocomplete="off" style="flex:1;min-width:150px"><span class="frid" style="font-size:18px"><i>#${me.tag}</i></span><button class="primary" id="frNameGo">Enregistrer</button></div><p class="small" style="margin-top:6px">Tu choisis le pseudo ; les 4 chiffres sont attribués une fois pour toutes et ne changent pas. Tes amis devront t'ajouter à nouveau avec le nouvel identifiant.</p></div>
-    <div id="frQrBox" class="hidden frqr"><div id="frQr"></div><p class="small">Ton ami scanne ce code avec l'appareil photo de son téléphone : le site s'ouvre et t'ajoute à ses amis.</p></div>
-    <p class="small" style="margin:6px 0 16px">Donne-le à tes amis. Tout passe en direct entre vos appareils : profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert.</p>
-    <label class="f" for="frAdd">Ajouter un ami</label><div class="row"><input id="frAdd" maxlength="22" placeholder="Pseudo#1234" autocomplete="off" style="flex:1;min-width:170px"><button class="primary" id="frAddGo">Ajouter</button></div><div class="err" id="frErr">${esc(typeof msg === "string" ? msg : "")}</div>
-    <div class="frlist">${L.length ? L.map(f => { const on = Date.now() - (FR.online[f.id] || 0) < 12e4; return `<div class="frrow"><div><b>${esc(f.name)}<i>#${f.tag}</i></b><small class="${on ? "on" : ""}">${on ? "En ligne" : f.seen ? "Vu le " + new Date(f.seen).toLocaleDateString("fr-FR", {day: "numeric", month: "short"}) : "Jamais vu en ligne"}${f.last ? " · niveau " + f.last.lv + " · " + f.last.own.length + " cartes" : ""}</small></div><div class="row"><button class="primary" data-frv="${esc(f.id)}">Voir</button><button class="ghost" data-frd="${esc(f.id)}">Retirer</button></div></div>`; }).join("") : `<p class="muted">Aucun ami pour l'instant.</p>`}</div></div>`;
+  // rubrique en trois onglets (12 oct. 2026, d'après la page Amis de Kyara) : la liste, l'ajout par identifiant, et le partage (identifiant, lien, code QR)
+  if (typeof msg === "string" && msg) FR_TAB = /ajouté à tes amis/.test(msg) ? "list" : "add";
+  const av = f => { try { return pfAvatar(pfClean(f.last && f.last.pf), f.name); } catch { return ""; } }, link = FR_SITE + "#ami=" + encodeURIComponent(me.id);
+  const list = () => L.length ? `<div class="frlist">${L.map(f => { const on = Date.now() - (FR.online[f.id] || 0) < 12e4, pf = pfClean(f.last && f.last.pf), ti = pf.ti && VT.find(v => v[0] === pf.ti);
+      return `<div class="frrow"><button class="frwho" data-frv="${esc(f.id)}" aria-label="Voir le profil de ${esc(f.name)}">${av(f)}<span><b>${esc(f.name)}<i>#${f.tag}</i></b>${ti ? `<em class="pfti t${ti[3]}">${ti[2]} ${esc(ti[1])}</em>` : ""}<small class="${on ? "on" : ""}">${on ? "En ligne" : f.seen ? "Vu le " + new Date(f.seen).toLocaleDateString("fr-FR", {day: "numeric", month: "short"}) : "Jamais vu en ligne"}${f.last ? " · niveau " + f.last.lv : ""}</small></span></button><div class="row"><button class="primary" data-frv="${esc(f.id)}">Voir</button><button class="ghost" data-frd="${esc(f.id)}" aria-label="Retirer ${esc(f.name)}">Retirer</button></div></div>`; }).join("")}</div>`
+    : `<div class="frempty"><i aria-hidden="true">友</i><p>Tu n'as pas encore d'amis sur Hanko.</p><button class="primary" data-frtab="add">Ajouter un ami</button></div>`;
+  const add = () => `<label class="f" for="frAdd">Identifiant de ton ami</label><div class="row"><input id="frAdd" maxlength="22" placeholder="Pseudo#1234" autocomplete="off" style="flex:1;min-width:170px"><button class="primary" id="frAddGo">Ajouter</button></div><div class="err" id="frErr">${esc(typeof msg === "string" && FR_TAB === "add" ? msg : "")}</div>
+    <p class="small" style="margin-top:8px">Demande-lui son identifiant : son pseudo suivi de # et de quatre chiffres, par exemple Zoro#4821. Encore plus simple : il t'envoie son lien ou te montre son code QR (onglet « Partager »), et tu es ajouté tout seul.</p>`;
+  const share = () => `<label class="f">Ton identifiant</label><div class="frshare"><span class="frid">${esc(me.name)}<i>#${me.tag}</i></span><button id="frCopy">Copier</button></div>
+    <label class="f" style="margin-top:14px">Ton lien d'ami</label><div class="frshare"><span class="frlink">${esc(link.replace(/^https?:\/\//, ""))}</span><button class="primary" id="frLink">Copier le lien</button></div>
+    <label class="f" style="margin-top:14px">Ton code QR</label><div class="frqr"><div id="frQr">Chargement…</div><p class="small">Ton ami le scanne avec l'appareil photo de son téléphone : le site s'ouvre et t'ajoute à ses amis.</p></div>
+    <div class="row" style="margin-top:14px"><button class="ghost" id="frEdit">Changer de pseudo</button></div>
+    <div id="frEditBox" class="hidden" style="margin-top:10px"><div class="row"><input id="frName" maxlength="16" value="${esc(me.name)}" autocomplete="off" style="flex:1;min-width:150px"><span class="frid" style="font-size:18px"><i>#${me.tag}</i></span><button class="primary" id="frNameGo">Enregistrer</button></div><p class="small" style="margin-top:6px">Tu choisis le pseudo ; les 4 chiffres sont attribués une fois pour toutes et ne changent pas. Tes amis devront t'ajouter à nouveau avec le nouvel identifiant.</p></div>`;
+  M.innerHTML = `<div class="box frbox" style="max-width:640px"><div class="head"><div><span class="freb">Amis · 友達</span><h2>Tes amis</h2></div><button class="ghost" id="frX">✕ Fermer</button></div>
+    <p class="frdesc">Ajoute d'autres collectionneurs, regarde leur profil, invite-les en partie et échange tes doublons.</p>
+    <div class="frtabs" role="tablist">${[["list", "Amis", L.length], ["add", "Ajouter", ""], ["share", "Partager", ""]].map(([k, n, c]) => `<button role="tab" aria-selected="${FR_TAB === k}" class="${FR_TAB === k ? "on" : ""}" data-frtab="${k}">${n}${c !== "" ? `<small>${c}</small>` : ""}</button>`).join("")}</div>
+    ${typeof msg === "string" && msg && FR_TAB === "list" ? `<p class="frok">${esc(msg)}</p>` : ""}
+    ${FR_TAB === "add" ? add() : FR_TAB === "share" ? share() : list()}
+    <p class="small frfoot">Tout passe en direct entre vos appareils : profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert.</p></div>`;
   M.classList.remove("hidden"); M.scrollTo(0, 0);
   const close = () => { M.classList.add("hidden"); M.innerHTML = ""; frHome(); };
   $("#frX").onclick = close; M.onclick = e => { if (e.target === M) close(); };
-  $("#frCopy").onclick = async () => { try { await navigator.clipboard.writeText(me.id); $("#frCopy").textContent = "Copié ✔"; } catch { $("#frCopy").textContent = me.id; } };
-  // code QR : l'adresse du site suivie de #ami=Pseudo%231234 (bibliothèque qrcode-generator, chargée à la demande)
-  $("#frQrGo").onclick = () => { const box = $("#frQrBox"); if (box.classList.toggle("hidden")) return; const draw = k => { if (!box.isConnected) return; if (!window.qrcode){ $("#frQr").textContent = k > 12 ? "Code QR indisponible hors ligne." : "Chargement…"; if (k <= 12) setTimeout(() => draw(k + 1), 400); return; }
-      const q = qrcode(0, "M"); q.addData(FR_SITE + "#ami=" + encodeURIComponent(me.id)); q.make(); $("#frQr").innerHTML = q.createSvgTag({cellSize: 6, margin: 3, scalable: true}); }; draw(0); };
-  $("#frEdit").onclick = () => { $("#frEditBox").classList.toggle("hidden"); $("#frName").focus(); $("#frName").select(); };
-  const rename = () => { const name = cleanName($("#frName").value, ""); if (!name || name.includes("#")) return $("#frName").focus(); if (name === me.name) return $("#frEditBox").classList.add("hidden"); frSetName(name); frShow(); };
-  $("#frNameGo").onclick = rename; $("#frName").onkeydown = e => { if (e.key === "Enter") rename(); };
-  const add = () => { const f = frParse($("#frAdd").value); if (!f) return $("#frErr").textContent = "Écris le pseudo suivi de # et de 4 chiffres, par exemple Zoro#4821.";
-    if (f.id.toLowerCase() === me.id.toLowerCase()) return $("#frErr").textContent = "C'est ton propre identifiant.";
-    if (!frList().some(x => x.id.toLowerCase() === f.id.toLowerCase())) lsSet(FR_KEY, [...frList(), {id: f.id, name: f.name, tag: f.tag}].slice(0, 50)); frView(f.id); };
-  $("#frAddGo").onclick = add; $("#frAdd").onkeydown = e => { if (e.key === "Enter") add(); };
+  M.querySelectorAll("[data-frtab]").forEach(b => b.onclick = () => { FR_TAB = b.dataset.frtab; frShow(); });
+  const copy = async (btn, txt, okLabel) => { const t = btn.textContent; try { await navigator.clipboard.writeText(txt); btn.textContent = okLabel; } catch { window.prompt("Copie ce texte :", txt); } setTimeout(() => { if (btn.isConnected) btn.textContent = t; }, 2200); };
+  $("#frCopy") && ($("#frCopy").onclick = e => copy(e.currentTarget, me.id, "Copié ✔")); $("#frLink") && ($("#frLink").onclick = e => copy(e.currentTarget, link, "Lien copié ✔"));
+  // code QR : l'adresse du site suivie de #ami=Pseudo%231234 (bibliothèque qrcode-generator, chargée à la demande), dessiné dès l'ouverture de l'onglet
+  if ($("#frQr")){ const draw = k => { const box = $("#frQr"); if (!box) return; if (!window.qrcode){ box.textContent = k > 12 ? "Code QR indisponible hors ligne." : "Chargement…"; if (k <= 12) setTimeout(() => draw(k + 1), 400); return; }
+      const q = qrcode(0, "M"); q.addData(link); q.make(); box.innerHTML = q.createSvgTag({cellSize: 6, margin: 3, scalable: true}); }; draw(0); }
+  if ($("#frEdit")){ $("#frEdit").onclick = () => { $("#frEditBox").classList.toggle("hidden"); $("#frName").focus(); $("#frName").select(); };
+    const rename = () => { const name = cleanName($("#frName").value, ""); if (!name || name.includes("#")) return $("#frName").focus(); if (name === me.name) return $("#frEditBox").classList.add("hidden"); frSetName(name); frShow(); };
+    $("#frNameGo").onclick = rename; $("#frName").onkeydown = e => { if (e.key === "Enter") rename(); }; }
+  if ($("#frAddGo")){ const addGo = () => { const f = frParse($("#frAdd").value); if (!f) return $("#frErr").textContent = "Écris le pseudo suivi de # et de 4 chiffres, par exemple Zoro#4821.";
+      if (f.id.toLowerCase() === me.id.toLowerCase()) return $("#frErr").textContent = "C'est ton propre identifiant.";
+      if (!frList().some(x => x.id.toLowerCase() === f.id.toLowerCase())) lsSet(FR_KEY, [...frList(), {id: f.id, name: f.name, tag: f.tag}].slice(0, 50)); FR_TAB = "list"; frView(f.id); };
+    $("#frAddGo").onclick = addGo; $("#frAdd").onkeydown = e => { if (e.key === "Enter") addGo(); }; }
   document.querySelectorAll("[data-frv]").forEach(b => b.onclick = () => frView(b.dataset.frv));
   document.querySelectorAll("[data-frd]").forEach(b => b.onclick = () => { lsSet(FR_KEY, frList().filter(f => f.id !== b.dataset.frd)); frShow(); });
 }
@@ -11340,6 +11375,16 @@ if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRende
 .hud .f i{display:block;width:22px;height:6px;border-radius:6px;background:var(--line);overflow:hidden}.hud .f i u{display:block;height:100%;border-radius:6px;background:var(--accent)}
 .hud .g{color:#e6fbb4}.hud .l{color:#bff1ff}
 .hud + .mnbtn{margin-left:8px}
+.hudpop{position:fixed;z-index:9980;width:min(340px,calc(100vw - 16px));padding:16px;border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line),0 24px 60px rgba(0,0,0,.65)}
+@media (prefers-reduced-motion:no-preference){.hudpop{animation:hpin .18s ease-out both}}@keyframes hpin{from{opacity:0;transform:translateY(-8px)}}
+.hudpop .hp-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.hudpop .hp-h span{font-weight:700;font-size:15px;color:var(--muted)}
+.hudpop .hp-h b{font-family:var(--mono);font-weight:700;font-size:24px;line-height:1}.hudpop .hp-h b i{font-style:normal;font-size:15px;color:var(--muted)}.hudpop .hp-h b.l{color:#bff1ff}
+.hudpop .hp-bar{height:7px;border-radius:7px;background:var(--line);overflow:hidden;margin:9px 0 8px}.hudpop .hp-bar u{display:block;height:100%;border-radius:7px;background:var(--accent)}.hudpop .hp-bar.lv u{background:linear-gradient(90deg,#3fd8ff,#bff1ff)}
+.hudpop p{margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.45;color:var(--muted)}
+.hudpop .hp-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.hudpop .hp-g div{padding:10px 12px;border-radius:12px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line)}
+.hudpop .hp-g span{display:block;font-size:11.5px;color:var(--muted)}.hudpop .hp-g b{display:block;font-family:var(--mono);font-size:17px;margin-top:3px}.hudpop .hp-g b.g{color:#e6fbb4}
+@media (max-width:520px){.hudpop{left:8px!important;right:8px!important;width:auto}}
+.hudpop button{width:100%;margin-top:14px;padding:11px;border-radius:999px;font-size:14.5px}
 #tcg .topbar .hud{margin-left:auto;padding:0 4px;font-size:13px}#tcg .topbar .hud + .mnbtn{margin-left:0}#tcg .topbar .mnbtn{padding:0 12px 0 5px;font-size:13.5px}
 @media (max-width:640px){.hud{height:38px;font-size:11.5px;padding:0 2px;min-width:0;flex:0 1 auto;overflow:hidden}.hud span{padding:0 6px;gap:4px}.hud .f i{width:13px}
   #tcg .topbar{gap:6px}#tcg .topbar h1 .lbl,#tcg #tcQuit .lbl{display:none}#tcg .topbar h1{flex:none;min-width:26px}#tcg .topbar h1::before{margin-right:0}#tcg #tcQuit{display:none}   /* sur téléphone le logo ramène à l'accueil : le bouton ✕ laisse sa place au niveau dans la pastille */
@@ -11398,6 +11443,22 @@ function mnBtnHTML(){ const d = mnData(); return `<span class="av" aria-hidden="
 // pastille de la barre du haut (à la manière de Kyara) : boosters gratuits en réserve, éclats, niveau. Elle remplace les quatre tuiles de l'écran Cartes.
 function hudHTML(){ let n = 0, mx = 3, g = 0, lv = 0, wait = ""; try { const s = tcLoad(); n = s.free.n; mx = TC_FREE.max; g = s.gems || 0; lv = tcLvl(s.xp || 0); if (n < mx){ const ms = Math.max(0, s.free.t + TC_FREE.every - Date.now()), m = Math.ceil(ms / 6e4); wait = m >= 60 ? "1 h" : m + " min"; } } catch {}
   return {html: `<span class="f"><i aria-hidden="true"><u style="width:${mx ? n / mx * 100 : 0}%"></u></i>${n}/${mx}</span><span class="g">◆ ${g >= 10000 ? (g / 1000).toFixed(g >= 100000 ? 0 : 1).replace(".", ",") + "k" : g.toLocaleString("fr-FR")}</span><span class="l">Niv.&nbsp;${lv}</span>`, label: `${n} booster${n > 1 ? "s" : ""} gratuit${n > 1 ? "s" : ""} sur ${mx}${wait ? ", le prochain dans " + wait : ", réserve pleine"} · ${g} éclats · niveau ${lv}`}; }
+// volet qui se déroule sous la pastille (comme chez Kyara) : réserve de boosters gratuits et compte à rebours, boosters gagnés, éclats, niveau
+let HUD_T = 0;
+function hudClose(){ clearInterval(HUD_T); HUD_T = 0; document.querySelector(".hudpop")?.remove(); document.removeEventListener("click", hudOut, true); document.removeEventListener("keydown", hudKey); }
+function hudOut(e){ if (!e.target.closest || !e.target.closest(".hudpop,.hud")) hudClose(); }
+function hudKey(e){ if (e.key === "Escape") hudClose(); }
+function hudPop(btn){ if (document.querySelector(".hudpop")) return hudClose(); let s; try { s = tcLoad(); } catch { return; }
+  const fill = () => { const s = tcLoad(), n = s.free.n, mx = TC_FREE.max, full = n >= mx, ms = full ? 0 : Math.max(0, s.free.t + TC_FREE.every - Date.now()), mm = Math.floor(ms / 6e4), ss = Math.floor(ms % 6e4 / 1e3), lv = tcLvl(s.xp || 0), x0 = tcLvlNeed(lv), x1 = tcLvlNeed(lv + 1), won = Object.values(s.packs || {}).reduce((a, b) => a + b, 0);
+    return `<div class="hp-h"><span>Boosters gratuits</span><b>${n}<i>/${mx}</i></b></div><div class="hp-bar"><u style="width:${n / mx * 100}%"></u></div>
+      <p>${full ? "Réserve pleine" : "Prochain dans " + (mm ? mm + " min " : "") + String(ss).padStart(2, "0") + " s"} · 1 toutes les heures${full ? " · ouvre-en un pour relancer le compteur" : ""}</p>
+      <div class="hp-g"><div><span>Boosters gagnés</span><b>${won}</b></div><div><span>Éclats</span><b class="g">◆ ${(s.gems || 0).toLocaleString("fr-FR")}</b></div></div>
+      <div class="hp-h" style="margin-top:12px"><span>Niveau de collectionneur</span><b class="l">${lv}</b></div><div class="hp-bar lv"><u style="width:${Math.min(100, ((s.xp || 0) - x0) / Math.max(1, x1 - x0) * 100)}%"></u></div><p>${(s.xp || 0) - x0}/${x1 - x0} XP avant le niveau ${lv + 1}</p>
+      <button class="primary" data-hp="go">${n + won ? "Ouvrir mes boosters" : "Voir les boosters"}</button>`; };
+  document.body.insertAdjacentHTML("beforeend", `<div class="hudpop" role="dialog" aria-label="Boosters, éclats et niveau"></div>`); const P = document.querySelector(".hudpop"), r = btn.getBoundingClientRect();
+  P.style.top = Math.round(r.bottom + 8) + "px"; P.style.right = Math.max(8, Math.round(innerWidth - r.right - 60)) + "px";
+  const draw = () => { if (!P.isConnected) return hudClose(); P.innerHTML = fill(); P.querySelector('[data-hp="go"]').onclick = () => { hudClose(); tcShow("packs"); }; }; draw(); HUD_T = setInterval(draw, 1000);
+  setTimeout(() => { document.addEventListener("click", hudOut, true); document.addEventListener("keydown", hudKey); }, 0); }
 function mnRefresh(){ document.querySelectorAll(".mnbtn").forEach(b => { b.innerHTML = mnBtnHTML(); }); const h = hudHTML(); document.querySelectorAll(".hud").forEach(b => { if (b.dataset.h !== h.html){ b.dataset.h = h.html; b.innerHTML = h.html; } b.title = h.label; b.setAttribute("aria-label", h.label); }); }
 function mnClose(){ document.querySelector(".mnveil")?.remove(); document.removeEventListener("keydown", mnKey); mnRefresh(); }
 function mnKey(e){ if (e.key === "Escape") mnClose(); }
@@ -11430,7 +11491,7 @@ function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFi
 // le bouton : dans la barre de l'accueil et dans celle de l'écran Cartes
 try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", `<button class="hud"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
   document.querySelector("#tcQuit")?.insertAdjacentHTML("beforebegin", `<button class="hud"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
-  document.querySelectorAll(".hud").forEach(b => { b.onclick = () => tcShow("packs"); });
+  document.querySelectorAll(".hud").forEach(b => { b.setAttribute("aria-haspopup", "dialog"); b.onclick = e => { e.stopPropagation(); hudPop(b); }; });
   { const base = tcRender; tcRender = function(){ const r = base.apply(this, arguments); try { mnRefresh(); } catch {} return r; }; }
   document.querySelectorAll(".mnbtn").forEach(b => { b.onclick = mnOpen; }); mnRefresh(); setInterval(() => { if (!document.querySelector(".mnveil")) mnRefresh(); }, 4000); } catch {}
 </script>
