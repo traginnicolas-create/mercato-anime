@@ -13507,6 +13507,27 @@ body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:h
 body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .topbar h1::before{background:var(--gb);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--gb) 60%,transparent))}
 body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .rules li::marker{color:var(--gb)}body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .rules.fold > b:first-child::after{color:var(--gb)}
 </style>
+<style>
+/* survol des boutons ordinaires : l'ancien reflet vert (#182522) devient un reflet de la famille. :where() garde la même priorité que la règle d'origine. */
+:where(body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden)))) button:hover:not(:disabled){border-color:color-mix(in srgb,var(--gb) 55%,#1d1d20);background:color-mix(in srgb,var(--g1) 14%,#0b0b0c)}
+:where(body:has(#home:not(.hidden))) button:hover:not(:disabled){border-color:color-mix(in srgb,var(--hc) 55%,#1d1d20);background:color-mix(in srgb,var(--hc) 14%,#0b0b0c)}
+</style>
+<style>
+/* la page des jeux reçoit les mêmes variables que l'intérieur des jeux, avec la couleur de la famille affichée (--hc) : plus aucun fond ni filet vert-noir */
+body:has(#home:not(.hidden)){--g1:var(--hc);--gb:var(--hc);--panel:#0b0b0c;--panel2:#141416;--line:color-mix(in srgb,var(--hc) 24%,#1d1d20);--text:#f3f1f5;--muted:#a29ea8;
+  --accent:var(--hc);--accent2:color-mix(in srgb,var(--hc) 70%,#000);--accent3:color-mix(in srgb,var(--hc) 55%,#fff);--cyan:color-mix(in srgb,var(--hc) 60%,#fff);
+  --grad:linear-gradient(115deg,var(--hc),color-mix(in srgb,var(--hc) 68%,#fff));--grad-cool:linear-gradient(115deg,var(--hc),color-mix(in srgb,var(--hc) 60%,#fff));--grad-aurora:linear-gradient(115deg,color-mix(in srgb,var(--hc) 70%,#000),var(--hc),color-mix(in srgb,var(--hc) 60%,#fff))}
+body:has(#home:not(.hidden)) button.primary,body:has(#home:not(.hidden)) button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 26%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px var(--hc);text-shadow:none;filter:none}
+body:has(#home:not(.hidden)) button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 40%,#050505)}
+/* restes de vert écrits en dur dans l'ancien thème */
+:where(body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden)))) .panel,:where(body:has(#home:not(.hidden))) .panel{background:var(--panel)}
+:where(body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden)))) .mode.sel,:where(body:has(#home:not(.hidden))) .mode.sel{box-shadow:0 0 22px color-mix(in srgb,var(--gb) 16%,transparent)}
+:where(body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden)))) .pfav,:where(body:has(#home:not(.hidden))) .pfav{--ring:linear-gradient(135deg,var(--gb),color-mix(in srgb,var(--gb) 60%,#fff))}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .pfcrop .pc-view,body:has(#home:not(.hidden)) .pfcrop .pc-view{box-shadow:0 0 0 3px var(--gb),0 0 0 9px color-mix(in srgb,var(--gb) 14%,transparent)}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .tabbar .on,body:has(#home:not(.hidden)) .tabbar .on,body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .tabbar [aria-current="page"],body:has(#home:not(.hidden)) .tabbar [aria-current="page"],body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .tabbar .sel,body:has(#home:not(.hidden)) .tabbar .sel{background:color-mix(in srgb,var(--gb) 16%,transparent)}
+/* barre du haut de la page des jeux : au survol, les pastilles restent noires */
+#home .sitebar button,#home .sitebar button:hover:not(:disabled){background:#050505}
+</style>
 
 </body>
 </html>
