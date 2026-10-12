@@ -12223,6 +12223,9 @@ button.crc{cursor:pointer}
 .crauc .feed{display:grid;gap:3px;min-height:54px;margin:8px 0 12px;font-size:12.5px;color:var(--muted)}
 .crauc .crc{width:118px;margin:0 auto}
 .crit{display:flex;flex-wrap:wrap;gap:8px}
+.crrule{padding:11px 14px;border-radius:12px;background:color-mix(in srgb,#f7c64a 10%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,#f7c64a 45%,transparent);margin-bottom:12px}
+.crrule i{display:block;font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#f7c64a}.crrule b{display:block;font-size:15.5px;margin:2px 0}.crrule p{margin:0;font-size:13px;color:#d9d5df}
+.crrule.cup{background:color-mix(in srgb,#ff5a6a 10%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,#ff5a6a 45%,transparent)}.crrule.cup i{color:#ff8f9a}
 .crit button{padding:8px 12px;border-radius:999px;font-size:13px}.crit button.sel{box-shadow:inset 0 0 0 2px var(--accent)}
 .crtop{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;gap:9px;height:42px;padding:0 14px 0 6px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dc,var(--accent)) 55%,var(--line));transition:transform .15s,box-shadow .2s}
 .crtop svg{flex:none;width:30px;height:30px;padding:5px;box-sizing:border-box;border-radius:50%;background:linear-gradient(140deg,#3fe0a8,#c9f26b);color:#06110d}
@@ -12250,7 +12253,7 @@ const CR_DIV = [["Fer", "鉄", "#9aa3ad"], ["Bronze", "銅", "#c98a4b"], ["Argen
 const CR_BAND = [[0, .30], [.16, .48], [.36, .68], [.56, .86], [.74, 1]];
 // économie : réglée par simulation (tools/sim-carriere.js), voir CLAUDE.md
 // Les sommes suivent l'échelle du vrai marché des transferts du football (demande de l'utilisateur) : un personnage moyen vaut 1 à 20M, un crack plusieurs centaines de millions, jamais un milliard.
-const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .35, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, star: .7, clubLo: .24, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
+const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .35, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, star: .7, clubLo: .24, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
 // noms des clubs IA : des groupes qui existent dans chaque univers (leur effectif, lui, est tiré selon la division)
 const CR_NAMES = {
   op: ["Pirates du Clown", "Baroque Works", "Équipage d'Arlong", "Marine de Loguetown", "Pirates de Krieg", "Pirates du Chat Noir", "CP9", "Thriller Bark", "Pirates de Foxy", "Brigade de Wapol", "Pirates de Bellamy", "Garnison d'Impel Down", "Armée de Dressrosa", "Pirates du Soleil", "Germa 66", "Pirates aux Cent Bêtes", "Marine de G-5", "Tontattas de Green Bit"],
@@ -12288,7 +12291,7 @@ function crNewSeason(S){
     /* tout premier match de la carrière (celui du didacticiel) : un adversaire à la portée de l'effectif de départ */
     S.clubs[ord[0]].team = [0, 2, 4, 6, 8].map(k => crPool(S.u).ix[k]); }
   ord.splice(Math.min(ord.length, 4 + Math.floor(Math.random() * 3)), 0, 6);
-  Object.assign(S, {order: ord, day: 0, pts: 0, sw: 0, sl: 0, young: 0, beatRival: false});
+  Object.assign(S, {order: ord, day: 0, pts: 0, sw: 0, sl: 0, young: 0, beatRival: false, cup: {r: 0, alive: true, pend: false, opp: null}});
   const pool = ["top", "cash", "young", "rival"], o = crShuffle(pool).slice(0, 2);
   S.obj = o.map(k => ({k, done: false}));
   crNewDay(S);
@@ -12298,6 +12301,7 @@ function crNewDay(S){
   const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), star = lo + (hi - lo) * crStar(S.u), own = S.squad;
   S.oppOrd = S.div === 0 && S.season === 1 && S.day < 2 ? CR_AIORD[0] : CR_AIORD[Math.floor(Math.random() * CR_AIORD.length)];
   S.spy = false;
+  S.rule = null; if (S.tuto >= 5 && S.stat.played >= 3 && Math.random() < .3){ const k = crShuffle(Object.keys(CR_RULES))[0]; S.rule = {k}; if (k === "cap"){ const b = crByP(S, crAvail(S), true).slice(0, 5); S.rule.x = crSum(S.u, b) - 6 - Math.floor(Math.random() * 8); } }
   // la boutique et la vedette proposent en priorité des personnages qui renforceraient vraiment l'équipe (meilleurs que le 5e de l'effectif)
   const D = DATA[S.u], fifth = [...own].sort((a, b) => D[b].p - D[a].p)[4], useful = i => fifth == null || D[i].p > D[fifth].p;
   const sh = crShuffle(P.ix.filter(i => !own.includes(i) && P.q[i] >= Math.max(0, lo - .04) && P.q[i] <= star));
@@ -12319,14 +12323,65 @@ function crNews(S, k, x = {}){ const d = CR_DIV[S.div][0]; S.news = ({
   beat: `${S.club} fait tomber ${S.rival} ! Toute la division en parle.`,
   lost: `${S.rival} l'emporte encore. La revanche attendra.`,
   title: `${S.club} est champion d'Élite ! Tu es au sommet : il ne reste plus qu'à réunir la meilleure équipe possible et à défendre ton titre.`,
-  out: `${x.n} est indisponible pour ${x.k} matchs.`, sponsor: `Un sponsor verse ${x.m} à ${S.club}.`}[k]) || S.news; }
+  out: `${x.n} est indisponible pour ${x.k} matchs.`, sponsor: `Un sponsor verse ${x.m} à ${S.club}.`, cup: `La coupe t'attend : ${x.r} contre ${x.n}. Une défaite et c'est l'élimination.`, cupwin: `${S.club} remporte la coupe ! Un personnage de choix t'attend en récompense.`, cupout: `${S.club} est éliminé de la coupe. Rendez-vous la saison prochaine.`}[k]) || S.news; }
 function crStart(u, club){
   const P = crPool(u), S = {u, club: cleanName(club, "Mon club"), rival: CR_RIVALS[u], div: 0, season: 1, money: CR_ECO.start, prestige: 0, squad: [], out: {}, items: {spy: 1, boost: 0}, mis: [], streak: 0, tuto: 0, ev: null,
-    stat: {played: 0, wins: 0, titles: 0, top: 0, ups: 0}, news: "", eco: 2};
+    stat: {played: 0, wins: 0, titles: 0, top: 0, ups: 0, cups: 0, best: 0, sale: 0, buy: 0, ex: 0, exN: ""}, reach: {}, news: "", eco: 2};
   // effectif de départ : six personnages parmi les plus faibles de l'univers
   S.squad = [1, 3, 5, 7, 9, 11].map(k => P.ix[k]);   /* un sur deux parmi les douze plus faibles : les six autres forment le tout premier adversaire, un cran en dessous */
   crNewSeason(S); crMissions(S); crNews(S, "start"); return S;
 }
+/* ---------- affinités : des liens qui existent vraiment dans l'œuvre. Trois alignés du même groupe : +1 à leur note ; quatre : +2 ; cinq : +3 ---------- */
+const CR_LINK = {
+  op: [["Équipage du Chapeau de paille", ["Monkey D. Luffy", "Roronoa Zoro", "Nami", "Usopp", "Sanji", "Tony Tony Chopper", "Nico Robin", "Franky", "Brook", "Jinbe"]],
+    ["Équipage de Barbe Blanche", ["Edward Newgate", "Marco", "Jozu", "Portgas D. Ace"]], ["Équipage du Roux", ["Shanks", "Benn Beckman", "Lucky Roux", "Yasopp"]],
+    ["Équipage de Roger", ["Gol D. Roger", "Silvers Rayleigh", "Kozuki Oden", "Shanks", "Buggy"]], ["Pirates aux Cent Bêtes", ["Kaido", "King", "Queen", "Jack"]],
+    ["Marine", ["Sakazuki (Akainu)", "Borsalino (Kizaru)", "Issho (Fujitora)", "Aramaki (Ryokugyu)", "Sengoku", "Monkey D. Garp", "Smoker", "Tashigi", "Koby", "Helmeppo", "Jango"]],
+    ["Famille Donquixote", ["Donquixote Doflamingo", "Vergo", "Baby 5", "Donquixote Rosinante (Corazon)"]], ["Équipage de Big Mom", ["Charlotte Linlin", "Charlotte Katakuri", "Charlotte Cracker", "Charlotte Pudding"]],
+    ["CP9", ["Rob Lucci", "Kaku", "Kalifa", "Spandam"]], ["Baroque Works", ["Crocodile", "Galdino (Mr. 3)", "Bentham (Mr. 2 Bon Clay)", "Nico Robin"]],
+    ["Pire génération", ["Monkey D. Luffy", "Roronoa Zoro", "Trafalgar D. Water Law", "Eustass Kid", "Killer", "X Drake", "Jewelry Bonney"]], ["Armée révolutionnaire", ["Monkey D. Dragon", "Sabo", "Emporio Ivankov", "Bartholomew Kuma"]],
+    ["Pays de Wano", ["Kozuki Oden", "Kin'emon", "Otama", "Shimotsuki Ryuma", "Yamato"]], ["Hommes-poissons", ["Jinbe", "Arlong", "Hody Jones", "Hatchan"]],
+    ["Royaume d'Alabasta", ["Nefertari Vivi", "Karoo", "Pell", "Kung Fu Dugong"]], ["Gouvernement mondial", ["Imu", "Jaygarcia Saturn", "Figarland Garling", "Figarland Shamrock"]]],
+  db: [["Famille de Goku", ["Son Goku", "Son Gohan", "Chi-Chi", "Pan", "Videl", "Bardock", "Raditz"]], ["Guerriers Z", ["Son Goku", "Vegeta", "Son Gohan", "Piccolo", "Krilin", "Yamcha", "Ten Shin Han", "Chaozu", "Trunks"]],
+    ["Saiyans", ["Son Goku", "Vegeta", "Broly", "Bardock", "Raditz", "Nappa", "Son Gohan", "Trunks", "Pan"]], ["Armée de Freezer", ["Freezer", "Zarbon", "Dodoria", "Ginyu", "Guldo"]],
+    ["Cyborgs du Dr Gero", ["C-13", "C-14", "C-15", "C-16", "C-17", "C-18", "C-19", "Dr Gero (C-20)", "Cell"]], ["Anges et dieux", ["Zeno", "Grand Prêtre", "Whis", "Beerus", "Vermoud", "Marcarita", "Kibito Kai", "Maître Kaio", "Dende"]],
+    ["Univers 11", ["Jiren", "Toppo", "Dyspo", "Vermoud", "Marcarita"]], ["Premiers compagnons", ["Bulma", "Oolong", "Plume", "Yamcha", "Tortue Géniale", "Lunch", "Krilin"]],
+    ["Nameks", ["Piccolo", "Nail", "Dende"]], ["Serviteurs de Babidi", ["Babidi", "Majin Buu", "Spopovich"]], ["École de la Grue", ["Ten Shin Han", "Chaozu", "Tao Pai Pai"]]],
+  na: [["Équipe 7", ["Naruto Uzumaki", "Sasuke Uchiha", "Sakura Haruno", "Kakashi Hatake", "Sai", "Yamato"]], ["Ino-Shika-Chô", ["Ino Yamanaka", "Shikamaru Nara", "Chôji Akimichi", "Inoichi Yamanaka", "Shikaku Nara", "Chôza Akimichi"]],
+    ["Équipe Gaï", ["Gaï Maito", "Rock Lee", "Neji Hyûga", "Tenten"]], ["Équipe 8", ["Kurenai Yûhi", "Hinata Hyûga", "Kiba Inuzuka", "Shino Aburame", "Akamaru"]],
+    ["Akatsuki", ["Nagato (Pain)", "Konan", "Itachi Uchiha", "Kisame Hoshigaki", "Deidara", "Sasori", "Kakuzu", "Hidan", "Obito Uchiha", "Zetsu Noir"]], ["Sannin légendaires", ["Jiraiya", "Tsunade", "Orochimaru"]],
+    ["Hokage", ["Hashirama Senju", "Tobirama Senju", "Hiruzen Sarutobi", "Minato Namikaze", "Tsunade", "Kakashi Hatake"]], ["Clan Uchiha", ["Sasuke Uchiha", "Itachi Uchiha", "Madara Uchiha", "Obito Uchiha", "Shisui Uchiha", "Fugaku Uchiha"]],
+    ["Clan Hyûga", ["Neji Hyûga", "Hinata Hyûga", "Hiashi Hyûga", "Hizashi Hyûga", "Hanabi Hyûga"]], ["Village de Suna", ["Gaara", "Temari", "Kankurô", "Rasa (4e Kazekage)", "Yashamaru", "Baki", "Chiyo"]],
+    ["Quintet du Son", ["Sakon & Ukon", "Kidômaru", "Tayuya", "Jirôbô", "Kimimaro"]], ["Équipe Taka", ["Sasuke Uchiha", "Suigetsu Hôzuki", "Karin", "Jûgo"]],
+    ["Cinq Kage", ["Gaara", "A (4e Raikage)", "Ônoki (3e Tsuchikage)", "Mei Terumî (5e Mizukage)", "Tsunade"]], ["Mont Myôboku", ["Gamabunta", "Gamakichi", "Gamatatsu", "Jiraiya"]],
+    ["Village de Kumo", ["Killer B", "A (4e Raikage)", "Darui", "Karui", "Omoi"]], ["Trio du Son", ["Dosu Kinuta", "Zaku Abumi", "Kin Tsuchi"]]]};
+function crAff(u, l){ let best = null; for (const [name, m] of CR_LINK[u] || []){ const ids = l.filter(i => m.includes(DATA[u][i].n)); if (ids.length >= 3 && (!best || ids.length > best.ids.length)) best = {name, ids, b: ids.length - 2}; } return best; }
+const crLinksOf = (u, i) => (CR_LINK[u] || []).filter(g => g[1].includes(DATA[u][i].n)).map(g => g[0]);
+/* ---------- matchs à règle spéciale : environ un sur trois, annoncée avant la composition ; la prime de match y est majorée de moitié ---------- */
+const CR_RULES = {three: ["Duel à trois", "Chaque équipe n'aligne que 3 combattants."], random: ["Ordre tiré au sort", "L'ordre de passage des deux équipes est tiré au sort au coup d'envoi."],
+  nostar: ["Vedette suspendue", "Ton meilleur combattant disponible ne peut pas jouer ce match."], bench: ["Place aux remplaçants", "Tu dois aligner au moins deux de tes trois combattants les plus faibles."],
+  cap: ["Plafond de niveau", "Le niveau cumulé de ton équipe ne doit pas dépasser la limite."]};
+const crByP = (S, l, desc) => [...l].sort((a, b) => (crCard(S.u, a).p - crCard(S.u, b).p) * (desc ? -1 : 1));
+// la règle du jour, seulement si elle reste jouable avec les combattants disponibles
+function crRule(S){ const r = S.rule; if (!r) return null; const av = crByP(S, crAvail(S)); if ((r.k === "nostar" || r.k === "bench") && av.length < 6) return null; if (r.k === "cap" && (av.length < 5 || crSum(S.u, av.slice(0, 5)) > r.x)) return null; return r; }
+const crN = S => { const r = crRule(S); return r && r.k === "three" ? 3 : 5; };
+function crRuleOk(S, pick){ const r = crRule(S), n = crN(S), u = S.u, av = crByP(S, crAvail(S)); if (pick.length !== n) return `Aligne ${n} combattants (${pick.length}/${n})`; if (!r) return "";
+  if (r.k === "nostar" && pick.includes(av[av.length - 1])) return `${crCard(u, av[av.length - 1]).n} est suspendu pour ce match`;
+  if (r.k === "bench" && pick.filter(i => av.slice(0, 3).includes(i)).length < 2) return "Il faut au moins deux de tes trois plus faibles";
+  if (r.k === "cap" && crSum(u, pick) > r.x) return `Niveau cumulé ${crSum(u, pick)} : la limite est ${r.x}`; return ""; }
+// meilleure équipe permise par la règle, du plus faible au plus fort (bouton « Remplir » et robot de simulation)
+function crAutoLineup(S){ const r = crRule(S), n = crN(S), u = S.u; let av = crByP(S, crAvail(S), true); if (r && r.k === "nostar") av = av.slice(1); let pick = av.slice(0, n);
+  if (r && r.k === "bench"){ const weak = crByP(S, crAvail(S)).slice(0, 3), two = crByP(S, weak, true).slice(0, 2); pick = [...av.filter(i => !two.includes(i)).slice(0, n - 2), ...two]; }
+  if (r && r.k === "cap"){ let rest = av.slice(n); while (crSum(u, pick) > r.x && rest.length){ pick = crByP(S, pick, true); pick.shift(); pick.push(rest.shift()); } if (crSum(u, pick) > r.x) pick = crByP(S, crAvail(S)).slice(0, n); }
+  return crByP(S, pick); }
+/* ---------- coupe : trois tours à élimination directe pendant la saison (après les matchs 2, 4 et 6), contre des clubs de plus en plus forts ---------- */
+const CR_CUP = {names: ["Quart de finale", "Demi-finale", "Finale"], pay: [2, 3, 6], after: [2, 4, 6]};
+function crCupClub(S){ const r = S.cup.r, used = S.clubs.map(c => c.name), name = crShuffle(CR_NAMES[S.u].filter(n => !used.includes(n) && n !== S.rival))[0] || "Sélection de la coupe";
+  return r === 2 ? (S.div < 4 ? crMkClub({...S, div: S.div + 1}, name, .4) : crMkClub(S, name, 1)) : crMkClub(S, name, r === 0 ? .5 : .88); }
+function crCupPick(S){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u); return crShuffle(P.ix.filter(i => !S.squad.includes(i) && P.q[i] > hi - .05 && P.q[i] <= Math.min(1, hi + CR_ECO.cupUp))).slice(0, 3); }
+const crOpp = S => S.cup && S.cup.pend && S.cup.opp ? S.cup.opp : S.clubs[S.order[S.day]];
+// carrières commencées avant l'arrivée de la coupe, des règles spéciales et du palmarès : champs manquants ajoutés
+function crFix(S){ if (!S) return S; S.cup = S.cup || {r: 0, alive: S.day < 2, pend: false, opp: null}; S.stat = Object.assign({played: 0, wins: 0, titles: 0, top: 0, ups: 0, cups: 0, best: 0, sale: 0, buy: 0, ex: 0, exN: ""}, S.stat || {}); S.reach = S.reach || {}; return S; }
 const crAvail = S => S.squad.filter(i => !(S.out[i] > 0));
 const crWeakest = S => S.squad.reduce((a, i) => crCard(S.u, i).p < crCard(S.u, a).p ? i : a, S.squad[0]);
 const crSum = (u, l) => l.reduce((a, i) => a + crCard(u, i).p, 0);
@@ -12342,31 +12397,44 @@ function crMis(S, k, n = 1, set){ const got = []; for (const m of S.mis){ if (m.
       if (rw.m) S.money += crR5(rw.m * crWinPay(S)); if (rw.spy) S.items.spy += rw.spy; if (rw.boost) S.items.boost += rw.boost; if (rw.pr) S.prestige += rw.pr; got.push({t: T.t, rw: crRwTxt(S, rw)}); } } return got; }
 
 /* ---------- le match ---------- */
-function crFight(S, mine, boost, opp, oppOrd){
-  const g = {u: S.u, mode: "live", id: "cr" + Math.random().toString(36).slice(2, 9), round: 0, cur: null, log: [], over: true, phase: {k: "over"}, opts: {anim: true}, event: null, drawer: 0,
-    players: [{name: S.club, budget: 0, team: mine.map(i => [i, 0, i === boost ? -4 : 0])}, {name: opp.name, budget: 0, team: opp.team.map(i => [i, 0, 0])}], orders: [mine.map((_, k) => k), oppOrd]};
+function crFight(S, mine, boost, opp, oppOrd, rule){
+  const three = rule && rule.k === "three", ot = three ? opp.team.slice(-3) : opp.team; let oo = three ? oppOrd.filter(k => k >= 2).map(k => k - 2) : [...oppOrd];
+  if (rule && rule.k === "random"){ mine = crShuffle(mine); oo = crShuffle(oo); }
+  const af = [crAff(S.u, mine), crAff(S.u, ot)], bonus = (a, i) => a && a.ids.includes(i) ? a.b : 0;
+  const g = {u: S.u, mode: "live", id: "cr" + Math.random().toString(36).slice(2, 9), round: 0, cur: null, log: [], over: true, phase: {k: "over"}, opts: {anim: true}, event: null, drawer: 0, aff: af, ot,
+    players: [{name: S.club, budget: 0, team: mine.map(i => [i, 0, -(bonus(af[0], i) + (i === boost ? 4 : 0))])}, {name: opp.name, budget: 0, team: ot.map(i => [i, 0, -bonus(af[1], i)])}], orders: [mine.map((_, k) => k), oo]};
   const keep = G; G = g; let f; try { f = simulateFight(); } finally { G = keep; } g.fight = f; return g;
 }
-// joue la journée : résultat, argent, points, missions, puis journée suivante (ou fin de saison)
+// joue le match du moment (championnat ou coupe) : résultat, argent, points, missions, puis la suite (coupe, journée suivante ou fin de saison)
 function crPlay(S, mine, boost){
-  const opp = S.clubs[S.order[S.day]], g = crFight(S, mine, boost, opp, S.oppOrd), w = g.fight.winner, won = w === 0, draw = w < 0, pay = crWinPay(S);
-  const res = {g, won, draw, opp: opp.name, rival: opp.rival, gains: [], mis: [], cap: false};
-  const gain = draw ? crR5(pay * .6) : won ? pay : crR5(pay * CR_ECO.loss); S.money += gain; res.gains.push([won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match", "+" + crMoney(S, gain)]);
-  S.stat.played++; if (won){ S.pts += 3; S.sw++; S.stat.wins++; S.streak++; S.prestige += 2 + S.div; res.gains.push(["Prestige", "+" + (2 + S.div)]); } else { S.streak = 0; if (draw){ S.pts++; opp.pts++; } else { opp.pts += 3; S.sl++; } }
-  // les autres clubs jouent leur journée
-  S.clubs.forEach(c => { if (c === opp) return; const r = Math.random(), p = .18 + .62 * c.s; c.pts += r < p ? 3 : r < p + .15 ? 1 : 0; });
+  const cup = !!(S.cup && S.cup.pend && S.cup.opp), opp = crOpp(S), rule = crRule(S), g = crFight(S, mine, boost, opp, S.oppOrd, rule), u = S.u, sumO = crSum(u, g.ot), sumM = crSum(u, mine);
+  let w = g.fight.winner; if (cup && w < 0) w = sumM <= sumO ? 0 : 1;   /* coupe : pas de match nul, l'équipe au plus petit niveau cumulé passe */
+  const won = w === 0, draw = w < 0, base = crWinPay(S), pay = crR5(base * (rule ? 1.5 : 1) * (cup ? CR_CUP.pay[S.cup.r] : 1));
+  const res = {g, won, draw, opp: opp.name, rival: !cup && opp.rival, gains: [], mis: [], cap: false, cup: cup ? CR_CUP.names[S.cup.r] : "", rule: rule ? CR_RULES[rule.k][0] : ""};
+  const gain = draw ? crR5(pay * .6) : won ? pay : crR5(base * CR_ECO.loss); S.money += gain; res.gains.push([(won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match") + (cup ? " · coupe" : "") + (rule && won ? " · règle spéciale" : ""), "+" + crMoney(S, gain)]);
+  S.stat.played++;
+  if (won){ S.stat.wins++; S.streak++; S.stat.best = Math.max(S.stat.best || 0, S.streak); S.prestige += 2 + S.div; res.gains.push(["Prestige", "+" + (2 + S.div)]); if (sumO - sumM > (S.stat.ex || 0)){ S.stat.ex = sumO - sumM; S.stat.exN = opp.name; } } else S.streak = 0;
+  if (!cup){ if (won){ S.pts += 3; S.sw++; } else if (draw){ S.pts++; opp.pts++; } else { opp.pts += 3; S.sl++; }
+    S.clubs.forEach(c => { if (c === opp) return; const r = Math.random(), p = .18 + .62 * c.s; c.pts += r < p ? 3 : r < p + .15 ? 1 : 0; }); }
   res.mis.push(...crMis(S, "play3"));
   if (won){ res.mis.push(...crMis(S, "win2"), ...crMis(S, "streak2", 0, S.streak));
-    if (crSum(S.u, opp.team) > crSum(S.u, mine)) res.mis.push(...crMis(S, "under"));
-    if (mine.includes(crWeakest(S))){ S.young++; res.mis.push(...crMis(S, "young")); }
+    if (sumO > sumM) res.mis.push(...crMis(S, "under"));
+    if (mine.includes(crWeakest(S))){ if (!cup) S.young++; res.mis.push(...crMis(S, "young")); }
     if (g.fight.survivors.length >= 3) res.mis.push(...crMis(S, "clean"));
-    if (opp.rival){ S.beatRival = true; const b = crR5(pay * 1.5); S.money += b; res.gains.push(["Prime : rival battu", "+" + crMoney(S, b)]); res.mis.push(...crMis(S, "rival")); crNews(S, "beat"); } }
-  else { crMis(S, "streak2", 0, 0); if (opp.rival) crNews(S, "lost"); }
+    if (!cup && opp.rival){ S.beatRival = true; const b = crR5(base * 1.5); S.money += b; res.gains.push(["Prime : rival battu", "+" + crMoney(S, b)]); res.mis.push(...crMis(S, "rival")); crNews(S, "beat"); } }
+  else { crMis(S, "streak2", 0, 0); if (!cup && opp.rival) crNews(S, "lost"); }
   if (boost != null) S.items.boost = Math.max(0, S.items.boost - 1);
   for (const k of Object.keys(S.out)){ if (--S.out[k] <= 0) delete S.out[k]; }
-  S.day++; S.ev = null;
+  S.ev = null;
+  if (cup){ S.cup.pend = false; S.cup.opp = null;
+    if (won){ S.cup.r++; if (S.cup.r >= 3){ S.cup.alive = false; S.cup.won = true; S.stat.cups = (S.stat.cups || 0) + 1; S.prestige += 8; res.gains.push(["Coupe remportée : prestige", "+8"]); const pk = crCupPick(S); if (pk.length) S.pick = pk; else { const b = crR5(base * 8); S.money += b; res.gains.push(["Dotation de la coupe", "+" + crMoney(S, b)]); } res.cupWon = true; crNews(S, "cupwin"); } }
+    else { S.cup.alive = false; crNews(S, "cupout"); }
+    crMissions(S); crNewDay(S); return res; }
+  S.day++;
   if (S.day >= CR_DAYS) res.season = crSeasonEnd(S);
-  else { crMissions(S); crNewDay(S); crEvent(S); const nx = S.clubs[S.order[S.day]]; if (nx.rival && !opp.rival) crNews(S, "rival"); }
+  else { crMissions(S);
+    if (S.cup && S.cup.alive && S.day === CR_CUP.after[S.cup.r]){ S.cup.pend = true; S.cup.opp = crCupClub(S); crNewDay(S); crNews(S, "cup", {r: CR_CUP.names[S.cup.r].toLowerCase(), n: S.cup.opp.name}); }
+    else { crNewDay(S); crEvent(S); const nx = S.clubs[S.order[S.day]]; if (nx.rival && !opp.rival) crNews(S, "rival"); } }
   return res;
 }
 // événement entre deux matchs : indisponibilité, offre de rachat, sponsor
@@ -12387,12 +12455,16 @@ function crSeasonEnd(S){
   else if (rank <= 2 && S.div < 4){ out.move = "up"; S.div++; S.prestige += 10; S.stat.ups++; S.stat.top = Math.max(S.stat.top, S.div); crNews(S, "up"); }
   else if (rank >= 7 && S.div > 0){ out.move = "down"; S.div--; S.prestige = Math.max(0, S.prestige - 5); crNews(S, "down"); }
   else { out.move = "stay"; crNews(S, "stay"); }
+  /* jalons : un booster de cartes à la première accession à chaque division, et au premier titre (une seule fois par carrière) */
+  S.reach = S.reach || {}; const key = out.move === "title" ? "t" : out.move === "up" ? "d" + S.div : "";
+  if (key && !S.reach[key]){ S.reach[key] = 1; const t = key === "t" ? 3 : S.div >= 3 ? 2 : 1; out.gift = `Booster ${TC_T[t].n} offert : ${key === "t" ? "premier titre d'Élite" : "première montée en division " + CR_DIV[S.div][0]}`; if (!S.bot) try { const s = tcLoad(); tcGive(s, tcKey("mix", t)); tcSave(s); } catch {} }
+  out.cup = S.cup && S.cup.won ? "Coupe remportée" : "";
   S.season++; S.out = {}; crNewSeason(S); crMissions(S); return out;
 }
 // achat à prix fixe, vente, enchère gagnée
 function crCanBuy(S, i, price){ return S.squad.length >= CR_MAXSQ ? "Effectif complet" : S.prestige < crGate(S.u, i) ? `Prestige ${crGate(S.u, i)} requis` : S.money < price ? "Pas assez d'argent" : ""; }
-function crBuy(S, i, price, viaBid){ if (crCanBuy(S, i, price)) return false; S.money -= price; S.squad.push(i); S.shop = S.shop.filter(x => x !== i); crMis(S, "buy"); if (viaBid) crMis(S, "bid"); return true; }
-function crSell(S, i){ if (S.squad.length <= 5 || !S.squad.includes(i)) return 0; const v = crR5(crVal(S.u, i) * CR_ECO.sell); S.squad = S.squad.filter(x => x !== i); delete S.out[i]; S.money += v; return v; }
+function crBuy(S, i, price, viaBid){ if (crCanBuy(S, i, price)) return false; S.money -= price; S.squad.push(i); S.shop = S.shop.filter(x => x !== i); if (S.stat) S.stat.buy = Math.max(S.stat.buy || 0, price); crMis(S, "buy"); if (viaBid) crMis(S, "bid"); return true; }
+function crSell(S, i){ if (S.squad.length <= 5 || !S.squad.includes(i)) return 0; const v = crR5(crVal(S.u, i) * CR_ECO.sell); S.squad = S.squad.filter(x => x !== i); delete S.out[i]; S.money += v; if (S.stat) S.stat.sale = Math.max(S.stat.sale || 0, v); return v; }
 // ce qu'il faut miser pour battre les clubs IA sur la vedette du jour (sert au robot de simulation et à l'achat immédiat)
 const crLotInc = p => Math.max(1, crR5(p * .06));
 
@@ -12403,8 +12475,8 @@ function crCount(S, res){ const r = crLoad(); if (!r.cap || r.cap.d !== tcDay())
   return true; }
 
 /* ---------- affichage ---------- */
-const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}</div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up ? 4 : 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? TIER[c.t]}</div>${o.foot || ""}</${tag}>`; };
-function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; CR.view = "hub"; show("cr"); crRender(); }
+const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}</div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? TIER[c.t]}</div>${o.foot || ""}</${tag}>`; };
+function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); }
 const CR_TUTO = [
   ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Fer, Bronze, Argent, Or, Élite) et deviens champion d'Élite.", "Compris"],
   ["Ton effectif", "Voici tes combattants. Le chiffre est leur note : plus elle est haute, plus ils sont forts. Ils ne progressent pas : pour avancer, il faudra en recruter de meilleurs.", "Suivant", "squad"],
@@ -12416,8 +12488,8 @@ function crRender(){
   let body = "";
   if (CR.view === "compose") body = crComposeHTML(S);
   else if (CR.view === "result") body = crResultHTML(S);
-  else { const tabs = [["match", "Match"], ["squad", "Effectif", S.squad.length + "/" + CR_MAXSQ], ["shop", "Mercato"], ["table", "Classement"], ["mis", "Missions", S.mis.filter(m => !m.done).length || ""]];
-    body = `<div class="crtabs" role="tablist">${tabs.map(([k, t, n]) => `<button role="tab" class="${CR.tab === k ? "sel" : ""} ${S.tuto < 5 && CR_TUTO[S.tuto][3] === k && CR.tab !== k ? "crpulse" : ""}" data-crtab="${k}">${t}${n ? `<small>${n}</small>` : ""}</button>`).join("")}</div>${({match: crMatchHTML, squad: crSquadHTML, shop: crShopHTML, table: crTableHTML, mis: crMisHTML})[CR.tab](S)}`; }
+  else { const tabs = [["match", S.cup.pend ? "Coupe" : "Match"], ["squad", "Effectif", S.squad.length + "/" + CR_MAXSQ], ["shop", "Mercato"], ["table", "Classement"], ["mis", "Missions", S.mis.filter(m => !m.done).length || ""], ["club", "Palmarès"]];
+    body = `<div class="crtabs" role="tablist">${tabs.map(([k, t, n]) => `<button role="tab" class="${CR.tab === k ? "sel" : ""} ${S.tuto < 5 && CR_TUTO[S.tuto][3] === k && CR.tab !== k ? "crpulse" : ""}" data-crtab="${k}">${t}${n ? `<small>${n}</small>` : ""}</button>`).join("")}</div>${({match: crMatchHTML, squad: crSquadHTML, shop: crShopHTML, table: crTableHTML, mis: crMisHTML, club: crClubHTML})[CR.tab](S)}`; }
   const tu = S.tuto < 5 && (CR.view === "compose" ? S.tuto === 3 : CR.view === "hub" && S.tuto !== 3) ? CR_TUTO[S.tuto] : null;
   el.style.setProperty("--dc", dv[2]);
   el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>
@@ -12430,26 +12502,31 @@ function crRender(){
   $("#crTuNext") && ($("#crTuNext").onclick = () => { const next = CR_TUTO[S.tuto + 1]; S.tuto++; if (S.tuto >= 5){ crSave(); return crRender(); } if (CR_TUTO[S.tuto][3]) CR.tab = CR_TUTO[S.tuto][3]; crSave(); crRender(); window.scrollTo(0, 0); });
   crWire(S);
 }
-function crMatchHTML(S){ const opp = S.clubs[S.order[S.day]], u = S.u, mine = [...crAvail(S)].sort((a, b) => crCard(u, b).p - crCard(u, a).p).slice(0, 5), ev = S.ev;
-  const show = S.spy ? S.oppOrd.map(k => opp.team[k]) : opp.team;
-  return `${ev && ev.k === "offer" && S.squad.includes(ev.i) ? `<div class="crbox"><div class="crrow"><div><h3>Offre de rachat</h3><p>${esc(ev.club)} propose ${crMoney(S, ev.price)} pour ${esc(crCard(u, ev.i).n)} (valeur ${crMoney(S, crVal(u, ev.i))}).</p></div><span class="row"><button class="primary" id="crEvYes">Accepter</button><button class="ghost" id="crEvNo">Refuser</button></span></div></div>` : ""}
-    <div class="crbox"><div class="crvs"><div><b>${esc(S.club)}</b><small>Tes 5 meilleurs : ${crSum(u, mine)}</small></div><em>VS</em><div><b>${esc(opp.name)}</b><small>${opp.rival ? "Ton rival · " : ""}Niveau cumulé : ${crSum(u, opp.team)}</small></div></div>
-      <div class="crrow"><p>${S.spy ? "Ton espion a trouvé leur ordre de passage." : "Leurs cinq combattants. Tu ne connais pas leur ordre de passage."}</p></div>
-      <div class="crgrid">${show.map((i, k) => crTile(S, i, {ord: S.spy ? k + 1 : 0})).join("")}</div>
-      <div class="crrow" style="margin:14px 0 0"><div class="crit">${S.items.spy && !S.spy ? `<button id="crSpy">Envoyer un espion (${S.items.spy})</button>` : ""}</div><button class="primary ${S.tuto === 2 ? "crpulse" : ""}" id="crPrep" style="font-size:16px;padding:12px 22px">Préparer le match</button></div></div>`; }
-function crComposeHTML(S){ const u = S.u, opp = S.clubs[S.order[S.day]], av = crAvail(S), n = CR.pick.length;
-  const tiles = [...S.squad].sort((a, b) => crCard(u, b).p - crCard(u, a).p).map(i => { const k = CR.pick.indexOf(i), off = !av.includes(i); return crTile(S, i, {btn: !off, cls: (k >= 0 ? "sel " : "") + (off ? "off" : ""), ord: k >= 0 ? k + 1 : 0, up: CR.boost === i, attr: `data-crpick="${i}"`, sub: off ? "Indisponible" : undefined}); }).join("");
-  return `<div class="crbox"><div class="crrow"><div><h3>Ton équipe contre ${esc(opp.name)}</h3><p>${CR.useBoost ? "Touche le combattant qui recevra la Forme olympique (+4 pour ce match)." : `Touche 5 combattants dans leur ordre de passage (${n}/5). Le premier touché entre en premier.`}</p></div><button class="ghost" id="crBackHub">Retour</button></div>
+const crRuleBox = S => { const r = crRule(S); return r ? `<div class="crrule"><i>Règle spéciale · prime +50 %</i><b>${CR_RULES[r.k][0]}</b><p>${CR_RULES[r.k][1]}${r.k === "cap" ? ` Limite : <b>${r.x}</b>.` : ""}</p></div>` : ""; };
+function crMatchHTML(S){ const cup = S.cup.pend, opp = crOpp(S), u = S.u, n = crN(S), three = n === 3, mine = crByP(S, crAvail(S), true).slice(0, n), ev = S.ev, ot = three ? opp.team.slice(-3) : opp.team, rule = crRule(S);
+  const oo = three ? S.oppOrd.filter(k => k >= 2).map(k => k - 2) : S.oppOrd, show = S.spy ? oo.map(k => ot[k]) : ot, af = crAff(u, ot), pk = (S.pick || []).filter(i => !S.squad.includes(i));
+  return `${pk.length ? `<div class="crbox"><div class="crrow"><div><h3>Récompense de la coupe</h3><p>${S.squad.length >= CR_MAXSQ ? "Ton effectif est complet : vends un personnage pour pouvoir choisir." : "Choisis le personnage qui rejoint ton club, gratuitement."}</p></div></div><div class="crgrid">${pk.map(i => crTile(S, i, {sub: "Valeur " + crVal(u, i) + "M", foot: `<button class="crbuy primary" data-crpk="${i}" ${S.squad.length >= CR_MAXSQ ? "disabled" : ""}>Choisir</button>`})).join("")}</div></div>` : ""}
+    ${ev && ev.k === "offer" && S.squad.includes(ev.i) ? `<div class="crbox"><div class="crrow"><div><h3>Offre de rachat</h3><p>${esc(ev.club)} propose ${crMoney(S, ev.price)} pour ${esc(crCard(u, ev.i).n)} (valeur ${crMoney(S, crVal(u, ev.i))}).</p></div><span class="row"><button class="primary" id="crEvYes">Accepter</button><button class="ghost" id="crEvNo">Refuser</button></span></div></div>` : ""}
+    <div class="crbox ${cup ? "crcup" : ""}">${cup ? `<div class="crrule cup"><i>Coupe · ${CR_CUP.names[S.cup.r]}</i><b>Match à élimination directe</b><p>Une défaite et la coupe est finie pour cette saison. Prime de victoire ×${CR_CUP.pay[S.cup.r]}${S.cup.r === 2 ? ", et un personnage de choix pour le vainqueur" : ""}.</p></div>` : ""}${crRuleBox(S)}
+      <div class="crvs"><div><b>${esc(S.club)}</b><small>Tes ${n} meilleurs : ${crSum(u, mine)}</small></div><em>VS</em><div><b>${esc(opp.name)}</b><small>${!cup && opp.rival ? "Ton rival · " : ""}Niveau cumulé : ${crSum(u, ot)}</small></div></div>
+      <div class="crrow"><p>${rule && rule.k === "random" ? "L'ordre de passage sera tiré au sort pour les deux équipes." : S.spy ? "Ton espion a trouvé leur ordre de passage." : `Leurs ${three ? "trois" : "cinq"} combattants. Tu ne connais pas leur ordre de passage.`}${af ? ` <b style="color:var(--accent)">Affinité : ${esc(af.name)} (+${af.b}).</b>` : ""}</p></div>
+      <div class="crgrid">${show.map((i, k) => crTile(S, i, {ord: S.spy ? k + 1 : 0, up: af && af.ids.includes(i) ? af.b : 0})).join("")}</div>
+      <div class="crrow" style="margin:14px 0 0"><div class="crit">${S.items.spy && !S.spy && !(rule && rule.k === "random") ? `<button id="crSpy">Envoyer un espion (${S.items.spy})</button>` : ""}</div><button class="primary ${S.tuto === 2 ? "crpulse" : ""}" id="crPrep" style="font-size:16px;padding:12px 22px">Préparer le match</button></div></div>`; }
+function crComposeHTML(S){ const u = S.u, opp = crOpp(S), av = crAvail(S), n = CR.pick.length, need = crN(S), bad = crRuleOk(S, CR.pick), af = crAff(u, CR.pick), rule = crRule(S), best = crByP(S, av, true)[0];
+  const tiles = crByP(S, S.squad, true).map(i => { const k = CR.pick.indexOf(i), off = !av.includes(i) || (rule && rule.k === "nostar" && i === best), ln = crLinksOf(u, i)[0];
+    return crTile(S, i, {btn: !off, cls: (k >= 0 ? "sel " : "") + (off ? "off" : ""), ord: k >= 0 ? k + 1 : 0, up: (CR.boost === i ? 4 : 0) + (af && af.ids.includes(i) ? af.b : 0), attr: `data-crpick="${i}"`, sub: !av.includes(i) ? "Indisponible" : off ? "Suspendu" : ln ? esc(ln) : undefined}); }).join("");
+  return `<div class="crbox">${crRuleBox(S)}<div class="crrow"><div><h3>Ton équipe contre ${esc(opp.name)}</h3><p>${CR.useBoost ? "Touche le combattant qui recevra la Forme olympique (+4 pour ce match)." : `Touche ${need} combattants dans leur ordre de passage (${n}/${need}). Le premier touché entre en premier.`}</p></div><button class="ghost" id="crBackHub">Retour</button></div>
       <div class="crgrid">${tiles}</div>
-      <div class="crrow" style="margin:14px 0 0"><div class="crit"><button id="crAuto">Remplir : du plus faible au plus fort</button>${n ? `<button id="crClear">Vider</button>` : ""}${S.items.boost ? `<button id="crBoost" class="${CR.useBoost || CR.boost != null ? "sel" : ""}">Forme olympique (${S.items.boost})</button>` : ""}</div>
-        <button class="primary" id="crGo" style="font-size:16px;padding:12px 22px" ${n === 5 ? "" : "disabled"}>Lancer le combat</button></div></div>`; }
-function crResultHTML(S){ const r = CR.res, se = r.season; let h = `<div class="crbox" style="text-align:center"><p class="crbang" style="color:${r.won ? "var(--accent)" : r.draw ? "var(--text)" : "#ff5a6a"}">${r.won ? "Victoire !" : r.draw ? "Match nul" : "Défaite"}</p><p class="muted" style="margin:0">${r.won ? fightSummaryCr(r) : "Contre " + esc(r.opp) + "."}</p>
+      <p class="small" style="margin:12px 0 0">${af ? `<b style="color:var(--accent)">Affinité : ${esc(af.name)}, +${af.b} à la note de ${af.ids.length} combattants.</b>` : "Affinité : aligne au moins trois combattants d'un même groupe (indiqué sous leur nom) pour un bonus de note."}${n === need && bad ? ` <b style="color:#ff8f9a">${esc(bad)}.</b>` : ""}</p>
+      <div class="crrow" style="margin:12px 0 0"><div class="crit"><button id="crAuto">Remplir : meilleure équipe permise</button>${n ? `<button id="crClear">Vider</button>` : ""}${S.items.boost ? `<button id="crBoost" class="${CR.useBoost || CR.boost != null ? "sel" : ""}">Forme olympique (${S.items.boost})</button>` : ""}</div>
+        <button class="primary" id="crGo" style="font-size:16px;padding:12px 22px" ${bad ? "disabled" : ""}>Lancer le combat</button></div></div>`; }
+function crResultHTML(S){ const r = CR.res, se = r.season, af = r.g.aff && r.g.aff[0]; let h = `<div class="crbox" style="text-align:center">${r.cup ? `<p class="small" style="margin:0 0 6px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)">Coupe · ${r.cup}</p>` : ""}<p class="crbang" style="color:${r.won ? "var(--accent)" : r.draw ? "var(--text)" : "#ff5a6a"}">${r.cupWon ? "Coupe remportée !" : r.won ? (r.cup ? "Qualifié !" : "Victoire !") : r.draw ? "Match nul" : r.cup ? "Éliminé" : "Défaite"}</p><p class="muted" style="margin:0">${r.won ? fightSummaryCr(r) : "Contre " + esc(r.opp) + "."}${af ? ` Affinité ${esc(af.name)} : +${af.b}.` : ""}</p>
       <div class="crgain">${r.gains.map(g => `<div><span>${g[0]}</span><b>${g[1]}</b></div>`).join("")}${r.mis.map(m => `<div><span>Mission remplie : ${m.t}</span><b>${m.rw}</b></div>`).join("")}</div>
       <p class="small">${r.cap ? `Ce match compte pour tes cartes (éclats, boosters, missions) : ${CR_CAP - crCapLeft()}/${CR_CAP} aujourd'hui.` : `Plafond du jour atteint (${CR_CAP} matchs) : la carrière continue, mais ce match ne rapporte plus d'éclats ni de boosters.`}</p></div>`;
   if (se){ const dn = CR_DIV[S.div][0];
     h += `<div class="crbox"><div class="crrow"><div><h3>Fin de la saison</h3><p>${se.move === "title" ? "Champion d'Élite !" : se.move === "up" ? "Montée en division " + dn + " !" : se.move === "down" ? "Descente en division " + dn + "." : `Tu restes en division ${dn}.`}</p></div></div>
       <table class="crtable">${se.table.map((t, k) => `<tr class="${t.me ? "me" : ""} ${k < 2 && se.div0 < 4 ? "up" : ""} ${k >= 6 && se.div0 > 0 ? "dn" : ""}"><td>${k + 1}</td><td>${esc(t.name)}${t.rival ? " · rival" : ""}</td><td>${t.pts}</td></tr>`).join("")}</table>
-      <div class="crgain">${se.obj.map(o => `<div><span>Objectif : ${o.t}</span><b>${o.done ? "Rempli" : "Manqué"}</b></div>`).join("")}${se.gains.map(g => `<div><span>${g[0]}</span><b>${g[1]}</b></div>`).join("")}</div></div>`; }
+      <div class="crgain">${se.obj.map(o => `<div><span>Objectif : ${o.t}</span><b>${o.done ? "Rempli" : "Manqué"}</b></div>`).join("")}${se.gains.map(g => `<div><span>${g[0]}</span><b>${g[1]}</b></div>`).join("")}${se.gift ? `<div><span>${se.gift}</span><b>Cartes</b></div>` : ""}</div></div>`; }
   return h + `<div class="row" style="justify-content:center"><button class="primary" id="crNext" style="font-size:16px;padding:12px 24px">${se ? "Commencer la saison " + S.season : "Continuer"}</button></div>`; }
 const fightSummaryCr = r => { const f = r.g.fight; return `${f.survivors.length} combattant${f.survivors.length > 1 ? "s" : ""} encore debout contre ${esc(r.opp)}${f.mvp ? " · meilleur combattant : " + esc(f.mvp.n) : ""}.`; };
 function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.</p></div></div>
@@ -12463,9 +12540,16 @@ function crShopHTML(S){ const u = S.u, L = S.lot;
   return `<div class="crbox"><div class="crrow"><div><h3>Boutique · prix fixe</h3><p>Des personnages du niveau de ta division, renouvelés après chaque match. Caisse : ${crMoney(S, S.money)}.</p></div></div>
       <div class="crgrid crshop">${S.shop.length ? S.shop.map(i => { const p = crVal(u, i), no = crCanBuy(S, i, p); return crTile(S, i, {sub: p + "M", foot: `<button class="crbuy ${no ? "ghost" : "primary"}" data-crbuy="${i}" ${no ? "disabled" : ""} title="${no}">${no && no !== "Pas assez d'argent" ? no : "Acheter"}</button>`}); }).join("") : `<p class="muted">Plus rien en boutique avant le prochain match.</p>`}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Vedette du jour · aux enchères</h3><p>Les meilleurs personnages ne se vendent pas à prix fixe : tu enchéris en direct contre les clubs de ta division. L'offre disparaît après le prochain match.</p></div></div>${lot}</div>`; }
-function crTableHTML(S){ const t = [...S.clubs.map(c => ({name: c.name, pts: c.pts, rival: c.rival})), {name: S.club, pts: S.pts, me: true}].sort((a, b) => b.pts - a.pts || (b.me ? 1 : 0) - (a.me ? 1 : 0));
+function crTableHTML(S){ const t = [...S.clubs.map(c => ({name: c.name, pts: c.pts, rival: c.rival})), {name: S.club, pts: S.pts, me: true}].sort((a, b) => b.pts - a.pts || (b.me ? 1 : 0) - (a.me ? 1 : 0)), c = S.cup;
   return `<div class="crbox"><div class="crrow"><div><h3>Division ${CR_DIV[S.div][0]} · saison ${S.season}</h3><p>${S.div < 4 ? "Les deux premiers montent" : "Le premier est champion"}${S.div > 0 ? ", les deux derniers descendent" : ""}. ${S.day}/${CR_DAYS} matchs joués.</p></div></div>
-    <table class="crtable">${t.map((x, k) => `<tr class="${x.me ? "me" : ""} ${k < (S.div < 4 ? 2 : 1) ? "up" : ""} ${k >= 6 && S.div > 0 ? "dn" : ""}"><td>${k + 1}</td><td>${esc(x.name)}${x.rival ? " · rival" : ""}</td><td>${x.pts} pts</td></tr>`).join("")}</table></div>`; }
+    <table class="crtable">${t.map((x, k) => `<tr class="${x.me ? "me" : ""} ${k < (S.div < 4 ? 2 : 1) ? "up" : ""} ${k >= 6 && S.div > 0 ? "dn" : ""}"><td>${k + 1}</td><td>${esc(x.name)}${x.rival ? " · rival" : ""}</td><td>${x.pts} pts</td></tr>`).join("")}</table></div>
+    <div class="crbox"><div class="crrow"><div><h3>Coupe</h3><p>Trois tours à élimination directe, joués après tes matchs 2, 4 et 6. La finale t'oppose à un club de la division du dessus ; le vainqueur choisit un personnage parmi trois.</p></div></div>
+      <div class="crmis">${CR_CUP.names.map((n, k) => `<div class="crmi ${c.r > k ? "ok" : ""}"><b>${n}</b><span>${c.r > k ? "Passé" : c.pend && c.r === k ? "À jouer maintenant" : c.alive && c.r === k ? `Après ton match ${CR_CUP.after[k]}` : c.alive ? "À venir" : c.won ? "" : "Éliminé"}</span></div>`).join("")}</div></div>`; }
+function crClubHTML(S){ const st = S.stat, row = (a, b) => `<div><span>${a}</span><b>${b}</b></div>`;
+  return `<div class="crbox"><div class="crrow"><div><h3>Palmarès de ${esc(S.club)}</h3><p>Ce que ton club a accompli depuis le début de la carrière.</p></div></div>
+    <div class="crgain">${row("Titres de champion d'Élite", st.titles)}${row("Coupes remportées", st.cups || 0)}${row("Montées de division", st.ups)}${row("Plus haute division atteinte", CR_DIV[Math.max(st.top, S.div)][0])}${row("Matchs joués · victoires", st.played + " · " + st.wins + (st.played ? " (" + Math.round(st.wins / st.played * 100) + " %)" : ""))}${row("Plus longue série de victoires", st.best || 0)}${row("Plus bel exploit", st.ex ? `${esc(st.exN)}, ${st.ex} de niveau cumulé en plus` : "Aucun pour l'instant")}${row("Achat le plus cher", st.buy ? crMoney(S, st.buy) : "Aucun")}${row("Vente la plus chère", st.sale ? crMoney(S, st.sale) : "Aucune")}${row("Prestige", S.prestige)}</div></div>
+    <div class="crbox"><div class="crrow"><div><h3>Jalons</h3><p>Chaque première accession à une division offre un booster de cartes à collectionner ; le premier titre d'Élite offre un booster Divin.</p></div></div>
+      <div class="crmis">${[1, 2, 3, 4].map(d => `<div class="crmi ${S.reach["d" + d] ? "ok" : ""}"><b>Monter en division ${CR_DIV[d][0]}</b><span>${S.reach["d" + d] ? "Booster reçu" : "Booster " + TC_T[d >= 3 ? 2 : 1].n}</span></div>`).join("")}<div class="crmi ${S.reach.t ? "ok" : ""}"><b>Devenir champion d'Élite</b><span>${S.reach.t ? "Booster reçu" : "Booster Divin"}</span></div></div></div>`; }
 function crMisHTML(S){ return `<div class="crbox"><div class="crrow"><div><h3>Missions</h3><p>Elles donnent de l'argent et des atouts pour passer un adversaire qui te bloque.</p></div></div>
       <div class="crmis">${S.mis.map(m => { const T = CR_MIS[m.k]; return `<div class="crmi ${m.done ? "ok" : ""}"><b>${T.t}</b><span>${m.done ? "Récompense reçue" : crRwTxt(S, T.rw)}</span><i><u style="width:${Math.min(100, m.cur / T.g * 100)}%"></u></i></div>`; }).join("")}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Objectifs de la saison</h3><p>Prime de ${crMoney(S, crObjPrime(S))} par objectif rempli, versée en fin de saison.</p></div></div>
@@ -12479,12 +12563,13 @@ function crWire(S){
   $("#crEvNo") && ($("#crEvNo").onclick = () => { S.ev = null; save(); });
   $("#crBackHub") && ($("#crBackHub").onclick = () => { CR.view = "hub"; crRender(); });
   el.querySelectorAll("button[data-crpick]").forEach(b => b.onclick = () => { const i = +b.dataset.crpick, k = CR.pick.indexOf(i);
-    if (CR.useBoost){ if (k < 0 && CR.pick.length < 5) CR.pick.push(i); if (CR.pick.includes(i)){ CR.boost = i; CR.useBoost = false; } return crRender(); }
-    if (k >= 0){ CR.pick.splice(k, 1); if (CR.boost === i) CR.boost = null; } else if (CR.pick.length < 5) CR.pick.push(i); crRender(); });
-  $("#crAuto") && ($("#crAuto").onclick = () => { CR.pick = [...crAvail(S)].sort((a, b) => crCard(u, b).p - crCard(u, a).p).slice(0, 5).reverse(); if (!CR.pick.includes(CR.boost)) CR.boost = null; crRender(); });
+    if (CR.useBoost){ if (k < 0 && CR.pick.length < crN(S)) CR.pick.push(i); if (CR.pick.includes(i)){ CR.boost = i; CR.useBoost = false; } return crRender(); }
+    if (k >= 0){ CR.pick.splice(k, 1); if (CR.boost === i) CR.boost = null; } else if (CR.pick.length < crN(S)) CR.pick.push(i); crRender(); });
+  $("#crAuto") && ($("#crAuto").onclick = () => { CR.pick = crAutoLineup(S); if (!CR.pick.includes(CR.boost)) CR.boost = null; crRender(); });
+  el.querySelectorAll("[data-crpk]").forEach(b => b.onclick = () => { const i = +b.dataset.crpk; if (S.squad.length >= CR_MAXSQ || !(S.pick || []).includes(i)) return; S.squad.push(i); S.pick = null; S.news = `${crCard(u, i).n} rejoint ${S.club} : c'est la récompense de la coupe.`; try { SFX.play("fanfare"); } catch {} save(); });
   $("#crClear") && ($("#crClear").onclick = () => { CR.pick = []; CR.boost = null; CR.useBoost = false; crRender(); });
   $("#crBoost") && ($("#crBoost").onclick = () => { if (CR.boost != null){ CR.boost = null; CR.useBoost = false; } else CR.useBoost = !CR.useBoost; crRender(); });
-  $("#crGo") && ($("#crGo").onclick = () => { if (CR.pick.length !== 5 || CR.busy) return; CR.busy = true; const res = crPlay(S, [...CR.pick], CR.boost); if (S.tuto === 3) S.tuto = 4; res.cap = crCount(S, res); crSave(); CR.res = res;
+  $("#crGo") && ($("#crGo").onclick = () => { if (crRuleOk(S, CR.pick) || CR.busy) return; CR.busy = true; const res = crPlay(S, [...CR.pick], CR.boost); if (S.tuto === 3) S.tuto = 4; res.cap = crCount(S, res); crSave(); CR.res = res;
     const keep = G; G = res.g; const end = () => { G = keep && keep !== res.g ? keep : null; CR.busy = false; CR.view = "result"; show("cr"); crRender(); try { SFX.play(res.won ? "fanfare" : "pop"); } catch {} };
     try { playFight(end); } catch { end(); } });
   $("#crNext") && ($("#crNext").onclick = () => { CR.view = "hub"; CR.res = null; CR.tab = S.tuto === 4 ? "shop" : "match"; crRender(); window.scrollTo(0, 0); });
