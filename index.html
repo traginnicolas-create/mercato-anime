@@ -9241,7 +9241,13 @@ setInterval(voxRender, 2000);
 .tcfacts div{border:1px solid var(--line);border-radius:12px;background:#0b0a0e;padding:9px 10px}
 .tcfacts b{display:block;font-family:var(--title);font-weight:900;font-size:clamp(14px,3.6vw,18px);line-height:1.1}
 .tcfacts span{font-size:11.5px;color:var(--muted);line-height:1.25;display:block;margin-top:3px}
-@media (max-width:680px){.tchero{grid-template-columns:1fr;padding:16px}.tcstage .pk3d{max-width:170px}}
+.tcsure-h{display:flex;align-items:baseline;gap:8px;margin:14px 0 8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tcsure-h i{font-style:normal;opacity:.6}.tcsure-h{white-space:nowrap}.tcsure-h span{margin-left:auto;letter-spacing:0;text-transform:none;font-family:inherit;font-size:11.5px}
+.tcsure{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+.tcsure div{border:1px solid color-mix(in srgb,var(--sc) 30%,var(--line));border-radius:12px;background:#0b0a0e;padding:9px 10px;min-width:0}
+.tcsure b{display:block;font-family:var(--title);font-weight:900;font-size:clamp(17px,4.4vw,22px);line-height:1.1;color:var(--sc);font-variant-numeric:tabular-nums}
+.tcsure span{font-size:11.5px;color:var(--muted);line-height:1.25;display:block;margin-top:3px}
+@media (max-width:680px){.tcsure{grid-template-columns:repeat(2,minmax(0,1fr))}.tchero{grid-template-columns:1fr;padding:16px}.tcstage .pk3d{max-width:170px}}
 .tcrail{display:flex;gap:10px;overflow-x:auto;padding:8px 2px 10px;margin-bottom:14px;scrollbar-width:none}
 .tcrail::-webkit-scrollbar{display:none}
 .tcrail .tcpk{flex:0 0 104px}
@@ -9908,7 +9914,8 @@ function tcCards(){
   for (const c of TC_ALL) if (c.late) c.no = ++no;
   return TC_ALL;
 }
-const tcDay = (off = 0) => { const d = new Date(Date.now() + off * 864e5); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const TC_RESET = 10;   /* heure locale à laquelle la journée de jeu recommence (missions du jour, connexion quotidienne, plafonds du jour) : 10 h, demandé le 13 oct. 2026 */
+const tcDay = (off = 0) => { const d = new Date(Date.now() - TC_RESET * 36e5 + off * 864e5); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 const tcKey = (u, t) => u + ":" + t, tcParse = k => { const [u, t] = String(k).split(":"); return {u: TC_PACKS[u] ? u : "mix", t: Math.min(3, Math.max(0, +t || 0))}; };
 const tcPrice = (u, t) => Math.round(TC_T[t].price * (u === "mix" ? 1 : 1.2) / 10) * 10;
 const tcName = k => { const {u, t} = tcParse(k); return TC_PACKS[u][0] + (t ? " " + TC_T[t].n : ""); };
@@ -9930,11 +9937,11 @@ function tcLoad(){
   for (const id in s.fin) if (s.fin[id].S){ s.fin[id].K = (s.fin[id].K || 0) + s.fin[id].S; delete s.fin[id].S; } if (bad) s.taint = true; delete s.sig;
   // boosters gratuits : un par heure, cumulables jusqu'à TC_FREE.max (3, choix de l'utilisateur le 12 oct. 2026) ; à 3, le compteur s'arrête et ne repart qu'à l'ouverture d'un booster
   if (s.free.n < TC_FREE.max){ const k = Math.floor((Date.now() - s.free.t) / TC_FREE.every); if (k > 0){ s.free.n = Math.min(TC_FREE.max, s.free.n + k); s.free.t = s.free.n >= TC_FREE.max ? Date.now() : s.free.t + k * TC_FREE.every; } }
-  if (!s.day || s.day.d !== tcDay()) s.day = {d: tcDay(), play: 0, win: 0, open: 0, neu: 0, modes: [], unis: [], claimed: [], bonus: false, vp: 0};
+  if (!s.day || s.day.d < tcDay()) s.day = {d: tcDay(), play: 0, win: 0, open: 0, neu: 0, modes: [], unis: [], claimed: [], bonus: false, vp: 0};
   // série de connexion : un jour de plus si la dernière visite date d'hier, sinon on repart à 1
   if (s.login) s.loginBest = Math.max(s.loginBest || 0, s.login.n);
   tcMonth(s);
-  if (!s.login || s.login.d !== tcDay()) s.login = {d: tcDay(), n: s.login && s.login.d === tcDay(-1) ? s.login.n + 1 : 1, got: false};
+  if (!s.login || s.login.d < tcDay()) s.login = {d: tcDay(), n: s.login && s.login.d === tcDay(-1) ? s.login.n + 1 : 1, got: false};
   return s;
 }
 const tcSave = s => { try { vtCheck(s); } catch {} delete s.sig; s.signed = 1; lsSet(TC_KEY, {...s, sig: tcSig(s)}); tcHome(s); };
@@ -9950,7 +9957,10 @@ function tcRoll(rate){ let r = Math.random() * Object.values(rate).reduce((a, b)
 // [clé, nom, kanji, une chance sur…, couleur, ce qu'il garantit]
 const TC_SECRET = [["divin", "Divin caché", "神", 500, "#c9a2ff", "Légendaire garantie, taux du booster Divin"], ["tresor", "Trésor", "宝", 200, "#7de3ff", "un objet Légendaire ou Mythique garanti"], ["eveil", "Éveil", "覚", 150, "#8fe9ff", "une transformation garantie"],
   ["rouge", "Sceau rouge", "判", 100, "#ff5a36", "une version rare garantie (AR, Wanted ou Red Blood)"], ["dore", "Doré", "金", 40, "#f7c64a", "Épique garantie, taux du booster Or"]];
-const tcSecretRoll = () => { for (const sx of TC_SECRET) if (Math.random() < 1 / sx[3]) return sx[0]; return ""; };
+const TC_DPITY = 60;   /* booster Doré garanti au 60e Classique ouvert sans Doré (13 oct. 2026) ; le compteur s.pity.D ne redescend qu'avec un Doré */
+const tcSecretRoll = s => { let r = ""; for (const sx of TC_SECRET) if (Math.random() < 1 / sx[3]){ r = sx[0]; break; }
+  if (s){ s.pity = s.pity || {M: 0, L: 0}; if (!r && (s.pity.D || 0) + 1 >= TC_DPITY) r = "dore"; s.pity.D = r === "dore" ? 0 : (s.pity.D || 0) + 1; }
+  return r; };
 // Versions rares : avant, la version était tirée pour chaque carte puis annulée si la carte n'y avait pas droit, ce qui rendait une UR précise quasi impossible (1 booster Or sur 150 000).
 // Désormais un tirage par booster : en % de chance (booster Classique, multiplié par TC_FINMUL selon le niveau) que la 4e carte soit une version rare, dont la carte est choisie parmi celles qui existent dans cette version.
 const TC_VHIT = {A: 4.8, W: 1.9, K: 1.6, G: .41, Z: .2}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
@@ -10235,6 +10245,9 @@ function tcRender(){
     if (!inv.includes(TC_PICK)) TC_PICK = inv[0] || null;
     const k = TC_PICK, real = k === "free" ? "mix:0" : k, left = s.free.n < TC_FREE.max ? Math.max(0, s.free.t + TC_FREE.every - Date.now()) : 0, od = tcWinOdds(s.streak + 1, false);
     const wait = left ? `${Math.floor(left / 36e5)} h ${String(Math.floor(left % 36e5 / 6e4)).padStart(2, "0")}` : "";
+    const tcSure = (s, t) => { const P = s.pity || {}, left = (max, n) => Math.max(1, max - (n || 0));
+      return [...(t === 0 ? [["#f7c64a", left(TC_DPITY, P.D), "avant le booster Doré"]] : []), ["#f7c64a", left(TC_PITY.L, P.L), "avant Légendaire sûre"], ["#ff5a36", left(TC_PITY.M, P.M), "avant Mythique sûre"],
+        ["#ff3b4e", left(TC_VPITY, P.V), "avant Red Blood ou mieux"], ["#c9a2ff", left(TC_UPITY, P.U), "avant UR ou Légende"]].map(x => `<div style="--sc:${x[0]}"><b>${x[1]}</b><span>${x[2]}</span></div>`).join(""); };
     const oddsHTML = t => `<div class="tcodds">${["R", "E", "L", "M"].map(r => { const pr = tcOdds(r, t); return `<div class="r-${r}"><span>${TC_R[r][0]}${r === "M" ? "" : " ou mieux"}</span><i><u style="width:${Math.max(2, pr)}%"></u></i><b>${pr >= 10 ? pr.toFixed(0) : pr.toFixed(1)} %</b></div>`; }).join("")}</div>`;
     html += `<div class="tcsub"><button class="${TC_SUB === "mine" ? "sel" : ""}" data-tcsub="mine">Gratuits et gagnés<small>${tcStock(s)}</small></button><button class="${TC_SUB === "shop" ? "sel" : ""}" data-tcsub="shop">Boutique<small>${s.gems} ◆</small></button></div>`;
     if (TC_SUB === "mine"){
@@ -10245,7 +10258,8 @@ function tcRender(){
             ${oddsHTML(p.t)}
             <div class="row"><button class="primary" id="tcOpen">Ouvrir ce booster</button>${[3, 5, 10].map(q => `<button data-tcopen="${q}" ${(k === "free" ? s.free.n : s.packs[k] || 0) >= q ? "" : "disabled"}>×${q}</button>`).join("")}</div>
             <div class="row" style="margin-top:8px"><button data-tcdrop="${real}">Voir les ${n} persos et les taux</button></div>
-            ${p.t === 0 ? `<p class="small" style="margin-top:10px">Environ 1 Classique sur 22 cache un <b>booster secret</b> : Doré, Sceau rouge, Éveil, Trésor ou Divin caché.</p>` : ""}<p class="small" style="margin-top:10px">Légendaire ou mieux garantie dans ${TC_PITY.L - s.pity.L} booster${TC_PITY.L - s.pity.L > 1 ? "s" : ""} au plus, Mythique dans ${TC_PITY.M - s.pity.M}.</p></div></div>`; })()
+            <div class="tcsure-h">Garanties <i>· 保証</i><span>boosters restants</span></div><div class="tcsure">${tcSure(s, p.t)}</div>
+            ${p.t === 0 ? `<p class="small" style="margin-top:10px">Environ 1 Classique sur 22 cache un <b>booster secret</b> : Doré, Sceau rouge, Éveil, Trésor ou Divin caché.</p>` : ""}</div></div>`; })()
         : `<p class="note-off">Aucun booster en stock. Gagne des parties pour des éclats, termine une mission, ou attends le prochain gratuit${wait ? ` (dans ${wait})` : ""}.</p>`;
       html += inv.length > 1 ? `<h2 class="tch">Mes boosters</h2><div class="tcrail">${inv.map(x => { const r = x === "free" ? "mix:0" : x, p = tcParse(r); return `<button class="tcpk ${x === k ? "sel" : ""}" data-tcp="${x}" style="--pc:${TC_PACKS[p.u][2]}"><span class="cnt">${x === "free" ? s.free.n : s.packs[x]}</span>${tcPouch3D(r, "sm")}<span class="lb">${x === "free" ? "Gratuit" : tcName(r)}</span></button>`; }).join("")}</div>` : "";
       html += `<div class="tcluck"><b>Gratuits : ${s.free.n}/${TC_FREE.max}${wait ? ` · le prochain dans ${wait}` : ""}</b><span>Un booster gratuit par heure, jusqu'à ${TC_FREE.max} en réserve : au-delà le compteur s'arrête, ouvre-en un pour qu'il reparte. Série de victoires en ligne : <b>${s.streak}</b>. Prochaine victoire : <b>+${TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * s.streak)} ◆</b> et <b>${Math.round(tcDropChance(s.streak + 1) * 100)} %</b> de chance de booster (${od.map((p, t) => `<em class="q${t}">${TC_T[t].n} ${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</em>`).join(" · ")}). Un <b>record battu</b> donne +${TC_GAIN.record} ◆ et un booster garanti. Boosters gagnés en victoire aujourd'hui : ${s.day.vp}/${TC_WINCAP}.</span></div>`;
@@ -10276,7 +10290,7 @@ function tcRender(){
     const row = (m, cl, attr) => { const ok = m.cur >= m.g; return `<div class="tcm tcm2 ${ok ? "done" : ""} ${cl ? "claimed" : ""} ${ok || cl ? "" : "go"}" ${ok || cl ? "" : `data-tcgo="${m.k}" role="button" tabindex="0"`}>${rwt(m.rw)}<div><b>${esc(m.t)}</b><i><u style="width:${m.cur / m.g * 100}%"></u></i><small><span>${m.cur}/${m.g}</span><span>${ok || cl ? tcRw(m.rw) : "y aller →"}</span></small></div><button class="${ok && !cl ? "primary" : ""}" ${attr}="${m.k}" ${ok && !cl ? "" : "disabled"}>${cl ? "✔ Réclamée" : ok ? "Réclamer" : "En cours"}</button></div>`; };
     const left = l => l.filter(m => m.cur >= m.g).length, dn = (l, c) => l.filter(m => c.includes(m.k)).length;
     const now = new Date(), inT = d => { const h = Math.max(0, (d - now) / 36e5); return h >= 48 ? "encore " + Math.ceil(h / 24) + " jours" : h >= 1 ? "encore " + Math.floor(h) + " h" : "encore " + Math.ceil(h * 60) + " min"; };
-    const tDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tWk = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((8 - now.getDay()) % 7 || 7)), tMo = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const gd = new Date(now.getTime() - TC_RESET * 36e5), tDay = new Date(gd.getFullYear(), gd.getMonth(), gd.getDate() + 1, TC_RESET), tWk = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((8 - now.getDay()) % 7 || 7)), tMo = new Date(gd.getFullYear(), gd.getMonth() + 1, 1, TC_RESET);
     const sec = (t, kj, n, when) => `<div class="tcsec"><h3>${t}<i>${kj}</i></h3><em>${n}</em><span>${when}</span></div>`;
     html += `<div class="tcmhead"><div><span>À réclamer</span><b>${claim}</b></div><div><span>Série de connexion</span><b>Jour ${s.login.n}</b></div><div><span>Faites aujourd'hui</span><b>${left(mis)}/${mis.length}</b></div><button class="primary" id="tcClaimAll" ${claim ? "" : "disabled"}>Tout réclamer</button></div>
       <div class="tclog"><div class="tclog-h"><b>Connexion quotidienne <i>連続</i></b><span>Jour ${((s.login.n - 1) % 7) + 1}/7 · nouveau cadeau ${inT(tDay).replace("encore", "dans")}</span></div>
@@ -10313,7 +10327,7 @@ function tcRender(){
   // ouvrir un booster, ou plusieurs du même type d'un coup (même mise en scène, toutes les cartes à la suite)
   const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
-    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll() : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
+    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll(s) : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
     const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
