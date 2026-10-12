@@ -42,7 +42,7 @@ h1{font-size:clamp(26px,5.4vw,44px);line-height:1.02;color:var(--text);text-tran
 h2{font-size:clamp(18px,3.2vw,23px);font-weight:700;line-height:1.2;color:var(--text)}
 .muted{color:var(--muted)}
 button{font:inherit;cursor:pointer;border-radius:12px;padding:12px 18px;font-weight:700;background:var(--panel2);color:var(--text);border:1px solid var(--line);transition:transform .08s,background .15s,border-color .15s,box-shadow .2s}
-button:hover:not(:disabled){border-color:#2f463f;background:#182522}
+button:hover:not(:disabled){border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent) 10%,var(--panel))}
 button:active:not(:disabled){transform:translateY(1px)}
 button:focus-visible,a:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 button:disabled{opacity:.38;cursor:not-allowed}
@@ -13088,11 +13088,11 @@ button.primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY
 /* fond : trois halos de couleurs différentes au lieu d'un seul halo jade */
 body{background-image:radial-gradient(ellipse 60% 38% at 18% -8%,rgba(63,224,168,.16),transparent 70%),radial-gradient(ellipse 55% 36% at 92% 4%,rgba(143,123,255,.15),transparent 70%),radial-gradient(ellipse 70% 30% at 60% 108%,rgba(63,216,255,.09),transparent 70%);background-repeat:no-repeat;background-attachment:fixed}
 /* boutons principaux et éléments actifs : dégradé du logo */
-button.primary{background:var(--grad);box-shadow:0 0 30px rgba(63,224,168,.26),0 0 60px rgba(201,242,107,.1)}
-button.primary:hover:not(:disabled){background:linear-gradient(115deg,#62ecbb,#d8f78c);box-shadow:0 0 40px rgba(63,224,168,.4)}
+button.primary{background:var(--grad);box-shadow:0 0 30px color-mix(in srgb,var(--accent) 26%,transparent)}
+button.primary:hover:not(:disabled){background:var(--grad);box-shadow:0 0 40px color-mix(in srgb,var(--accent) 40%,transparent)}
 .tctabs button.sel{background:var(--grad);border-color:transparent;color:#03140e}
 .tabbar .on,.tabbar [aria-current="page"],.tabbar .sel{background:linear-gradient(180deg,rgba(63,224,168,.2),rgba(143,123,255,.12))}
-.mode.sel{border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad-aurora) border-box;box-shadow:0 0 22px rgba(63,224,168,.14)}
+.mode.sel{border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad-aurora) border-box;box-shadow:0 0 22px color-mix(in srgb,var(--accent) 14%,transparent)}
 .opt:has(input:checked){border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad) border-box;box-shadow:none}
 /* nom du site et grands titres : dégradé aurore */
 .logo span{background:var(--grad-aurora);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -13103,7 +13103,7 @@ button.primary:hover:not(:disabled){background:linear-gradient(115deg,#62ecbb,#d
 .bar i,.tcbars u,.tcstats .xp u,.tcm i u,.btbar i,.vt .pg u{background:var(--grad-cool)}
 .tcm.done i u{background:linear-gradient(115deg,#a6e35a,#c9f26b)}
 /* panneaux : un filet lumineux en haut, de couleur différente selon la place */
-.panel{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 86%,#16302a),var(--panel) 120px)}
+.panel{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 90%,var(--accent)),var(--panel) 120px)}
 .tcstats div{position:relative;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--sc,var(--accent)) 12%,var(--panel)),var(--panel) 70%)}
 .tcstats div::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--sc,var(--accent))}
 .tcstats div:nth-child(1){--sc:#3fe0a8}.tcstats div:nth-child(2){--sc:#3fd8ff}.tcstats div:nth-child(3){--sc:#c9f26b}.tcstats div:nth-child(4){--sc:#8f7bff}
@@ -13559,6 +13559,11 @@ body:has(#home:not(.hidden)) .mnsheet .mncard::after{box-shadow:inset 0 0 0 1.5p
 /* le bouton « C'est parti » garde son fond plein et sa lueur, sans contour (la règle générale des boutons de la page des jeux le lui remettait) */
 body .welcome button.primary,body .welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 56%,#050505)!important;box-shadow:0 0 26px color-mix(in srgb,var(--hc) 50%,transparent),0 0 60px color-mix(in srgb,var(--hc) 24%,transparent)!important;outline:0!important}
 body .welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 68%,#050505)!important}
+</style>
+<style>
+/* porte d'entrée (création de compte / pseudo) : noir + rouge de Duel, plus de halo vert */
+.cpgate{background:radial-gradient(ellipse 60% 40% at 18% 0,color-mix(in srgb,var(--hc) 20%,transparent),transparent 70%),#050505}
+.cpgate h1{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hc);text-shadow:0 0 14px color-mix(in srgb,var(--hc) 50%,transparent)}
 </style>
 
 </body>
