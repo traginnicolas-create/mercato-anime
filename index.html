@@ -8688,10 +8688,16 @@ const PROF_FIELDS = ["#qjName", "#myName", "#ucMe", "#gsMe", "#pmMe", "#ntMe", "
 const profGet = () => lsGet(PROF_KEY, null);
 // une partie terminée entre dans l'historique une seule fois (id unique)
 // o.win = noms des gagnants ([] = égalité) ; o.coop = partie en équipe (pas de gagnant) ; o.neutral = joueurs hors compétition (le juge)
+// partie « en ligne » : jouée contre d'autres joueurs, chacun sur son appareil. Les parties solo (gss-, fxs-, tps-), celles où l'on se passe le téléphone
+// (gsl-, jg-) et un Mercato local ne le sont pas. Seules les parties en ligne comptent pour le ratio victoires/défaites et pour la série de victoires.
+const HIST_LOCAL = /^(gsl|jg|gss|fxs|tps)-/;
+function histIsOnline(id, players, o = {}){ try { if (o.coop || (players || []).length < 2 || HIST_LOCAL.test(String(id))) return false; if (String(id).startsWith("me-")) return !!(typeof NET !== "undefined" && NET.role); return true; } catch { return false; } }
+// à la lecture : le marqueur enregistré, sinon (anciennes parties) une estimation d'après l'identifiant
+const histOnline = x => x.o != null ? !!x.o : !x.c && (x.players || []).length >= 2 && !HIST_LOCAL.test(String(x.id));
 function histAdd(id, mode, players, result, o = {}){
   const h = lsGet(HIST_KEY, []);
   if (h.some(x => x.id === id)) return;
-  h.unshift({id, d: Date.now(), mode, players: players.slice(0, 8), result, ...(o.coop ? {c: 1} : Array.isArray(o.win) ? {w: o.win.slice(0, 8)} : {}), ...(o.neutral ? {x: o.neutral} : {})});
+  h.unshift({id, d: Date.now(), mode, players: players.slice(0, 8), result, o: histIsOnline(id, players, o) ? 1 : 0, ...(o.coop ? {c: 1} : Array.isArray(o.win) ? {w: o.win.slice(0, 8)} : {}), ...(o.neutral ? {x: o.neutral} : {})});
   lsSet(HIST_KEY, h.slice(0, 80));
 }
 function profApply(prevName){
@@ -8740,7 +8746,7 @@ function histStats(me){
     const k = x.mode.split(" · ")[0], s = S[k] = S[k] || {n: 0, w: 0, l: 0, d: 0, coop: false, other: 0};
     s.n++;
     if (x.c){ s.coop = true; return; }
-    if (!x.w || !x.players.includes(me) || (x.x || []).includes(me)){ s.other++; return; }
+    if (!x.w || !x.players.includes(me) || (x.x || []).includes(me) || !histOnline(x)){ s.other++; return; }   // hors ligne : la partie est comptée, pas son résultat
     if (!x.w.length) s.d++; else if (x.w.includes(me)) s.w++; else s.l++;
   });
   return S;
@@ -9964,17 +9970,19 @@ function tcOnGame(mode, players, o){
   // gagné : partie coopérative réussie, ou gagnant désigné (toi si ton pseudo est dans la partie, sinon quelqu'un sur ce téléphone)
   const won = o.coop ? !!o.ok : Array.isArray(o.win) && o.win.length > 0 && (me && players.includes(me) ? o.win.includes(me) : true);
   const record = Date.now() - TC_REC < 20000; TC_REC = 0;
-  if (won){ d.win++; s.week.win++; s.month.win++; s.stat.w++; s.stat.mw = s.stat.mw || {}; s.stat.mw[base] = (s.stat.mw[base] || 0) + 1; s.streak++; s.best = Math.max(s.best || 0, s.streak); d.vg = d.vg || 0;
+  if (won){ d.win++; s.week.win++; s.month.win++; s.stat.w++; s.stat.mw = s.stat.mw || {}; s.stat.mw[base] = (s.stat.mw[base] || 0) + 1; if (o.online){ s.streak++; s.best = Math.max(s.best || 0, s.streak); } d.vg = d.vg || 0;
     // une victoire rapporte des éclats (crédits) ; parfois elle lâche en plus un booster, dont le niveau est tiré au sort
-    const g = d.vg < TC_GAIN.cap ? TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * (s.streak - 1)) + (record ? TC_GAIN.record : 0) : 0; if (g){ d.vg++; s.gems += g; }
-    const drop = d.vp < TC_WINCAP && (record || Math.random() < tcDropChance(s.streak)); let t = -1;
-    if (drop){ d.vp++; const od = tcWinOdds(s.streak, record); let r = Math.random() * 100; t = 0; for (let k = 0; k < 4; k++){ r -= od[k]; if (r <= 0){ t = k; break; } } tcGive(s, tcKey(u, t)); }
-    const txt = (record ? "Nouveau record" : "Victoire") + (s.streak > 1 ? " (série de " + s.streak + ")" : "") + " : " + [g && "+" + g + " ◆", drop && "booster " + tcName(tcKey(u, t)) + " !"].filter(Boolean).join(" et ");
+    // la série de victoires ne vit qu'en ligne : une victoire en solo ou sur un seul téléphone rapporte la récompense de base (et le record), sans bonus de série
+    const sk = o.online ? s.streak : 1;
+    const g = d.vg < TC_GAIN.cap ? TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * (sk - 1)) + (record ? TC_GAIN.record : 0) : 0; if (g){ d.vg++; s.gems += g; }
+    const drop = d.vp < TC_WINCAP && (record || Math.random() < tcDropChance(sk)); let t = -1;
+    if (drop){ d.vp++; const od = tcWinOdds(sk, record); let r = Math.random() * 100; t = 0; for (let k = 0; k < 4; k++){ r -= od[k]; if (r <= 0){ t = k; break; } } tcGive(s, tcKey(u, t)); }
+    const txt = (record ? "Nouveau record" : "Victoire") + (sk > 1 ? " (série de " + sk + ")" : "") + " : " + [g && "+" + g + " ◆", drop && "booster " + tcName(tcKey(u, t)) + " !"].filter(Boolean).join(" et ");
     if (g || drop) setTimeout(() => { tcToast(txt, Math.max(0, t)); SFX.play(t >= 2 ? "fanfare" : drop ? "win" : "pop"); }, 900); }
-  else if (!o.neutral || (Array.isArray(o.win) && !o.win.length)) s.streak = 0;
+  else if (o.online && (!o.neutral || (Array.isArray(o.win) && !o.win.length))) s.streak = 0;   // seule une défaite en ligne casse la série
   tcSave(s);
 }
-{ const base = histAdd; histAdd = function(id, mode, players, result, o = {}){ const known = lsGet(HIST_KEY, []).some(x => x.id === id); base(id, mode, players, result, o); if (!known) try { tcOnGame(String(mode), players || [], o); } catch {} }; }
+{ const base = histAdd; histAdd = function(id, mode, players, result, o = {}){ const known = lsGet(HIST_KEY, []).some(x => x.id === id); base(id, mode, players, result, o); if (!known) try { tcOnGame(String(mode), players || [], {...o, online: histIsOnline(id, players || [], o)}); } catch {} }; }
 
 // ---- missions du jour : trois par jour, les mêmes pour tout le monde ce jour-là ----
 const TC_DAYN = 5;   // missions tirées chaque jour dans la liste
@@ -10172,7 +10180,7 @@ function tcRender(){
             ${p.t === 0 ? `<p class="small" style="margin-top:10px">Environ 1 Classique sur 22 cache un <b>booster secret</b> : Doré, Sceau rouge, Éveil, Trésor ou Divin caché.</p>` : ""}<p class="small" style="margin-top:10px">Légendaire ou mieux garantie dans ${TC_PITY.L - s.pity.L} booster${TC_PITY.L - s.pity.L > 1 ? "s" : ""} au plus, Mythique dans ${TC_PITY.M - s.pity.M}.</p></div></div>`; })()
         : `<p class="note-off">Aucun booster en stock. Gagne des parties pour des éclats, termine une mission, ou attends le prochain gratuit${wait ? ` (dans ${wait})` : ""}.</p>`;
       html += inv.length > 1 ? `<h2 class="tch">Mes boosters</h2><div class="tcrail">${inv.map(x => { const r = x === "free" ? "mix:0" : x, p = tcParse(r); return `<button class="tcpk ${x === k ? "sel" : ""}" data-tcp="${x}" style="--pc:${TC_PACKS[p.u][2]}"><span class="cnt">${x === "free" ? s.free.n : s.packs[x]}</span>${tcPouch3D(r, "sm")}<span class="lb">${x === "free" ? "Gratuit" : tcName(r)}</span></button>`; }).join("")}</div>` : "";
-      html += `<div class="tcluck"><b>Gratuits : ${s.free.n}/${TC_FREE.max}${wait ? ` · le prochain dans ${wait}` : ""}</b><span>Un booster gratuit par heure, qui ne se cumule pas : ouvre-le pour que le suivant arrive. Série de victoires : <b>${s.streak}</b>. Prochaine victoire : <b>+${TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * s.streak)} ◆</b> et <b>${Math.round(tcDropChance(s.streak + 1) * 100)} %</b> de chance de booster (${od.map((p, t) => `<em class="q${t}">${TC_T[t].n} ${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</em>`).join(" · ")}). Un <b>record battu</b> donne +${TC_GAIN.record} ◆ et un booster garanti. Boosters gagnés en victoire aujourd'hui : ${s.day.vp}/${TC_WINCAP}.</span></div>`;
+      html += `<div class="tcluck"><b>Gratuits : ${s.free.n}/${TC_FREE.max}${wait ? ` · le prochain dans ${wait}` : ""}</b><span>Un booster gratuit par heure, qui ne se cumule pas : ouvre-le pour que le suivant arrive. Série de victoires en ligne : <b>${s.streak}</b>. Prochaine victoire : <b>+${TC_GAIN.win + Math.min(TC_GAIN.streakMax, TC_GAIN.streak * s.streak)} ◆</b> et <b>${Math.round(tcDropChance(s.streak + 1) * 100)} %</b> de chance de booster (${od.map((p, t) => `<em class="q${t}">${TC_T[t].n} ${p >= 10 ? p.toFixed(0) : p.toFixed(1)} %</em>`).join(" · ")}). Un <b>record battu</b> donne +${TC_GAIN.record} ◆ et un booster garanti. Boosters gagnés en victoire aujourd'hui : ${s.day.vp}/${TC_WINCAP}.</span></div>`;
     } else {
       html += `<div class="tcchips">${Object.keys(TC_PACKS).map(u => `<button class="${TC_SHOP.u === u ? "sel" : ""}" data-tcsu="${u}">${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</button>`).join("")}</div>
         <div class="tcshop">${TC_T.map((T, t) => { const pr = tcPrice(TC_SHOP.u, t), key = tcKey(TC_SHOP.u, t), f = x => x >= 10 ? x.toFixed(0) : x.toFixed(1); return `<div class="tcsh q${t}" style="--pc:${TC_PACKS[TC_SHOP.u][2]}"><div class="pw">${tcPouch3D(key, "sm")}</div><b>${T.n}</b>
@@ -10217,7 +10225,7 @@ function tcRender(){
       <p class="tcsecp">Plus longues, mieux payées. Elles repartent de zéro chaque lundi. Les parties en solo comptent, comme pour les quotidiennes.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}</div>
       ${sec("Mensuelles", "月間", dn(mos, mo.claimed) + "/" + mos.length, inT(tMo))}
       <p class="tcsecp">Les plus dures, pour les plus belles récompenses : boosters Divin et Or, gros lots d'éclats. Elles repartent de zéro le 1er du mois.</p><div class="tcms">${mos.map(m => row(m, mo.claimed.includes(m.k), "data-tcmo")).join("")}</div>
-      <details class="tchelp"><summary>Comment gagner des boosters</summary><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. Une défaite remet la série à zéro.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster garanti.</li><li><b>Boosters gratuits</b> : un par heure, il ne se cumule pas.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
+      <details class="tchelp"><summary>Comment gagner des boosters</summary><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. La série ne compte que les parties en ligne contre d'autres joueurs : une défaite en ligne la remet à zéro, le solo n'y touche pas.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster garanti.</li><li><b>Boosters gratuits</b> : un par heure, il ne se cumule pas.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
   }
   $("#tcBoard").innerHTML = html;
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
@@ -10953,7 +10961,7 @@ function frCard(){
   const me = frMe(), s = tcLoad(), all = tcCards(), h = lsGet(HIST_KEY, []), S = histStats(me.name), us = Object.keys(UNI);
   const tot = Object.values(S).reduce((a, x) => ({w: a.w + x.w, l: a.l + x.l, d: a.d + x.d}), {w: 0, l: 0, d: 0});
   // plus longue série de victoires dans l'historique (du plus ancien au plus récent), complétée par la série tenue par les cartes
-  let run = 0, best = s.best || 0; [...h].reverse().forEach(x => { if (x.c || !x.w || !x.players.includes(me.name)) return; if (x.w.includes(me.name)){ run++; best = Math.max(best, run); } else run = 0; });
+  let run = 0, best = s.best || 0; [...h].reverse().forEach(x => { if (x.c || !x.w || !x.players.includes(me.name) || !histOnline(x)) return; if (x.w.includes(me.name)){ run++; best = Math.max(best, run); } else run = 0; });
   const rec = []; [["Perso pixelisé", "mercato-devine-", " pts"], ["Silhouettes", "mercato-sil-", " pts"], ["Plus fort ? (série)", "mercato-vs-", ""], ["Tier list", "mercato-tier-", ""], ["Le Menteur", "mercato-liar-", " pts"]].forEach(([n, k, suf]) => us.forEach(u => { const v = lsGet(k + u, null); if (typeof v === "number") rec.push([n + " · " + UNI[u].name, v + suf]); }));
   const top = all.filter(c => s.own[c.id]).sort((a, b) => s.own[b.id] - s.own[a.id])[0];
   return {id: me.id, since: profGet().since, lv: tcLvl(s.xp), g: h.length, w: tot.w, l: tot.l, d: tot.d, best,
