@@ -9513,6 +9513,31 @@ setInterval(voxRender, 2000);
 .tcm2 i{grid-column:auto;margin:7px 0 5px;height:7px;border-radius:4px}
 .tcm2 > div small{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11px;margin:0;font-variant-numeric:tabular-nums}
 .tcm2.claimed{opacity:.55}
+/* missions compactes (12 oct. 2026) : la connexion quotidienne en haut, dans un seul bloc (barre de progression, sept jours sur une ligne, bouton) ;
+   les missions en tuiles côte à côte (2 par ligne sur téléphone, 3 puis 4 sur grand écran) pour ne plus avoir une mission par ligne */
+.tclog{display:grid;gap:9px;padding:13px;margin:0 0 6px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 40%,var(--line))}
+.tclog-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}.tclog-h b{font-family:var(--title);font-weight:900;font-size:16px}.tclog-h b i{font-style:normal;font-family:var(--brand);color:var(--accent);font-size:.8em;margin-left:6px}
+.tclog-h span{font-family:var(--mono);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.tclog-bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}.tclog-bar u{display:block;height:100%;border-radius:6px;background:var(--grad,var(--accent))}
+.tclog-w{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.tclog-w div{--kc:var(--accent);display:grid;justify-items:center;gap:2px;padding:6px 1px 7px;border-radius:10px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line);min-width:0}
+.tclog-w .pk{--kc:#dfe5ee}.tclog-w .pk.t2{--kc:#f2c230}.tclog-w .pk.t3{--kc:#c9a2ff}
+.tclog-w small{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.tclog-w i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;font-style:normal;font-family:var(--brand);font-weight:900;font-size:12px;color:var(--kc);background:color-mix(in srgb,var(--kc) 14%,transparent)}
+.tclog-w .pk i{color:#0e0d12;background:var(--kc)}
+.tclog-w b{font-family:var(--mono);font-weight:700;font-size:9.5px;line-height:1.1;color:var(--kc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tclog-w .now{box-shadow:inset 0 0 0 1.5px var(--accent),0 0 12px color-mix(in srgb,var(--accent) 30%,transparent)}.tclog-w .ok{opacity:.5}.tclog-w .ok i{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.tclog > button{padding:10px 12px;font-size:14px}.tclog > p{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
+.tcsec{margin:18px 0 8px}.tcsecp{display:none}
+.tcms{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:700px){.tcms{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1000px){.tcms{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tcm.tcm2{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto 1fr auto;gap:7px 9px;padding:9px;align-items:start;min-width:0}
+.tcm.tcm2 .rwt{width:40px;height:40px;border-radius:10px;font-size:16px}.tcm.tcm2 .rwt small{font-size:8px}
+.tcm.tcm2 > div{min-width:0}.tcm.tcm2 > div > b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;line-height:1.25;font-weight:700}
+.tcm.tcm2 i{margin:6px 0 4px;height:5px}.tcm.tcm2 > div small{font-size:10px}.tcm.tcm2 > div small span + span{display:none}
+.tcm.tcm2 > button{grid-column:1 / -1;align-self:end;padding:7px 6px;font-size:12.5px;border-radius:10px;min-height:0}
+.tcm.tcm2 > button[disabled]{padding:3px 4px;font-size:11px;background:none;border-color:transparent;box-shadow:none;color:var(--muted);opacity:.8}
+.tcm.tcm2 .rwt small{font-size:6.5px;letter-spacing:0;max-width:38px;overflow:hidden}
 .tcm2.done:not(.claimed){box-shadow:0 0 0 1px var(--ok),0 0 22px color-mix(in srgb,var(--ok) 25%,transparent)}
 @media (max-width:480px){.tcm.tcm2{grid-template-columns:auto minmax(0,1fr)}.tcm2 > button{grid-column:1 / -1}.tcm2 .rwt{width:50px;height:50px;font-size:19px}}
 .tchelp{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:12px 14px}
@@ -10213,13 +10238,15 @@ function tcRender(){
     const tDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tWk = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((8 - now.getDay()) % 7 || 7)), tMo = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const sec = (t, kj, n, when) => `<div class="tcsec"><h3>${t}<i>${kj}</i></h3><em>${n}</em><span>${when}</span></div>`;
     html += `<div class="tcmhead"><div><span>À réclamer</span><b>${claim}</b></div><div><span>Série de connexion</span><b>Jour ${s.login.n}</b></div><div><span>Faites aujourd'hui</span><b>${left(mis)}/${mis.length}</b></div><button class="primary" id="tcClaimAll" ${claim ? "" : "disabled"}>Tout réclamer</button></div>
+      <div class="tclog"><div class="tclog-h"><b>Connexion quotidienne <i>連続</i></b><span>Jour ${((s.login.n - 1) % 7) + 1}/7 · nouveau cadeau ${inT(tDay).replace("encore", "dans")}</span></div>
+        <div class="tclog-bar" aria-hidden="true"><u style="width:${(((s.login.n - 1) % 7) + (s.login.got ? 1 : 0)) / 7 * 100}%"></u></div>
+        <div class="tclog-w">${nx.map((n, k) => { const r = tcLoginRw(n), tt = r.p ? tcParse(r.p).t : -1, done = n < s.login.n || (n === s.login.n && s.login.got);
+          return `<div class="${done ? "ok" : n === s.login.n ? "now" : ""} ${tt >= 0 ? "pk t" + tt : ""}" title="${tt >= 0 ? "Booster " + TC_T[tt].n + " : " + TC_T[tt].g + " garantie" : r.g + " éclats"}"><small>J${k + 1}</small><i aria-hidden="true">${done ? "✔" : tt >= 0 ? TC_T[tt].k : "◆"}</i><b>${tt >= 0 ? TC_T[tt].n : r.g + " ◆"}</b></div>`; }).join("")}</div>
+        <button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + (lr.g ? lr.g + " éclats" : "booster " + TC_T[tcParse(lr.p).t].n) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button>
+        <p>Chaque jour : la récompense du jour + ${TC_LOGIN_PACKS} boosters Classique. <b>Un jour manqué et la série repart au jour 1.</b></p></div>
       ${s.tuto.bonus ? "" : `${sec("Découverte", "入門", dn(tut, s.tuto.claimed) + "/" + tut.length, "à faire une seule fois")}
       <p class="tcsecp">Tes premiers pas sur Hanko. Termine-les toutes pour un booster Or en cadeau.</p><div class="tcms">${tut.map(m => row(m, s.tuto.claimed.includes(m.k), "data-tcd")).join("")}
         <div class="tcm tcm2 ${tutDone ? "done" : ""}">${rwt({p: "mix:2"})}<div><b>Bonus : toutes les missions Découverte</b><i><u style="width:${dn(tut, s.tuto.claimed) / tut.length * 100}%"></u></i><small><span>${dn(tut, s.tuto.claimed)}/${tut.length}</span><span>1 booster Mélange Or</span></small></div><button class="${tutDone ? "primary" : ""}" id="tcTutoBonus" ${tutDone ? "" : "disabled"}>${tutDone ? "Réclamer" : "En cours"}</button></div></div>`}
-      ${sec("Connexion", "連続", "Jour " + s.login.n, "nouveau cadeau · " + inT(tDay))}
-      <div class="tcweek wk7">${nx.map((n, k) => { const r = tcLoginRw(n), tt = r.p ? tcParse(r.p).t : -1, done = n < s.login.n || (n === s.login.n && s.login.got);
-        return `<div class="${done ? "ok" : n === s.login.n ? "now" : ""} ${k === 6 ? "big" : ""} ${tt >= 0 ? "pk t" + tt : ""}"><small>Jour ${k + 1}${done ? " ✔" : ""}</small>${tt >= 0 ? `<i aria-hidden="true">${TC_T[tt].k}</i><b>Booster ${TC_T[tt].n}</b><u>${TC_T[tt].g} garantie</u>` : `<i aria-hidden="true">◆</i><b>${r.g} éclats</b>`}</div>`; }).join("")}</div>
-      <div class="row"><button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + tcRw(lr) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button></div><p class="small" style="margin-top:8px">Chaque jour, en plus de la récompense affichée : ${TC_LOGIN_PACKS} boosters Classique. Le 7e jour, un booster Divin avec une Légendaire garantie, puis la semaine recommence. <b>Un seul jour manqué et la série repart au jour 1.</b></p>
       ${sec("Quotidiennes", "任務", dn(mis, s.day.claimed) + "/" + mis.length, inT(tDay))}
       <div class="tcms">${mis.map(m => row(m, s.day.claimed.includes(m.k), "data-tcm")).join("")}
         <div class="tcm tcm2 ${all3 ? "done" : ""} ${s.day.bonus ? "claimed" : ""}">${rwt({p: "mix:1"})}<div><b>Bonus : toutes les missions du jour</b><i><u style="width:${mis.filter(m => s.day.claimed.includes(m.k)).length / mis.length * 100}%"></u></i><small><span>${mis.filter(m => s.day.claimed.includes(m.k)).length}/${mis.length}</span><span>1 booster Mélange Argent</span></small></div><button class="${all3 && !s.day.bonus ? "primary" : ""}" id="tcBonus" ${all3 && !s.day.bonus ? "" : "disabled"}>${s.day.bonus ? "✔ Réclamé" : all3 ? "Réclamer" : "En cours"}</button></div></div>
