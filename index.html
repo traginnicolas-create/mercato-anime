@@ -13249,16 +13249,17 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   box-shadow:0 0 3px var(--fn),0 0 8px var(--f1),0 0 20px color-mix(in srgb,var(--f1) 70%,transparent),0 0 42px color-mix(in srgb,var(--f1) 38%,transparent),inset 0 0 28px color-mix(in srgb,var(--f1) 15%,transparent)}
 #home #cat2{--f1:#2b5bff;--fb:#3d6bff}#home #cat3{--f1:#ff8fb8}#home #cat4{--f1:#b14dff}
 /* fond d'en-tête, discret, qui s'efface vers la gauche pour laisser le titre tranquille */
-.cat .dam{position:absolute;inset:0 0 auto 0;height:200px;z-index:-1;pointer-events:none;border-radius:22px 22px 0 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 30%,#000 86%);mask-image:linear-gradient(90deg,transparent 30%,#000 86%)}
+.cat .dam{position:absolute;inset:0 0 auto 0;height:200px;z-index:-1;pointer-events:none;border-radius:22px 22px 0 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 30%,#000 86%),linear-gradient(180deg,#000 55%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 30%,#000 86%),linear-gradient(180deg,#000 55%,transparent 100%);mask-composite:intersect}
 .cat .dam svg{position:absolute;right:0;top:0;width:70%;height:100%}
 .cat .dam.d1{background:repeating-linear-gradient(115deg,transparent 0 26px,color-mix(in srgb,var(--f1) 26%,transparent) 26px 27px)}
-.cat .dam.v3{-webkit-mask-image:none;mask-image:none}
-.cat .dam.v3::before{content:"";position:absolute;right:-120px;top:50%;width:240px;height:240px;margin-top:-120px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--f1) 80%,transparent);box-shadow:0 0 0 44px #050505,0 0 0 45.5px color-mix(in srgb,var(--f1) 55%,transparent),0 0 0 92px #050505,0 0 0 93px color-mix(in srgb,var(--f1) 34%,transparent),0 0 0 144px #050505,0 0 0 145px color-mix(in srgb,var(--f1) 18%,transparent)}
+/* anneaux d'écho (Voix) : de simples traits, sans aplat noir derrière, pour laisser voir le fond teinté de la famille */
+.cat .dam.v3{-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%);-webkit-mask-composite:initial;mask-composite:initial}
+.cat .dam.v3 svg{width:100%}
 #home .cat .cath{margin-bottom:20px;min-height:132px;align-content:end}
 #home .cat .cath .eyebrow{color:var(--fb);text-shadow:0 0 7px color-mix(in srgb,var(--f1) 70%,transparent)}
 #home .cat .cath h2{font-family:var(--title);font-weight:900;font-size:clamp(32px,7vw,56px);line-height:.98;letter-spacing:-.01em;color:var(--fb);margin-top:6px;text-shadow:0 0 14px color-mix(in srgb,var(--f1) 60%,transparent),0 0 34px color-mix(in srgb,var(--f1) 35%,transparent)}
 #home .cat .cath small{max-width:46ch;margin-top:10px;font-size:15.5px;line-height:1.45;color:#e6e2ea}
-#home .cat .cath .nb{color:var(--fb);border:0;box-shadow:inset 0 0 0 1.5px var(--fb);background:none;font-weight:700}
+#home .cat .cath .nb{position:relative;z-index:1;color:var(--fb);border:0;box-shadow:inset 0 0 0 1.5px var(--fb);background:#050505;font-weight:700}
 /* cartes de jeux */
 #home .gcards{gap:14px}
 #home .gcards .mode{display:block;position:relative;overflow:visible;min-height:172px;padding:14px calc(36% + 22px) 14px 14px;border:0;border-radius:22px;text-align:left;color:#fff;
@@ -13300,7 +13301,7 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   const MOTIF = {cat1: `<div class="dam d1" aria-hidden="true"></div>`,
     cat2: `<div class="dam" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMaxYMid slice">${ST.slice(0, -1).map((p, k) => `<line x1="${p[0]}" y1="${p[1]}" x2="${ST[k + 1][0]}" y2="${ST[k + 1][1]}" stroke="var(--f1)" stroke-width="1" opacity=".5"/>`).join("")}${ST.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="var(--fb)"/>`).join("")}</svg></div>`,
     cat3: `<div class="dam" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="none">${wave(16, 34, 84, .7)}${wave(16, 34, 112, .35)}</svg></div>`,
-    cat4: `<div class="dam v3" aria-hidden="true"></div>`};
+    cat4: `<div class="dam v3" aria-hidden="true"><svg viewBox="0 0 400 200" preserveAspectRatio="xMaxYMid slice">${[[72, .85], [118, .55], [166, .34], [216, .18]].map(r => `<circle cx="412" cy="92" r="${r[0]}" fill="none" stroke="var(--f1)" stroke-width="1.5" opacity="${r[1]}"/>`).join("")}</svg></div>`};
   document.querySelectorAll("#home section.cat").forEach(sec => { if (MOTIF[sec.id] && !sec.querySelector(".dam")) sec.insertAdjacentHTML("afterbegin", MOTIF[sec.id]); });
   // un personnage par jeu, dans la couleur de sa famille : rouge (Duel), bleu (Connaissance), rose (Complicité). Le jeu au micro garde un micro.
   const WHO = {mercato: ["op", "Shanks"], gt: ["na", "Gaara"], uc: ["na", "Sasori"], liar: ["op", "Eustass Kid"], rl: ["op", "Sakazuki (Akainu)"], wh: ["op", "Monkey D. Luffy"], jg: ["na", "Kushina Uzumaki"], pc: ["na", "Karin"],
