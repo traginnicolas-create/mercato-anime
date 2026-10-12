@@ -11789,11 +11789,26 @@ body:has(.gcards [data-g="gt"].sel) .gth{display:block}
 .gtm .ac{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .gtm .ac button{padding:6px 10px;font-size:12.5px;border-radius:999px}
 .gtm .nt{font-size:11.5px;color:var(--muted);margin-top:6px}
-.gtpod{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.gtpod div{padding:14px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);text-align:center}
-.gtpod div i{display:block;font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.gtpod div b{display:block;font-family:var(--title);font-weight:900;font-size:20px;margin-top:4px;overflow:hidden;text-overflow:ellipsis}
-.gtpod div.p1{background:linear-gradient(160deg,color-mix(in srgb,#f7c64a 22%,var(--panel)),var(--panel));box-shadow:inset 0 0 0 1.5px #f7c64a}.gtpod div.p1 i{color:#f7c64a}
+/* podium : le vainqueur occupe deux cases, avec sa carte de visite en fond, sa photo de profil et son titre */
+.gtpod{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.gtpo{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;padding:14px 10px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);text-align:center}
+.gtpo .ccbg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,8,10,.86) 0,rgba(6,8,10,.6) 50%,rgba(6,8,10,.2) 100%),linear-gradient(0deg,rgba(6,8,10,.55),transparent 65%)}
+.gtpo:not(.p1) .ccbg::after{background:rgba(6,8,10,.68)}
+.gtpo .pfav{--sz:46px;box-shadow:none;height:var(--sz);box-sizing:border-box}
+.gtpo .rk{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.gtpo.cc .rk{color:#e9e6ee}
+.gtpo b.nm{display:block;max-width:100%;font-family:var(--title);font-weight:900;font-size:16px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 8px #000}
+.gtpo > span:not(.pfav){display:grid;justify-items:center;gap:3px;min-width:0;max-width:100%}
+.gtpo .pfti{margin:4px 0 0;padding:2px 7px;font-size:10px;transform:none;border-radius:4px}
+.gtpo.p1{grid-column:span 2;flex-direction:row;justify-content:flex-start;gap:16px;padding:18px 20px;text-align:left;min-height:124px;box-shadow:inset 0 0 0 2px #f7c64a,0 0 28px rgba(247,198,74,.18)}
+.gtpo.p1:not(.cc){background:linear-gradient(160deg,color-mix(in srgb,#f7c64a 22%,var(--panel)),var(--panel))}
+.gtpo.p1 > span:not(.pfav){justify-items:start}
+.gtpo.p1 .pfav{--sz:84px}
+.gtpo.p1 .rk{color:#f7c64a;font-size:11.5px}
+.gtpo.p1 b.nm{font-size:clamp(22px,4.6vw,30px)}
+.gtpo.p1 .pfti{font-size:11.5px;padding:3px 9px}
+.gtpo.p2 .rk{color:#d5dbe6}.gtpo.p3 .rk{color:#e0a36a}
+@media (max-width:860px){.gtpod{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.gtpo.p1{grid-column:1/-1;padding:16px}.gtpo.p1 .pfav{--sz:72px}.gtpo{padding:12px 6px}.gtpo b.nm{font-size:14px}}
 .gtlog{margin-top:14px;font-size:13px;color:var(--muted);display:grid;gap:4px}
 .gtwarn{padding:10px 14px;border-radius:12px;background:color-mix(in srgb,#ff5a6a 12%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,#ff5a6a 45%,transparent);font-size:13.5px;margin-bottom:12px}
 .gtstrip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;margin:0 0 10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 9%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent);font-size:13.5px}
@@ -11819,10 +11834,13 @@ body.gtwatch #board button,body.gtwatch #board input,body.gtwatch #board .bidbox
      (en mode bluff, le personnage reste caché tant que l'enchère n'est pas finie).
    - Égalité parfaite au combat : la manche est rejouée. Joueur absent 90 s alors que son match peut se jouer : forfait.
    ===================================================================== */
-const GT = {room: null, role: null, code: null, T: null, name: "", pid: "", peers: new Map(), seen: new Map(), timers: [], cur: null, watch: null, pending: null, last: 0, sent: null, cfg: {u: "op", mode: "live", size: 4}, ask: null};
+const GT = {room: null, role: null, code: null, T: null, name: "", pid: "", peers: new Map(), seen: new Map(), timers: [], cur: null, watch: null, pending: null, last: 0, sent: null, cfg: {u: "op", mode: "live", size: 4}, ask: null, pf: {}, pfT: 0};
 GT.pid = (() => { let p = lsGet("hanko-gt-pid", ""); if (!/^[a-z0-9]{8,14}$/.test(p)){ p = Math.random().toString(36).slice(2, 12); lsSet("hanko-gt-pid", p); } return p; })();
 const GT_ABSENT = 90000, GT_KEY = "hanko-gt-host", GT_LAST = "hanko-gt-last";
 const GT_RN = {q: "Quart de finale", s: "Demi-finale", f: "Finale", t: "Petite finale"};
+// profil public montré sur le podium (carte de visite, photo de profil, cadre, titre) : envoyé une fois à l'organisateur, qui le redistribue à la demande
+const gtMyPf = () => { try { const p = pfPublic(tcLoad()); return {av: p.av, img: p.img, cc: p.cc, fr: p.fr, ti: p.ti}; } catch { return null; } };
+const gtPfOf = pid => { try { return pfClean(GT.pf[pid] || {}); } catch { return {fr: "auto"}; } };
 const gtP = pid => GT.T && GT.T.players.find(p => p.pid === pid);
 const gtName = pid => pid ? esc(gtP(pid)?.name || "?") : "";
 const gtM = id => GT.T && GT.T.matches.find(m => m.id === id);
@@ -11878,7 +11896,7 @@ function gtTick(){
 
 /* ---------- salon du tournoi ---------- */
 function gtErr(t){ const e = $("#gtErr"); if (e) e.textContent = t || ""; }
-function gtReset(){ GT.timers.forEach(clearInterval); GT.timers = []; try { GT.room?.leave().catch(() => {}); } catch {} Object.assign(GT, {room: null, role: null, code: null, T: null, cur: null, watch: null, pending: null, sent: null, ask: null}); GT.peers.clear(); GT.seen.clear(); document.body.classList.remove("gtwatch"); try { p2pRoom.current = null; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {} }
+function gtReset(){ GT.timers.forEach(clearInterval); GT.timers = []; try { GT.room?.leave().catch(() => {}); } catch {} Object.assign(GT, {room: null, role: null, code: null, T: null, cur: null, watch: null, pending: null, sent: null, ask: null, pf: {}}); GT.peers.clear(); GT.seen.clear(); document.body.classList.remove("gtwatch"); try { p2pRoom.current = null; p2pRoom.onVoice && p2pRoom.onVoice(); } catch {} }
 function gtQuit(){ gtLeaveMatch(); if (GT.role === "host") try { localStorage.removeItem(GT_KEY); } catch {} try { localStorage.removeItem(GT_LAST); } catch {} gtReset(); show("home"); }
 async function gtHost(resume){
   if (!NET.p2p || GT.role) return; gtErr("");
@@ -11891,13 +11909,16 @@ async function gtHost(resume){
   $("#gtHost").disabled = false;
   if (!room) return gtErr(resume ? "Impossible de reprendre le tournoi pour le moment. Réessaie dans quelques secondes." : "Impossible de créer le tournoi pour le moment. Vérifie ta connexion internet puis réessaie.");
   Object.assign(GT, {room, role: "host", code});
-  if (resume){ GT.T = resume.T; GT.name = resume.name || GT.name; const now = Date.now(); GT.T.players.forEach(p => GT.seen.set(p.pid, now)); GT.T.matches.forEach(m => { if (gtReady(m)) m.readyAt = now; m.live = null; }); }
+  if (resume){ GT.T = resume.T; GT.name = resume.name || GT.name; const now = Date.now(); GT.T.players.forEach(p => GT.seen.set(p.pid, now)); GT.T.matches.forEach(m => { if (gtReady(m)) m.readyAt = now; m.live = null; }); GT.T.players.forEach(p => { p.hp = 0; }); }
   else GT.T = {code, u: GT.cfg.u, mode: GT.cfg.mode, size: GT.cfg.size, phase: "lobby", players: [{pid: GT.pid, name: GT.name, on: true}], matches: [], seq: 0, log: []};
   room.on("thello", msg => { if (GT.role !== "host") return; const d = msg.data || {}, pid = String(d.pid || ""), T = GT.T; if (!/^[a-z0-9]{8,14}$/.test(pid) || pid === GT.pid) return;
     GT.peers.set(msg.peer, pid); GT.seen.set(pid, Date.now());
     let p = T.players.find(x => x.pid === pid);
     if (!p && T.phase === "lobby" && T.players.length < T.size){ let n = cleanName(d.name, "Joueur"); while (T.players.some(x => x.name === n)) n = (n.slice(0, 12) + " " + (T.players.length + 1)); p = {pid, name: n, on: true}; T.players.push(p); return gtPush(); }
     if (p && !p.on){ p.on = true; return gtPush(); } });
+  { const mine = gtMyPf(), me = GT.T.players.find(p => p.pid === GT.pid); if (mine && me){ GT.pf[GT.pid] = mine; me.hp = 1; } }
+  room.on("tpf", msg => { if (GT.role !== "host") return; const pid = GT.peers.get(msg.peer), p = pid && gtP(pid), d = msg.data || {}; if (!p || !d.pf || JSON.stringify(d.pf).length > 400000) return; GT.pf[pid] = pfClean(d.pf); p.hp = 1; room.emit("tpf", {pid, pf: GT.pf[pid]}).catch(() => {}); gtPush(); });
+  room.on("tpfq", msg => { if (GT.role !== "host") return; const pid = String(msg.data?.pid || ""); if (GT.pf[pid]) room.emitTo(msg.peer, "tpf", {pid, pf: GT.pf[pid]}); });
   room.on("tres", msg => { if (GT.role !== "host") return; const d = msg.data || {}, m = gtM(Number(d.mid)), pid = GT.peers.get(msg.peer); if (!m || !pid) return; gtOnRes(m, pid, Number(d.game), Number(d.w)); });
   room.on("tlive", msg => { if (GT.role !== "host") return; const d = msg.data || {}, m = gtM(Number(d.mid)), pid = GT.peers.get(msg.peer); if (!m || m.a !== pid || m.winner != null || m.game !== Number(d.game) || m.live === m.game) return; m.live = m.game; gtPush(); });
   GT.timers.push(setInterval(gtTick, 3000));
@@ -11915,7 +11936,11 @@ async function gtJoin(){
   Object.assign(GT, {room, role: "guest", code, last: 0}); const t0 = Date.now();
   lsSet(GT_LAST, {code, name: GT.name, t: Date.now()});
   room.on("tstate", msg => { if (GT.role !== "guest") return; const T = msg.data; if (!T || T.code !== code || !Array.isArray(T.players)) return; GT.last = Date.now(); if (GT.T && T.seq < GT.T.seq) return; const first = !GT.T; gtOnState(T); if (first) gtShow(); });
+  room.on("tpf", msg => { if (GT.role !== "guest") return; const d = msg.data || {}; if (typeof d.pid !== "string" || !d.pf) return; GT.pf[d.pid] = pfClean(d.pf); if (GT.T && GT.T.phase === "done" && !$("#gt").classList.contains("hidden")) gtRender(); });
   const hello = () => { if (GT.role !== "guest") return;
+    if (GT.T && Date.now() - GT.pfT > 6000){ const me = gtP(GT.pid), miss = GT.T.players.find(p => p.hp && !GT.pf[p.pid]);
+      if (me && !me.hp){ GT.pfT = Date.now(); const pf = gtMyPf(); if (pf){ GT.pf[GT.pid] = pf; room.emit("tpf", {pf}).catch(() => {}); } }
+      else if (miss){ GT.pfT = Date.now() - 4000; room.emit("tpfq", {pid: miss.pid}).catch(() => {}); } }
     if (!GT.T && Date.now() - t0 > 14000){ gtReset(); show("home"); document.querySelector('[data-g="gt"]')?.click(); return gtErr(`Aucun tournoi trouvé avec le code ${code}. Vérifie le code, et que l'organisateur a bien créé le tournoi.`); }
     room.emit("thello", {pid: GT.pid, name: GT.name}).catch(() => {});
     const pd = GT.pending; if (pd) room.emit("tres", pd).catch(() => {});
@@ -12034,7 +12059,10 @@ function gtRender(){
     const my = gtMine(), F = T.matches.find(m => m.r === "f"), S3 = T.matches.find(m => m.r === "t");
     let me = "";
     if (T.phase === "done"){ const w = k => k.winner === 0 ? k.a : k.b, l = k => k.winner === 0 ? k.b : k.a;
-      me = `<div class="gtpod"><div class="p1"><i>Vainqueur</i><b>${gtName(w(F))}</b></div><div><i>Finaliste</i><b>${gtName(l(F))}</b></div><div><i>3e place</i><b>${gtName(w(S3))}</b></div><div><i>4e place</i><b>${gtName(l(S3))}</b></div></div>`; }
+      const tile = (pid, k, lab) => { const name = gtP(pid)?.name || "?", pf = gtPfOf(pid), ti = pf.ti && VT.find(v => v[0] === pf.ti); let bg = ""; try { if (pf.cc) bg = `<i class="ccbg" aria-hidden="true">${vtCardHTML(pf.cc, {cls: "main"}).replaceAll('loading="lazy"', "")}</i>`; } catch {}
+        let av = ""; try { av = pfAvatar(pf, name); } catch {}
+        return `<div class="gtpo p${k} ${bg ? "cc" : ""}">${bg}${av}<span><i class="rk" style="font-style:normal">${lab}</i><b class="nm">${esc(name)}</b>${ti ? `<em class="pfti t${ti[3]}" style="font-style:normal">${ti[2]} ${esc(ti[1])}</em>` : ""}</span></div>`; };
+      me = `<div class="gtpod">${tile(w(F), 1, "1er · Grand vainqueur")}${tile(l(F), 2, "2e")}${tile(w(S3), 3, "3e")}${tile(l(S3), 4, "4e")}</div>`; }
     else if (my){ const opp = my.a === GT.pid ? my.b : my.a, inIt = GT.cur === my.id + ":" + my.game;
       me = `<div class="gtme go"><div><b>${inIt ? "Ton match est en cours" : "À toi de jouer"} · ${GT_RN[my.r]}${my.best === 3 ? ` (${my.wins[my.a === GT.pid ? 0 : 1]}-${my.wins[my.a === GT.pid ? 1 : 0]})` : ""}</b><span>Contre ${gtName(opp)}. Nouvelle équipe à recruter, 300M chacun.</span></div><button class="primary" data-gtplay="${my.id}">${inIt ? "Revenir à mon match" : my.best === 3 && my.wins[0] + my.wins[1] ? "Jouer la manche " + (my.wins[0] + my.wins[1] + 1) : "Jouer mon match"}</button></div>`; }
     else if (iAm){ const next = T.matches.find(m => m.winner == null && (m.a === GT.pid || m.b === GT.pid)), still = next || T.matches.some(m => m.winner == null && [m.fa, m.fb].some(s => s && (() => { const x = gtM(s[0]); return x.winner == null && (x.a === GT.pid || x.b === GT.pid); })()));
