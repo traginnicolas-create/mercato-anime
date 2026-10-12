@@ -13440,6 +13440,21 @@ body:has(#home:not(.hidden)) .hudpop .hp-g div{background:#050505;box-shadow:ins
 body:has(#home:not(.hidden)) .hudpop button.primary{font-family:var(--title);font-weight:900;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;padding:14px 20px;border:0;background:color-mix(in srgb,var(--hc) 26%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px var(--hc);text-shadow:none;transition:background .35s,box-shadow .35s}
 body:has(#home:not(.hidden)) .hudpop button.primary:hover{background:color-mix(in srgb,var(--hc) 40%,#050505)}
 </style>
+<style>
+/* menu (panneau de droite) ouvert depuis la page des jeux : noir + couleur de la famille affichée, comme la barre du haut et la fenêtre des boosters */
+body:has(#home:not(.hidden)) .mnsheet{background:#050505;box-shadow:-1.5px 0 0 color-mix(in srgb,var(--hc) 70%,#fff),-10px 0 26px color-mix(in srgb,var(--hc) 30%,transparent),-30px 0 60px rgba(0,0,0,.5)}
+body:has(#home:not(.hidden)) .mnsheet .mntop span,body:has(#home:not(.hidden)) .mnsheet h3{color:color-mix(in srgb,var(--hc) 60%,#fff)}
+body:has(#home:not(.hidden)) .mnsheet .mnx,body:has(#home:not(.hidden)) .mnsheet .mngrid button{background:#050505;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hc) 40%,transparent)}
+body:has(#home:not(.hidden)) .mnsheet .mncard,body:has(#home:not(.hidden)) .mnsheet .mnfoot{background:#050505;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc) 60%,transparent)}
+body:has(#home:not(.hidden)) .mnsheet .mnst div{background:#050505;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hc) 35%,transparent)}
+body:has(#home:not(.hidden)) .mnsheet .mngrid button:hover{background:color-mix(in srgb,var(--hc) 16%,#050505);box-shadow:inset 0 0 0 1.5px var(--hc)}
+body:has(#home:not(.hidden)) .mnsheet .mngrid button:focus-visible,body:has(#home:not(.hidden)) .mnsheet .mnwho:focus-visible{outline-color:var(--hc)}
+body:has(#home:not(.hidden)) .mnsheet .mngrid i{color:color-mix(in srgb,var(--hc) 65%,#fff)}
+body:has(#home:not(.hidden)) .mnsheet .mngrid u{background:var(--hc);color:#fff}
+body:has(#home:not(.hidden)) .mnsheet .mnfoot .a{color:color-mix(in srgb,var(--hc) 60%,#fff)}
+body:has(#home:not(.hidden)) .mnsheet .mnfoot button + button{border-top-color:color-mix(in srgb,var(--hc) 30%,transparent)}
+body:has(#home:not(.hidden)) .mnsheet .mnwho .av{background:var(--hc);background-image:none}
+</style>
 
 </body>
 </html>
