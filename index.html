@@ -413,6 +413,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
       <li>À ton tour, propose un personnage : « Est-ce qu'il est dans mon équipe ? ». Ton adversaire répond <b>oui</b> s'il respecte ta règle, <b>non</b> sinon.</li>
       <li>Cherche le <b>point commun</b> des personnages acceptés : c'est ta règle. Après chaque réponse, tu peux tenter de la deviner : <b>3 tentatives</b> par joueur.</li>
       <li>Tout le monde joue le même nombre de tours : si tu trouves en premier, l'adversaire a encore son tour pour égaliser. 12 tours maximum.</li>
+      <li>La règle que tu gardes ne te parle pas ? Tu peux la <b>changer une fois</b>, avant que la partie commence.</li>
       <li><b>Sur un téléphone</b> (2 à 4) : chacun dévoile en secret la règle du joueur suivant puis passe le téléphone. <b>En ligne</b> : à 2, chacun sur son appareil.</li>
     </ul>
   </div>
@@ -6444,7 +6445,7 @@ function rlStart(names, where, set = RL_SET){
   while (rules.length < names.length){ const r = pool[Math.floor(Math.random() * pool.length)]; if (!rules.includes(r)) rules.push(r); }
   const N = names.length, start = Math.floor(Math.random() * N);
   RLG = {id: Math.random().toString(36).slice(2, 10), where, set, players: names, rules: rules.map(x => ({r: x.r, ex: x.ex})),   // rules[p] = règle que le joueur p doit trouver
-    lists: names.map(() => []), tries: names.map(() => []), found: names.map(() => false), start, pos: 0, turn: start, round: 0, seen: 0, cur: null, phase: where === "local" ? "cover" : "prop"};
+    lists: names.map(() => []), tries: names.map(() => []), found: names.map(() => false), swap: names.map(() => false), start, pos: 0, turn: start, round: 0, seen: 0, cur: null, phase: where === "local" ? "cover" : "prop"};
   RL_PEEK = false; show("rl"); rlSync();
 }
 function rlEndTurn(){
@@ -6464,6 +6465,11 @@ function rlEndTurn(){
 function rlAct(i, t, v){
   const G = RLG; if (!G) return;
   const loc = G.where === "local", p = G.turn, k = rlKeeper(G, p), txt = String(v ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 60);
+  // swap : celui qui garde une règle peut la changer une seule fois, avant le début de la partie (règle qu'il ne comprend pas, par exemple)
+  if (t === "swap"){ const kp = loc ? G.seen : i, tg = (kp + 1) % G.players.length;
+    if (G.swap[kp] || (loc ? G.phase !== "show" : G.phase !== "prop" || G.lists.flat().length || G.tries.flat().length)) return;
+    const pool = RL_RULES.filter(x => (G.set === "mix" || x.u === G.set) && !G.rules.some(r => r.r === x.r)); if (!pool.length) return;
+    const x = pool[Math.floor(Math.random() * pool.length)]; G.rules[tg] = {r: x.r, ex: x.ex}; G.swap[kp] = true; RL_PEEK = false; rlSync(); return; }
   if (t === "show" && G.phase === "cover") G.phase = "show";
   else if (t === "see" && G.phase === "show"){ G.seen++; G.phase = G.seen >= G.players.length ? "prop" : "cover"; }
   else if (t === "prop" && G.phase === "prop" && !loc && i === p){ if (!txt) return; G.cur = txt; G.phase = "ans"; }
@@ -6481,7 +6487,7 @@ function rlAct(i, t, v){
 // vue d'un joueur : il voit la règle qu'il garde (celle de l'adversaire), jamais la sienne avant la fin
 function rlView(i){
   const G = RLG, over = G.phase === "over", N = G.players.length;
-  return {id: G.id, where: G.where, players: G.players, lists: G.lists, tries: G.tries, found: G.found, turn: G.turn, round: G.round, seen: G.seen, cur: G.cur, phase: G.phase, me: i,
+  return {id: G.id, where: G.where, players: G.players, lists: G.lists, tries: G.tries, found: G.found, turn: G.turn, round: G.round, seen: G.seen, cur: G.cur, phase: G.phase, me: i, swap: G.swap || [], fresh: !G.lists.flat().length && !G.tries.flat().length,
     rules: G.rules.map((r, p) => over || G.where === "local" || rlKeeper(G, p) === i ? r : null)};
 }
 function rlSync(){
@@ -6502,7 +6508,7 @@ const rlNames = () => RL_NAMES || (RL_NAMES = `<datalist id="rlNames">${[...new 
 function rlRender(force){
   const V = RLV; if (!V) return;
   const P = V.players, N = P.length, p = V.turn, k = (p + N - 1) % N, online = V.where === "online", me = V.me;
-  const key = [V.id, V.phase, p, V.seen, V.lists.flat().length, V.tries.flat().length, RL_PEEK].join(":");
+  const key = [V.id, V.phase, p, V.seen, V.lists.flat().length, V.tries.flat().length, RL_PEEK, (V.swap || []).join("")].join(":");
   if (key === RL_KEY && !force) return;   // ne pas effacer une saisie en cours
   RL_KEY = key;
   $("#rlTitle").textContent = "TROUVE LA RÈGLE" + (online ? " · EN LIGNE" : "");
@@ -6513,7 +6519,8 @@ function rlRender(force){
     <p class="small">${V.lists[q].filter(x => x.ok).length} dans l'équipe · ${V.lists[q].filter(x => !x.ok).length} refusé${V.lists[q].filter(x => !x.ok).length > 1 ? "s" : ""}</p>
     <div class="rlchips">${V.lists[q].map(x => `<span class="${x.ok ? "y" : "n"}">${x.ok ? "✔" : "✗"} ${esc(x.n)}</span>`).join("") || `<span class="t">Aucun personnage proposé</span>`}</div>
     ${V.tries[q].some(x => x.t) ? `<div class="rlchips" style="margin-top:6px">${V.tries[q].filter(x => x.t).map(x => `<span class="t ${x.ok ? "y" : "n"}">« ${esc(x.t)} »</span>`).join("")}</div>` : ""}</div>`).join("")}</div>`;
-  const mine = online ? card((me + 1) % N, "mini") : "";    // en ligne : la règle de l'adversaire reste sous les yeux
+  const swapBtn = `<div class="row" style="justify-content:center;margin:-4px 0 12px"><button class="ghost" id="rlSwap">Changer de règle (une seule fois)</button></div>`;
+  const mine = online ? card((me + 1) % N, "mini") + (V.phase === "prop" && V.fresh && !(V.swap || [])[me] ? swapBtn : "") : "";    // en ligne : la règle de l'adversaire reste sous les yeux
   const peek = !online ? `<div class="row" style="justify-content:center;margin-top:10px"><button class="ghost" id="rlPeek">${RL_PEEK ? "Cacher la règle" : `${esc(P[k])} : revoir la règle (en cachette)`}</button></div>${RL_PEEK ? card(p) : ""}` : "";
   let html = "";
   if (V.phase === "cover"){
@@ -6522,7 +6529,7 @@ function rlRender(force){
       <p class="muted" style="margin:8px 0 14px">Tu vas voir la règle que <b>${esc(P[t])}</b> doit trouver. Les autres ne regardent pas !</p><button class="primary" id="rlShow">Je suis ${esc(P[s])}, dévoiler la règle</button></div></div>`;
   } else if (V.phase === "show"){
     const s = V.seen, t = (s + 1) % N;
-    html = `<div class="panel">${card(t)}
+    html = `<div class="panel">${card(t)}${(V.swap || [])[s] ? "" : swapBtn}
       <p class="muted" style="text-align:center;max-width:54ch;margin:0 auto 14px">Quand ${esc(P[t])} te demandera « Est-ce que tel personnage est dans mon équipe ? », tu répondras <b>oui</b> s'il respecte cette règle, <b>non</b> sinon. Ne dis jamais la règle.</p>
       <div class="row" style="justify-content:center"><button class="primary" id="rlSeen">J'ai retenu, cacher${s + 1 < N ? " et passer le téléphone" : " et commencer"}</button></div></div>`;
   } else if (V.phase === "prop" && !online){
@@ -6567,6 +6574,7 @@ function rlRender(force){
   $("#rlBoard").innerHTML = html;
   $("#rlShow") && ($("#rlShow").onclick = () => rlSend("show"));
   $("#rlSeen") && ($("#rlSeen").onclick = () => rlSend("see"));
+  $("#rlSwap") && ($("#rlSwap").onclick = () => rlSend("swap"));
   $("#rlPeek") && ($("#rlPeek").onclick = () => { const keep = $("#rlName")?.value; RL_PEEK = !RL_PEEK; clearTimeout(RL_PEEK_T); if (RL_PEEK) RL_PEEK_T = setTimeout(() => { if (RL_PEEK){ const kp = $("#rlName")?.value; RL_PEEK = false; rlRender(); if (kp && $("#rlName")) $("#rlName").value = kp; } }, 5000); rlRender(); if (keep && $("#rlName")) $("#rlName").value = keep; });
   document.querySelectorAll("[data-rla]").forEach(b => b.onclick = () => rlSend(b.dataset.rla, $("#rlName")?.value));
   const nm = $("#rlProp") && $("#rlName"); if (nm){ nm.focus({preventScroll: true}); const go = () => { if (nm.value.trim()) rlSend("prop", nm.value); }; nm.onkeydown = e => { if (e.key === "Enter") go(); }; $("#rlProp").onclick = go; }
@@ -6597,7 +6605,7 @@ async function rlHost(){
   RLN.unsub.push(game.on("gact", msg => {
     const d = msg.data;
     if (msg.sameTab || !RLG || !d?.rl || RLN.lobby[1]?.peer !== msg.peer || d.id !== RLG.id || d.n !== RLG.lists.flat().length + RLG.tries.flat().length) return;
-    if (["prop", "yes", "no", "try", "pass", "ok", "ko"].includes(d.t)) rlAct(1, d.t, d.v);
+    if (["prop", "yes", "no", "try", "pass", "ok", "ko", "swap"].includes(d.t)) rlAct(1, d.t, d.v);
   }));
   RLN.unsub.push(game.onPeers(ch => { if (!RLG && ch.left.length){ RLN.lobby = RLN.lobby.filter((p, i) => i === 0 || !ch.left.some(l => l.peer === p.peer)); rlLobbyCast(); } }));
   RLN.timers.push(setInterval(() => RLG ? RLN.game.emit("gstate", {rl: 1, views: [rlView(0), rlView(1)]}).catch(() => {}) : rlLobbyCast(), 3000));
@@ -13547,6 +13555,11 @@ body:has(#home:not(.hidden)) .mnsheet .mncard::after{box-shadow:inset 0 0 0 1.5p
   addEventListener("resize", () => { const v = document.querySelector(".mnveil"); if (v) fit(v); });
 })();
 </script>
+<style>
+/* le bouton « C'est parti » garde son fond plein et sa lueur, sans contour (la règle générale des boutons de la page des jeux le lui remettait) */
+body .welcome button.primary,body .welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 56%,#050505)!important;box-shadow:0 0 26px color-mix(in srgb,var(--hc) 50%,transparent),0 0 60px color-mix(in srgb,var(--hc) 24%,transparent)!important;outline:0!important}
+body .welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 68%,#050505)!important}
+</style>
 
 </body>
 </html>
