@@ -9919,6 +9919,7 @@ function tcOpenPack(s, key, sec){
     // premier booster : la dernière carte est une Épique très connue (ni Légendaire ni Mythique), mise en scène avec la grande cinématique, pour donner envie de continuer
     if (slot === 4 && first){ s.firstDone = 1; const TOP = ["Nami", "Nico Robin", "Freezer", "Trunks", "Piccolo", "Son Gohan", "Tsunade", "Orochimaru", "Rock Lee", "Sakura Haruno", "Deidara", "Killer B"], fam = pool.filter(x => x.r === "E" && !x.obj && (x.pop === "S" || TOP.includes(x.n)) && !got.some(g => g.id === x.id)), l2 = fam.length ? fam : pool.filter(x => x.r === "E" && !x.obj); if (l2.length){ c = l2[Math.floor(Math.random() * l2.length)]; f = ""; hype = true; } }
     const newFin = !!f && !(s.fin[c.id] && s.fin[c.id][f]);
+    if (hype) s.firstHit = c.id;   /* la carte garantie du tout premier booster : c'est elle que le didacticiel fait regarder en 3D */
     got.push({...c, f, isNew: !s.own[c.id], newFin, ...(hype ? {hype: true} : {})}); s.own[c.id] = (s.own[c.id] || 0) + 1;
     if (f){ s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; }
   }
@@ -10598,7 +10599,7 @@ const TC_TSTEPS = [
   {sel: () => $('[data-tct="packs"]'), t: "Voici tes boosters", p: "Touche « Boosters » pour voir ceux que tu as.", done: () => TC_TAB === "packs"},
   {sel: () => TC_SUB !== "mine" ? $('[data-tcsub="mine"]') : $("#tcOpen"), t: "Ouvre ton premier booster", p: "Touche le bouton « Ouvrir ce booster ». Tu déchireras ensuite le sachet pour découvrir tes 5 cartes.", pre: () => { if (TC_TAB !== "packs"){ TC_TAB = "packs"; tcRender(); } }, done: () => !!$(".tcopen") || TC_TOUR.seen, mark: () => !!$(".tcopen")},
   {sel: () => $('[data-tct="album"]'), t: "Va voir ta collection", p: "Tes cartes sont rangées ici. Touche « Collection ».", done: () => TC_TAB === "album"},
-  {sel: () => $(".tcgrid .tc:not(.no)"), t: "Regarde une carte de près", p: "Touche-la pour la voir en 3D, puis ferme-la.", pre: () => { if (TC_F.own !== true){ TC_F.own = true; TC_F.f = "*"; TC_F.r = "all"; TC_F.u = "all"; tcRender(); } }, done: () => !!$(".tcview") || TC_TOUR.seen, mark: () => !!$(".tcview")},
+  {sel: () => { const id = tcLoad().firstHit, hit = id && [...document.querySelectorAll(".tcgrid .tc:not(.no)")].find(e => e.dataset.tc === id); return hit || $(".tcgrid .tc:not(.no)"); }, t: "Regarde ta meilleure carte de près", p: "Touche-la pour la voir en 3D, puis ferme-la.", pre: () => { if (TC_F.own !== true){ TC_F.own = true; TC_F.f = "*"; TC_F.r = "all"; TC_F.u = "all"; tcRender(); } }, done: () => !!$(".tcview") || TC_TOUR.seen, mark: () => !!$(".tcview")},
   {sel: () => $('[data-tct="missions"]'), t: "Découvre tes missions", p: "Elles donnent des boosters et des éclats. Touche « Missions ».", done: () => TC_TAB === "missions"},
   {sel: () => { const b = $("#tcClaimAll"); return b && !b.disabled ? b : null; }, t: "Récupère tes cadeaux", p: "Touche « Tout réclamer ».", skipIf: () => { const b = $("#tcClaimAll"); return !b || b.disabled; }, done: () => true, mark: () => !!$(".tccele")},   // validée dès que la célébration s'affiche : le bouton peut rester actif, car réclamer débloque d'autres récompenses
   {t: "C'est tout !", p: "Un booster gratuit arrive chaque heure, et chaque partie gagnée en rapporte d'autres. Voici un booster Argent en cadeau.", next: "Jouer", end: true}];
@@ -10652,6 +10653,7 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vt .art{position:absolute;inset:0;z-index:-2;pointer-events:none}
 .vt .art img{position:absolute;right:2%;top:-6%;height:185%;width:auto;max-width:none;aspect-ratio:4/5;object-fit:cover;object-position:50% 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 34%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 34%,#000 82%,transparent)}
 .vt .art img.b{right:24%;top:2%;height:160%;opacity:.5;filter:saturate(.7)}
+.vt .art img.fit{right:auto;height:auto;aspect-ratio:auto;object-fit:fill}
 .vt::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(11,10,14,.94) 0,rgba(11,10,14,.72) 36%,transparent 66%),linear-gradient(0deg,rgba(11,10,14,.6),transparent 46%)}
 .vt .fx{position:absolute;inset:0;z-index:-1;pointer-events:none}
 .vt .kj{position:absolute;left:44%;top:50%;transform:translate(-50%,-50%);z-index:-1;font-family:var(--brand);font-weight:900;font-size:min(22cqw,96px);line-height:1;color:color-mix(in srgb,var(--vc) 16%,transparent);white-space:nowrap;pointer-events:none}
@@ -10719,6 +10721,10 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vt.lock small{color:#e9e5ee}
 .vtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .vtitem{display:grid;gap:6px}
+.vtseg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:4px 0 12px;border-radius:16px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line)}
+.vtseg button{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:11px 6px;border-radius:12px;font-weight:700;font-size:14px;color:var(--muted)}
+.vtseg button small{display:block;font-family:var(--mono);font-weight:500;font-size:11px;margin-top:2px;opacity:.8}
+.vtseg button.on{color:var(--text);background:var(--panel2,var(--panel));box-shadow:inset 0 0 0 1px var(--accent)}.vtseg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* annonce d'une carte de visite débloquée : panneau en haut de l'écran (remplace l'ancienne bulle du bas) */
 .vtnote{--nc:#c9a36a;position:fixed;left:0;right:0;top:0;z-index:9999;display:grid;justify-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 0;pointer-events:none}
 .vtnote.t2{--nc:#dfe5ee}.vtnote.t3{--nc:#f2c230}.vtnote.t4{--nc:#c9a2ff}
@@ -10860,11 +10866,25 @@ const VT_ONE = {uo: ["op:Monkey D. Luffy", "op:Roronoa Zoro"], un: ["na:Naruto U
   c6: ["op:Nami", "op:Nico Robin"], c5: ["op:Nico Robin", "na:Orochimaru"], u4: ["op:Monkey D. Luffy", "db:Son Goku"], x3: ["db:Son Goku (Ultra Instinct)", "db:Gogeta (Super Saiyan Blue)"],
   f5: ["na:Minato Namikaze", "op:Borsalino (Kizaru)"], f6: ["na:Deidara", "na:Sasori"], f7: ["na:Jiraiya", "na:Naruto Uzumaki"], f8: ["db:Freezer", "db:Zeno"], d5: ["na:Rock Lee", "na:Gaï Maito"], d4: ["na:Orochimaru", "na:Madara Uchiha"],
   t3: ["op:Crocodile", "op:Buggy"], a3: ["op:Monkey D. Luffy", "op:Jinbe"], o4: ["op:Donquixote Doflamingo", "op:Crocodile"], l4: ["na:Hiruzen Sarutobi", "na:Hashirama Senju"]};
+// cadrage des personnages sur une carte de visite (12 oct. 2026) : chaque image est placée d'après la position du visage (FACES, sinon estimée sur la
+// silhouette pour les images en pied détourées), pour que la tête soit entière et à la même place sur toutes les cartes, quel que soit le cadrage d'origine
+const VT_FACE = {};
+function vtFace(img, id){ if (VT_FACE[id]) return VT_FACE[id]; const u = id.slice(0, 2), n = id.slice(3); let f = null;
+  try { const F = typeof FACES !== "undefined" && FACES[u] && FACES[u][n]; if (F) f = [F[0], F[1], F[2]]; } catch {}
+  if (!f) try { const S = 72, cv = document.createElement("canvas"), W = img.naturalWidth, H = img.naturalHeight; cv.width = S; cv.height = Math.max(8, Math.round(S * H / W)); const g = cv.getContext("2d", {willReadFrequently: true}); g.drawImage(img, 0, 0, cv.width, cv.height);
+      const d = g.getImageData(0, 0, cv.width, cv.height).data, on = (x, y) => d[(y * cv.width + x) * 4 + 3] > 40; let top = -1, bot = -1; for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (on(x, y)){ if (top < 0) top = y; bot = y; }
+      if (top >= 0 && (top > 1 || !on(0, 0) || !on(cv.width - 1, 0))){ const bh = bot - top + 1, y1 = top + Math.max(2, Math.round(bh * .17)); let sx = 0, k = 0, mn = cv.width, mx = 0; for (let y = top; y < y1; y++) for (let x = 0; x < cv.width; x++) if (on(x, y)){ sx += x; k++; mn = Math.min(mn, x); mx = Math.max(mx, x); }
+        if (k) f = [sx / k / cv.width, (top + bh * .135) / cv.height, Math.max(.2, Math.min(.7, bh / 4.4 / cv.width))]; } } catch {}   /* tête et chevelure d'un personnage en pied : environ le quart supérieur */
+  return (VT_FACE[id] = f || [.5, .3, .45]); }
+function vtFit(img){ try { const card = img.closest(".vt"), id = img.dataset.vf; if (!card || !id || !img.naturalWidth) return; const r = card.getBoundingClientRect(); if (!r.width || !r.height) return setTimeout(() => vtFit(img), 250);
+    const [fx, fy, fw] = vtFace(img, id), back = img.classList.contains("b"), Wc = r.width, Hc = r.height, a = img.naturalWidth / img.naturalHeight;
+    let W = Math.max((back ? .5 : .62) * Hc / fw, Hc * a * 1.02), H = W / a, left = (back ? .6 : .8) * Wc - fx * W, top = .47 * Hc - fy * H; top = Math.min(0, Math.max(Hc - H, top)); left = Math.min(Wc - W * .55, left);
+    img.classList.add("fit"); img.style.width = (W / Wc * 100).toFixed(2) + "%"; img.style.left = (left / Wc * 100).toFixed(2) + "%"; img.style.top = (top / Hc * 100).toFixed(2) + "%"; } catch {} }
 function vtImg(id){ const [u, n] = [id.slice(0, 2), id.slice(3)]; try { return (DATA[u].find(c => c.n === n) || (GUESS[u] || []).find(c => c.n === n) || {}).i || ""; } catch { return ""; } }
 const vtCardHTML = (k, o = {}) => { const v = VT.find(z => z[0] === k); if (!v) return `<div class="slot">${o.empty || "Emplacement libre"}</div>`;
   const fam = VT_ART[k[0]] || ["dots", []], lst = VT_ONE[k] || [fam[1][Math.min(fam[1].length - 1, +k.slice(1) - 1)], v[3] >= 3 ? fam[1][Math.max(0, Math.min(fam[1].length - 1, +k.slice(1) - 1) - 1)] : null];
   const a = lst[0] && vtImg(lst[0]), b = v[3] >= 3 && lst[1] && lst[1] !== lst[0] && vtImg(lst[1]);
-  return `<div class="vt vt${v[3]} ${o.cls || ""} ${o.lock ? "lock" : ""}"><span class="bg ${fam[0]}"></span><span class="art" aria-hidden="true">${b ? `<img class="b" src="${b}" alt="" loading="lazy">` : ""}${a ? `<img src="${a}" alt="" loading="lazy">${v[3] === 4 ? `<img class="g" src="${a}" alt="" loading="lazy">` : ""}` : ""}</span>${v[3] === 4 ? `<span class="aur"></span><span class="bolt"></span><span class="bolt two"></span>` : ""}<span class="fx"></span>${v[3] === 4 ? `<span class="glare"></span>` : ""}<span class="kj" aria-hidden="true">${v[2]}</span>
+  return `<div class="vt vt${v[3]} ${o.cls || ""} ${o.lock ? "lock" : ""}"><span class="bg ${fam[0]}"></span><span class="art" aria-hidden="true">${b ? `<img class="b" src="${b}" alt="" loading="lazy" data-vf="${esc(lst[1])}" onload="vtFit(this)">` : ""}${a ? `<img src="${a}" alt="" loading="lazy" data-vf="${esc(lst[0])}" onload="vtFit(this)">${v[3] === 4 ? `<img class="g" src="${a}" alt="" loading="lazy" data-vf="${esc(lst[0])}" onload="vtFit(this)">` : ""}` : ""}</span>${v[3] === 4 ? `<span class="aur"></span><span class="bolt"></span><span class="bolt two"></span>` : ""}<span class="fx"></span>${v[3] === 4 ? `<span class="glare"></span>` : ""}<span class="kj" aria-hidden="true">${v[2]}</span>
     <span class="tr">${VT_T[v[3]]}</span><b>${esc(v[1])}</b><small>${esc(v[4])}${o.pg != null ? ` · ${o.pg}` : ""}</small>${o.bar != null ? `<span class="pg"><u style="width:${o.bar}%"></u></span>` : ""}</div>`; };
 // la vitrine telle qu'elle s'affiche sur un profil : sh = {b, t:[clés], c:[[numéro, finition]]}
 function vtShowcase(sh, name){
@@ -10874,16 +10894,18 @@ function vtShowcase(sh, name){
     <div class="best">${c.map(e => { const x = e && all.find(y => y.no === e[0]); return x ? tcCard(x, {f: e[1]}) : `<div class="slot">Carte</div>`; }).join("")}</div></div>`;
 }
 const vtMine = s => { const sh = s.show || {b: "", t: [], c: []}, all = tcCards(); return {b: sh.b, t: sh.t || [], c: (sh.c || []).map(id => all.find(x => x.id === id)).filter(x => x && s.own[x.id]).map(x => [x.no, tcBestFin(s, x)])}; };
-// onglet « Vitrine » des Cartes
+// onglet « Vitrine » des Cartes : la vitrine en haut, puis un seul des deux choix à la fois (cartes de visite ou cartes à épingler), pour ne plus avoir
+// à descendre tout en bas des cartes de visite avant d'épingler une carte
+let VT_SUB = "vt";
 function vtHTML(s){
   const x = vtCtx(s), unl = s.unl || [], sh = s.show || {b: "", t: [], c: []}, all = tcCards();
   const owned = all.filter(c => s.own[c.id]).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p).slice(0, 36);
   return `<h2 class="tch">Ma vitrine</h2><p class="small" style="margin:-4px 0 10px">C'est ce que tes amis voient sur ton profil : une carte de visite en bannière, trois trophées, tes trois plus belles cartes.</p>${vtShowcase(vtMine(s))}
-    <h2 class="tch">Cartes de visite <small style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px">${unl.length}/${VT.length}</small></h2>
+    <div class="vtseg" role="group" aria-label="Que veux-tu choisir ?"><button class="${VT_SUB === "vt" ? "on" : ""}" data-vtsub="vt">Cartes de visite<small>${unl.length}/${VT.length}</small></button><button class="${VT_SUB === "tc" ? "on" : ""}" data-vtsub="tc">Cartes à épingler<small>${(sh.c || []).length}/3</small></button></div>
+    ${VT_SUB === "tc" ? "" : `<p class="small" style="margin:0 0 10px">Choisis ta bannière et jusqu'à trois trophées parmi les cartes de visite débloquées.</p>
     <div class="vtgrid">${[...VT].sort((a, b) => (unl.includes(b[0]) ? 1 : 0) - (unl.includes(a[0]) ? 1 : 0) || (unl.includes(a[0]) ? b[3] - a[3] : a[3] - b[3])).map(v => { const ok = unl.includes(v[0]), g = vtGoal(v, x), cur = Math.min(g, v[5](x));
-      return `<div class="vtitem">${vtCardHTML(v[0], ok ? {} : {lock: true, pg: cur + "/" + g, bar: g ? cur / g * 100 : 0})}${ok ? "" : `<div class="vtrwb"><div class="pk" aria-hidden="true">${tcPouch(VT_RW[v[3]].p)}</div><div><small>Récompense</small><div class="vtrw">${vtRwChips(v[3])}</div></div></div>`}${ok ? `<div class="row"><button class="${sh.b === v[0] ? "on" : ""}" data-vtb="${v[0]}">${sh.b === v[0] ? "✔ Bannière" : "En bannière"}</button><button class="${(sh.t || []).includes(v[0]) ? "on" : ""}" data-vtt="${v[0]}">${(sh.t || []).includes(v[0]) ? "✔ Épinglée" : "Épingler"}</button></div>` : ""}</div>`; }).join("")}</div>
-    <h2 class="tch" style="margin-top:20px">Mes cartes épinglées <small style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px">${(sh.c || []).length}/3</small></h2>
-    ${owned.length ? `<div class="vtpick">${owned.map(c => tcCard(c, {btn: true, f: tcBestFin(s, c), cls: (sh.c || []).includes(c.id) ? "pick" : ""})).join("")}</div>` : `<p class="muted">Ouvre des boosters pour avoir des cartes à épingler.</p>`}`;
+      return `<div class="vtitem">${vtCardHTML(v[0], ok ? {} : {lock: true, pg: cur + "/" + g, bar: g ? cur / g * 100 : 0})}${ok ? "" : `<div class="vtrwb"><div class="pk" aria-hidden="true">${tcPouch(VT_RW[v[3]].p)}</div><div><small>Récompense</small><div class="vtrw">${vtRwChips(v[3])}</div></div></div>`}${ok ? `<div class="row"><button class="${sh.b === v[0] ? "on" : ""}" data-vtb="${v[0]}">${sh.b === v[0] ? "✔ Bannière" : "En bannière"}</button><button class="${(sh.t || []).includes(v[0]) ? "on" : ""}" data-vtt="${v[0]}">${(sh.t || []).includes(v[0]) ? "✔ Épinglée" : "Épingler"}</button></div>` : ""}</div>`; }).join("")}</div>`}
+    ${VT_SUB !== "tc" ? "" : `<p class="small" style="margin:0 0 10px">Touche jusqu'à trois cartes de ta collection pour les épingler dans ta vitrine.</p>` + (owned.length ? `<div class="vtpick">${owned.map(c => tcCard(c, {btn: true, f: tcBestFin(s, c), cls: (sh.c || []).includes(c.id) ? "pick" : ""})).join("")}</div>` : `<p class="muted">Ouvre des boosters pour avoir des cartes à épingler.</p>`)}`;
 }
 // cartes de visite à l'écran : calcul direct à chaque défilement (une fois par image), au plus dix fois par seconde, sans dépendre d'IntersectionObserver ni de requestAnimationFrame
 let VT_RAF = 0;
@@ -10893,6 +10915,7 @@ function vtWatch(){ const L = document.querySelectorAll(".vtgrid .vtitem"); if (
   addEventListener("scroll", tick, {passive: true, capture: true}); addEventListener("resize", tick, {passive: true}); setInterval(() => { if (document.querySelector(".vtgrid")) run(); }, 600); }   // filet de sécurité : jamais de carte restée vide
 function vtBind(){
   vtWatch();
+  document.querySelectorAll("[data-vtsub]").forEach(b => b.onclick = () => { VT_SUB = b.dataset.vtsub; tcRender(); });
   const upd = fn => { const s = tcLoad(); s.show = s.show || {b: "", t: [], c: []}; s.show.t = s.show.t || []; s.show.c = s.show.c || []; fn(s.show); tcSave(s); tcRender(); SFX.play("pop"); };
   const tog = (l, k) => { const i = l.indexOf(k); if (i >= 0) l.splice(i, 1); else { if (l.length >= 3) l.shift(); l.push(k); } };
   document.querySelectorAll("[data-vtb]").forEach(b => b.onclick = () => upd(sh => { sh.b = b.dataset.vtb; }));
