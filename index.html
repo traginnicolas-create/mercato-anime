@@ -2860,10 +2860,10 @@ select{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(
 .gtabs button.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel2))}
 .ucnames{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:10px}
 .ucp{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.ucp span{padding:5px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);font-size:13px;font-weight:600}
-.ucp span.now{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
-.ucp span.out{opacity:.45;text-decoration:line-through}
-.ucp span.done{border-color:var(--ok)}
+.ucp > span{padding:5px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);font-size:13px;font-weight:600}
+.ucp > span.now{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.ucp > span.out{opacity:.45;text-decoration:line-through}
+.ucp > span.done{border-color:var(--ok)}
 .uccard{max-width:260px;margin:0 auto}
 .clues{display:grid;gap:6px;margin:10px 0}
 .clues div{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:14px}
@@ -11295,9 +11295,6 @@ if (cpReady() && cpOnSite() && !window.__INVITE) cpClient().then(sb => { cpRende
 .mnsheet .mnwho .ti{display:inline-block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;margin-top:5px;color:#ffe9e2;background:linear-gradient(135deg,#d63a2c,#8f1710)}
 /* carte d'appel : la carte de visite active sert de fond, le pseudo se lit par-dessus */
 .mnsheet .mnwho.cc{margin:-16px -16px 0;padding:18px 16px;min-height:104px;border-radius:18px 18px 0 0;overflow:hidden;isolation:isolate}
-.mnsheet .mnwho.cc .ccbg{position:absolute;inset:0;z-index:-1}
-.mnsheet .mnwho.cc .ccbg .vt{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;min-height:0;border:0;border-radius:0;padding:0}
-.mnsheet .mnwho.cc .ccbg .vt > b,.mnsheet .mnwho.cc .ccbg .vt > small,.mnsheet .mnwho.cc .ccbg .vt > .tr,.mnsheet .mnwho.cc .ccbg .vt > .pg{display:none}
 .mnsheet .mnwho.cc .ccbg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,8,10,.86) 0,rgba(6,8,10,.62) 46%,rgba(6,8,10,.12) 100%),linear-gradient(0deg,rgba(6,8,10,.5),transparent 60%)}
 .mnsheet .mnwho.cc b{text-shadow:0 2px 10px #000}.mnsheet .mnwho.cc small{color:#d6d2cc;text-shadow:0 1px 6px #000}.mnsheet .mnwho.cc em{color:#fff;text-shadow:0 1px 6px #000}
 .mnsheet .mnwho:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
@@ -11372,6 +11369,15 @@ try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", 
 .pfav.fr-n10{--ring:linear-gradient(135deg,#bff3ff,#2aa7d8)}.pfav.fr-n25{--ring:repeating-conic-gradient(#7de3ff 0 12deg,#1b5f86 12deg 24deg)}.pfav.fr-s{--ring:conic-gradient(from 200deg,#ffb347,#ff3b3b,#ffe08a,#ff3b3b,#ffb347)}
 .pfav.fr-c{--ring:repeating-conic-gradient(#3fe0a8 0 18deg,#0f7a59 18deg 36deg)}.pfav.fr-e{--ring:linear-gradient(135deg,#fff,#cfd6e0 40%,#fff 60%,#9aa5b5)}.pfav.fr-t{--ring:repeating-conic-gradient(#5ac8fa 0 30deg,#3fe0a8 30deg 60deg)}
 .pfav.fr-l,.pfav.fr-p,.pfav.fr-m{box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 26px color-mix(in srgb,#c9a2ff 45%,transparent)}
+/* carte d'appel : la carte de visite active en fond de l'en-tête du profil, des salons de partie et du menu */
+.pfhead.cc{position:relative;isolation:isolate;overflow:hidden;margin:-4px -6px 14px;padding:18px 16px;border-radius:16px;box-shadow:inset 0 0 0 1px var(--line)}
+.ccbg{position:absolute;inset:0;z-index:-1}.ccbg .vt{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;min-height:0;border:0;border-radius:0;padding:0}
+.ccbg .vt > b,.ccbg .vt > small,.ccbg .vt > .tr,.ccbg .vt > .pg{display:none}
+.pfhead.cc .ccbg::after,.lcc .ccbg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,8,10,.88) 0,rgba(6,8,10,.66) 48%,rgba(6,8,10,.14) 100%),linear-gradient(0deg,rgba(6,8,10,.5),transparent 60%)}
+.pfhead.cc .pfid h2,.pfhead.cc .mt,.pfhead.cc .bio,.pfhead.cc .eb{text-shadow:0 1px 8px #000}.pfhead.cc .mt{color:#d6d2cc}
+/* salons de partie : chaque joueur connu apparaît sur sa carte d'appel */
+#lobbyBox .ucp span.lcc{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;gap:9px;min-width:min(100%,200px);min-height:52px;padding:6px 16px 6px 7px;border-radius:13px;border:0;background:#0b0a0e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 8px #000;text-align:left}
+#lobbyBox .ucp span.lcc .pfav{--sz:38px;box-shadow:none}
 .pfid{min-width:0}.pfid .eb{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
 .pfid h2{margin:4px 0 6px;font-size:clamp(22px,6vw,32px);line-height:1.05;overflow-wrap:anywhere}.pfid h2 small{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.5em;margin-left:6px}
 .pfti{display:inline-flex;align-items:center;gap:7px;margin:0 0 8px;padding:5px 10px 5px 6px;border-radius:6px;font-weight:800;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:#ffe9e2;background:linear-gradient(135deg,#d63a2c,#8f1710);transform:rotate(-2deg);box-shadow:inset 0 0 0 1.5px rgba(255,220,210,.4),0 4px 10px rgba(0,0,0,.4)}
@@ -11407,7 +11413,7 @@ try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", 
 .pfed .pfopt{display:flex;flex-wrap:wrap;gap:8px}
 .pfed .pfopt button{all:unset;box-sizing:border-box;cursor:pointer;padding:9px 13px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:inset 0 0 0 1px var(--line);background:#0b0a0e}
 .pfed .pfopt button.on{box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--accent)}.pfed .pfopt button[disabled]{opacity:.45;cursor:not-allowed}
-.pfed .pfavs{display:flex;flex-wrap:wrap;gap:10px;padding:4px}.pfed .pfavs button{width:58px}
+.pfed .pfavs{display:flex;flex-wrap:wrap;gap:10px;padding:4px}
 .pfhide{all:unset;cursor:pointer;text-decoration:underline;color:var(--text)}
 .pfcrop{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:16px;background:rgba(5,6,8,.86);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .pfcrop .pc-in{width:min(100%,360px);display:grid;gap:12px;padding:18px;border-radius:20px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--line),0 30px 70px rgba(0,0,0,.6)}
@@ -11415,7 +11421,7 @@ try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", 
 .pfcrop .pc-view{position:relative;width:min(240px,70vw);aspect-ratio:1;margin:4px auto;border-radius:50%;overflow:hidden;background:#10151a;cursor:grab;touch-action:none;box-shadow:0 0 0 3px var(--accent),0 0 0 9px rgba(63,224,168,.14)}
 .pfcrop .pc-view:active{cursor:grabbing}.pfcrop .pc-view img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;user-select:none;-webkit-user-select:none;pointer-events:none}
 .pfcrop .pc-z{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-family:var(--mono);font-size:18px;color:var(--muted)}.pfcrop .pc-z input{width:100%;accent-color:var(--accent)}
-.pfed .pfavs button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#10151a;box-shadow:inset 0 0 0 1px var(--line);font-family:var(--title);font-weight:900}
+.pfed .pfavs button{all:unset;box-sizing:border-box;flex:none;width:58px;height:58px;cursor:pointer;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#10151a;box-shadow:inset 0 0 0 1px var(--line);font-family:var(--title);font-weight:900}
 .pfed .pfavs button img{width:100%;height:100%;object-fit:cover;object-position:50% 14%}.pfed .pfavs button.on{box-shadow:0 0 0 3px var(--accent)}
 .pfed .pffr{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
 .pfed .pffr button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:38px 1fr;gap:9px;align-items:center;padding:8px 10px;border-radius:14px;box-shadow:inset 0 0 0 1px var(--line);background:#0b0a0e}
@@ -11450,10 +11456,10 @@ function pfGet(s){ const p = (s && s.pf) || {}, bl = (Array.isArray(p.bl) ? p.bl
     vs: PF_VS.some(v => v[0] === p.vs) ? p.vs : "flat", sl: PF_SLEEVES.some(v => v[0] === p.sl) ? p.sl : "", pv: {all: p.pv && p.pv.all === 0 ? 0 : 1, col: p.pv && p.pv.col === 0 ? 0 : 1, tr: p.pv && p.pv.tr === 0 ? 0 : 1}}; }
 // ce qui part vers les amis : seulement ce qui est débloqué et affiché
 function pfPublic(s){ const p = pfGet(s), all = tcCards(), a = p.av && all.find(c => c.no === p.av && s.own[c.id]);
-  return {bio: p.bio, av: a ? [a.no, tcBestFin(s, a)] : null, img: p.av === -1 && p.img ? p.img : "", fr: (PF_FRAMES.find(f => f[0] === p.fr) || PF_FRAMES[0])[3](s) ? p.fr : "auto", ti: (s.unl || []).includes(p.ti) ? p.ti : "", bl: p.bl.filter(k => !p.hide.includes(k)), vs: p.vs, sl: (PF_SLEEVES.find(f => f[0] === p.sl) || PF_SLEEVES[0])[3](s) ? p.sl : ""}; }
+  return {bio: p.bio, av: a ? [a.no, tcBestFin(s, a)] : null, img: p.av === -1 && p.img ? p.img : "", cc: s.show && s.show.b && (s.unl || []).includes(s.show.b) ? s.show.b : "", fr: (PF_FRAMES.find(f => f[0] === p.fr) || PF_FRAMES[0])[3](s) ? p.fr : "auto", ti: (s.unl || []).includes(p.ti) ? p.ti : "", bl: p.bl.filter(k => !p.hide.includes(k)), vs: p.vs, sl: (PF_SLEEVES.find(f => f[0] === p.sl) || PF_SLEEVES[0])[3](s) ? p.sl : ""}; }
 // ce qui arrive d'un ami : rien n'est repris tel quel
 function pfClean(x){ x = x && typeof x === "object" ? x : {}; const av = Array.isArray(x.av) && Number.isFinite(+x.av[0]) ? [+x.av[0], typeof x.av[1] === "string" ? x.av[1].slice(0, 1) : ""] : null;
-  return {bio: String(x.bio || "").slice(0, 160), av, img: pfImgOk(x.img) ? x.img : "", fr: PF_FRAMES.some(f => f[0] === x.fr) ? x.fr : "auto", ti: VT.some(v => v[0] === x.ti) ? x.ti : "", bl: Array.isArray(x.bl) ? x.bl.filter((k, i, a) => PF_KEYS.includes(k) && a.indexOf(k) === i) : [...PF_KEYS], vs: PF_VS.some(v => v[0] === x.vs) ? x.vs : "flat", sl: PF_SLEEVES.some(v => v[0] === x.sl) ? x.sl : ""}; }
+  return {bio: String(x.bio || "").slice(0, 160), av, img: pfImgOk(x.img) ? x.img : "", cc: VT.some(v => v[0] === x.cc) ? x.cc : "", fr: PF_FRAMES.some(f => f[0] === x.fr) ? x.fr : "auto", ti: VT.some(v => v[0] === x.ti) ? x.ti : "", bl: Array.isArray(x.bl) ? x.bl.filter((k, i, a) => PF_KEYS.includes(k) && a.indexOf(k) === i) : [...PF_KEYS], vs: PF_VS.some(v => v[0] === x.vs) ? x.vs : "flat", sl: PF_SLEEVES.some(v => v[0] === x.sl) ? x.sl : ""}; }
 // ---- photo d'avatar importée ----
 // Une photo n'est jamais affichée sans avoir été analysée SUR L'APPAREIL QUI L'AFFICHE (celui qui l'importe, puis celui de chaque ami qui la reçoit) :
 // modifier sa sauvegarde à la main ne suffit donc pas à imposer une image aux autres. L'analyse (nsfwjs, modèle MobileNetV2 chargé à la demande)
@@ -11473,7 +11479,7 @@ function pfPendRun(){ document.querySelectorAll(".pfav[data-pfpend]").forEach(el
 function pfAvatar(pf, name){ const c = pf.av && tcCards().find(x => x.no === pf.av[0]), ini = `<b>${esc((name || "?").slice(0, 1).toUpperCase())}</b>`;
   if (pf.img && pfImgOk(pf.img)){ const h = pfHash(pf.img); if (pfList(PF_KO).includes(h)) return `<span class="pfav fr-${pf.fr}">${ini}</span>`; if (pfList(PF_OK).includes(h)) return `<span class="pfav fr-${pf.fr}" data-pfcustom="${h}"><img src="${pf.img}" alt=""></span>`;
     PF_PEND[h] = pf.img; setTimeout(pfPendRun, 60); return `<span class="pfav fr-${pf.fr}" data-pfpend="${h}" data-pfcustom="${h}">${ini}</span>`; }
-  return `<span class="pfav fr-${pf.fr}">${c ? `<img src="${tcArt(c, pf.av[1] || "")}" alt="">` : ini}</span>`; }
+  return `<span class="pfav fr-${pf.fr}">${c ? `<img src="${tcBase(c)}" alt="">` : ini}</span>`; }   /* toujours l'image de base de la carte : c'est celle que montre le choix d'avatar (une version Wanted ou AR se cadrait mal dans le rond) */
 // cadrage de la photo, comme pour une photo de profil : on la déplace au doigt ou à la souris et on zoome (curseur, molette ou pincement) dans le rond
 // qui montre le rendu final. La validation produit un carré de 160 px (JPEG léger) : c'est cette version, et elle seule, qui est analysée, enregistrée et envoyée.
 function pfCrop(file){ return new Promise((done, fail) => { const url = URL.createObjectURL(file), el = new Image(); el.onerror = () => { URL.revokeObjectURL(url); fail(new Error("image")); };
@@ -11499,7 +11505,8 @@ function pfCrop(file){ return new Promise((done, fail) => { const url = URL.crea
         let q = .82, out = cv.toDataURL("image/jpeg", q); while (out.length > 38000 && q > .4){ q -= .1; out = cv.toDataURL("image/jpeg", q); } end(); done(out); } catch (e){ end(); fail(e); } }; };
   el.src = url; }); }
 function pfHead(name, tag, c, pf, o = {}){ const ti = pf.ti && VT.find(v => v[0] === pf.ti), since = c.since ? new Date(c.since).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"}) : "";
-  return `<div class="pfhead">${pfAvatar(pf, name)}<div class="pfid"><span class="eb">Collectionneur · niveau ${c.lv || 0}</span><h2>${esc(name)}${tag ? `<small>#${esc(String(tag))}</small>` : ""}</h2>${ti ? `<span class="pfti"><i>${ti[2]}</i>${esc(ti[1])}</span>` : ""}
+  const bg = pf.cc && !o.plain ? `<div class="ccbg" aria-hidden="true">${vtCardHTML(pf.cc, {cls: "main"}).replaceAll('loading="lazy"', "")}</div>` : "";   // carte d'appel : la carte de visite en bannière derrière l'en-tête
+  return `<div class="pfhead ${bg ? "cc" : ""}">${bg}${pfAvatar(pf, name)}<div class="pfid"><span class="eb">Collectionneur · niveau ${c.lv || 0}</span><h2>${esc(name)}${tag ? `<small>#${esc(String(tag))}</small>` : ""}</h2>${ti ? `<span class="pfti"><i>${ti[2]}</i>${esc(ti[1])}</span>` : ""}
     <p class="mt">${since ? "Membre depuis le " + since : ""}${o.me ? `<em>c'est toi</em>` : o.live != null ? ` · <span style="color:${o.live ? "var(--ok)" : "var(--muted)"}">${o.live ? "en ligne" : "hors ligne"}</span>` : ""}</p>${pf.bio ? `<p class="bio">${esc(pf.bio)}</p>` : ""}</div></div>`; }
 // le corps du profil : en-tête puis blocs, dans l'ordre choisi par son propriétaire
 function pfBody(name, tag, c, o = {}){ const all = tcCards(), pf = pfClean(c.pf), own = c.own || [], ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]);
@@ -11537,7 +11544,7 @@ function pfShow(){ const me = frMe(); if (!me){ show("home"); setTimeout(() => d
 // fenêtre « Personnaliser » : trois onglets, un brouillon, rien n'est enregistré avant « Enregistrer »
 function pfEdit(tab = "look", draft){ const me = frMe(); if (!me) return; const s = tcLoad(), d = draft || pfGet(s), M = $("#modal"), all = tcCards();
   const owned = all.filter(c => s.own[c.id]).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p).slice(0, 5), titles = VT.filter(v => (s.unl || []).includes(v[0]));
-  const prevPf = () => { const a = d.av && all.find(c => c.no === d.av && s.own[c.id]); return {bio: d.bio, av: a ? [a.no, tcBestFin(s, a)] : null, img: d.av === -1 ? d.img : "", fr: d.fr, ti: d.ti, bl: [], vs: d.vs, sl: d.sl}; };
+  const prevPf = () => { const a = d.av && all.find(c => c.no === d.av && s.own[c.id]); return {bio: d.bio, av: a ? [a.no, tcBestFin(s, a)] : null, img: d.av === -1 ? d.img : "", cc: pfPublic(s).cc, fr: d.fr, ti: d.ti, bl: [], vs: d.vs, sl: d.sl}; };
   const look = () => `<h3>Bio</h3><textarea id="pfBio" maxlength="160" placeholder="Une phrase sur toi : tes animés préférés, ce que tu cherches…">${esc(d.bio)}</textarea><span class="cnt" id="pfCnt">${d.bio.length}/160</span>
     <h3>Avatar <small>ton initiale, une de tes cinq meilleures cartes, ou ta photo</small></h3><div class="pfavs"><button class="${d.av ? "" : "on"}" data-pfav="0" aria-label="Initiale">${esc(me.name.slice(0, 1).toUpperCase())}</button>${owned.map(c => `<button class="${d.av === c.no ? "on" : ""}" data-pfav="${c.no}" aria-label="${esc(c.n)}"><img src="${tcBase(c)}" alt="" loading="lazy"></button>`).join("")}${d.img ? `<button class="${d.av === -1 ? "on" : ""}" data-pfav="-1" aria-label="Ma photo"><img src="${d.img}" alt=""></button>` : ""}</div>
     <div class="row" style="margin-top:10px;align-items:center"><button id="pfUp">${d.img ? "Changer de photo" : "Importer une photo"}</button>${d.img ? `<button class="ghost" id="pfUpDel">Supprimer ma photo</button>` : ""}<input type="file" id="pfFile" accept="image/*" hidden></div><p class="small" id="pfUpSt" style="margin-top:8px">La photo est réduite à un petit carré, puis analysée automatiquement sur ton appareil avant d'être acceptée. Elle est analysée de nouveau chez chaque ami avant de s'afficher. Les images à caractère sexuel sont refusées.</p>
@@ -11571,6 +11578,22 @@ function pfEdit(tab = "look", draft){ const me = frMe(); if (!me) return; const 
   q("[data-pfpv]", x => { const [k, v] = x.pfpv.split(":"); d.pv[k] = +v; re(); });
   $("#pfCancel").onclick = $("#pfCancelX").onclick = () => pfShow();
   $("#pfSave").onclick = () => { const st = tcLoad(); st.pf = {bio: d.bio.trim(), av: d.av, img: d.img || "", fr: d.fr, ti: d.ti, bl: d.bl, hide: d.hide, vs: d.vs, sl: d.sl, pv: d.pv}; tcSave(st); try { SFX.play("win"); } catch {} pfShow(); }; }
+// ---- cartes d'appel dans les salons de partie ----
+// Chaque joueur envoie sa carte d'appel (bannière, avatar, cadre, titre : jamais la photo importée) dans le salon qu'il rejoint ; les pseudos du salon
+// d'attente dont on a reçu la carte sont alors affichés dessus. Sans carte reçue, le pseudo reste tel quel.
+const HCC = {};
+function hccMine(){ try { const n = profGet()?.name; if (!n) return null; const pf = pfPublic(tcLoad()); return {n, pf: {av: pf.av, cc: pf.cc, fr: pf.fr, ti: pf.ti}}; } catch { return null; } }
+function hccPaint(){ const box = document.querySelector("#lobbyBox"); if (!box) return; const me = hccMine(); if (me) HCC[me.n] = pfClean(me.pf);
+  box.querySelectorAll(".ucp > span:not(.lcc)").forEach(sp => { const name = (sp.firstChild && sp.firstChild.nodeType === 3 ? sp.firstChild.textContent : sp.textContent).replace(/\s*✓\s*$/, "").trim(), pf = HCC[name]; if (!pf || !pf.cc) return;
+    sp.classList.add("lcc"); sp.insertAdjacentHTML("afterbegin", `<i class="ccbg" aria-hidden="true">${vtCardHTML(pf.cc, {cls: "main"}).replaceAll('loading="lazy"', "")}</i>${pfAvatar({...pf, img: ""}, name)}`); }); }
+function hccHook(room){ if (!room || room.__hcc || typeof room.on !== "function" || typeof room.emit !== "function") return; room.__hcc = 1; const seen = new Set();
+  const say = () => { const m = hccMine(); if (m) try { room.emit("hcc", m).catch?.(() => {}); } catch {} };
+  try { room.on("hcc", m => { const d = m && m.data; if (!d || m.sameTab || typeof d.n !== "string" || d.n.length > 24) return; HCC[d.n] = pfClean(d.pf); if (!seen.has(d.n)){ seen.add(d.n); say(); } hccPaint(); }); } catch {}
+  say(); setTimeout(say, 1500); setTimeout(say, 5000); }
+{ const wrap = () => { try { if (typeof NET === "undefined" || !NET.room || NET.room.__hccW) return; const R = NET.room, base = R.join; if (typeof base !== "function") return; R.__hccW = 1;
+      R.join = async function(...a){ const room = await base.apply(this, a); try { if (!/^(fr|ami)/.test(String(a[0]))) hccHook(room); } catch {} return room; }; } catch {} };
+  wrap(); setInterval(wrap, 1500);
+  try { const box = document.querySelector("#lobbyBox"); if (box) new MutationObserver(() => { try { hccPaint(); } catch {} }).observe(box, {childList: true, subtree: true}); } catch {} }
 </script>
 
 <style>
@@ -11599,8 +11622,8 @@ section:not(#home):not(#game) > .topbar{position:sticky;top:env(safe-area-inset-
 .opt:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 /* pastilles de l'en-tête de partie et listes de joueurs */
 .gshud{gap:8px;margin-bottom:14px}
-.ucp span{border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;background:var(--panel2)}
-.ucp span.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.ucp > span{border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;background:var(--panel2)}
+.ucp > span.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 /* écran « passe le téléphone » : un sceau à la place de l'emoji */
 .cover{padding:44px 18px 40px}
 .cover .ico{font-size:0;line-height:0;margin-bottom:18px}
@@ -11727,9 +11750,9 @@ button.pmcard:hover:not(:disabled){transform:translateY(-3px);border-color:#3a37
 .gsres.ko::before{content:"負";background:color-mix(in srgb,var(--danger) 18%,var(--panel2));color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 50%,transparent)}
 .gsres.ok{color:var(--text)}.gsres.ko{color:var(--text)}
 /* ---- joueurs : pastilles et tour en cours ---- */
-.ucp span.now{background:color-mix(in srgb,var(--accent) 14%,var(--panel2));color:var(--text)}
-.ucp span.now::before{content:"";display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--accent);vertical-align:1px}
-.ucp span.done{border-color:color-mix(in srgb,var(--ok) 60%,transparent)}
+.ucp > span.now{background:color-mix(in srgb,var(--accent) 14%,var(--panel2));color:var(--text)}
+.ucp > span.now::before{content:"";display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--accent);vertical-align:1px}
+.ucp > span.done{border-color:color-mix(in srgb,var(--ok) 60%,transparent)}
 .rlteam,.btsc div,.pcrow{border-radius:14px;border:1px solid var(--line);background:#0b0a0e}
 .rlteam{border-top-width:1px}.rlteam.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .rlteam h3{font-family:var(--title);font-weight:700;font-size:14px}
