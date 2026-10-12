@@ -13192,7 +13192,7 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   let seen = true; try { seen = !!localStorage.getItem("mercato-bienvenue"); } catch {}
   if (!seen && !hashOk){
     document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Hanko, en trois gestes</h2>
-      <ol><li><i>01</i><span><b>Choisis un jeu</b>17 jeux rangés par famille : affrontement, connaissance, complicité, voix.</span></li>
+      <ol><li><i>01</i><span><b>Choisis un jeu</b>17 jeux rangés par famille : duel, connaissance, complicité, voix.</span></li>
       <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien avec un code à quatre caractères.</span></li>
       <li><i>03</i><span><b>Garde tes parties</b>Un pseudo suffit, sans mot de passe, pour retrouver tes records.</span></li></ol>
       <button class="primary" id="welGo">C'est parti</button></div></div>`);
@@ -13460,6 +13460,14 @@ body:has(#home:not(.hidden)) .mnsheet .mnwho .av{background:var(--hc);background
 /* Blind test (famille Voix) : un disque et une note à la place d'un personnage */
 #home .gcards .mode .art.disc .vin{position:absolute;left:50%;top:50%;width:86%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 7px,color-mix(in srgb,var(--f1) 55%,transparent) 7px 8px);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--f1) 70%,transparent);opacity:.6}
 #home .gcards .mode .art.disc svg{width:40%}
+</style>
+<style>
+/* fenêtre de bienvenue : elle s'ouvre sur la page des jeux, en haut (famille Duel), donc noir + rouge comme la barre du haut */
+.welcome{background:rgba(5,5,5,.84)}
+.welcome > div{background:#050505;border:0;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc) 70%,#fff),0 0 14px color-mix(in srgb,var(--hc) 45%,transparent),0 24px 60px rgba(0,0,0,.7)}
+.welcome .eyebrow,.welcome li i{color:var(--hc)}
+.welcome button.primary{font-family:var(--title);font-weight:900;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;padding:14px 20px;border:0;border-radius:999px;background:color-mix(in srgb,var(--hc) 26%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px var(--hc);text-shadow:none}
+.welcome button.primary:hover{background:color-mix(in srgb,var(--hc) 40%,#050505)}
 </style>
 
 </body>
