@@ -13285,6 +13285,8 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
 /* haut et bas du site aux couleurs du bloc qu'ils touchent (demande de l'utilisateur) : la barre du haut, et la barre d'onglets du téléphone, prennent la couleur de la famille
    qui se trouve en haut de l'écran (rouge au départ, puis bleu, rose, violet en défilant) ; le pied de page, collé à Voix, est en violet. --hc est posée sur <body> par le script. */
 body{--hc:#ff1e2d}
+/* fond noir uni sur la page des jeux et l'écran de lancement : plus de reflets verts ou violets du fond général, qui ne vont pas avec les couleurs des familles */
+body:has(#home:not(.hidden)),body:has(#launch:not(.hidden)){--bg:#050505;background:#050505;background-image:none}
 #home .sitebar .logo span{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hc);text-shadow:0 0 12px color-mix(in srgb,var(--hc) 55%,transparent);transition:color .35s}
 #home .sitebar .hlogo [fill="url(#hlg)"],#home .sitebar .hlogo [fill="#3fe0a8"]{fill:var(--hc);transition:fill .35s}
 #home .sitebar .sitenav a:hover{color:var(--hc)}
