@@ -9525,6 +9525,10 @@ setInterval(voxRender, 2000);
 .tclog-w small{font-family:var(--mono);font-size:9px;color:var(--muted)}
 .tclog-w i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;font-style:normal;font-family:var(--brand);font-weight:900;font-size:12px;color:var(--kc);background:color-mix(in srgb,var(--kc) 14%,transparent)}
 .tclog-w .pk i{color:#0e0d12;background:var(--kc)}
+.tclog-w .pkm{position:relative;display:block;width:28px;margin:0 0 1px}.tclog-w .pkm .pouch{width:100%;max-width:none;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.5);filter:none;animation:none}
+.tclog-w .pkm em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-weight:900;font-size:13px;color:var(--ok);text-shadow:0 1px 4px #000}
+.tclog-w .pk b{white-space:normal;text-align:center;font-size:8.5px;line-height:1.1}
+.tclog-w div{align-content:start}
 .tclog-w b{font-family:var(--mono);font-weight:700;font-size:9.5px;line-height:1.1;color:var(--kc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tclog-w .now{box-shadow:inset 0 0 0 1.5px var(--accent),0 0 12px color-mix(in srgb,var(--accent) 30%,transparent)}.tclog-w .ok{opacity:.5}.tclog-w .ok i{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
 .tclog > button{padding:10px 12px;font-size:14px}.tclog > p{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
@@ -10064,7 +10068,7 @@ function tcGo(k){ if (/days/.test(k) || k === "tlogin") return;
   if (k === "tfriend"){ try { if (frMe()) frShow(); else { show("home"); setTimeout(() => document.querySelector("#frHome")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); } } catch {} return; }
   if (k === "tname" || k === "tacc"){ show("home"); setTimeout(() => document.querySelector(k === "tacc" ? "#cpBox" : "#profBox")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); return; } if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
 const tcRw = rw => rw.g ? rw.g + " ◆" : "1 booster " + tcName(rw.p);
-const TC_LOGIN_PACKS = 2;   // boosters Classique offerts chaque jour avec le cadeau de connexion, en plus de la récompense du jour
+const TC_LOGIN_PACKS = 0;   // plus de booster Classique offert chaque jour avec le cadeau de connexion (retiré à la demande de l'utilisateur, 12 oct. 2026)
 // cadeau de connexion : un cycle de sept jours, toujours le même et toujours écrit en clair ; le 7e jour donne un booster Divin (Légendaire garantie)
 const TC_LOGIN7 = [{g: 20}, {g: 40}, {g: 60}, {p: "mix:2"}, {g: 80}, {g: 100}, {p: "mix:3"}];   // Divin le 7e jour (accepté par l'utilisateur le 12 oct. 2026, en échange d'une Mythique un peu plus rare)
 const tcLoginRw = n => TC_LOGIN7[(Math.max(1, n) - 1) % 7];
@@ -10241,9 +10245,9 @@ function tcRender(){
       <div class="tclog"><div class="tclog-h"><b>Connexion quotidienne <i>連続</i></b><span>Jour ${((s.login.n - 1) % 7) + 1}/7 · nouveau cadeau ${inT(tDay).replace("encore", "dans")}</span></div>
         <div class="tclog-bar" aria-hidden="true"><u style="width:${(((s.login.n - 1) % 7) + (s.login.got ? 1 : 0)) / 7 * 100}%"></u></div>
         <div class="tclog-w">${nx.map((n, k) => { const r = tcLoginRw(n), tt = r.p ? tcParse(r.p).t : -1, done = n < s.login.n || (n === s.login.n && s.login.got);
-          return `<div class="${done ? "ok" : n === s.login.n ? "now" : ""} ${tt >= 0 ? "pk t" + tt : ""}" title="${tt >= 0 ? "Booster " + TC_T[tt].n + " : " + TC_T[tt].g + " garantie" : r.g + " éclats"}"><small>J${k + 1}</small><i aria-hidden="true">${done ? "✔" : tt >= 0 ? TC_T[tt].k : "◆"}</i><b>${tt >= 0 ? TC_T[tt].n : r.g + " ◆"}</b></div>`; }).join("")}</div>
-        <button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + (lr.g ? lr.g + " éclats" : "booster " + TC_T[tcParse(lr.p).t].n) + " + " + TC_LOGIN_PACKS + " boosters Classique"}</button>
-        <p>Chaque jour : la récompense du jour + ${TC_LOGIN_PACKS} boosters Classique. <b>Un jour manqué et la série repart au jour 1.</b></p></div>
+          return `<div class="${done ? "ok" : n === s.login.n ? "now" : ""} ${tt >= 0 ? "pk t" + tt : ""}" title="${tt >= 0 ? "Booster " + TC_T[tt].n + " : " + TC_T[tt].g + " garantie" : r.g + " éclats"}"><small>J${k + 1}</small>${tt >= 0 ? `<span class="pkm" aria-hidden="true">${tcPouch(r.p)}${done ? `<em>✔</em>` : ""}</span>` : `<i aria-hidden="true">${done ? "✔" : "◆"}</i>`}<b>${tt >= 0 ? "Booster<br>" + TC_T[tt].n : r.g + " ◆"}</b></div>`; }).join("")}</div>
+        <button class="${s.login.got ? "" : "primary"}" id="tcLogin" ${s.login.got ? "disabled" : ""}>${s.login.got ? "✔ Cadeau du jour réclamé" : "Réclamer : " + (lr.g ? lr.g + " éclats" : "booster " + TC_T[tcParse(lr.p).t].n)}</button>
+        <p>Un cadeau par jour, de plus en plus gros jusqu'au booster Divin du 7e jour. <b>Un jour manqué et la série repart au jour 1.</b></p></div>
       ${s.tuto.bonus ? "" : `${sec("Découverte", "入門", dn(tut, s.tuto.claimed) + "/" + tut.length, "à faire une seule fois")}
       <p class="tcsecp">Tes premiers pas sur Hanko. Termine-les toutes pour un booster Or en cadeau.</p><div class="tcms">${tut.map(m => row(m, s.tuto.claimed.includes(m.k), "data-tcd")).join("")}
         <div class="tcm tcm2 ${tutDone ? "done" : ""}">${rwt({p: "mix:2"})}<div><b>Bonus : toutes les missions Découverte</b><i><u style="width:${dn(tut, s.tuto.claimed) / tut.length * 100}%"></u></i><small><span>${dn(tut, s.tuto.claimed)}/${tut.length}</span><span>1 booster Mélange Or</span></small></div><button class="${tutDone ? "primary" : ""}" id="tcTutoBonus" ${tutDone ? "" : "disabled"}>${tutDone ? "Réclamer" : "En cours"}</button></div></div>`}
@@ -10290,14 +10294,14 @@ function tcRender(){
   $("#tcClaimAll") && ($("#tcClaimAll").onclick = () => { const s = tcLoad(), w = tcWeek(s); let n = 0;
     tcTuto(s).forEach(m => { if (m.cur >= m.g && !s.tuto.claimed.includes(m.k)){ s.tuto.claimed.push(m.k); pay(s, m.rw); n++; } });
     if (!s.tuto.bonus && tcTuto(s).every(m => s.tuto.claimed.includes(m.k))){ s.tuto.bonus = true; tcGive(s, "mix:2"); n++; }
-    if (!s.login.got){ s.login.got = true; pay(s, tcLoginRw(s.login.n)); tcGive(s, "mix:0", TC_LOGIN_PACKS); n++; }
+    if (!s.login.got){ s.login.got = true; pay(s, tcLoginRw(s.login.n)); if (TC_LOGIN_PACKS) tcGive(s, "mix:0", TC_LOGIN_PACKS); n++; }
     tcMissions(s).forEach(m => { if (m.cur >= m.g && !s.day.claimed.includes(m.k)){ s.day.claimed.push(m.k); pay(s, m.rw); n++; } });
     if (!s.day.bonus && tcMissions(s).every(m => s.day.claimed.includes(m.k))){ s.day.bonus = true; tcGive(s, "mix:1"); n++; }
     { const mo = tcMonth(s); TC_MO.forEach(m => { if (m.v(mo) >= m.g && !mo.claimed.includes(m.k)){ mo.claimed.push(m.k); pay(s, m.rw); n++; } }); }
     TC_WK.forEach(m => { if (m.v(w) >= m.g && !w.claimed.includes(m.k)){ w.claimed.push(m.k); pay(s, m.rw); n++; } });
     if (n){ tcSave(s); tcRender(); SFX.play("fanfare"); tcCele(n > 1 ? n + " récompenses" : "Récompense", "réclamée" + (n > 1 ? "s" : ""), "褒"); } });
   $("#tcBonus") && ($("#tcBonus").onclick = () => { const s = tcLoad(); if (s.day.bonus || !tcMissions(s).every(m => s.day.claimed.includes(m.k))) return; s.day.bonus = true; tcGive(s, "mix:1"); tcSave(s); tcRender(); SFX.play("win"); });
-  $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; const rw = tcLoginRw(s.login.n); pay(s, rw); tcGive(s, "mix:0", TC_LOGIN_PACKS); tcSave(s); tcRender(); SFX.play("win"); tcCele("Jour " + s.login.n, tcRw(rw) + " + " + TC_LOGIN_PACKS + " boosters", "連"); });
+  $("#tcLogin") && ($("#tcLogin").onclick = () => { const s = tcLoad(); if (s.login.got) return; s.login.got = true; const rw = tcLoginRw(s.login.n); pay(s, rw); if (TC_LOGIN_PACKS) tcGive(s, "mix:0", TC_LOGIN_PACKS); tcSave(s); tcRender(); SFX.play("win"); tcCele("Jour " + s.login.n, tcRw(rw), "連"); });
   document.querySelectorAll("#tcBoard [data-tc]").forEach(b => b.onclick = () => { const c = tcCards().find(x => x.id === b.dataset.tc), s = tcLoad(); if (!c) return;
     const M = $("#modal"), close = () => { M.classList.add("hidden"); M.innerHTML = ""; };
     const vsel = b.dataset.v || ((TC_F.f ?? "*") === "*" ? "*" : "");
