@@ -11994,10 +11994,10 @@ body.scrolled .sitebar .logo,body.scrolled section:not(#home):not(#game) > .topb
   .tabbar a i{font-style:normal;font-family:var(--brand);font-weight:900;font-size:18px;line-height:1;color:var(--text)}
   .tabbar a:active{background:var(--panel2)}
   .tabbar a i{position:relative}
-  .tabbar .tdot{position:absolute;top:-7px;left:calc(100% - 3px);min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#ff3b4e;color:#fff;font-family:var(--mono);font-weight:700;font-size:10.5px;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--bg)}
-  /* la pastille bat deux fois toutes les 2,6 s (halo rouge qui s'élargit) pour attirer l'œil sans clignoter en continu */
-  @media (prefers-reduced-motion:no-preference){.tabbar .tdot{animation:tdot 2.6s ease-in-out infinite}}
-  @keyframes tdot{0%,36%,100%{transform:scale(1);box-shadow:0 0 0 2px var(--bg),0 0 0 2px rgba(255,59,78,0)}8%{transform:scale(1.28);box-shadow:0 0 0 2px var(--bg),0 0 0 3px rgba(255,59,78,.75)}18%{transform:scale(1);box-shadow:0 0 0 2px var(--bg),0 0 0 11px rgba(255,59,78,0)}26%{transform:scale(1.2);box-shadow:0 0 0 2px var(--bg),0 0 0 3px rgba(255,59,78,.6)}}
+  .tabbar .tdot{position:absolute;top:-5px;left:calc(100% - 2px);min-width:13px;height:13px;padding:0 3px;box-sizing:border-box;border-radius:7px;background:#ff3b4e;color:#fff;font-family:var(--mono);font-weight:700;font-size:8.5px;line-height:13px;text-align:center;box-shadow:0 0 0 2px var(--bg)}
+  /* pastille petite et discrète qui clignote doucement (choix de l'utilisateur : pas de halo ni de grossissement) */
+  @media (prefers-reduced-motion:no-preference){.tabbar .tdot{animation:tdot 1.6s ease-in-out infinite}}
+  @keyframes tdot{0%,55%,100%{opacity:1}75%,85%{opacity:.15}}
   body:has(#home:not(.hidden)) .wrap{padding-bottom:96px}
   body:has(#home:not(.hidden)) #vox{bottom:76px}
 }
