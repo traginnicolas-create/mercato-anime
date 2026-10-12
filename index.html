@@ -1803,7 +1803,7 @@ function localDebrief(){
   const tot = P.map(p => teamCards(p).reduce((s,c) => s + c.p, 0));
   const lines = w < 0 ? `<p><b>Verdict : égalité parfaite.</b></p>` : `
     <p><b>Verdict : l'${u.team} de ${esc(P[w].name)} l'emporte.</b> ${fightSummary(f)}</p>
-    <ul>
+    <ul class="fgsum">
       ${f.mvp ? `<li><b>Meilleur combattant :</b> ${esc(f.mvp.n)}, ${f.mvp.k} adversaire${f.mvp.k > 1 ? "s" : ""} battu${f.mvp.k > 1 ? "s" : ""}.</li>` : ""}
       ${f.survivors.length ? `<li><b>Encore debout :</b> ${f.survivors.map(s => `${esc(s.c.n)} (${pct(s.hp)})`).join(", ")}.</li>` : ""}
       <li><b>Niveau cumulé :</b> ${tot[0]} contre ${tot[1]}${tot[1-w] > tot[w] ? ", l'équipe gagnante avait moins de points : ce sont le niveau individuel et les capacités qui ont fait la différence." : "."}</li>
@@ -13527,6 +13527,10 @@ body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:h
 body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .tabbar .on,body:has(#home:not(.hidden)) .tabbar .on,body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .tabbar [aria-current="page"],body:has(#home:not(.hidden)) .tabbar [aria-current="page"],body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .tabbar .sel,body:has(#home:not(.hidden)) .tabbar .sel{background:color-mix(in srgb,var(--gb) 16%,transparent)}
 /* barre du haut de la page des jeux : au survol, les pastilles restent noires */
 #home .sitebar button,#home .sitebar button:hover:not(:disabled){background:#050505}
+</style>
+<style>
+/* fin du Mercato : la liste du verdict respire (les puces touchaient le bord du cadre) */
+.fgsum{margin:10px 0 4px;padding-left:24px;display:grid;gap:6px}.fgsum li{padding-left:4px}.fgsum li::marker{color:var(--accent)}
 </style>
 
 </body>
