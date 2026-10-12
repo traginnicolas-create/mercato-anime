@@ -13249,12 +13249,12 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   box-shadow:0 0 3px var(--fn),0 0 8px var(--f1),0 0 20px color-mix(in srgb,var(--f1) 70%,transparent),0 0 42px color-mix(in srgb,var(--f1) 38%,transparent),inset 0 0 28px color-mix(in srgb,var(--f1) 15%,transparent)}
 #home #cat2{--f1:#2b5bff;--fb:#3d6bff}#home #cat3{--f1:#ff8fb8}#home #cat4{--f1:#b14dff}
 /* fond d'en-tête, discret, qui s'efface vers la gauche pour laisser le titre tranquille */
-.cat .dam{position:absolute;inset:0 0 auto 0;height:200px;z-index:-1;pointer-events:none;border-radius:22px 22px 0 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 30%,#000 86%),linear-gradient(180deg,#000 55%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 30%,#000 86%),linear-gradient(180deg,#000 55%,transparent 100%);mask-composite:intersect}
-.cat .dam svg{position:absolute;right:0;top:0;width:70%;height:100%}
-.cat .dam.d1{background:repeating-linear-gradient(115deg,transparent 0 26px,color-mix(in srgb,var(--f1) 26%,transparent) 26px 27px)}
-/* anneaux d'écho (Voix) : de simples traits, sans aplat noir derrière, pour laisser voir le fond teinté de la famille */
-.cat .dam.v3{-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%);-webkit-mask-composite:initial;mask-composite:initial}
-.cat .dam.v3 svg{width:100%}
+.cat .dam{position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:22px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 30%,#000 86%);mask-image:linear-gradient(90deg,transparent 30%,#000 86%)}
+/* motifs dessinés pour l'en-tête (constellation, vagues) : ils restent en haut et s'estompent vers le bas ; les lignes de Duel et les anneaux de Voix courent sur toute la hauteur du bloc */
+.cat .dam svg{position:absolute;right:0;top:0;width:70%;height:200px;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%)}
+.cat .dam.d1{background:repeating-linear-gradient(115deg,transparent 0 26px,color-mix(in srgb,var(--f1) 22%,transparent) 26px 27px)}
+.cat .dam.v3{-webkit-mask-image:linear-gradient(90deg,transparent 22%,#000 70%);mask-image:linear-gradient(90deg,transparent 22%,#000 70%)}
+.cat .dam.v3 svg{width:100%;height:100%;-webkit-mask-image:none;mask-image:none}
 #home .cat .cath{margin-bottom:20px;min-height:132px;align-content:end}
 #home .cat .cath .eyebrow{color:var(--fb);text-shadow:0 0 7px color-mix(in srgb,var(--f1) 70%,transparent)}
 #home .cat .cath h2{font-family:var(--title);font-weight:900;font-size:clamp(32px,7vw,56px);line-height:.98;letter-spacing:-.01em;color:var(--fb);margin-top:6px;text-shadow:0 0 14px color-mix(in srgb,var(--f1) 60%,transparent),0 0 34px color-mix(in srgb,var(--f1) 35%,transparent)}
@@ -13282,6 +13282,27 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
 #home .gcards .mode span{display:block;padding:0;margin-top:5px;font-size:13.5px;line-height:1.38;color:#d9d5df;-webkit-line-clamp:unset;overflow:visible}
 #home .gcards .mode .mt{display:flex;margin-top:10px;padding:0;color:var(--fb);text-shadow:0 0 7px color-mix(in srgb,var(--f1) 60%,transparent)}
 #home .gcards .mode .mt em{color:var(--fb)}
+/* haut et bas du site aux couleurs du bloc qu'ils touchent (demande de l'utilisateur) : la barre du haut, et la barre d'onglets du téléphone, prennent la couleur de la famille
+   qui se trouve en haut de l'écran (rouge au départ, puis bleu, rose, violet en défilant) ; le pied de page, collé à Voix, est en violet. --hc est posée sur <body> par le script. */
+body{--hc:#ff1e2d}
+#home .sitebar .logo span{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hc);text-shadow:0 0 12px color-mix(in srgb,var(--hc) 55%,transparent);transition:color .35s}
+#home .sitebar .hlogo [fill="url(#hlg)"],#home .sitebar .hlogo [fill="#3fe0a8"]{fill:var(--hc);transition:fill .35s}
+#home .sitebar .sitenav a:hover{color:var(--hc)}
+#home .sitebar .crtop{box-shadow:inset 0 0 0 1.5px var(--hc);transition:box-shadow .35s}
+#home .sitebar .crtop > svg:first-child{background:var(--hc);transition:background .35s}
+#home .sitebar .crtop small{color:var(--hc)}
+#home .sitebar .hpill{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hc) 60%,var(--line))}
+#home .sitebar .hpill .f i u{background:var(--hc)}
+#home .sitebar .hpill .g,#home .sitebar .hpill .l{color:color-mix(in srgb,var(--hc) 45%,#fff)}
+#home .sitebar .mnbtn{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hc) 60%,var(--line))}
+#home .sitebar .mnbtn .av{background:var(--hc);transition:background .35s}
+#home .sitebar .mnbtn .dot{background:var(--hc);box-shadow:0 0 8px var(--hc)}
+#home .sitefoot{--hc:#b14dff;border-top-color:color-mix(in srgb,var(--hc) 50%,transparent)}
+#home .sitefoot span:first-child{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hc);text-shadow:0 0 10px color-mix(in srgb,var(--hc) 55%,transparent)}
+#home .sitefoot a{color:var(--hc)}
+.tabbar{border-top-color:color-mix(in srgb,var(--hc) 45%,var(--line))!important}
+.tabbar a.tcr i{background:var(--hc)!important;color:#fff!important;box-shadow:0 0 0 4px var(--bg),0 6px 18px color-mix(in srgb,var(--hc) 45%,transparent)!important;transition:background .35s}
+.tabbar a i{transition:color .35s}
 /* raccourcis vers les familles : pastilles au contour de la famille */
 #famNav button{box-shadow:inset 0 0 0 1.5px var(--fc)}
 @media (max-width:640px){
@@ -13301,7 +13322,7 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   const MOTIF = {cat1: `<div class="dam d1" aria-hidden="true"></div>`,
     cat2: `<div class="dam" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="xMaxYMid slice">${ST.slice(0, -1).map((p, k) => `<line x1="${p[0]}" y1="${p[1]}" x2="${ST[k + 1][0]}" y2="${ST[k + 1][1]}" stroke="var(--f1)" stroke-width="1" opacity=".5"/>`).join("")}${ST.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="var(--fb)"/>`).join("")}</svg></div>`,
     cat3: `<div class="dam" aria-hidden="true"><svg viewBox="0 0 400 190" preserveAspectRatio="none">${wave(16, 34, 84, .7)}${wave(16, 34, 112, .35)}</svg></div>`,
-    cat4: `<div class="dam v3" aria-hidden="true"><svg viewBox="0 0 400 200" preserveAspectRatio="xMaxYMid slice">${[[72, .85], [118, .55], [166, .34], [216, .18]].map(r => `<circle cx="412" cy="92" r="${r[0]}" fill="none" stroke="var(--f1)" stroke-width="1.5" opacity="${r[1]}"/>`).join("")}</svg></div>`};
+    cat4: `<div class="dam v3" aria-hidden="true"><svg viewBox="0 0 400 200" preserveAspectRatio="xMaxYMid slice">${[[60, .85], [100, .6], [142, .42], [186, .28], [232, .16]].map(r => `<circle cx="410" cy="100" r="${r[0]}" fill="none" stroke="var(--f1)" stroke-width="1.5" opacity="${r[1]}"/>`).join("")}</svg></div>`};
   document.querySelectorAll("#home section.cat").forEach(sec => { if (MOTIF[sec.id] && !sec.querySelector(".dam")) sec.insertAdjacentHTML("afterbegin", MOTIF[sec.id]); });
   // un personnage par jeu, dans la couleur de sa famille : rouge (Duel), bleu (Connaissance), rose (Complicité). Le jeu au micro garde un micro.
   const WHO = {mercato: ["op", "Shanks"], gt: ["na", "Gaara"], uc: ["na", "Sasori"], liar: ["op", "Eustass Kid"], rl: ["op", "Sakazuki (Akainu)"], wh: ["op", "Monkey D. Luffy"], jg: ["na", "Kushina Uzumaki"], pc: ["na", "Karin"],
@@ -13311,6 +13332,11 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   document.querySelectorAll("#home .gcards .mode").forEach(c => { const g = c.dataset.g, art = c.querySelector(".art"); if (!art) return;
     if (g === "mm"){ art.classList.add("mic"); art.innerHTML = `<div class="eq">${Array.from({length: 9}, (_, x) => `<u style="height:${24 + Math.round(70 * Math.abs(Math.sin(x * 1.7 + .6)))}%"></u>`).join("")}</div>${mic}`; return; }
     const w = WHO[g], src = w && find(w[0], w[1]); if (src) art.innerHTML = `<img src="${src}" alt="" loading="lazy">${g === "sil" ? `<i class="tint"></i>` : ""}`; });
+  // la couleur du haut du site suit la famille qui occupe le haut de l'écran
+  try { const secs = [...document.querySelectorAll("#home section.cat")], home = document.querySelector("#home"); let last = "", tick = 0;
+    const upd = () => { tick = 0; if (!home || home.classList.contains("hidden")) return; let cur = secs[0]; for (const s of secs){ if (s.getBoundingClientRect().top <= innerHeight * .4) cur = s; }
+      const c = getComputedStyle(cur).getPropertyValue("--fb").trim() || getComputedStyle(cur).getPropertyValue("--f1").trim(); if (c && c !== last){ last = c; document.body.style.setProperty("--hc", c); } };
+    addEventListener("scroll", () => { if (!tick) tick = requestAnimationFrame(upd); }, {passive: true}); upd(); setTimeout(upd, 600); } catch {}
   // les pastilles de familles ont été créées avec les anciennes couleurs : on leur donne celles de la nouvelle direction
   try { const secs = [...document.querySelectorAll("#home section.cat")]; document.querySelectorAll("#famNav button").forEach((b, k) => { if (secs[k]) b.style.setProperty("--fc", getComputedStyle(secs[k]).getPropertyValue("--fb").trim() || getComputedStyle(secs[k]).getPropertyValue("--f1")); }); } catch {}
 })();
