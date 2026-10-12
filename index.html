@@ -11831,6 +11831,10 @@ input::placeholder{color:#716c7a}
 #home > #tcHome{order:5}#home > #frHome{order:6}#home > #joinBox{order:7}#home > .sitefoot{order:9}
 #home > .feature,#home > .steps{display:none!important}
 .sitebar .logo,section:not(#home):not(#game) > .topbar h1{cursor:pointer}
+/* barre du haut (12 oct. 2026) : en haut de page elle est transparente, sans fond ni filet (son fond dessinait une bande sombre entre le logo et le menu) ;
+   dès qu'on défile, elle prend un fond plein sur toute la largeur de l'écran pour rester lisible par-dessus le contenu */
+.sitebar,section:not(#home):not(#game) > .topbar{background:transparent!important;background-image:none!important;border-bottom-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+body.scrolled .sitebar,body.scrolled section:not(#home):not(#game) > .topbar{background:var(--bg)!important;box-shadow:0 0 0 100vmax var(--bg);clip-path:inset(0 -100vmax)}
 .resume{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin:14px 0;background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
 .resume b{font-family:var(--mono);font-weight:500;letter-spacing:2px;color:var(--accent)}
 .welcome{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(8,7,11,.82);backdrop-filter:blur(6px)}
@@ -12054,6 +12058,7 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   // téléphone : onglets en bas de l'accueil
   document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#" id="tabTcg"><i>札</i>Cartes</a></nav>`);   // « Rejoindre » et « Profil » sont dans le menu en haut à droite
   document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); tcShow(); };
+  { const sc = () => document.body.classList.toggle("scrolled", (window.scrollY || document.documentElement.scrollTop || 0) > 6); addEventListener("scroll", sc, {passive: true}); sc(); }
   // le logo ramène à l'accueil : celui de l'accueil remonte en haut de page, celui des autres écrans passe par leur bouton « Accueil » (pour quitter proprement)
   document.addEventListener("click", e => { const t = e.target.closest && e.target.closest(".sitebar .logo, section:not(#home):not(#game) > .topbar h1"); if (!t) return;
     if (t.matches(".logo")){ window.scrollTo({top: 0, behavior: "smooth"}); return; }
