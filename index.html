@@ -11824,6 +11824,13 @@ input::placeholder{color:#716c7a}
   #home .panel > button.primary[id$="Go"],#home #go{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:20;width:100%;box-shadow:0 0 0 6px var(--panel),0 0 34px color-mix(in srgb,var(--accent) 30%,transparent)}
 }
 /* ---- reprise d'une partie, premier lancement ---- */
+/* accueil épuré (12 oct. 2026) : plus de jeu « à la une » ni de mode d'emploi en trois étapes ; les jeux d'abord, puis les cartes, les amis,
+   et tout en bas le bloc rejoindre / pseudo / compte (aussi accessibles par le menu en haut à droite) */
+#home{display:flex;flex-direction:column}#home > *{order:4}
+#home > .sitebar{order:0}#home > .resume{order:1}#home > #famNav{order:2}#home > section.cat{order:3}
+#home > #tcHome{order:5}#home > #frHome{order:6}#home > #joinBox{order:7}#home > .sitefoot{order:9}
+#home > .feature,#home > .steps{display:none!important}
+.sitebar .logo,section:not(#home):not(#game) > .topbar h1{cursor:pointer}
 .resume{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin:14px 0;background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
 .resume b{font-family:var(--mono);font-weight:500;letter-spacing:2px;color:var(--accent)}
 .welcome{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(8,7,11,.82);backdrop-filter:blur(6px)}
@@ -11859,7 +11866,7 @@ input::placeholder{color:#716c7a}
 @media (max-width:640px){
   .sitenav{display:none}
   body:has(#home:not(.hidden)) .tabbar{display:grid}
-  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;grid-template-columns:repeat(2,1fr);gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
   .tabbar a{display:grid;justify-items:center;gap:2px;padding:6px 4px;border-radius:12px;color:#b7b2bd;text-decoration:none;font-size:12px;font-weight:700}
   .tabbar a i{font-style:normal;font-family:var(--brand);font-weight:900;font-size:18px;line-height:1;color:var(--text)}
   .tabbar a:active{background:var(--panel2)}
@@ -12045,9 +12052,12 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   document.querySelectorAll(".panel.rules").forEach(p => { const h = p.querySelector(":scope > b:first-child"); if (!h) return; p.classList.add("fold");
     h.setAttribute("role", "button"); h.tabIndex = 0; const tog = () => p.classList.toggle("open"); h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
   // téléphone : onglets en bas de l'accueil
-  document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#joinBox"><i>参</i>Rejoindre</a><a href="#" id="tabTcg"><i>札</i>Cartes</a><a href="#joinBox" id="tabProf"><i>名</i>Profil</a></nav>`);
+  document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#" id="tabTcg"><i>札</i>Cartes</a></nav>`);   // « Rejoindre » et « Profil » sont dans le menu en haut à droite
   document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); tcShow(); };
-  document.querySelector("#tabProf").onclick = () => setTimeout(() => (document.querySelector("#profOpen") || document.querySelector("#profName"))?.focus({preventScroll: true}), 300);
+  // le logo ramène à l'accueil : celui de l'accueil remonte en haut de page, celui des autres écrans passe par leur bouton « Accueil » (pour quitter proprement)
+  document.addEventListener("click", e => { const t = e.target.closest && e.target.closest(".sitebar .logo, section:not(#home):not(#game) > .topbar h1"); if (!t) return;
+    if (t.matches(".logo")){ window.scrollTo({top: 0, behavior: "smooth"}); return; }
+    const b = [...t.closest(".topbar").querySelectorAll("button")].find(x => /Accueil|Quitter|Menu/i.test(x.textContent) && !x.classList.contains("mnbtn")); if (b) b.click(); else { try { show("home"); } catch {} window.scrollTo(0, 0); } });
 })();
 </script>
 
