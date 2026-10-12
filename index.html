@@ -11834,7 +11834,12 @@ input::placeholder{color:#716c7a}
 /* barre du haut (12 oct. 2026) : en haut de page elle est transparente, sans fond ni filet (son fond dessinait une bande sombre entre le logo et le menu) ;
    dès qu'on défile, elle prend un fond plein sur toute la largeur de l'écran pour rester lisible par-dessus le contenu */
 .sitebar,section:not(#home):not(#game) > .topbar{background:transparent!important;background-image:none!important;border-bottom-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-body.scrolled .sitebar,body.scrolled section:not(#home):not(#game) > .topbar{background:var(--bg)!important;box-shadow:0 0 0 100vmax var(--bg);clip-path:inset(0 -100vmax)}
+/* 2e passe : plus aucun fond de barre, même en défilant (l'utilisateur voyait encore une bande sur téléphone). Ce sont le logo, le titre et les boutons
+   qui portent chacun leur propre fond arrondi quand la page défile dessous ; la barre elle-même laisse passer les clics entre eux */
+.sitebar,section:not(#home):not(#game) > .topbar{box-shadow:none!important;pointer-events:none}
+.sitebar > *,section:not(#home):not(#game) > .topbar > *{pointer-events:auto}
+body.scrolled .sitebar .logo,body.scrolled section:not(#home):not(#game) > .topbar h1,body.scrolled section:not(#home):not(#game) > .topbar > button:not(.mnbtn){background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:999px;box-shadow:inset 0 0 0 1px var(--line)}
+body.scrolled .sitebar .logo,body.scrolled section:not(#home):not(#game) > .topbar h1{padding:6px 14px 6px 8px;margin-left:-8px}
 .resume{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin:14px 0;background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
 .resume b{font-family:var(--mono);font-weight:500;letter-spacing:2px;color:var(--accent)}
 .welcome{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(8,7,11,.82);backdrop-filter:blur(6px)}
