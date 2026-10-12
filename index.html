@@ -8692,8 +8692,9 @@ const profGet = () => lsGet(PROF_KEY, null);
 // (gsl-, jg-) et un Mercato local ne le sont pas. Seules les parties en ligne comptent pour le ratio victoires/défaites et pour la série de victoires.
 const HIST_LOCAL = /^(gsl|jg|gss|fxs|tps)-/;
 function histIsOnline(id, players, o = {}){ try { if (o.coop || (players || []).length < 2 || HIST_LOCAL.test(String(id))) return false; if (String(id).startsWith("me-")) return !!(typeof NET !== "undefined" && NET.role); return true; } catch { return false; } }
-// à la lecture : le marqueur enregistré, sinon (anciennes parties) une estimation d'après l'identifiant
-const histOnline = x => x.o != null ? !!x.o : !x.c && (x.players || []).length >= 2 && !HIST_LOCAL.test(String(x.id));
+// à la lecture : seul le marqueur enregistré compte. Les parties d'avant le 12 oct. 2026 n'en ont pas : elles restent dans l'historique mais sont
+// exclues du ratio victoires/défaites (demande de l'utilisateur : on ne compte les parties en ligne qu'à partir de maintenant)
+const histOnline = x => x.o === 1;
 function histAdd(id, mode, players, result, o = {}){
   const h = lsGet(HIST_KEY, []);
   if (h.some(x => x.id === id)) return;
