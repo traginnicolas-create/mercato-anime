@@ -12184,16 +12184,21 @@ body:has(.gcards [data-g="cr"].sel) .crh{display:block}
 .crtabs button.sel{color:var(--text);border-bottom-color:var(--accent)}.crtabs button small{margin-left:5px;font-family:var(--mono);font-size:11px;color:var(--accent)}
 .crtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px}
-.crc{all:unset;position:relative;box-sizing:border-box;display:block;border-radius:12px;overflow:hidden;background:#0b0a0e;box-shadow:inset 0 0 0 2px var(--tc,var(--line));min-width:0}
+/* mêmes raretés et mêmes contours que les cartes du Mercato : bordure de 3 px à la couleur du rang (rouge Mythique, jaune Légendaire, violet Épique, bleu Rare, gris Commun), halo, bandeau du rang, reflet des Mythiques */
+.crc{all:unset;position:relative;box-sizing:border-box;display:block;border-radius:13px;overflow:hidden;background:var(--panel2);border:3px solid var(--tc,var(--line));box-shadow:0 0 14px color-mix(in srgb,var(--tc,transparent) 32%,transparent);min-width:0}
+.crc[data-t="C"],.crc[data-t="R"]{box-shadow:0 0 8px color-mix(in srgb,var(--tc) 16%,transparent)}
+.crc .tr{position:absolute;left:0;right:0;bottom:0;padding:2px 4px;background:var(--tc);color:#111;font-weight:800;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;text-align:center}
+.crc[data-t="M"] .pic::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.32) 45%,transparent 60%);animation:shine 2.4s infinite;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.crc[data-t="M"] .pic::after{animation:none;opacity:0}}
 button.crc{cursor:pointer}
 .crc[data-t="M"]{--tc:var(--M)}.crc[data-t="L"]{--tc:var(--L)}.crc[data-t="E"]{--tc:var(--E)}.crc[data-t="R"]{--tc:var(--R)}.crc[data-t="C"]{--tc:var(--C)}
-.crc .pic{aspect-ratio:3/4;overflow:hidden;border-radius:10px 10px 0 0;margin:2px 2px 0}.crc .pic img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
-.crc .pw{position:absolute;top:6px;left:6px;min-width:26px;padding:2px 5px;border-radius:7px;background:rgba(8,8,10,.86);box-shadow:inset 0 0 0 1.5px var(--tc);font-family:var(--mono);font-weight:700;font-size:13px;text-align:center;color:#fff}
+.crc .pic{position:relative;aspect-ratio:3/4;overflow:hidden}.crc .pic img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.crc .pw{position:absolute;z-index:1;top:5px;left:5px;min-width:26px;padding:2px 5px;border-radius:7px;background:rgba(8,8,10,.86);box-shadow:inset 0 0 0 1.5px var(--tc);font-family:var(--mono);font-weight:700;font-size:13px;text-align:center;color:#fff}
 .crc .pw.up{color:#9df0c0}
 .crc .t{padding:5px 7px 7px;font-size:11px;line-height:1.25;color:var(--muted)}
 .crc .t b{display:block;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crc .ord{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#06110d;font-weight:900;font-size:13px}
-.crc.sel{box-shadow:inset 0 0 0 2.5px var(--accent)}.crc.off{opacity:.38;filter:grayscale(.8)}
+.crc .ord{position:absolute;z-index:1;top:5px;right:5px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#06110d;font-weight:900;font-size:13px}
+.crc.sel{outline:3px solid var(--accent);outline-offset:1px}.crc.off{opacity:.38;filter:grayscale(.8)}
 .crc.crpulse,.crpulse{animation:crpulse 1.5s ease-in-out infinite}
 @keyframes crpulse{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 45%,transparent)}}
 @media (prefers-reduced-motion:reduce){.crpulse,.crc.crpulse{animation:none}}
@@ -12223,10 +12228,52 @@ button.crc{cursor:pointer}
 .crauc .feed{display:grid;gap:3px;min-height:54px;margin:8px 0 12px;font-size:12.5px;color:var(--muted)}
 .crauc .crc{width:118px;margin:0 auto}
 .crit{display:flex;flex-wrap:wrap;gap:8px}
+.crsc{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.crsm{display:flex;flex-direction:column;gap:6px;padding:13px;border-radius:14px;background:#0b0a0e;box-shadow:inset 0 0 0 1px var(--line)}
+.crsm b{font-size:15px}.crsm small{color:var(--muted);font-size:12.5px}.crsm ul{list-style:none;margin:4px 0 8px;padding:0;display:grid;gap:4px;flex:1}
+.crsm li{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:#d9d5df}.crsm li em{font-style:normal;font-family:var(--mono);font-weight:700}
+.crsm li.t2 em{color:#7de3ff}.crsm li.t3{color:#f7c64a}.crsm li.t3 em{color:#f7c64a}
+.crsm button{padding:9px 10px;border-radius:999px;font-size:13.5px}
+.crcine{position:fixed;inset:0;z-index:9995;display:grid;place-items:center;padding:18px;background:rgba(3,4,5,.97);overflow:hidden;--cc:var(--tc,#b5b1bb)}
+.crcine[data-t="M"]{--tc:var(--M)}.crcine[data-t="L"]{--tc:var(--L)}.crcine[data-t="E"]{--tc:var(--E)}.crcine[data-t="R"]{--tc:var(--R)}.crcine[data-t="C"]{--tc:var(--C)}
+.crcine .in{position:relative;display:grid;justify-items:center;gap:8px;text-align:center;animation:crcin .5s .15s cubic-bezier(.2,.9,.2,1.1) both}
+.crcine .cw{width:min(210px,56vw);perspective:900px}.crcine .cw .crc{width:100%;animation:crflip .7s .2s cubic-bezier(.2,.8,.2,1) both}
+.crcine .cw .crc .t{font-size:13px}.crcine .cw .crc .t b{font-size:15px}.crcine .cw .crc .pw{font-size:18px}.crcine .cw .crc .tr{font-size:11.5px;padding:4px}
+.crcine .k{margin:0;font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--cc)}
+.crcine h3{margin:4px 0 0;font-family:var(--title);font-weight:900;font-size:clamp(22px,6vw,32px)}.crcine .d{margin:0 0 8px;color:var(--muted);font-size:13.5px}
+.crcine .rays,.crcine .ring,.crcine .flash{position:absolute;left:50%;top:50%;pointer-events:none;display:none}
+.crcine.t2 .rays:not(.two),.crcine.star .rays{display:block;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--cc) 26%,transparent) 0 6deg,transparent 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 62%);mask-image:radial-gradient(circle,#000 0,transparent 62%);animation:crspin 22s linear infinite;opacity:.5}
+.crcine.star .rays.two{animation-direction:reverse;animation-duration:34s;opacity:.3;background:repeating-conic-gradient(from 9deg,rgba(255,255,255,.2) 0 3deg,transparent 3deg 22deg)}
+.crcine.star .ring{display:block;width:40vmin;height:40vmin;margin:-20vmin 0 0 -20vmin;border-radius:50%;border:3px solid var(--cc);animation:crring 1.3s .55s ease-out both}
+.crcine.star .flash{display:block;inset:0;left:0;top:0;width:100%;height:100%;background:#fff;animation:crflash .9s .5s ease-out both}
+.crcine.star .k{font-size:clamp(26px,8vw,44px);letter-spacing:.06em;font-family:var(--title);font-weight:900;color:#f7c64a;text-shadow:0 0 26px rgba(247,198,74,.6);animation:crpop .6s .75s cubic-bezier(.2,1.4,.3,1) both}
+.crcine.star .in{animation-delay:.55s}.crcine.star .cw .crc{animation:crflip 1s .6s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 0 60px color-mix(in srgb,var(--cc) 70%,transparent)}
+@keyframes crcin{from{opacity:0;transform:translateY(18px) scale(.94)}}@keyframes crflip{from{transform:rotateY(180deg) scale(.7);opacity:0}}
+@keyframes crspin{to{transform:rotate(360deg)}}@keyframes crring{from{transform:scale(.2);opacity:1}to{transform:scale(4.2);opacity:0}}@keyframes crflash{from{opacity:.85}to{opacity:0}}@keyframes crpop{from{transform:scale(.3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.crcine .rays,.crcine .ring,.crcine .flash{display:none!important}.crcine .in,.crcine .cw .crc,.crcine.star .k{animation:none}}
 .crrule{padding:11px 14px;border-radius:12px;background:color-mix(in srgb,#f7c64a 10%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,#f7c64a 45%,transparent);margin-bottom:12px}
 .crrule i{display:block;font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#f7c64a}.crrule b{display:block;font-size:15.5px;margin:2px 0}.crrule p{margin:0;font-size:13px;color:#d9d5df}
 .crrule.cup{background:color-mix(in srgb,#ff5a6a 10%,var(--panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,#ff5a6a 45%,transparent)}.crrule.cup i{color:#ff8f9a}
 .crit button{padding:8px 12px;border-radius:999px;font-size:13px}.crit button.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.cruni{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.cruni button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:grid;gap:3px;padding:16px;border-radius:18px;background:radial-gradient(ellipse 90% 70% at 50% 0,color-mix(in srgb,var(--uc) 26%,transparent),transparent 70%),var(--panel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--uc) 40%,var(--line));text-align:center;transition:transform .18s,box-shadow .2s}
+.cruni button:hover,.cruni button:focus-visible{transform:translateY(-4px);box-shadow:inset 0 0 0 2px var(--uc),0 16px 34px rgba(0,0,0,.5)}
+.cruni .fan{display:flex;justify-content:center;height:120px;margin-bottom:8px}.cruni .fan img{width:78px;height:112px;object-fit:cover;object-position:top;border-radius:10px;border:2px solid var(--uc);margin:0 -14px;box-shadow:0 8px 18px rgba(0,0,0,.5);background:var(--panel2)}
+.cruni .fan img:nth-child(1){transform:rotate(-9deg) translateY(6px)}.cruni .fan img:nth-child(3){transform:rotate(9deg) translateY(6px)}.cruni .fan img:nth-child(2){z-index:1}
+.cruni b{font-family:var(--title);font-weight:900;font-size:20px}.cruni small{color:var(--muted);font-size:12.5px}.cruni em{font-style:normal;margin-top:8px;padding:8px;border-radius:999px;background:var(--uc);color:#0b0a0e;font-weight:800;font-size:14px}
+.crwel{position:relative;display:grid;justify-items:center;gap:10px;text-align:center;padding:10px 0 30px;perspective:1000px;--mx:0;--my:0}
+.crwel .eb{margin:0;font-family:var(--mono);font-size:11.5px;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
+.crwel h2{margin:0;font-family:var(--title);font-weight:900;font-size:clamp(26px,6vw,40px);line-height:1.02;letter-spacing:-.02em}.crwel h2 b{font-size:1.7em;background:linear-gradient(120deg,#3fe0a8,#c9f26b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.crwel .lead{max-width:46ch;margin:0;color:#d9d5df;font-size:15px;line-height:1.5}
+.crwel-fan{display:flex;justify-content:center;height:clamp(170px,40vw,250px);margin:6px 0 4px;transform-style:preserve-3d;transform:rotateX(calc(var(--my) * -10deg)) rotateY(calc(var(--mx) * 16deg));transition:transform .15s ease-out}
+.crwel-fan span{width:clamp(92px,22vw,140px);margin:0 clamp(-26px,-5vw,-18px);border-radius:14px;overflow:hidden;border:3px solid color-mix(in srgb,var(--accent) 70%,#fff);box-shadow:0 18px 40px rgba(0,0,0,.6);transform:translateZ(calc((2 - max(var(--k), -1 * var(--k))) * 26px)) rotate(calc(var(--k) * 7deg)) translateY(calc(max(var(--k), -1 * var(--k)) * 12px));animation:crfloat 5s ease-in-out infinite;animation-delay:calc(var(--k) * -.6s)}
+.crwel-fan img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+@keyframes crfloat{50%{margin-top:-8px}}
+.crwel-steps{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin:6px 0}
+.crwel-steps span{display:grid;justify-items:center;gap:2px;font-size:11.5px;font-weight:700;color:var(--c)}.crwel-steps i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;font-style:normal;font-size:16px;background:color-mix(in srgb,var(--c) 16%,var(--panel));box-shadow:inset 0 0 0 1.5px var(--c)}
+.crwel-steps u{width:14px;height:2px;background:var(--line);margin-bottom:14px}
+.crwel #crWelGo{font-size:18px;padding:14px 34px;margin-top:6px}
+@media (prefers-reduced-motion:reduce){.crwel-fan span{animation:none}}
 .crtop{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;gap:9px;height:42px;padding:0 14px 0 6px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dc,var(--accent)) 55%,var(--line));transition:transform .15s,box-shadow .2s}
 .crtop svg{flex:none;width:30px;height:30px;padding:5px;box-sizing:border-box;border-radius:50%;background:linear-gradient(140deg,#3fe0a8,#c9f26b);color:#06110d}
 .crtop span{display:grid;line-height:1.1}.crtop b{font-size:13.5px}.crtop small{font-family:var(--mono);font-size:10px;letter-spacing:.6px;color:var(--dc,var(--accent))}
@@ -12253,7 +12300,7 @@ const CR_DIV = [["Fer", "鉄", "#9aa3ad"], ["Bronze", "銅", "#c98a4b"], ["Argen
 const CR_BAND = [[0, .30], [.16, .48], [.36, .68], [.56, .86], [.74, 1]];
 // économie : réglée par simulation (tools/sim-carriere.js), voir CLAUDE.md
 // Les sommes suivent l'échelle du vrai marché des transferts du football (demande de l'utilisateur) : un personnage moyen vaut 1 à 20M, un crack plusieurs centaines de millions, jamais un milliard.
-const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .35, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, star: .7, clubLo: .24, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
+const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .35, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .24, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
 // noms des clubs IA : des groupes qui existent dans chaque univers (leur effectif, lui, est tiré selon la division)
 const CR_NAMES = {
   op: ["Pirates du Clown", "Baroque Works", "Équipage d'Arlong", "Marine de Loguetown", "Pirates de Krieg", "Pirates du Chat Noir", "CP9", "Thriller Bark", "Pirates de Foxy", "Brigade de Wapol", "Pirates de Bellamy", "Garnison d'Impel Down", "Armée de Dressrosa", "Pirates du Soleil", "Germa 66", "Pirates aux Cent Bêtes", "Marine de G-5", "Tontattas de Green Bit"],
@@ -12300,7 +12347,7 @@ const CR_AIORD = [[0, 1, 2, 3, 4], [4, 3, 2, 1, 0], [4, 0, 1, 2, 3], [0, 4, 1, 3
 function crNewDay(S){
   const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), star = lo + (hi - lo) * crStar(S.u), own = S.squad;
   S.oppOrd = S.div === 0 && S.season === 1 && S.day < 2 ? CR_AIORD[0] : CR_AIORD[Math.floor(Math.random() * CR_AIORD.length)];
-  S.spy = false;
+  S.spy = false; S.scouted = false;
   S.rule = null; if (S.tuto >= 5 && S.stat.played >= 3 && Math.random() < .3){ const k = crShuffle(Object.keys(CR_RULES))[0]; S.rule = {k}; if (k === "cap"){ const b = crByP(S, crAvail(S), true).slice(0, 5); S.rule.x = crSum(S.u, b) - 6 - Math.floor(Math.random() * 8); } }
   // la boutique et la vedette proposent en priorité des personnages qui renforceraient vraiment l'équipe (meilleurs que le 5e de l'effectif)
   const D = DATA[S.u], fifth = [...own].sort((a, b) => D[b].p - D[a].p)[4], useful = i => fifth == null || D[i].p > D[fifth].p;
@@ -12374,6 +12421,21 @@ function crAutoLineup(S){ const r = crRule(S), n = crN(S), u = S.u; let av = crB
   if (r && r.k === "bench"){ const weak = crByP(S, crAvail(S)).slice(0, 3), two = crByP(S, weak, true).slice(0, 2); pick = [...av.filter(i => !two.includes(i)).slice(0, n - 2), ...two]; }
   if (r && r.k === "cap"){ let rest = av.slice(n); while (crSum(u, pick) > r.x && rest.length){ pick = crByP(S, pick, true); pick.shift(); pick.push(rest.shift()); } if (crSum(u, pick) > r.x) pick = crByP(S, crAvail(S)).slice(0, n); }
   return crByP(S, pick); }
+/* ---------- cellule de recrutement : on paie une mission, le recruteur ramène un personnage tiré au sort (une mission par match). Pas de garantie : c'est un pari, chances affichées ---------- */
+const CR_SCOUT = {loc: ["Mission locale", "Le recruteur fait le tour des environs.", [55, 40, 4.5, .5]], nat: ["Mission nationale", "Il sillonne tout le pays.", [30, 55, 13, 2]], mon: ["Mission mondiale", "Il part à l'autre bout du monde.", [10, 50, 32, 8]]};
+const CR_TIERN = ["Un cran en dessous de ta division", "Du niveau de ta division", "Un cran au-dessus", "Vedette"];
+function crScoutPools(S){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), w = hi - lo, star = lo + w * crStar(S.u), top = Math.min(hi + .04, .93), f = (a, b) => P.ix.filter(i => !S.squad.includes(i) && P.q[i] > a && P.q[i] <= b);
+  return [f(lo - .14, lo + w * .3), f(lo + w * .3, star), f(star, top), f(top, Math.min(1, hi + .18))]; }
+// chances réelles (une tranche vide reporte sa part sur la tranche du dessous, sinon du dessus) et prix : un peu plus que ce que la mission rapporte en moyenne
+function crScoutInfo(S, k){ const pools = crScoutPools(S), odds = [...CR_SCOUT[k][2]];
+  for (let t = 3; t >= 0; t--) if (!pools[t].length && odds[t]){ let d = t - 1; while (d >= 0 && !pools[d].length) d--; if (d < 0){ d = t + 1; while (d < 4 && !pools[d].length) d++; } if (d >= 0 && d < 4) odds[d] += odds[t]; odds[t] = 0; }
+  const mean = l => l.reduce((a, i) => a + crVal(S.u, i), 0) / Math.max(1, l.length), ev = odds.reduce((a, o, t) => a + o / 100 * mean(pools[t]), 0);
+  return {pools, odds, price: crR5(ev * CR_ECO.scoutK), any: pools.some(l => l.length)}; }
+function crScoutNo(S, k){ const I = crScoutInfo(S, k); return S.scouted ? "Une seule mission par match" : !I.any ? "Plus personne à découvrir" : S.squad.length >= CR_MAXSQ ? "Effectif complet" : S.money < I.price ? "Pas assez d'argent" : ""; }
+function crScout(S, k){ if (crScoutNo(S, k)) return null; const I = crScoutInfo(S, k); let r = Math.random() * I.odds.reduce((a, b) => a + b, 0), t = 0; for (let x = 0; x < 4; x++){ r -= I.odds[x]; if (r <= 0){ t = x; break; } }
+  if (!I.pools[t].length) t = I.pools.findIndex(l => l.length); const l = I.pools[t], i = l[Math.floor(Math.random() * l.length)];
+  S.money -= I.price; S.squad.push(i); S.scouted = true; S.shop = S.shop.filter(x => x !== i); if (S.lot && S.lot.i === i && !S.lot.done) S.lot.done = `${crCard(S.u, i).n} a été recruté par ta cellule.`; S.stat.scout = (S.stat.scout || 0) + 1; if (t === 3) S.stat.stars = (S.stat.stars || 0) + 1; crMis(S, "buy");
+  return {i, t, price: I.price}; }
 /* ---------- coupe : trois tours à élimination directe pendant la saison (après les matchs 2, 4 et 6), contre des clubs de plus en plus forts ---------- */
 const CR_CUP = {names: ["Quart de finale", "Demi-finale", "Finale"], pay: [2, 3, 6], after: [2, 4, 6]};
 function crCupClub(S){ const r = S.cup.r, used = S.clubs.map(c => c.name), name = crShuffle(CR_NAMES[S.u].filter(n => !used.includes(n) && n !== S.rival))[0] || "Sélection de la coupe";
@@ -12475,7 +12537,7 @@ function crCount(S, res){ const r = crLoad(); if (!r.cap || r.cap.d !== tcDay())
   return true; }
 
 /* ---------- affichage ---------- */
-const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}</div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? TIER[c.t]}</div>${o.foot || ""}</${tag}>`; };
+const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}<span class="tr">${TIER[c.t]}</span></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
 function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); }
 const CR_TUTO = [
   ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Fer, Bronze, Argent, Or, Élite) et deviens champion d'Élite.", "Compris"],
@@ -12495,7 +12557,7 @@ function crRender(){
   el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>
     <div class="crhead"><div><div class="eb">${dv[1]} Division ${dv[0]} · Saison ${S.season} · Match ${Math.min(S.day + 1, CR_DAYS)}/${CR_DAYS}</div><h2>${esc(S.club)}</h2></div>
       <div class="crstats"><span><i>Caisse</i>${crMoney(S, S.money)}</span><span><i>Prestige</i>${S.prestige}</span><span><i>Points</i>${S.pts}</span><span title="Matchs de carrière qui rapportent encore des éclats et des boosters aujourd'hui"><i>Cartes · jour</i>${CR_CAP - cap}/${CR_CAP}</span></div></div>
-    ${tu ? `<div class="crcoach"><div><i>Didacticiel · ${S.tuto + 1}/5</i><b>${tu[0]}</b><p>${tu[1]}</p></div>${tu[2] ? `<button class="primary" id="crTuNext">${tu[2]}</button>` : ""}</div>` : S.news && CR.view === "hub" ? `<div class="crnews">${esc(S.news)}</div>` : ""}
+    ${tu ? `<div class="crcoach"><div><i>Didacticiel · ${S.tuto + 3}/7</i><b>${tu[0]}</b><p>${tu[1]}</p></div>${tu[2] ? `<button class="primary" id="crTuNext">${tu[2]}</button>` : ""}</div>` : S.news && CR.view === "hub" ? `<div class="crnews">${esc(S.news)}</div>` : ""}
     ${body}`;
   $("#crQuit").onclick = () => { crSave(); show("home"); };
   el.querySelectorAll("[data-crtab]").forEach(b => b.onclick = () => { CR.tab = b.dataset.crtab; CR.ask = null; crRender(); });
@@ -12539,7 +12601,17 @@ function crShopHTML(S){ const u = S.u, L = S.lot;
         ${crCanBuy(S, L.i, L.start) ? `<p class="small" style="margin-top:8px">${crCanBuy(S, L.i, L.start)}.</p>` : ""}</div></div>`;
   return `<div class="crbox"><div class="crrow"><div><h3>Boutique · prix fixe</h3><p>Des personnages du niveau de ta division, renouvelés après chaque match. Caisse : ${crMoney(S, S.money)}.</p></div></div>
       <div class="crgrid crshop">${S.shop.length ? S.shop.map(i => { const p = crVal(u, i), no = crCanBuy(S, i, p); return crTile(S, i, {sub: p + "M", foot: `<button class="crbuy ${no ? "ghost" : "primary"}" data-crbuy="${i}" ${no ? "disabled" : ""} title="${no}">${no && no !== "Pas assez d'argent" ? no : "Acheter"}</button>`}); }).join("") : `<p class="muted">Plus rien en boutique avant le prochain match.</p>`}</div></div>
-    <div class="crbox"><div class="crrow"><div><h3>Vedette du jour · aux enchères</h3><p>Les meilleurs personnages ne se vendent pas à prix fixe : tu enchéris en direct contre les clubs de ta division. L'offre disparaît après le prochain match.</p></div></div>${lot}</div>`; }
+    ${crScoutHTML(S)}<div class="crbox"><div class="crrow"><div><h3>Vedette du jour · aux enchères</h3><p>Les meilleurs personnages ne se vendent pas à prix fixe : tu enchéris en direct contre les clubs de ta division. L'offre disparaît après le prochain match.</p></div></div>${lot}</div>`; }
+function crScoutHTML(S){ return `<div class="crbox"><div class="crrow"><div><h3>Cellule de recrutement</h3><p>Paie une mission : ton recruteur revient avec un personnage tiré au sort, qui signe gratuitement. Une mission par match, et aucune garantie : c'est un pari.</p></div></div>
+    <div class="crsc">${Object.keys(CR_SCOUT).map(k => { const [n, d] = CR_SCOUT[k], I = crScoutInfo(S, k), no = crScoutNo(S, k);
+      return `<div class="crsm"><b>${n}</b><small>${d}</small><ul>${CR_TIERN.map((t, x) => I.odds[x] ? `<li class="t${x}"><span>${t}</span><em>${String(Math.round(I.odds[x] * 10) / 10).replace(".", ",")} %</em></li>` : "").join("")}</ul><button class="${no ? "ghost" : "primary"}" data-crsc="${k}" ${no ? "disabled" : ""}>${no && no !== "Pas assez d'argent" ? no : "Lancer · " + I.price + "M"}</button></div>`; }).join("")}</div></div>`; }
+// révélation d'une recrue : mise en scène complète pour une vedette (rayons, éclat, confettis, comme un gros tirage de cartes), simple retournement sinon
+function crCine(S, i, t){ return new Promise(done => { const c = crCard(S.u, i), star = t === 3, up = t === 2; try { if (star) tcLibs(); } catch {}
+  document.body.insertAdjacentHTML("beforeend", `<div class="crcine t${t} ${star ? "star" : ""}" data-t="${c.t}" role="dialog" aria-modal="true" aria-label="Recrue : ${esc(c.n)}"><i class="rays" aria-hidden="true"></i><i class="rays two" aria-hidden="true"></i><i class="ring" aria-hidden="true"></i><i class="flash" aria-hidden="true"></i>
+    <div class="in"><p class="k">${star ? "Vedette !" : up ? "Belle prise" : t === 1 ? "Recrue" : "Petite prise"}</p><div class="cw">${crTile(S, i)}</div><h3>${esc(c.n)}</h3><p class="d">${CR_TIERN[t]} · note ${c.p} · valeur ${crMoney(S, crVal(S.u, i))}</p><button class="primary" id="crCineOk">Bienvenue au club</button></div></div>`);
+  const el = document.querySelector(".crcine"); try { SFX.play(star ? "fanfare" : up ? "win" : "pop"); } catch {}
+  if (star) setTimeout(() => { try { tcBoom(3, el.querySelector(".cw")); } catch {} }, 900);
+  const end = () => { el.remove(); done(); }; el.querySelector("#crCineOk").onclick = end; setTimeout(() => el.querySelector("#crCineOk")?.focus(), star ? 1700 : 500); }); }
 function crTableHTML(S){ const t = [...S.clubs.map(c => ({name: c.name, pts: c.pts, rival: c.rival})), {name: S.club, pts: S.pts, me: true}].sort((a, b) => b.pts - a.pts || (b.me ? 1 : 0) - (a.me ? 1 : 0)), c = S.cup;
   return `<div class="crbox"><div class="crrow"><div><h3>Division ${CR_DIV[S.div][0]} · saison ${S.season}</h3><p>${S.div < 4 ? "Les deux premiers montent" : "Le premier est champion"}${S.div > 0 ? ", les deux derniers descendent" : ""}. ${S.day}/${CR_DAYS} matchs joués.</p></div></div>
     <table class="crtable">${t.map((x, k) => `<tr class="${x.me ? "me" : ""} ${k < (S.div < 4 ? 2 : 1) ? "up" : ""} ${k >= 6 && S.div > 0 ? "dn" : ""}"><td>${k + 1}</td><td>${esc(x.name)}${x.rival ? " · rival" : ""}</td><td>${x.pts} pts</td></tr>`).join("")}</table></div>
@@ -12549,7 +12621,8 @@ function crClubHTML(S){ const st = S.stat, row = (a, b) => `<div><span>${a}</spa
   return `<div class="crbox"><div class="crrow"><div><h3>Palmarès de ${esc(S.club)}</h3><p>Ce que ton club a accompli depuis le début de la carrière.</p></div></div>
     <div class="crgain">${row("Titres de champion d'Élite", st.titles)}${row("Coupes remportées", st.cups || 0)}${row("Montées de division", st.ups)}${row("Plus haute division atteinte", CR_DIV[Math.max(st.top, S.div)][0])}${row("Matchs joués · victoires", st.played + " · " + st.wins + (st.played ? " (" + Math.round(st.wins / st.played * 100) + " %)" : ""))}${row("Plus longue série de victoires", st.best || 0)}${row("Plus bel exploit", st.ex ? `${esc(st.exN)}, ${st.ex} de niveau cumulé en plus` : "Aucun pour l'instant")}${row("Achat le plus cher", st.buy ? crMoney(S, st.buy) : "Aucun")}${row("Vente la plus chère", st.sale ? crMoney(S, st.sale) : "Aucune")}${row("Prestige", S.prestige)}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Jalons</h3><p>Chaque première accession à une division offre un booster de cartes à collectionner ; le premier titre d'Élite offre un booster Divin.</p></div></div>
-      <div class="crmis">${[1, 2, 3, 4].map(d => `<div class="crmi ${S.reach["d" + d] ? "ok" : ""}"><b>Monter en division ${CR_DIV[d][0]}</b><span>${S.reach["d" + d] ? "Booster reçu" : "Booster " + TC_T[d >= 3 ? 2 : 1].n}</span></div>`).join("")}<div class="crmi ${S.reach.t ? "ok" : ""}"><b>Devenir champion d'Élite</b><span>${S.reach.t ? "Booster reçu" : "Booster Divin"}</span></div></div></div>`; }
+      <div class="crmis">${[1, 2, 3, 4].map(d => `<div class="crmi ${S.reach["d" + d] ? "ok" : ""}"><b>Monter en division ${CR_DIV[d][0]}</b><span>${S.reach["d" + d] ? "Booster reçu" : "Booster " + TC_T[d >= 3 ? 2 : 1].n}</span></div>`).join("")}<div class="crmi ${S.reach.t ? "ok" : ""}"><b>Devenir champion d'Élite</b><span>${S.reach.t ? "Booster reçu" : "Booster Divin"}</span></div></div></div>
+    <div class="crbox"><div class="crrow"><div><h3>Autre carrière</h3><p>Chaque univers a sa propre carrière, sauvegardée à part.</p></div><span class="row"><button id="crOther">Changer d'univers</button>${CR.ask === "reset" ? `<button class="red" id="crResetOk">Effacer cette carrière</button><button class="ghost" id="crResetNo">Annuler</button>` : `<button class="ghost" id="crReset">Recommencer de zéro</button>`}</span></div></div>`; }
 function crMisHTML(S){ return `<div class="crbox"><div class="crrow"><div><h3>Missions</h3><p>Elles donnent de l'argent et des atouts pour passer un adversaire qui te bloque.</p></div></div>
       <div class="crmis">${S.mis.map(m => { const T = CR_MIS[m.k]; return `<div class="crmi ${m.done ? "ok" : ""}"><b>${T.t}</b><span>${m.done ? "Récompense reçue" : crRwTxt(S, T.rw)}</span><i><u style="width:${Math.min(100, m.cur / T.g * 100)}%"></u></i></div>`; }).join("")}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Objectifs de la saison</h3><p>Prime de ${crMoney(S, crObjPrime(S))} par objectif rempli, versée en fin de saison.</p></div></div>
@@ -12577,6 +12650,10 @@ function crWire(S){
   el.querySelectorAll("[data-crbuy]").forEach(b => b.onclick = () => { const i = +b.dataset.crbuy; if (crBuy(S, i, crVal(u, i))){ try { SFX.play("pop"); } catch {} save(); } });
   $("#crNow") && ($("#crNow").onclick = () => { const L = S.lot; if (L && !L.done && crBuy(S, L.i, L.now, true)){ L.done = `${crCard(u, L.i).n} rejoint ${S.club} en achat immédiat (${crMoney(S, L.now)}).`; save(); } });
   $("#crBid") && ($("#crBid").onclick = () => crAuction(S));
+  $("#crOther") && ($("#crOther").onclick = () => { crSave(); CR.S = null; CR.intro = "uni"; crIntro(); window.scrollTo(0, 0); });
+  $("#crReset") && ($("#crReset").onclick = () => { CR.ask = "reset"; crRender(); }); $("#crResetNo") && ($("#crResetNo").onclick = () => { CR.ask = null; crRender(); });
+  $("#crResetOk") && ($("#crResetOk").onclick = () => { const x = crLoad(); delete x.saves[S.u]; x.cur = null; lsSet(CR_KEY, x); CR.ask = null; CR.S = null; CR.introU = S.u; CR.intro = "name"; crIntro(); window.scrollTo(0, 0); });
+  el.querySelectorAll("[data-crsc]").forEach(b => b.onclick = async () => { if (CR.busy) return; const r = crScout(S, b.dataset.crsc); if (!r) return; CR.busy = true; crSave(); await crCine(S, r.i, r.t); CR.busy = false; if (r.t === 3) S.news = `Coup de maître de ta cellule de recrutement : ${crCard(u, r.i).n} signe à ${S.club}.`; save(); });
 }
 /* ---------- l'enchère en direct : prix qui monte, compte à rebours, relance du chrono quand quelqu'un mise dans les dernières secondes ---------- */
 function crAuction(S){
@@ -12607,37 +12684,37 @@ function crAuction(S){
 
 /* ---------- raccourcis : onglet du milieu sur téléphone (theme.part), bouton dans la barre du haut sur ordinateur ---------- */
 const CR_ICON = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4"/><path d="M12 14v3.5M8.5 20.5h7M9.5 17.5h5"/><path d="M12 6.4l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z" fill="currentColor" stroke="none"/></svg>`;
-function crOpen(){ const r = crLoad(); if (r.cur && r.saves[r.cur]){ CR.S = r.saves[r.cur]; CR.tab = "match"; return crShow(); }
-  show("home"); document.querySelector('[data-g="cr"]')?.click(); setTimeout(() => document.querySelector("#crCfg")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); }
+function crOpen(){ const r = crLoad(); if (r.cur && r.saves[r.cur]){ CR.S = r.saves[r.cur]; CR.tab = "match"; return crShow(); } CR.S = null; CR.intro = "welcome"; show("cr"); crIntro(); }
+// avant la première carrière : page d'accueil du mode, puis les deux premières étapes du didacticiel (univers, nom du club). Sert aussi à changer d'univers.
+function crIntro(){ const el = $("#cr"); if (!el) return; const r = crLoad(), step = CR.intro || "welcome", top = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>`;
+  el.style.removeProperty("--dc");
+  if (step === "welcome") el.innerHTML = top + crWelcomeHTML();
+  else if (step === "uni") el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 1/7</i><b>Choisis ton univers</b><p>Toute ta carrière se joue dans un seul univers : tu ne recrutes que ses personnages. Tu pourras lancer une autre carrière dans un autre univers plus tard.</p></div></div>
+      <div class="cruni">${Object.keys(UNI).map(u => { const s = r.saves[u], pv = (UNI[u].preview || []).map(n => DATA[u].find(c => c.n === n)).filter(Boolean); return `<button data-cru="${u}" style="--uc:${TC_PACKS[u][2]}"><span class="fan">${pv.map(c => img(c)).join("")}</span><b>${UNI[u].name}</b><small>${s ? `Carrière en cours · division ${CR_DIV[s.div][0]}, saison ${s.season}` : DATA[u].length + " personnages"}</small><em>${s ? "Continuer" : "Choisir"}</em></button>`; }).join("")}</div>`;
+  else { const u = CR.introU; el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 2/7</i><b>Donne un nom à ton club</b><p>C'est lui qui apparaîtra au classement de ${UNI[u].name}. Tu commences en division Fer, avec six personnages modestes et ${CR_ECO.start}M en caisse.</p></div></div>
+      <div class="crbox" style="max-width:520px;margin:0 auto"><label class="f" for="crName">Nom du club</label><input id="crName" maxlength="16" placeholder="Mon club" value="${esc(profGet()?.name || "")}"><div class="row" style="margin-top:14px;justify-content:space-between"><button class="ghost" id="crBackU">Changer d'univers</button><button class="primary" id="crGoNew" style="font-size:16px;padding:12px 22px">Lancer ma carrière</button></div></div>`; }
+  $("#crQuit").onclick = () => show("home");
+  $("#crWelGo") && ($("#crWelGo").onclick = () => { CR.intro = "uni"; crIntro(); window.scrollTo(0, 0); });
+  el.querySelectorAll("[data-cru]").forEach(b => b.onclick = () => { const u = b.dataset.cru, s = crLoad().saves[u]; if (s){ CR.S = s; CR.tab = "match"; crSave(); return crShow(); } CR.introU = u; CR.intro = "name"; crIntro(); window.scrollTo(0, 0); });
+  $("#crBackU") && ($("#crBackU").onclick = () => { CR.intro = "uni"; crIntro(); });
+  $("#crGoNew") && ($("#crGoNew").onclick = () => { CR.S = crStart(CR.introU, $("#crName").value); CR.tab = "match"; crSave(); crShow(); window.scrollTo(0, 0); });
+  try { crWelcomeFx(el); } catch {} }
+// page d'accueil du mode (version provisoire, en attendant le choix de l'utilisateur parmi cinq propositions)
+function crWelcomeHTML(){ const pv = Object.keys(UNI).flatMap(u => (UNI[u].preview || []).slice(0, 2).map(n => DATA[u].find(c => c.n === n))).filter(Boolean).slice(0, 5);
+  return `<div class="crwel"><div class="crwel-fan" aria-hidden="true">${pv.map((c, k) => `<span style="--k:${k - (pv.length - 1) / 2}">${img(c)}</span>`).join("")}</div>
+    <p class="eb">Mode solo · 道</p><h2>Bienvenue dans<br><b>Carrière</b></h2><p class="lead">Pars de tout en bas avec une équipe modeste. Gagne, recrute, monte de division en division, et deviens champion d'Élite.</p>
+    <div class="crwel-steps">${CR_DIV.map(d => `<span style="--c:${d[2]}"><i>${d[1]}</i>${d[0]}</span>`).join("<u></u>")}</div>
+    <button class="primary" id="crWelGo">Commencer</button><p class="small">Une carrière complète demande une douzaine d'heures. Ta progression est sauvegardée.</p></div>`; }
+function crWelcomeFx(el){ const w = el.querySelector(".crwel"); if (!w) return; const mv = e => { const r = w.getBoundingClientRect(), x = ((e.clientX ?? r.left + r.width / 2) - r.left) / r.width - .5, y = ((e.clientY ?? r.top + r.height / 2) - r.top) / r.height - .5; w.style.setProperty("--mx", x.toFixed(3)); w.style.setProperty("--my", y.toFixed(3)); }; w.onpointermove = mv; }
 function crTopRefresh(){ const b = document.querySelector(".crtop"); if (!b) return; const r = crLoad(), s = r.cur && r.saves[r.cur]; b.innerHTML = `${CR_ICON}<span><b>Carrière</b><small>${s ? `${CR_DIV[s.div][0]} · saison ${s.season}` : "Nouveau mode solo"}</small></span>`; b.style.setProperty("--dc", s ? CR_DIV[s.div][2] : "var(--accent)"); }
 /* ---------- accueil : choix de l'univers et du nom du club ---------- */
 { const base = show; show = function(id){ base(id); const el = $("#cr"); if (el) el.classList.toggle("hidden", id !== "cr"); if (id === "home") try { crTopRefresh(); } catch {} if (id !== "cr" && CR.auc){ clearInterval(CR.auc.timer); document.querySelector(".crauc")?.remove(); CR.auc = null; } }; }
 (function crInit(){
-  const anchor = document.querySelector(".panel.mh"); if (!anchor) return;
   document.querySelector("#end").insertAdjacentHTML("afterend", `<section id="cr" class="hidden"></section>`);
-  anchor.insertAdjacentHTML("beforebegin", `<div class="panel crh" id="crCfg"></div>
-    <div class="panel rules crh" style="margin-top:14px"><b style="color:var(--text)">Comment marche la Carrière</b><ul style="margin-top:6px">
-      <li>Tu joues <b>seul contre l'ordinateur</b>, dans un seul univers. Tu pars de la division <b>Fer</b> avec des personnages faibles et un petit budget.</li>
-      <li>Une saison compte <b>7 matchs</b>. Les deux premiers du classement <b>montent</b>, les deux derniers <b>descendent</b>. But : devenir <b>champion d'Élite</b>.</li>
-      <li>Les personnages <b>ne progressent pas</b> : pour avancer, il faut <b>recruter</b>. La boutique vend à prix fixe ; les vedettes partent aux <b>enchères</b> contre les autres clubs.</li>
-      <li>Les cracks ne sont disponibles que dans les hautes divisions, coûtent très cher et demandent du <b>prestige</b>.</li>
-      <li>Des <b>missions</b> donnent de l'argent et des atouts (espion, forme olympique) pour passer un adversaire difficile.</li>
-      <li>Pour tes cartes à collectionner, seuls les <b>${CR_CAP} premiers matchs du jour</b> rapportent éclats et boosters. La carrière, elle, se joue sans limite.</li>
-    </ul></div>`);
-  let pickU = null, ask = null;
-  const draw = () => { const box = $("#crCfg"), r = crLoad(), name = box.querySelector("#crName")?.value ?? (profGet()?.name || "");
-    box.innerHTML = `<label class="f step"><i>01</i>Choisis ton univers</label><div class="gtseg">${Object.keys(UNI).map(u => { const s = r.saves[u]; return `<button class="${pickU === u ? "sel" : ""}" data-cru="${u}">${UNI[u].name}<small>${s ? `Division ${CR_DIV[s.div][0]} · saison ${s.season}` : "Nouvelle carrière"}</small></button>`; }).join("")}</div>
-      ${pickU ? (r.saves[pickU] ? `<div class="row" style="margin-top:16px"><button class="primary" id="crCont" style="font-size:17px;padding:13px 24px">Continuer ma carrière</button>${ask === "new" ? `<button class="red" id="crNewOk">Effacer et recommencer</button><button class="ghost" id="crNewNo">Annuler</button>` : `<button class="ghost" id="crNew">Recommencer de zéro</button>`}</div>`
-        : `<label class="f step" style="margin-top:16px"><i>02</i>Nom de ton club</label><input id="crName" maxlength="16" placeholder="Mon club" value="${esc(name)}"><div class="row" style="margin-top:16px"><button class="primary" id="crGoNew" style="font-size:17px;padding:13px 24px">Commencer la carrière</button></div>`) : ""}`;
-    box.querySelectorAll("[data-cru]").forEach(b => b.onclick = () => { pickU = b.dataset.cru; ask = null; draw(); });
-    const go = S => { CR.S = S; CR.tab = "match"; crSave(); crShow(); };
-    $("#crCont") && ($("#crCont").onclick = () => go(r.saves[pickU]));
-    $("#crNew") && ($("#crNew").onclick = () => { ask = "new"; draw(); }); $("#crNewNo") && ($("#crNewNo").onclick = () => { ask = null; draw(); });
-    $("#crNewOk") && ($("#crNewOk").onclick = () => { const x = crLoad(); delete x.saves[pickU]; if (x.cur === pickU) x.cur = null; lsSet(CR_KEY, x); ask = null; draw(); });
-    $("#crGoNew") && ($("#crGoNew").onclick = () => go(crStart(pickU, $("#crName").value))); };
   try { const hp = document.querySelector("#home .sitebar .hpill"); if (hp){ hp.insertAdjacentHTML("beforebegin", `<button class="crtop" aria-label="Ouvrir le mode Carrière"></button>`); document.querySelector(".crtop").onclick = crOpen; crTopRefresh(); } } catch {}
-  pickU = crLoad().cur; draw();
-  document.querySelector('[data-g="cr"]')?.addEventListener("click", draw);
+  /* la carte « Carrière » de la liste des jeux ouvre directement le mode (demande de l'utilisateur), sans passer par un panneau de réglages */
+  const hook = () => { const b = document.querySelector('[data-g="cr"]'); if (b && !b.__cr){ b.__cr = 1; b.addEventListener("click", e => { e.stopImmediatePropagation(); e.preventDefault(); crOpen(); }, true); } };
+  hook(); setTimeout(hook, 0);
 })();
 </script>
 
@@ -13096,6 +13173,36 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   document.addEventListener("click", e => { const t = e.target.closest && e.target.closest(".sitebar .logo, section:not(#home):not(#game) > .topbar h1"); if (!t) return;
     if (t.matches(".logo")){ window.scrollTo({top: 0, behavior: "smooth"}); return; }
     const b = [...t.closest(".topbar").querySelectorAll("button")].find(x => /Accueil|Quitter|Menu/i.test(x.textContent) && !x.classList.contains("mnbtn")); if (b) b.click(); else { try { show("home"); } catch {} window.scrollTo(0, 0); } });
+})();
+</script>
+<style>
+/* ---- Page des jeux épurée (13 oct. 2026) : on n'y garde que les jeux. Cartes, amis, profil, sauvegarde et « Rejoindre » passent par le menu,
+   qui ouvre la rubrique demandée dans une fenêtre au lieu de faire défiler la page. ---- */
+#home > #tcHome,#home > #frHome{display:none!important}
+#joinBox{display:none}
+#joinBox.hbshow{display:grid;position:fixed;inset:0;z-index:9200;place-items:center;align-content:center;gap:10px;padding:16px;background:rgba(4,5,6,.86);backdrop-filter:blur(6px);overflow:auto;margin:0;max-width:none;grid-template-columns:minmax(0,560px);justify-content:center}
+#joinBox.hbshow > .panel{display:none;width:100%;margin:0}
+#joinBox.hbshow > .panel.hbon{display:block;box-shadow:inset 0 0 0 1px var(--line),0 30px 80px rgba(0,0,0,.7)}
+#joinBox .hbx{display:none}
+#joinBox.hbshow .hbx{display:block;justify-self:end;padding:8px 14px;border-radius:999px}
+</style>
+<script>
+(function(){
+  const box = document.querySelector("#joinBox"); if (!box) return;
+  document.body.appendChild(box);   /* sorti de #home : l'accueil a une transformation CSS, qui empêcherait la fenêtre de se fixer à l'écran */
+  box.insertAdjacentHTML("afterbegin", `<button class="ghost hbx" id="hbClose">✕ Fermer</button>`);
+  const close = () => { box.classList.remove("hbshow"); box.querySelectorAll(".hbon").forEach(e => e.classList.remove("hbon")); document.removeEventListener("keydown", key); };
+  const key = e => { if (e.key === "Escape") close(); };
+  const open = id => { const t = box.querySelector("#" + id) || box.querySelector("#quickJoin"); try { if (document.querySelector("#home").classList.contains("hidden")) show("home"); } catch {}
+    box.querySelectorAll(".hbon").forEach(e => e.classList.remove("hbon")); t.classList.add("hbon"); box.classList.add("hbshow"); document.addEventListener("keydown", key);
+    setTimeout(() => { const f = t.querySelector("input:not(.hidden),button"); try { f && f.focus({preventScroll: true}); } catch {} }, 60); };
+  window.hbOpen = open; window.hbClose = close;
+  box.querySelector("#hbClose").onclick = close; box.addEventListener("click", e => { if (e.target === box) close(); });
+  /* tout ce qui, dans le site, « fait défiler jusqu'à » le profil, le compte, les amis ou la case Rejoindre ouvre désormais la fenêtre correspondante */
+  const siv = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function(...a){ try { if (this.id === "frHome") return open("profBox"); const inBox = this.closest && this.closest("#joinBox"); if (inBox && !box.classList.contains("hbshow")) return open(this.id === "joinBox" ? "quickJoin" : (this.closest("#joinBox > .panel") || this).id); } catch {} return siv.apply(this, a); };
+  document.querySelectorAll('a[href="#joinBox"]').forEach(a => a.addEventListener("click", e => { e.preventDefault(); open("quickJoin"); }));
+  { const base = show; show = function(id){ if (id !== "home") close(); return base(id); }; }
 })();
 </script>
 
