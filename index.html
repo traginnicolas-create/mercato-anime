@@ -13478,6 +13478,35 @@ body:has(#home:not(.hidden)) .mnsheet .mnwho .av{background:var(--hc);background
 .welcome button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--hc) 68%,#050505)}
 .welcome button.primary:focus-visible{box-shadow:0 0 0 2px #fff,0 0 30px color-mix(in srgb,var(--hc) 34%,transparent)}
 </style>
+<style>
+/* =====================================================================
+   DA DE LA FAMILLE À L'INTÉRIEUR DES JEUX (13 oct. 2026) : écran de lancement, salon, partie, fin de partie.
+   body[data-fam] = famille du jeu choisi (posé par le script ci-dessous à chaque changement d'écran). On remplace les variables de l'ancienne
+   identité verte (fond, panneaux, filets, accent, dégradés) par le noir + la couleur de la famille. Les Cartes, la Carrière et la page des jeux
+   ne sont pas concernées. --ok (bonne réponse) et --danger (erreur) gardent leur sens et leur couleur.
+   ===================================================================== */
+body[data-fam="1"]{--g1:#ff1e2d;--gb:#ff1e2d}body[data-fam="2"]{--g1:#2b5bff;--gb:#3d6bff}body[data-fam="3"]{--g1:#ff8fb8;--gb:#ff8fb8}body[data-fam="4"]{--g1:#b14dff;--gb:#b14dff}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))){--bg:#050505;--panel:#0b0b0c;--panel2:#141416;--line:color-mix(in srgb,var(--g1) 24%,#1d1d20);--text:#f3f1f5;--muted:#a29ea8;
+  --accent:var(--gb);--accent2:color-mix(in srgb,var(--gb) 70%,#000);--accent3:color-mix(in srgb,var(--gb) 55%,#fff);--cyan:color-mix(in srgb,var(--gb) 60%,#fff);
+  --grad:linear-gradient(115deg,var(--gb),color-mix(in srgb,var(--gb) 68%,#fff));--grad-cool:linear-gradient(115deg,var(--gb),color-mix(in srgb,var(--gb) 60%,#fff));--grad-aurora:linear-gradient(115deg,color-mix(in srgb,var(--gb) 70%,#000),var(--gb),color-mix(in srgb,var(--gb) 60%,#fff));
+  background:#050505;background-image:none}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) button.primary,body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--g1) 26%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px var(--gb);text-shadow:none;filter:none}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--g1) 40%,#050505)}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .hlogo [fill="url(#hlg)"],body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .hlogo [fill="#3fe0a8"]{fill:var(--gb)}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .hlogo [stroke="url(#hlg)"],body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .hlogo [stroke="#3fe0a8"]{stroke:var(--gb)}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) input[type=checkbox],body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) input[type=radio],body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) input[type=range]{accent-color:var(--gb)}
+</style>
+<script>
+(() => { const fam = () => { try { const c = document.querySelector("#home .gcards .mode.sel"), sec = c && c.closest("section.cat"), k = sec ? [...document.querySelectorAll("#home section.cat")].indexOf(sec) + 1 : 0; if (k) document.body.dataset.fam = k; else delete document.body.dataset.fam; } catch {} };
+  if (typeof show === "function"){ const _show = show; show = function(id){ const r = _show.apply(this, arguments); fam(); return r; }; }
+  document.addEventListener("click", () => setTimeout(fam, 0), true); fam();
+})();
+</script>
+<style>
+/* logo à gauche du titre, dans les jeux : même dessin, à la couleur de la famille (masque) */
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .topbar h1::before{background:var(--gb);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--gb) 60%,transparent))}
+body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .rules li::marker{color:var(--gb)}body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:has(#cr:not(.hidden))) .rules.fold > b:first-child::after{color:var(--gb)}
+</style>
 
 </body>
 </html>
