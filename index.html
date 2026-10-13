@@ -13766,6 +13766,20 @@ body:has(#tcg:not(.hidden)) .tcfb-s select.on,body:has(#tcg:not(.hidden)) .tcfb-
 body:has(#tcg:not(.hidden)) #tcg .tcm.done:not(.claimed){box-shadow:inset 0 0 0 1px #e0162f,0 0 9px color-mix(in srgb,#e0162f 38%,transparent)!important}
 </style>
 
+<style>
+/* Cartes : mêmes contours (1,5 px, rouge, léger halo) pour les éléments qui avaient gardé un filet fin : boutons ×3 / ×5 / ×10 et « Voir les persos », panneau d'aide, fenêtre « les persos » */
+body:has(#tcg:not(.hidden)) #tcg .tchero .row button:not(.primary),body:has(#tcg:not(.hidden)) #tcg .tchero .row button:not(.primary):hover:not(:disabled){border-color:transparent;background:#0b0b0c;color:#fff;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 62%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) #tcg .tchero .row button:not(.primary):hover:not(:disabled){background:color-mix(in srgb,#c8102e 18%,#0b0b0c)}
+body:has(#tcg:not(.hidden)) #tcg .tchero .row button:not(.primary):disabled{color:#8d8992;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 30%,#232326);opacity:1}
+body:has(#tcg:not(.hidden)) #tcg .tchelp{border-color:transparent;background:#0b0b0c;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 62%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) #tcg #tcRecycle{border-color:transparent;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 30%,#232326)}
+body:has(#tcg:not(.hidden)) #tcg #tcRecycle:not(:disabled){color:#fff;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 62%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) .tcdbox{background:#0b0b0c;border-color:transparent;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 62%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent),0 30px 80px rgba(0,0,0,.8)}
+body:has(#tcg:not(.hidden)) .tcdbox .head{border-bottom-color:color-mix(in srgb,#e0162f 45%,#232326)}
+body:has(#tcg:not(.hidden)) .tcdbox #tcClose,body:has(#tcg:not(.hidden)) .tcdbox #tcClose:hover:not(:disabled){border-color:transparent;background:#0b0b0c;color:#fff;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 62%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) .tcdbox .dcseg{background:#050505;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 62%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) .tcdbox .dcseg button{color:#fff}body:has(#tcg:not(.hidden)) .tcdbox .dcseg button.on{background:#fff;color:#050505}
+</style>
 
 </body>
 </html>
