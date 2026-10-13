@@ -10127,12 +10127,14 @@ const TC_WK_POOL = [{k: "wplay", t: "Termine 20 parties", g: 20, v: w => w.play,
 let TC_WK = tcPick(TC_WK_POOL, 8, tcWeekKey());
 const tcWeek = s => { TC_WK = tcPick(TC_WK_POOL, 8, tcWeekKey()); if (!s.week || s.week.k !== tcWeekKey()) s.week = {k: tcWeekKey(), play: 0, win: 0, open: 0, neu: 0, days: [], claimed: []}; s.week.days = s.week.days || []; if (!s.week.days.includes(tcDay())) s.week.days.push(tcDay()); return s.week; };
 // missions du mois : difficiles, très bien payées (booster Divin, gros lots d'éclats)
-// Seuils relevés le 14 oct. 2026 (demande de l'utilisateur) : les objectifs du mois demandent d'être très actif, 2 à 3 heures par jour (500 parties dans le mois ≈ 17 par jour).
-// Plus de mission « nouvelles cartes » au mois : elle devient infaisable quand la collection est presque complète.
-const TC_MO_POOL = [{k: "mwin", t: "Gagne 150 parties", g: 150, v: m => m.win, rw: {p: "mix:3"}}, {k: "mdays", t: "Connecte-toi 28 jours dans le mois", g: 28, v: m => m.days.length, rw: {p: "mix:3"}}, {k: "mopen", t: "Ouvre 250 boosters", g: 250, v: m => m.open, rw: {g: 1500}},
-  {k: "mplay500", t: "Termine 500 parties", g: 500, v: m => m.play, rw: {p: "mix:2"}}, {k: "mplay", t: "Termine 300 parties", g: 300, v: m => m.play, rw: {g: 1000}},
-  {k: "mdays15", t: "Connecte-toi 20 jours dans le mois", g: 20, v: m => m.days.length, rw: {p: "mix:2"}}, {k: "mopen250", t: "Ouvre 400 boosters", g: 400, v: m => m.open, rw: {p: "mix:3"}}, {k: "mwin120", t: "Gagne 250 parties", g: 250, v: m => m.win, rw: {g: 3000}},
-  {k: "mplay400", t: "Termine 400 parties", g: 400, v: m => m.play, rw: {g: 2000}}, {k: "mwin200", t: "Gagne 200 parties", g: 200, v: m => m.win, rw: {p: "mix:2"}}, {k: "mopen300", t: "Ouvre 300 boosters", g: 300, v: m => m.open, rw: {g: 1200}}, {k: "mdays25", t: "Connecte-toi 25 jours dans le mois", g: 25, v: m => m.days.length, rw: {p: "mix:2"}}];
+// Seuils du mois (14 oct. 2026, validés par l'utilisateur) : le palier haut de chaque mesure vaut environ 80 % de ce que produit un joueur très actif
+// (2 à 3 h par jour, connecté tous les jours ≈ 500 parties) : il boucle le mois avec un peu de marge ; le joueur régulier (≈ 240 parties, 150 victoires) valide les premiers paliers.
+// Le booster Divin est réservé aux deux paliers les plus durs (400 parties, 200 victoires) et au bonus « tout fini » : il ne doit pas être accessible à tous.
+// Pas de mission « nouvelles cartes » au mois : elle devient infaisable quand la collection est presque complète.
+const TC_MO_POOL = [{k: "mp200", t: "Termine 200 parties", g: 200, v: m => m.play, rw: {g: 1000}}, {k: "mp325", t: "Termine 325 parties", g: 325, v: m => m.play, rw: {g: 2000}}, {k: "mp400", t: "Termine 400 parties", g: 400, v: m => m.play, rw: {p: "mix:3"}},
+  {k: "mw125", t: "Gagne 125 parties", g: 125, v: m => m.win, rw: {p: "mix:2"}}, {k: "mw160", t: "Gagne 160 parties", g: 160, v: m => m.win, rw: {g: 3000}}, {k: "mw200", t: "Gagne 200 parties", g: 200, v: m => m.win, rw: {p: "mix:3"}},
+  {k: "mo200", t: "Ouvre 200 boosters", g: 200, v: m => m.open, rw: {g: 1200}}, {k: "mo275", t: "Ouvre 275 boosters", g: 275, v: m => m.open, rw: {g: 1500}}, {k: "mo350", t: "Ouvre 350 boosters", g: 350, v: m => m.open, rw: {p: "mix:2"}},
+  {k: "md20", t: "Connecte-toi 20 jours dans le mois", g: 20, v: m => m.days.length, rw: {p: "mix:1"}}, {k: "md24", t: "Connecte-toi 24 jours dans le mois", g: 24, v: m => m.days.length, rw: {p: "mix:2"}}, {k: "md27", t: "Connecte-toi 27 jours dans le mois", g: 27, v: m => m.days.length, rw: {p: "mix:2"}}];
 const tcMoSeed = k => { let h = 0; for (const ch of String(k)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
 let TC_MO = tcPick(TC_MO_POOL, 8, tcMoSeed(tcDay().slice(0, 7)));
 const tcMonth = s => { const k = tcDay().slice(0, 7); TC_MO = tcPick(TC_MO_POOL, 8, tcMoSeed(k)); if (!s.month || s.month.k !== k) s.month = {k, play: 0, win: 0, open: 0, neu: 0, days: [], claimed: []}; if (!s.month.days.includes(tcDay())) s.month.days.push(tcDay()); return s.month; };
