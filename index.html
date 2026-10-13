@@ -8743,6 +8743,21 @@ function histIsOnline(id, players, o = {}){ try { if (o.coop || (players || []).
 // à la lecture : seul le marqueur enregistré compte. Les parties d'avant le 12 oct. 2026 n'en ont pas : elles restent dans l'historique mais sont
 // exclues du ratio victoires/défaites (demande de l'utilisateur : on ne compte les parties en ligne qu'à partir de maintenant)
 const histOnline = x => x.o === 1;
+// Série de victoires : uniquement les parties EN LIGNE, à gagnant, où je joue. Les parties solo, locales ou en équipe ne l'augmentent pas et ne la remettent pas à zéro.
+// cur = série en cours (lue dans l'historique, du plus ancien au plus récent) ; best = record, gardé à part car l'historique ne conserve que 80 parties.
+function wsGet(me){ me = me || (profGet() || {}).name || ""; let run = 0, best = 0;
+  try { [...lsGet(HIST_KEY, [])].reverse().forEach(x => { if (x.c || !x.w || !(x.players || []).includes(me) || (x.x || []).includes(me) || !histOnline(x)) return; if (x.w.includes(me)){ run++; best = Math.max(best, run); } else run = 0; });
+    const old = +lsGet("hanko-ws-best", 0) || 0; if (best > old) lsSet("hanko-ws-best", best); else best = old; } catch {}
+  return {cur: run, best}; }
+// niveau de l'icône selon la série : 0 éteinte, 1 ivoire (1-2), 2 rouge (3-4), 3 or (5-9), 4 bleu incandescent (10 et plus)
+const wsLvl = n => n >= 10 ? 4 : n >= 5 ? 3 : n >= 3 ? 2 : n >= 1 ? 1 : 0;
+const WS_COL = [["#6f6b75", "#3a373f", "#1d1b20", "#8d8992"], ["#ffffff", "#e7e1d3", "#8e8876", "#fffdf6"], ["#ff8a94", "#e0162f", "#6d0a18", "#ffd9de"], ["#fff0a8", "#f7c64a", "#8a5a06", "#fffbe0"], ["#e2f6ff", "#59c2ff", "#0d4f8f", "#ffffff"]];
+// icône « flamme au sceau » (dessin original) : un sceau hexagonal en creux d'où sort une flamme ; dégradés, contour sombre et reflet pour le relief
+function wsIcon(n, px = 28){ const k = wsLvl(n), c = WS_COL[k], id = "wsg" + k;
+  return `<svg class="wsico l${k}" viewBox="0 0 64 64" width="${px}" height="${px}" aria-hidden="true"><defs><linearGradient id="${id}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient><linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient></defs>
+    <path d="M32 63L8 49V31l8-4.600v17.900L32 53.500l16-9.200V26.400l8 4.600v18z" fill="url(#${id}b)" stroke="#050505" stroke-width="2" stroke-linejoin="round"/><path d="M11 33.500l3-1.700v14.200l-3-1.700z" fill="${c[3]}" opacity=".55"/>
+    <path d="M32 2c2.200 9.500 14 15 14 28.500 0 4.300-1.200 7.900-3.300 10.800 1-5.400-.9-9.700-4.300-11.900-.8 6.300-5.500 8.600-5.500 15.100 0 3.200 1.300 5.800 3.400 7.700C25.500 51.200 17 43.600 17 32c0-6.300 3.100-10.800 6.500-14 0 4.200 2.100 6.700 4.300 7.600C27.800 16 30.900 9.400 32 2z" fill="url(#${id}a)" stroke="#050505" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M32 29c1 5.200 6.500 7.400 6.500 13.700 0 5-3.200 8.300-6.500 8.300s-6.500-3.300-6.500-8.300c0-3.100 1.800-5.300 3.200-7 0 2.100 1 3.200 2.100 3.200 0-3.300 1.200-6.600 1.200-9.900z" fill="${c[3]}"/><path d="M26.500 17.500c-2.600 3.300-4.600 7-4.600 11.800" fill="none" stroke="${c[3]}" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>`; }
 function histAdd(id, mode, players, result, o = {}){
   const h = lsGet(HIST_KEY, []);
   if (h.some(x => x.id === id)) return;
@@ -9888,6 +9903,7 @@ const TC_WIN = [80, 17, 2.7, .3];   // niveau du booster gagné sur une victoire
 // victoire : éclats gagnés (+ bonus par victoire de suite, + bonus de record), limités aux `cap` premières victoires du jour ; chance de booster en plus
 const TC_GAIN = {win: 30, streak: 5, streakMax: 30, record: 20, cap: 10, drop: .25, dropStreak: .05, dropMax: .5};
 const TC_XP = {C: 5, P: 8, R: 15, E: 40, L: 120, M: 400, X: 300};   // expérience pour une nouvelle carte (1 pour un doublon)
+const TC_ALLMAX = 50;   // « Tout ouvrir » : nombre maximal de boosters ouverts en un clic
 const TC_PITY = {M: 120, L: 25};   // Mythique sûre au 120e booster sans Mythique ; Légendaire ou mieux au 25e sans
 const TC_PACKS = {mix: ["Mélange", "混", "#f5c518", 100, "Les trois univers"], op: ["One Piece", "海", "#ff5a36", 120, "Pirates et Marine"], db: ["Dragon Ball", "龍", "#ff9f1c", 120, "Guerriers et dieux"], na: ["Naruto", "忍", "#5aa9ff", 120, "Shinobi"]};
 const TC_FREE = {max: 3, every: 36e5}, TC_WINCAP = 3;
@@ -10270,7 +10286,7 @@ function tcRender(){
           <div class="tcinfo"><div class="eyebrow">${k === "free" ? "Booster gratuit" : "Booster choisi"} <i>· 札</i></div><h2>${tcName(real)}</h2><p class="muted">${TC_PACKS[p.u][4]}</p>
             <div class="tcfacts"><div><b>5</b><span>cartes</span></div><div><b>${T.g}</b><span>ou mieux, garantie</span></div><div><b>${n}</b><span>persos possibles</span></div></div>
             ${oddsHTML(p.t)}
-            <div class="row"><button class="primary" id="tcOpen">Ouvrir ce booster</button>${[3, 5, 10].map(q => `<button data-tcopen="${q}" ${(k === "free" ? s.free.n : s.packs[k] || 0) >= q ? "" : "disabled"}>×${q}</button>`).join("")}</div>
+            <div class="row"><button class="primary" id="tcOpen">Ouvrir ce booster</button>${[3, 5, 10].map(q => `<button data-tcopen="${q}" ${(k === "free" ? s.free.n : s.packs[k] || 0) >= q ? "" : "disabled"}>×${q}</button>`).join("")}${(k === "free" ? s.free.n : s.packs[k] || 0) >= 2 ? `<button data-tcopen="all" class="tcall">Tout ouvrir · ${Math.min(TC_ALLMAX, k === "free" ? s.free.n : s.packs[k] || 0)}</button>` : ""}</div>
             <div class="row" style="margin-top:8px"><button data-tcdrop="${real}">Voir les ${n} persos et les taux</button></div>
             <div class="tcsure-h">Garanties <i>· 保証</i><span>boosters restants</span></div><div class="tcsure">${tcSure(s, p.t)}</div>
             ${p.t === 0 ? `<p class="small" style="margin-top:10px">Environ 1 Classique sur 22 cache un <b>booster secret</b> : Doré, Sceau rouge, Éveil, Trésor ou Divin caché.</p>` : ""}</div></div>`; })()
@@ -10354,7 +10370,8 @@ function tcRender(){
     const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
-  document.querySelectorAll("[data-tcopen]").forEach(b => b.onclick = () => openN(+b.dataset.tcopen));
+  // « Tout ouvrir » : tous les boosters du type choisi d'un coup (TC_ALLMAX au plus par clic, pour que l'écran de bilan reste fluide)
+  document.querySelectorAll("[data-tcopen]").forEach(b => b.onclick = () => { if (b.dataset.tcopen !== "all") return openN(+b.dataset.tcopen); const s = tcLoad(), n = TC_PICK === "free" ? s.free.n : s.packs[TC_PICK] || 0; if (n >= 1) openN(Math.min(TC_ALLMAX, n)); });
   document.querySelectorAll("[data-tcbuy]").forEach(b => b.onclick = () => { const s = tcLoad(), t = +b.dataset.tcbuy, c = tcPrice(TC_SHOP.u, t); if (s.gems < c) return; s.gems -= c; tcGive(s, tcKey(TC_SHOP.u, t)); TC_PICK = tcKey(TC_SHOP.u, t); TC_SUB = "mine"; tcSave(s); tcRender(); SFX.play("pop"); });
   $("#tcRecycle") && ($("#tcRecycle").onclick = () => { const s = tcLoad(); tcRecycle(s); tcSave(s); tcRender(); SFX.play("pop"); });
   const pay = (s, rw) => { if (rw.g) s.gems += rw.g; else tcGive(s, rw.p); };
@@ -10950,7 +10967,17 @@ const VT = [
   ["f5", "Illuminé", "光", 3, "Obtiens 50 cartes Holo", x => x.fin.H, 50], ["f6", "Collection d'art", "画商", 3, "Obtiens 25 cartes AR", x => x.fin.A + x.fin.B, 25], ["f7", "Mangaka", "漫画家", 3, "Obtiens 10 cartes Red Blood", x => x.fin.K, 10], ["f8", "Dragon doré", "金龍", 4, "Obtiens 15 cartes UR", x => x.fin.G, 15],
   ["d5", "Fidèle", "忠義", 3, "Connecte-toi 60 jours de suite", x => x.login, 60], ["d4", "Immortel", "不死", 4, "Connecte-toi 100 jours de suite", x => x.login, 100],
   ["t3", "Roi du troc", "商王", 3, "Fais 30 échanges", x => x.tr, 30], ["a3", "Capitaine", "船長", 3, "Ajoute 10 amis", x => x.fr, 10], ["o4", "Baron des boosters", "大富豪", 4, "Ouvre 1 500 boosters", x => x.opened, 1500], ["l4", "Grand maître", "師範", 4, "Atteins le niveau 30", x => x.lv, 30],
+  // Carrière (14 oct. 2026) : noms tirés du vocabulaire des animés plutôt que du football (demande de l'utilisateur). x.cr vient de vtCareer().
+  ["k1", "Premier arc", "序章", 1, "Joue ton premier match de Carrière", x => x.cr.played, 1], ["k2", "Fin de l'entraînement", "修行", 1, "Carrière : monte en division Bronze", x => x.cr.top, 1],
+  ["k3", "Vainqueur du tournoi", "優勝", 2, "Carrière : remporte une coupe", x => x.cr.cups, 1], ["k4", "Examen réussi", "合格", 2, "Carrière : atteins la division Argent", x => x.cr.top, 2], ["k5", "Nouveau compagnon", "仲間", 2, "Carrière : recrute une vedette", x => x.cr.stars, 1],
+  ["k6", "Éveil", "覚醒", 3, "Carrière : atteins la division Or", x => x.cr.top, 3], ["k7", "Sans une égratignure", "無傷", 3, "Carrière : gagne 10 matchs d'affilée", x => x.cr.best, 10],
+  ["k8", "Rang S", "特級", 4, "Carrière : atteins la division Élite", x => x.cr.top, 4], ["k9", "Numéro un", "頂点", 4, "Carrière : deviens champion d'Élite", x => x.cr.champ, 1],
   ["l1", "Apprenti", "見習", 1, "Atteins le niveau 3", x => x.lv, 3], ["l2", "Senpai", "先輩", 2, "Atteins le niveau 8", x => x.lv, 8], ["l3", "Sensei", "先生", 3, "Atteins le niveau 15", x => x.lv, 15]];
+// progression en Carrière, tous univers confondus (le meilleur de chaque mesure) ; tout à zéro si le mode n'a jamais été ouvert
+function vtCareer(){ const o = {played: 0, top: 0, cups: 0, stars: 0, best: 0, champ: 0};
+  try { const r = typeof crLoad === "function" ? crLoad() : null; Object.values((r && r.saves) || {}).forEach(S => { if (!S) return; const st = S.stat || {};
+    o.played += st.played || 0; o.top = Math.max(o.top, st.top || 0, S.div || 0); o.cups += st.cups || 0; o.stars += st.stars || 0; o.best = Math.max(o.best, st.best || 0); if ((S.reach && S.reach.t) || st.titles) o.champ = 1; }); } catch {}
+  return o; }
 // tout ce que mesurent les accomplissements
 function vtCtx(s){
   const all = tcCards(), has = c => !!s.own[c.id], st = s.stat || {g: 0, w: 0, modes: []}, base = all.filter(c => c.r !== "X");
@@ -10959,7 +10986,7 @@ function vtCtx(s){
   return {g: st.g, w: st.w, modes: st.modes.length, best: s.best || 0, own: all.filter(has).length, total: all.length, u: {op: full("op"), db: full("db"), na: full("na")},
     vers: (typeof tcVers === "function" ? tcVers(s) : 0), evAll: all.filter(c => c.r === "X").length, mw: k => (st.mw || {})[k] || 0,
     myth: all.filter(c => c.r === "M" && has(c)).length, mythAll: all.filter(c => c.r === "M").length, ev: all.filter(c => c.r === "X" && has(c)).length, fin,
-    opened: s.opened || 0, fr: (typeof frList === "function" ? frList().length : 0), tr: s.trades || 0, login: Math.max(s.login?.n || 0, s.loginBest || 0), lv: tcLvl(s.xp || 0)};
+    cr: vtCareer(), opened: s.opened || 0, fr: (typeof frList === "function" ? frList().length : 0), tr: s.trades || 0, login: Math.max(s.login?.n || 0, s.loginBest || 0), lv: tcLvl(s.xp || 0)};
 }
 const vtGoal = (v, x) => v[6] === 0 ? x.total : v[6] === -1 ? x.mythAll : v[6] === -2 ? x.evAll : v[6];
 // nouvelles cartes de visite : on les enregistre, on offre des éclats, et on prévient (appelé à chaque sauvegarde)
@@ -10987,11 +11014,13 @@ function vtCheck(s){
   setTimeout(showIt, 2600);
 }
 // illustration de chaque famille de cartes : motif de fond et personnages (pris dans les images du jeu), du palier le plus bas au plus haut
-const VT_ART = {g: ["speed", ["op:Usopp", "na:Rock Lee", "db:Krilin", "op:Monkey D. Luffy"]], w: ["burst", ["na:Neji Hyûga", "op:Roronoa Zoro", "db:Vegeta", "op:Kaido"]], s: ["flame", ["op:Portgas D. Ace", "op:Sabo", "na:Gaï Maito"]],
+const VT_ART = {k: ["burst", []], g: ["speed", ["op:Usopp", "na:Rock Lee", "db:Krilin", "op:Monkey D. Luffy"]], w: ["burst", ["na:Neji Hyûga", "op:Roronoa Zoro", "db:Vegeta", "op:Kaido"]], s: ["flame", ["op:Portgas D. Ace", "op:Sabo", "na:Gaï Maito"]],
   c: ["grid", ["op:Nami", "op:Nico Robin", "na:Shikamaru Nara", "op:Gol D. Roger"]], u: ["wave", []], m: ["burst", ["db:Beerus", "db:Whis", "db:Zeno"]], x: ["bolt", ["db:Son Gohan", "db:Son Goku"]],
   f: ["dots", ["op:Boa Hancock", "na:Deidara", "op:Donquixote Doflamingo", "op:Shanks"]], o: ["grid", ["op:Franky", "db:Bulma", "op:Crocodile"]], a: ["wave", ["op:Tony Tony Chopper", "op:Sanji"]], t: ["dots", ["op:Buggy", "na:Kakuzu"]],
   d: ["speed", ["na:Hinata Hyûga", "na:Sakura Haruno", "na:Naruto Uzumaki"]], p: ["grid", ["na:Tenten", "na:Kakashi Hatake", "na:Itachi Uchiha"]], l: ["wave", ["na:Iruka Umino", "na:Jiraiya", "db:Tortue Géniale"]]};
-const VT_ONE = {uo: ["op:Monkey D. Luffy", "op:Roronoa Zoro"], un: ["na:Naruto Uzumaki", "na:Sasuke Uchiha"], ud: ["db:Son Goku", "db:Vegeta"], x1: ["db:Son Gohan (Beast)"], x2: ["db:Son Goku (Ultra Instinct)", "db:Vegeta (Ultra Ego)"], m3: ["db:Zeno", "op:Edward Newgate"], c4: ["op:Gol D. Roger", "na:Hashirama Senju"], w4: ["op:Kaido", "op:Shanks"], g4: ["op:Monkey D. Luffy", "db:Son Goku"],
+const VT_ONE = {k1: ["na:Iruka Umino", "db:Tortue Géniale"], k2: ["na:Rock Lee", "db:Krilin"], k3: ["db:Krilin", "db:Son Goku"], k4: ["na:Shikamaru Nara", "na:Neji Hyûga"], k5: ["op:Tony Tony Chopper", "op:Sanji"],
+  k6: ["db:Son Gohan", "db:Son Goku"], k7: ["op:Roronoa Zoro", "op:Shanks"], k8: ["na:Kakashi Hatake", "na:Itachi Uchiha"], k9: ["op:Gol D. Roger", "na:Hashirama Senju"],
+  uo: ["op:Monkey D. Luffy", "op:Roronoa Zoro"], un: ["na:Naruto Uzumaki", "na:Sasuke Uchiha"], ud: ["db:Son Goku", "db:Vegeta"], x1: ["db:Son Gohan (Beast)"], x2: ["db:Son Goku (Ultra Instinct)", "db:Vegeta (Ultra Ego)"], m3: ["db:Zeno", "op:Edward Newgate"], c4: ["op:Gol D. Roger", "na:Hashirama Senju"], w4: ["op:Kaido", "op:Shanks"], g4: ["op:Monkey D. Luffy", "db:Son Goku"],
   g5: ["op:Gol D. Roger", "op:Edward Newgate"], s4: ["db:Jiren", "db:Broly"], w5: ["na:Shikamaru Nara", "op:Nami"], w6: ["na:Kakashi Hatake", "na:Itachi Uchiha"], w7: ["na:Neji Hyûga", "na:Hinata Hyûga"], w8: ["op:Brook", "na:Killer B"],
   c6: ["op:Nami", "op:Nico Robin"], c5: ["op:Nico Robin", "na:Orochimaru"], u4: ["op:Monkey D. Luffy", "db:Son Goku"], x3: ["db:Son Goku (Ultra Instinct)", "db:Gogeta (Super Saiyan Blue)"],
   f5: ["na:Minato Namikaze", "op:Borsalino (Kizaru)"], f6: ["na:Deidara", "na:Sasori"], f7: ["na:Jiraiya", "na:Naruto Uzumaki"], f8: ["db:Freezer", "db:Zeno"], d5: ["na:Rock Lee", "na:Gaï Maito"], d4: ["na:Orochimaru", "na:Madara Uchiha"],
@@ -11135,10 +11164,11 @@ function frCard(){
   const me = frMe(), s = tcLoad(), all = tcCards(), h = lsGet(HIST_KEY, []), S = histStats(me.name), us = Object.keys(UNI);
   const tot = Object.values(S).reduce((a, x) => ({w: a.w + x.w, l: a.l + x.l, d: a.d + x.d}), {w: 0, l: 0, d: 0});
   // plus longue série de victoires dans l'historique (du plus ancien au plus récent), complétée par la série tenue par les cartes
-  let run = 0, best = s.best || 0; [...h].reverse().forEach(x => { if (x.c || !x.w || !x.players.includes(me.name) || !histOnline(x)) return; if (x.w.includes(me.name)){ run++; best = Math.max(best, run); } else run = 0; });
+  // (14 oct. 2026) la série tenue par les cartes comptait aussi les parties solo : on ne s'appuie plus que sur l'historique en ligne
+  const WS = wsGet(me.name), run = WS.cur, best = WS.best;
   const rec = []; [["Perso pixelisé", "mercato-devine-", " pts"], ["Silhouettes", "mercato-sil-", " pts"], ["Plus fort ? (série)", "mercato-vs-", ""], ["Tier list", "mercato-tier-", ""], ["Le Menteur", "mercato-liar-", " pts"]].forEach(([n, k, suf]) => us.forEach(u => { const v = lsGet(k + u, null); if (typeof v === "number") rec.push([n + " · " + UNI[u].name, v + suf]); }));
   const top = all.filter(c => s.own[c.id]).sort((a, b) => s.own[b.id] - s.own[a.id])[0];
-  return {id: me.id, since: profGet().since, lv: tcLvl(s.xp), g: h.length, w: tot.w, l: tot.l, d: tot.d, best,
+  return {id: me.id, since: profGet().since, lv: tcLvl(s.xp), g: h.length, w: tot.w, l: tot.l, d: tot.d, best, run,
     modes: Object.entries(S).sort((a, b) => b[1].n - a[1].n).slice(0, 3).map(([k, x]) => [k, x.n]), rec: rec.slice(0, 15),
     top: top ? [top.no, s.own[top.id]] : null, own: all.filter(c => s.own[c.id]).map(c => [c.no, tcBestFin(s, c)]), tr: frTradeable(s), n: all.length, v: !s.taint, show: vtMine(s), unl: (s.unl || []).length};
 }
@@ -11557,7 +11587,7 @@ function mnRefresh(){ try { window.tabDot && window.tabDot(); } catch {} documen
 function mnClose(){ document.querySelector(".mnveil")?.remove(); document.removeEventListener("keydown", mnKey); mnRefresh(); }
 function mnKey(e){ if (e.key === "Escape") mnClose(); }
 function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFixed(2) : d.w ? d.w + ".00" : "—";
-  const acc = d.guest ? "Mode invité · rien n'est sauvegardé" : d.mail ? d.mail : "Non connecté";
+  const acc = d.guest ? "Mode invité · rien n'est sauvegardé" : d.mail ? "Compte connecté · progression sauvegardée" : "Non connecté";
   document.body.insertAdjacentHTML("beforeend", `<div class="mnveil" role="dialog" aria-modal="true" aria-label="Menu"><div class="mnsheet">
     <div class="mntop"><span>Menu · 名</span><button class="mnx" aria-label="Fermer le menu">✕</button></div>
     <div class="mncard">${(() => { let card = "", av = `<span class="av" aria-hidden="true">${esc((d.name || "?").slice(0, 1).toUpperCase())}</span>`, ti = "";
@@ -11684,7 +11714,7 @@ const pfOwnR = (s, r) => tcCards().filter(c => c.r === r && s.own[c.id]).length,
 // cadres d'avatar : [clé, nom, condition écrite, test]
 const PF_FRAMES = [["auto", "Hanko", "Toujours disponible", () => true], ["b", "Bronze", "1 carte de visite Bronze", s => pfTier(s, 1) >= 1], ["a", "Argent", "5 cartes de visite Argent", s => pfTier(s, 2) >= 5], ["o", "Or", "3 cartes de visite Or", s => pfTier(s, 3) >= 3],
   ["l", "Légende", "1 carte de visite Légende", s => pfTier(s, 4) >= 1], ["m", "Mythique", "Posséder 3 Mythiques", s => pfOwnR(s, "M") >= 3], ["p", "Panthéon", "Posséder 10 Mythiques", s => pfOwnR(s, "M") >= 10], ["n10", "Niveau 10", "Atteindre le niveau 10", s => tcLvl(s.xp || 0) >= 10],
-  ["n25", "Niveau 25", "Atteindre le niveau 25", s => tcLvl(s.xp || 0) >= 25], ["s", "Invaincu", "5 victoires en ligne d'affilée", s => (s.best || 0) >= 5], ["c", "Collectionneur", "Posséder 100 cartes", s => pfOwnN(s) >= 100], ["e", "Encyclopédie", "Posséder 250 cartes", s => pfOwnN(s) >= 250], ["t", "Négoce", "Réussir 10 échanges", s => (s.trades || 0) >= 10]];
+  ["n25", "Niveau 25", "Atteindre le niveau 25", s => tcLvl(s.xp || 0) >= 25], ["s", "Invaincu", "5 victoires en ligne d'affilée", s => wsGet().best >= 5], ["c", "Collectionneur", "Posséder 100 cartes", s => pfOwnN(s) >= 100], ["e", "Encyclopédie", "Posséder 250 cartes", s => pfOwnN(s) >= 250], ["t", "Négoce", "Réussir 10 échanges", s => (s.trades || 0) >= 10]];
 const PF_SLEEVES = [["", "Aucun", "", () => true], ["clear", "Transparent", "Niveau 5", s => tcLvl(s.xp || 0) >= 5], ["ink", "Encre", "Niveau 15", s => tcLvl(s.xp || 0) >= 15], ["holo", "Holographique", "Posséder 3 Mythiques", s => pfOwnR(s, "M") >= 3],
   ["gold", "Doré", "Posséder 1 carte UR", s => tcVList(tcCards(), "G").some(([c, f]) => tcHas(s, c, f))], ["jade", "Jade", "3 cartes de visite Or", s => pfTier(s, 3) >= 3]];
 const PF_VS = [["flat", "Classeur", "Les cartes à plat, sans décor."], ["glass", "Sous verre", "Chaque carte dans sa boîte en verre."], ["spot", "Projecteur", "La première en grand, les autres à côté."]];
@@ -11754,7 +11784,7 @@ function pfBody(name, tag, c, o = {}){ const all = tcCards(), pf = pfClean(c.pf)
   const by = r => own.filter(([n]) => all.find(x => x.no === n)?.r === r).length, nOwn = c.hc ? c.ownN || 0 : own.length;
   const B = {
     vit: () => c.show ? `<div class="pfvit vs-${pf.vs} sl-${pf.sl}">${vtShowcase(c.show)}</div><p class="small" style="margin:-8px 0 12px">${c.unl || 0}/${VT.length} cartes de visite débloquées</p>` : "",
-    stats: () => `<div class="frstats"><div><b>${c.g || 0}</b><span>Parties</span></div><div><b style="color:var(--ok)">${c.w || 0}</b><span>Victoires</span></div><div><b style="color:var(--danger)">${c.l || 0}</b><span>Défaites</span></div><div><b>${ratio}</b><span>Ratio V/D</span></div><div><b>${c.best || 0}</b><span>Meilleure série</span></div></div>
+    stats: () => `<div class="frstats"><div><b>${c.g || 0}</b><span>Parties</span></div><div><b style="color:var(--ok)">${c.w || 0}</b><span>Victoires</span></div><div><b style="color:var(--danger)">${c.l || 0}</b><span>Défaites</span></div><div><b>${ratio}</b><span>Ratio V/D</span></div><div class="frws"><b>${wsIcon(c.run || 0, 26)}${c.run || 0}</b><span>Série en cours · record ${c.best || 0}</span></div></div>
       <p class="small">Victoires, défaites et série : parties en ligne uniquement. ${(c.modes || []).length ? "Jeux les plus joués : " + c.modes.map(([k, n]) => `<b style="color:var(--text)">${esc(k)}</b> (${n})`).join(" · ") : ""}${top ? ` · Carte la plus tirée : <b style="color:var(--text)">${esc(top.n)}</b> (×${c.top[1]})` : ""}</p>`,
     rec: () => (c.rec || []).length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><div class="frrec">${c.rec.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(String(v))}</span>`).join("")}</div>` : "",
     col: () => `<div class="tierh" style="--tc:var(--accent)">Collection <small>${nOwn}/${c.n || all.length} cartes · ${c.v === false ? "modifiée à la main, non vérifiée" : "vérifiée ✔"}</small></div>` + (c.hc ? `<p class="pfnote">Le détail de cette collection est privé.</p>`
@@ -12562,7 +12592,7 @@ function crPlay(S, mine, boost){
   const won = w === 0, draw = w < 0, base = crWinPay(S), pay = crR5(base * (rule ? 1.5 : 1) * (cup ? CR_CUP.pay[S.cup.r] : 1));
   const res = {g, won, draw, opp: opp.name, rival: !cup && opp.rival, gains: [], mis: [], cap: false, cup: cup ? CR_CUP.names[S.cup.r] : "", rule: rule ? CR_RULES[rule.k][0] : ""};
   const gain = draw ? crR5(pay * .6) : won ? pay : crR5(base * CR_ECO.loss); S.money += gain; res.gains.push([(won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match") + (cup ? " · coupe" : "") + (rule && won ? " · règle spéciale" : ""), "+" + crMoney(S, gain)]);
-  S.stat.played++;
+  S.stat.played++; setTimeout(() => { try { tcSave(tcLoad()); } catch {} }, 600);
   if (won){ S.stat.wins++; S.streak++; S.stat.best = Math.max(S.stat.best || 0, S.streak); S.prestige += 2 + S.div; res.gains.push(["Prestige", "+" + (2 + S.div)]); if (sumO - sumM > (S.stat.ex || 0)){ S.stat.ex = sumO - sumM; S.stat.exN = opp.name; } } else S.streak = 0;
   if (!cup){ if (won){ S.pts += 3; S.sw++; } else if (draw){ S.pts++; opp.pts++; } else { opp.pts += 3; S.sl++; }
     S.clubs.forEach(c => { if (c === opp) return; const r = Math.random(), p = .18 + .62 * c.s; c.pts += r < p ? 3 : r < p + .15 ? 1 : 0; }); }
@@ -13830,6 +13860,68 @@ body:has(.tccine) .cinedemo,body:has(.tcopen) .cinedemo{display:none}
   const mk = () => { document.body.insertAdjacentHTML("beforeend", `<div class="cinedemo" role="group" aria-label="Démonstration des cinématiques"><span>Démo : rejouer une cinématique (le son doit être activé)</span>${[["E", "Épique"], ["L", "Légendaire"], ["M", "Mythique"]].map(([r, n]) => `<button data-r="${r}">${n}</button>`).join("")}<button data-r="">Fermer</button></div>`);
     document.querySelectorAll(".cinedemo button").forEach(b => b.onclick = () => b.dataset.r ? go(b.dataset.r) : document.querySelector(".cinedemo").remove()); };
   setTimeout(mk, 600);
+})();
+</script>
+<style>
+/* =====================================================================
+   LOT DU 14 OCT. 2026
+   ===================================================================== */
+/* --- Menu (trois barres) : UN SEUL habillage, quel que soit l'écran d'où on l'ouvre (jeux, cartes, carrière, écran de lancement).
+   Noir et blanc ; la couleur dynamique de l'endroit où l'on se trouve (--mc, posée à l'ouverture par le script plus bas) ne sert que d'accent :
+   kanji, pastilles de notification, avatar par défaut, survol. Ces règles l'emportent sur les anciens habillages par écran. --- */
+html body .mnveil .mnsheet{background:#050505!important;box-shadow:-1px 0 0 rgba(255,255,255,.16),-30px 0 60px rgba(0,0,0,.6)!important}
+html body .mnveil .mnsheet .mntop span,html body .mnveil .mnsheet h3{color:#fff!important;opacity:.72}
+html body .mnveil .mnsheet .mnx,html body .mnveil .mnsheet .mngrid button{background:#0b0b0c!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)!important}
+html body .mnveil .mnsheet .mncard,html body .mnveil .mnsheet .mnfoot{background:#0b0b0c!important;box-shadow:none!important}
+html body .mnveil .mnsheet .mncard::after{box-shadow:inset 0 0 0 1px rgba(255,255,255,.24)!important}
+html body .mnveil .mnsheet .mnfoot{box-shadow:inset 0 0 0 1px rgba(255,255,255,.24)!important}
+html body .mnveil .mnsheet .mnst div{background:#050505!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)!important}
+html body .mnveil .mnsheet .mnst b,html body .mnveil .mnsheet .mnwho b{color:#fff!important}html body .mnveil .mnsheet .mnst span,html body .mnveil .mnsheet .mnst small,html body .mnveil .mnsheet .mnwho small{color:#b4b0ba!important}
+html body .mnveil .mnsheet .mngrid button:hover,html body .mnveil .mnsheet .mnx:hover{background:#141416!important;box-shadow:inset 0 0 0 1.5px var(--mc,#fff)!important}
+html body .mnveil .mnsheet .mngrid button:focus-visible,html body .mnveil .mnsheet .mnwho:focus-visible{outline-color:var(--mc,#fff)!important}
+html body .mnveil .mnsheet .mngrid i{color:var(--mc,#fff)!important}
+html body .mnveil .mnsheet .mngrid u{background:var(--mc,#fff)!important;color:#050505!important}
+html body .mnveil .mnsheet .mnfoot button{color:#fff!important}html body .mnveil .mnsheet .mnfoot .a{color:#fff!important}html body .mnveil .mnsheet .mnfoot .q{color:#b4b0ba!important}
+html body .mnveil .mnsheet .mnfoot button + button{border-top-color:rgba(255,255,255,.14)!important}
+html body .mnveil .mnsheet .mnwho .av{background:var(--mc,#fff)!important;background-image:none!important;color:#050505!important}
+
+/* --- Barre du haut de l'écran de lancement : accès aux boosters et au menu, comme sur la page des jeux --- */
+#launch .topbar{flex-wrap:nowrap;gap:8px}#launch .topbar h1{margin-right:auto;min-width:0}#launch .topbar > button{flex:none}
+#launch .topbar .hpill{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--f1) 60%,#232326)}
+#launch .topbar .hpill .f i u{background:var(--fb)}#launch .topbar .hpill .g,#launch .topbar .hpill .l{color:color-mix(in srgb,var(--fb) 45%,#fff)}
+#launch .topbar .mnbtn{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--f1) 60%,#232326)}
+#launch .topbar .mnbtn .av{background:var(--fb)}#launch .topbar .mnbtn .dot{background:var(--fb);box-shadow:0 0 8px var(--fb)}
+#launch .topbar button{background:#050505}
+@media (max-width:640px){#launch .topbar{flex-wrap:wrap}#launch .topbar h1{flex:1 1 100%;order:-1}#launch .topbar #lnBack{margin-left:auto}}
+
+/* --- Série de victoires en ligne : sur l'écran de lancement, avant de lancer la partie (jamais dans le salon : choix de l'utilisateur) --- */
+.wsico{flex:none;vertical-align:-6px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.6))}
+.wsico.l1{filter:drop-shadow(0 0 5px rgba(255,255,255,.35))}.wsico.l2{filter:drop-shadow(0 0 7px rgba(224,22,47,.75))}.wsico.l3{filter:drop-shadow(0 0 8px rgba(247,198,74,.75))}.wsico.l4{filter:drop-shadow(0 0 10px rgba(89,194,255,.85))}
+.lnws{display:inline-flex;align-items:center;gap:12px;margin:14px 0 0;padding:8px 18px 8px 10px;border-radius:999px;background:#0b0b0c;box-shadow:inset 0 0 0 1.5px var(--wc,#3a3a3f),0 0 12px color-mix(in srgb,var(--wc,transparent) 30%,transparent)}
+.lnws.l0{--wc:#3a3a3f}.lnws.l1{--wc:#e7e1d3}.lnws.l2{--wc:#e0162f}.lnws.l3{--wc:#f7c64a}.lnws.l4{--wc:#59c2ff}
+.lnws b{font-family:var(--title);font-weight:900;font-size:24px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+.lnws span{display:grid;gap:1px;font-size:13.5px;font-weight:700;color:#fff;line-height:1.2}.lnws span small{font-family:var(--mono);font-weight:500;font-size:11px;color:#b4b0ba}
+.frws b{display:flex;align-items:center;gap:6px}
+
+/* --- Cartes : « Ouvrir ce booster » encore plus fin (ordinateur et téléphone) ; « Tout réclamer » affiné sur ordinateur seulement --- */
+body:has(#tcg:not(.hidden)) #tcg #tcOpen{padding:8px 18px!important;font-size:13.5px!important;font-weight:700!important}
+body:has(#tcg:not(.hidden)) #tcg .tchero .row button.tcall{color:#fff}
+@media (min-width:641px){body:has(#tcg:not(.hidden)) #tcg #tcClaimAll{padding:8px 18px!important;font-size:13.5px!important;font-weight:700!important;align-self:center;justify-self:end;min-height:0}}
+</style>
+<script>
+(() => {
+  /* menu et boosters dans la barre du haut de l'écran de lancement */
+  try { const back = document.querySelector("#lnBack"); if (back && !document.querySelector("#launch .mnbtn")){ back.insertAdjacentHTML("beforebegin", `<button class="hpill" aria-haspopup="dialog"></button><button class="mnbtn" aria-label="Ouvrir le menu" aria-haspopup="dialog"></button>`);
+      const hp = document.querySelector("#launch .hpill"), mb = document.querySelector("#launch .mnbtn"); hp.onclick = e => { e.stopPropagation(); hudPop(hp); }; mb.onclick = mnOpen; mnRefresh(); } } catch {}
+  /* couleur d'accent du menu : celle de l'endroit d'où on l'ouvre */
+  const vis = id => { const e = document.getElementById(id); return !!e && !e.classList.contains("hidden"); };
+  const accent = () => { const cs = getComputedStyle(document.body); if (vis("tcg")) return "#e0162f"; if (vis("cr")) return cs.getPropertyValue("--accent").trim() || "#3fe0a8"; if (vis("home")) return cs.getPropertyValue("--hc").trim() || "#ff1e2d"; return cs.getPropertyValue("--gb").trim() || cs.getPropertyValue("--hc").trim() || "#ff1e2d"; };
+  try { new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains("mnveil")) n.style.setProperty("--mc", accent()); }).observe(document.body, {childList: true}); } catch {}
+  /* série de victoires sur l'écran de lancement, pour les jeux jouables en ligne */
+  const L = document.querySelector("#launch"), cfg = L && L.querySelector("#modeCfg"); if (!L || !cfg) return;
+  const draw = () => { try { L.querySelector(".lnws")?.remove(); if (L.classList.contains("hidden") || !/en ligne/i.test((L.querySelector("#modeMeta") || {}).textContent || "")) return; const w = wsGet(), n = w.cur;
+      cfg.insertAdjacentHTML("beforeend", `<div class="lnws l${wsLvl(n)}" title="Série de victoires en ligne">${wsIcon(n, 40)}<b>${n}</b><span>${n ? "victoire" + (n > 1 ? "s" : "") + " en ligne d'affilée" : "Aucune série en cours"}<small>${n ? "record : " + w.best : "gagne une partie en ligne pour l'allumer" + (w.best ? " · record : " + w.best : "")}</small></span></div>`); } catch {} };
+  try { new MutationObserver(draw).observe(L, {attributes: true, attributeFilter: ["class"]}); new MutationObserver(() => { if (!L.querySelector(".lnws")) draw(); }).observe(cfg, {childList: true}); } catch {} draw();
 })();
 </script>
 <style>
