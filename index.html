@@ -10484,17 +10484,28 @@ function tcCine(c, o = {}){
       G.from(el.querySelectorAll(".lab,.who,.tap"), {y: 22, opacity: 0, duration: .5, stagger: .12, delay: .55, clearProps: "transform,opacity"});
       el.onpointermove = e => { const r = cd.getBoundingClientRect(), x = Math.min(1.4, Math.max(-.4, (e.clientX - r.left) / r.width)), y = Math.min(1.4, Math.max(-.4, (e.clientY - r.top) / r.height)); G.to(cd, {rotationY: (x - .5) * 34, rotationX: (.5 - y) * 24, duration: .35, overwrite: "auto"});
         cd.classList.add("hl"); cd.style.setProperty("--px", (Math.min(1, Math.max(0, x)) * 100).toFixed(1) + "%"); cd.style.setProperty("--py", (Math.min(1, Math.max(0, y)) * 100).toFixed(1) + "%"); cd.style.setProperty("--ph", Math.min(1, Math.hypot(x - .5, y - .5) / .5).toFixed(2)); }; };
-    const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); el.classList.add("s1", "s2", "s3", "s4"); GLc && GLc.reveal(); card3d(); SFX.play("fanfare"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
+    let riseOff = () => {};
+    const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); riseOff(); el.classList.add("s1", "s2", "s3", "s4"); GLc && GLc.reveal(); card3d(); SFX.play("fanfare"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
       if (myth && !calm){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); } };
     const at = (ms, fn) => timers.push(setTimeout(fn, ms));
     if (calm) end();
-    else if (mini){ at(250, () => { el.classList.add("s2"); GLc && GLc.stage(2); SFX.play("pop"); }); at(1000, end); }
-    else { at(650, () => { el.classList.add("s1"); GLc && GLc.stage(1); SFX.play("pop"); }); at(1500, () => { el.classList.add("s2"); GLc && GLc.stage(2); SFX.play("pop"); }); at(2350, () => { el.classList.add("s3"); GLc && GLc.stage(3); SFX.play("win"); }); at(3700, end); }
+    else if (mini){ riseOff = tcRiser(1, .9); at(250, () => { el.classList.add("s2"); GLc && GLc.stage(2); SFX.play("pop"); }); at(1000, end); }
+    else { riseOff = tcRiser(3.7, myth ? 1.25 : 1.05); at(650, () => { el.classList.add("s1"); GLc && GLc.stage(1); SFX.play("pop"); }); at(1500, () => { el.classList.add("s2"); GLc && GLc.stage(2); SFX.play("pop"); }); at(2350, () => { el.classList.add("s3"); GLc && GLc.stage(3); SFX.play("win"); }); at(3700, end); }
     el.onclick = () => { if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; GLc && GLc.stop(); if (G) G.killTweensOf(el.querySelector(".cardw .tc")); el.remove(); res(); };
   });
 }
 // ouverture : le sachet se charge et se déchire (la couleur de l'éclair annonce le meilleur tirage), puis on retourne les cinq cartes
 // Sons de l'ouverture, fabriqués à la volée (bruit filtré et notes) : froissement, montée, déchirure, distribution, et un carillon par niveau de rareté.
+// Montée de tension (« riser ») : un souffle dont le filtre s'ouvre et une note qui grimpe, de plus en plus fort pendant d secondes, pour finir pile sur la révélation.
+// Renvoie une fonction qui coupe le son en douceur (cinématique passée d'un toucher avant la fin).
+function tcRiser(d = 1, vol = 1){ const off = () => {}; if (!SFX.on) return off; try { const a = SFX.ac(); if (!a) return off; const t = a.currentTime, out = a.createGain(); out.gain.value = 1; out.connect(a.destination);
+    const b = a.createBuffer(1, Math.floor(a.sampleRate * d), a.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+    const src = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); src.buffer = b; fl.type = "bandpass"; fl.Q.value = 2.4; fl.frequency.setValueAtTime(240, t); fl.frequency.exponentialRampToValueAtTime(7600, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.1 * vol, t + d * .97); g.gain.exponentialRampToValueAtTime(.0001, t + d); src.connect(fl).connect(g).connect(out); src.start(t);
+    const os = [[1, "sawtooth", .024], [1.5, "sine", .045], [.5, "sine", .07]].map(([m, type, v]) => { const o = a.createOscillator(), og = a.createGain(); o.type = type; o.frequency.setValueAtTime(64 * m, t); o.frequency.exponentialRampToValueAtTime(820 * m, t + d);
+      og.gain.setValueAtTime(.0001, t); og.gain.exponentialRampToValueAtTime(v * vol, t + d * .97); og.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(og).connect(out); o.start(t); o.stop(t + d + .03); return o; });
+    return () => { try { const n = a.currentTime; out.gain.cancelScheduledValues(n); out.gain.setValueAtTime(out.gain.value, n); out.gain.linearRampToValueAtTime(0, n + .07); setTimeout(() => { try { src.stop(); os.forEach(o => o.stop()); out.disconnect(); } catch {} }, 150); } catch {} };
+  } catch { return off; } }
 function tcSnd(n){ if (!SFX.on) return; try { const a = SFX.ac(); if (!a) return; const T0 = a.currentTime;
     const nz = (d, vol, delay, type, f0, f1, q = 1) => { const b = a.createBuffer(1, Math.floor(a.sampleRate * d), a.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
       const src = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(), t = T0 + delay; src.buffer = b; fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f0, t); if (f1) fl.frequency.exponentialRampToValueAtTime(f1, t + d);
@@ -10664,7 +10675,7 @@ function tcOpening(key, got){
     el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); tcSnd("flip" + lvlOf(c));
     if (G){ const ne = par.children[ix]; G.fromTo(ne, {rotationY: -100, scale: .82, y: -14, transformPerspective: 700}, {rotationY: 0, scale: 1, y: 0, duration: .55, ease: "back.out(1.9)", clearProps: "transform"}); if (lvlOf(c)) tcBoom(Math.min(lvlOf(c), got.length > 5 ? 1 : 3), ne); }
     if (seen.every(Boolean)) done(); };
-  O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.onclick = null; p.classList.add("charge"); GL && GL.charge(); tcSnd("charge");
+  O.querySelector(".pouch").onclick = e => { const p = e.currentTarget; p.onclick = null; p.classList.add("charge"); GL && GL.charge(); tcSnd("charge"); tcRiser(.78, bi >= 5 ? 1.25 : bi >= 4 ? 1.1 : .9);
     if (G){ G.killTweensOf(p); G.to(p, {keyframes: [{x: -5, rotation: -3, scale: .95}, {x: 6, rotation: 3, scale: 1.02}, {x: -8, rotation: -5, scale: .96}, {x: 10, rotation: 5, scale: 1.07}, {x: -6, rotation: -3, scale: 1.1}, {x: 0, rotation: 0, scale: 1.15}], duration: .78, ease: "power2.in"}); G.to(p, {filter: "brightness(2.3)", duration: .78, ease: "power3.in"}); } mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
     setTimeout(() => { GL && GL.tear(); if (G){ G.killTweensOf(p); G.set(p, {clearProps: "transform,filter,opacity"}); } p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement; tcBoom(bi >= 5 ? 3 : bi >= 4 ? 2 : 0, w);
       // la bande du haut part sur le côté, la lumière sort par l'ouverture, les cinq cartes montent
