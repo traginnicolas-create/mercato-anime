@@ -13619,6 +13619,153 @@ body .cpgate #cgUp:hover:not(:disabled){background:rgba(255,255,255,.1)!importan
 .tcfb-s .tcfb-own input{width:17px;height:17px;margin:0;accent-color:var(--accent)}
 .tcfb-s #tcFReset{flex:0 0 auto;min-height:44px;padding:0 6px;border:0;background:none;text-decoration:underline;text-underline-offset:3px;font-size:13.5px}
 </style>
+<!-- =====================================================================
+   DA DE L'ÉCRAN CARTES (publiée le 13 oct. 2026, validée par l'utilisateur sur la copie d'essai, variante « B · Néon ») :
+   noir + rouge sang, cadres lumineux sur le booster et la connexion quotidienne, blanc pour l'action principale de Missions.
+   Les règles « body.ecB » sont celles de la variante retenue : la classe est posée une fois pour toutes par le script ci-dessous.
+   Les cartes, les sachets et les couleurs de rareté ne sont pas touchés.
+   ===================================================================== -->
+<script>document.body.classList.add("ecB");</script>
+<style id="essai-cartes">
+/* Base commune de l'écran Cartes : noir + rouge sang */
+body:has(#tcg:not(.hidden)){--bg:#050505;--panel:#0b0b0c;--panel2:#141416;--line:#232326;--text:#f3f1f5;--muted:#a29ea8;--accent:#f3efe6;--accent2:#c8102e;--accent3:#f3efe6;--cyan:#f3efe6;
+  --grad:linear-gradient(115deg,#d1122c,#d1122c);--grad-cool:linear-gradient(115deg,#c8102e,#ff4d5e);--grad-aurora:linear-gradient(115deg,#7a0a1c,#e0162f,#ff7a86);background:#050505;background-image:none}
+:where(body:has(#tcg:not(.hidden))) button:hover:not(:disabled){border-color:#4a474f;background:#141416}
+:where(body:has(#tcg:not(.hidden))) .panel{background:var(--panel)}
+body:has(#tcg:not(.hidden)) .topbar h1::before{background:#e0162f;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat}
+body:has(#tcg:not(.hidden)) .tcsec h3,body:has(#tcg:not(.hidden)) .tcopen h2{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--text)}
+body:has(#tcg:not(.hidden)) .tcsec h3 i{color:#e0162f}
+body:has(#tcg:not(.hidden)) .tcmhead > div{border-color:var(--line)!important}
+body:has(#tcg:not(.hidden)) .tcm .rwt{--rc:#f3efe6!important}
+body:has(#tcg:not(.hidden)) .tclog-w > div:not(.pk) i,body:has(#tcg:not(.hidden)) .tclog-w > div:not(.pk) b{color:#f3efe6}
+body:has(#tcg:not(.hidden)) .mnbtn .av{background:#d1122c;color:#fff}
+body:has(#tcg:not(.hidden)) .hudpop,body:has(#tcg:not(.hidden)) .mnsheet{background:#050505}
+body:has(#tcg:not(.hidden)) .tcinfo .eyebrow{color:#ff4d5e}
+
+
+/* B · Néon : comme les jeux, cadres lumineux sur les blocs principaux, titres rouges */
+body.ecB:has(#tcg:not(.hidden)){--accent:#ff4d5e;--line:color-mix(in srgb,#c8102e 22%,#1d1d20)}
+body.ecB:has(#tcg:not(.hidden)) button.primary,body.ecB:has(#tcg:not(.hidden)) button.primary:hover:not(:disabled){background:color-mix(in srgb,#c8102e 30%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 2px #e0162f;text-shadow:none;filter:none}
+body.ecB:has(#tcg:not(.hidden)) button.primary:hover:not(:disabled){background:color-mix(in srgb,#c8102e 46%,#050505)}
+body.ecB:has(#tcg:not(.hidden)) .tctabs button.sel{background:color-mix(in srgb,#c8102e 34%,#050505);color:#fff;box-shadow:inset 0 0 0 2px #e0162f}
+body.ecB:has(#tcg:not(.hidden)) .tchero,body.ecB:has(#tcg:not(.hidden)) .tclog{background:#0b0b0c!important;border-color:transparent;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#ff4d5e 70%,transparent),0 0 4px color-mix(in srgb,#ff4d5e 50%,transparent),0 0 16px color-mix(in srgb,#c8102e 45%,transparent),0 0 34px color-mix(in srgb,#c8102e 16%,transparent)}
+body.ecB:has(#tcg:not(.hidden)) .tcinfo h2,body.ecB:has(#tcg:not(.hidden)) .tcsec h3{color:#ff4d5e;text-shadow:0 0 12px color-mix(in srgb,#c8102e 60%,transparent)}
+
+
+</style>
+<style id="essai-cartes-3">
+/* barre du haut et onglets en rouge ; titres de section rouges, compteurs (0/9) en blanc */
+body:has(#tcg:not(.hidden)) .hpill{box-shadow:inset 0 0 0 1px color-mix(in srgb,#e0162f 55%,#232326)}
+body:has(#tcg:not(.hidden)) .hpill .f i u{background:#e0162f}
+body:has(#tcg:not(.hidden)) .hpill .g,body:has(#tcg:not(.hidden)) .hpill .l{color:#ff4d5e}
+body:has(#tcg:not(.hidden)) .mnbtn{box-shadow:inset 0 0 0 1px color-mix(in srgb,#e0162f 55%,#232326)}
+body:has(#tcg:not(.hidden)) .mnbtn .dot{background:#e0162f;box-shadow:0 0 8px #e0162f}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button.sel{background:#d1122c!important;color:#fff!important;box-shadow:none!important;border-color:transparent}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button.sel small{color:#fff;opacity:.85}
+body:has(#tcg:not(.hidden)) #tcg .tcsec h3{color:#ff4d5e;text-shadow:none}
+body:has(#tcg:not(.hidden)) #tcg .tcsec h3 i{color:#ff4d5e;opacity:.75}
+body:has(#tcg:not(.hidden)) #tcg .tcsec em{background:#141416;color:#fff;box-shadow:inset 0 0 0 1px #3a3a3f}
+</style>
+<style id="essai-cartes-4">
+/* titre CARTES, titres de section et leurs kanji dans le rouge du logo ; onglets cerclés de rouge ; fenêtre des boosters en rouge, sobre */
+body:has(#tcg:not(.hidden)) #tcg .topbar h1{color:#e0162f}
+body:has(#tcg:not(.hidden)) #tcg .tcsec h3,body:has(#tcg:not(.hidden)) #tcg .tcsec h3 i{color:#e0162f!important;-webkit-text-fill-color:#e0162f!important;opacity:1;text-shadow:none}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button{box-shadow:inset 0 0 0 1px color-mix(in srgb,#e0162f 55%,#232326);border-color:transparent;background:#0b0b0c}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button small{color:#ff4d5e}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button.sel small{color:#fff}
+body:has(#tcg:not(.hidden)) .hudpop{background:#050505;box-shadow:inset 0 0 0 1px color-mix(in srgb,#e0162f 60%,#232326),0 24px 60px rgba(0,0,0,.75)}
+body:has(#tcg:not(.hidden)) .hudpop .hp-bar{background:#1a1a1d}
+body:has(#tcg:not(.hidden)) .hudpop .hp-bar u,body:has(#tcg:not(.hidden)) .hudpop .hp-bar.lv u{background:#e0162f}
+body:has(#tcg:not(.hidden)) .hudpop .hp-h b,body:has(#tcg:not(.hidden)) .hudpop .hp-h b.l,body:has(#tcg:not(.hidden)) .hudpop .hp-g b.g{color:#ff4d5e}
+body:has(#tcg:not(.hidden)) .hudpop .hp-h b i{color:var(--muted)}
+body:has(#tcg:not(.hidden)) .hudpop .hp-g div{background:#0b0b0c;box-shadow:inset 0 0 0 1px #232326}
+body:has(#tcg:not(.hidden)) .hudpop button.primary,body:has(#tcg:not(.hidden)) .hudpop button.primary:hover:not(:disabled){background:#d1122c;color:#fff;box-shadow:none}
+body:has(#tcg:not(.hidden)) .hudpop button.primary:hover:not(:disabled){background:#e8203a}
+</style>
+<style id="essai-cartes-D">
+/* boutons : contour rouge par défaut, rouge plein pour l'action principale de l'écran */
+/* laque sur le seul bloc du booster ; la connexion quotidienne redevient noire */
+</style>
+<style id="essai-cartes-6">
+/* cadre du booster : plus de filet coloré à gauche, le contour est le même sur les quatre côtés */
+body:has(#tcg:not(.hidden)) .tchero{border:0!important}
+/* sélecteur Gratuits et gagnés / Boutique : fond noir, texte blanc, sélection par un filet rouge */
+body:has(#tcg:not(.hidden)) .tcsub{background:#050505;border:0;box-shadow:inset 0 0 0 1px #2e2e33;border-radius:18px;padding:6px;gap:6px}
+body:has(#tcg:not(.hidden)) .tcsub button,body:has(#tcg:not(.hidden)) .tcsub button:hover:not(:disabled){background:#050505;color:#fff;border-radius:13px;box-shadow:none}
+body:has(#tcg:not(.hidden)) .tcsub button.sel,body:has(#tcg:not(.hidden)) .tcsub button.sel:hover:not(:disabled){background:#050505;color:#fff;box-shadow:inset 0 0 0 1.5px #e0162f}
+body:has(#tcg:not(.hidden)) .tcsub button:not(.sel):hover:not(:disabled){box-shadow:inset 0 0 0 1px #55525a}
+body:has(#tcg:not(.hidden)) .tcsub small{color:#ff4d5e}
+/* boutique : le bouton d'achat prend la couleur du sachet et sa lueur */
+body:has(#tcg:not(.hidden)) .tcsh.q1{--qc:#d9dde4}body:has(#tcg:not(.hidden)) .tcsh.q3{--qc:#b07cff}
+body:has(#tcg:not(.hidden)) .tcsh{background:linear-gradient(180deg,color-mix(in srgb,var(--qc) 8%,#0b0b0c),#0b0b0c 60%);border-color:color-mix(in srgb,var(--qc) 45%,#232326)}
+body:has(#tcg:not(.hidden)) #tcg .tcsh button[data-tcbuy],body:has(#tcg:not(.hidden)) #tcg .tcsh button[data-tcbuy]:hover:not(:disabled){background:color-mix(in srgb,var(--qc) 20%,#0b0b0c)!important;background-image:none!important;color:#fff!important;border-color:transparent;box-shadow:inset 0 0 0 1.5px var(--qc),0 0 16px color-mix(in srgb,var(--qc) 35%,transparent)!important;font-weight:700}
+body:has(#tcg:not(.hidden)) #tcg .tcsh button[data-tcbuy]:hover:not(:disabled){background:color-mix(in srgb,var(--qc) 36%,#0b0b0c)!important}
+body:has(#tcg:not(.hidden)) #tcg .tcsh button[data-tcbuy]:disabled{background:#0b0b0c!important;color:#8d8992!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--qc) 35%,#232326)!important;opacity:1}
+</style>
+<style id="essai-cartes-7">
+/* filtres (univers de la boutique, filtres de la collection) : le choix actif n'est plus grisé, il est en blanc avec un filet rouge */
+body:has(#tcg:not(.hidden)) #tcg .tcchips button{color:#fff;background:#0b0b0c}
+body:has(#tcg:not(.hidden)) #tcg .tcchips button.sel,body:has(#tcg:not(.hidden)) #tcg .tcchips button.sel:disabled{color:#fff!important;opacity:1!important;background:#0b0b0c;border-color:var(--rc,#e0162f)!important;box-shadow:inset 0 0 0 1px var(--rc,#e0162f)!important}
+</style>
+<style id="essai-cartes-8">
+body:has(#tcg:not(.hidden)) #tcg .tcchips button.sel:not([class*="r-"]),body:has(#tcg:not(.hidden)) #tcg .tcchips button.sel:not([class*="r-"]):disabled{border-color:#e0162f!important;box-shadow:inset 0 0 0 1px #e0162f!important}
+</style>
+<style id="essai-cartes-9">
+/* filtres de la collection (listes déroulantes) aux couleurs de l'écran */
+body:has(#tcg:not(.hidden)) .tcfb-s select,body:has(#tcg:not(.hidden)) .tcfb-s .tcfb-own{background-color:#0b0b0c;border-color:#3a3a3f;color:#fff}
+body:has(#tcg:not(.hidden)) .tcfb-s select.on,body:has(#tcg:not(.hidden)) .tcfb-s .tcfb-own.on{border-color:#e0162f;box-shadow:inset 0 0 0 1px #e0162f}
+body:has(#tcg:not(.hidden)) .tcfb-s .tcfb-own input{accent-color:#e0162f}
+body:has(#tcg:not(.hidden)) .tcfb-s label{color:#fff}
+/* Missions (variante B) : mélange noir, rouge et blanc comme l'écran de connexion. Blanc plein pour l'action principale, contour blanc pour les autres, rouge pour le cadre et les titres. */
+body.ecB:has(#tcg:not(.hidden)) #tcg #tcClaimAll:not(:disabled),body.ecB:has(#tcg:not(.hidden)) #tcg #tcClaimAll:hover:not(:disabled){background:#fff!important;color:#050505!important;box-shadow:none!important}
+body.ecB:has(#tcg:not(.hidden)) #tcg #tcClaimAll:hover:not(:disabled){background:#e9e6ee!important}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tclog button.primary,body.ecB:has(#tcg:not(.hidden)) #tcg .tclog button.primary:hover:not(:disabled),body.ecB:has(#tcg:not(.hidden)) #tcg .tcm button.primary,body.ecB:has(#tcg:not(.hidden)) #tcg .tcm button.primary:hover:not(:disabled){background:transparent!important;color:#fff!important;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.85)!important}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tclog button.primary:hover:not(:disabled),body.ecB:has(#tcg:not(.hidden)) #tcg .tcm button.primary:hover:not(:disabled){background:rgba(255,255,255,.1)!important}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tcmhead > div{border-color:rgba(255,255,255,.22)!important;background:#0b0b0c}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tcmhead > div b{color:#fff!important}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tcmhead > div span{color:#fff}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tclog-h b,body.ecB:has(#tcg:not(.hidden)) #tcg .tclog-h span,body.ecB:has(#tcg:not(.hidden)) #tcg .tclog p{color:#fff}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tclog-w > div{border-color:rgba(255,255,255,.18)}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tclog-w > div.now{border-color:#fff;box-shadow:inset 0 0 0 1px #fff}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tcm{border-color:rgba(255,255,255,.14)}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tcm b{color:#fff}
+body.ecB:has(#tcg:not(.hidden)) #tcg .tcsec span{color:#fff}
+</style>
+<style id="essai-cartes-10">
+/* titre « CARTES · 札 » en blanc (le logo reste rouge) */
+body:has(#tcg:not(.hidden)) #tcg .topbar h1{color:#fff!important}
+/* récompenses de connexion : une simple ligne, sans cases. Sept colonnes fines sous la barre de progression ; seul le jour à réclamer a un filet blanc. */
+body:has(#tcg:not(.hidden)) #tcg .tclog-w{gap:2px;margin:2px 0 4px}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div{gap:4px;padding:8px 2px;border-radius:10px;background:none!important;border:0!important;box-shadow:none!important;opacity:1}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w small{font-size:10px;letter-spacing:.1em;color:#fff!important;opacity:.55}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div:not(.pk) i{width:auto;height:auto;background:none!important;font-size:11px;line-height:1.6;color:#fff!important}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div:not(.pk) b{font-size:12.5px;font-weight:700;color:#fff!important}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w .pk b{font-size:9.5px;line-height:1.15}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w .pkm{width:22px}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div.now{box-shadow:inset 0 0 0 1px rgba(255,255,255,.85)!important}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div.now small{opacity:1}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div.ok > *{opacity:.35}
+body:has(#tcg:not(.hidden)) #tcg .tclog-w > div.ok:not(.pk) i{color:#fff!important}
+</style>
+<style id="essai-cartes-11">
+/* mission atteinte : barre rouge (et contour rouge tant qu'elle reste à réclamer), plus de vert */
+body:has(#tcg:not(.hidden)) #tcg .tcm i u{background:#e0162f!important;background-image:none!important}
+body:has(#tcg:not(.hidden)) #tcg .tcm.done:not(.claimed){border-color:#e0162f!important;box-shadow:inset 0 0 0 1px #e0162f!important}
+</style>
+<style id="essai-cartes-12">
+/* cases à l'intérieur du cadre du booster (5 cartes, Rare, 371, garanties) : contour un peu plus épais et plus lisible */
+body:has(#tcg:not(.hidden)) #tcg .tcfacts div{border:0;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#e0162f 50%,#2a2a2e)}
+body:has(#tcg:not(.hidden)) #tcg .tcsure div{border:0;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--sc) 55%,#2a2a2e)}
+/* léger halo sur les contours rouges de la rubrique Cartes */
+body:has(#tcg:not(.hidden)) .hpill,body:has(#tcg:not(.hidden)) .mnbtn{box-shadow:inset 0 0 0 1px color-mix(in srgb,#e0162f 60%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button:not(.sel){box-shadow:inset 0 0 0 1px color-mix(in srgb,#e0162f 60%,#232326),0 0 9px color-mix(in srgb,#e0162f 38%,transparent)!important}
+body:has(#tcg:not(.hidden)) #tcg .tctabs button.sel{box-shadow:0 0 12px color-mix(in srgb,#e0162f 45%,transparent)!important}
+body:has(#tcg:not(.hidden)) .tcsub button.sel,body:has(#tcg:not(.hidden)) .tcsub button.sel:hover:not(:disabled){box-shadow:inset 0 0 0 1.5px #e0162f,0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) #tcg .tcchips button.sel:not([class*="r-"]),body:has(#tcg:not(.hidden)) #tcg .tcchips button.sel:not([class*="r-"]):disabled{box-shadow:inset 0 0 0 1px #e0162f,0 0 9px color-mix(in srgb,#e0162f 38%,transparent)!important}
+body:has(#tcg:not(.hidden)) .tcfb-s select.on,body:has(#tcg:not(.hidden)) .tcfb-s .tcfb-own.on{box-shadow:inset 0 0 0 1px #e0162f,0 0 9px color-mix(in srgb,#e0162f 38%,transparent)}
+body:has(#tcg:not(.hidden)) #tcg .tcm.done:not(.claimed){box-shadow:inset 0 0 0 1px #e0162f,0 0 9px color-mix(in srgb,#e0162f 38%,transparent)!important}
+</style>
+
 
 </body>
 </html>
