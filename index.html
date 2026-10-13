@@ -311,7 +311,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
 <section id="home">
   <div class="sitebar">
     <div class="logo"><svg class="hlogo" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="hlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fe0a8"/><stop offset="1" stop-color="#c9f26b"/></linearGradient></defs><path d="M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z" fill="url(#hlg)"/><path d="M50 12l32.9 19v38L50 88 17.1 69V31z" fill="#0c1312"/><rect x="31" y="28" width="11" height="44" rx="2.5" fill="url(#hlg)"/><rect x="58" y="28" width="11" height="44" rx="2.5" fill="url(#hlg)"/><path d="M27 60l46-21v10L27 70z" fill="#3fe0a8"/></svg><span>Hanko</span></div>
-    <nav class="sitenav" aria-label="Familles de jeux"><a href="#cat1">Duel</a><a href="#cat2">Connaissance</a><a href="#cat3">Complicité</a><a href="#cat4">Voix</a><a href="#joinBox">Rejoindre</a></nav>
+    <nav class="sitenav" aria-label="Raccourcis"><a href="#joinBox" data-nav="join">Rejoindre</a><a href="#" data-nav="cartes">Cartes</a><a href="#" data-nav="amis">Amis</a></nav>
   </div>
   <div class="feature">
     <div class="big" aria-hidden="true">競</div>
@@ -13931,6 +13931,20 @@ body:has(#tcg:not(.hidden)) #tcg .tchero .row button.tcall{color:#fff}
       cfg.insertAdjacentHTML("beforeend", `<div class="lnws l${wsLvl(n)}" title="Série de victoires en ligne">${wsIcon(n, 40)}<b>${n}</b><span>${n ? "victoire" + (n > 1 ? "s" : "") + " en ligne d'affilée" : "Aucune série en cours"}<small>${n ? "record : " + w.best : "gagne une partie en ligne pour l'allumer" + (w.best ? " · record : " + w.best : "")}</small></span></div>`); } catch {} };
   try { new MutationObserver(draw).observe(L, {attributes: true, attributeFilter: ["class"]}); new MutationObserver(() => { if (!L.querySelector(".lnws")) draw(); }).observe(cfg, {childList: true}); } catch {} draw();
 })();
+</script>
+<style>
+/* barre du haut sur ordinateur : les raccourcis vers les familles (inutiles, on défile très bien à la souris, et ils débordaient) sont remplacés par Rejoindre, Cartes et Amis */
+#home .sitebar .sitenav{display:flex;flex:0 1 auto;gap:4px;min-width:0;overflow:visible;margin-right:auto}
+#home .sitebar .sitenav a{white-space:nowrap;padding:8px 12px;border-radius:999px;font-weight:700;font-size:14.5px;color:#fff;text-decoration:none}
+#home .sitebar .sitenav a:hover{color:var(--hc);background:#0b0b0c}
+@media (max-width:1080px){#home .sitebar .sitenav a{padding:8px 8px;font-size:13.5px}}
+@media (max-width:900px){#home .sitebar .sitenav{display:none}}
+</style>
+<script>
+(() => { document.querySelectorAll("#home .sitenav [data-nav]").forEach(a => a.addEventListener("click", e => { const k = a.dataset.nav; e.preventDefault();
+    try { if (k === "join"){ document.querySelector("#joinBox").scrollIntoView({block: "center"}); setTimeout(() => document.querySelector("#qjCode")?.focus(), 200); }
+      else if (k === "cartes") document.querySelector("#tabTcg").click();
+      else if (k === "amis"){ if (typeof frMe === "function" && frMe()) frShow(); else document.querySelector("#profBox").scrollIntoView({block: "center"}); } } catch {} })); })();
 </script>
 <style>
 /* fin du fichier : tout est chargé, on révèle la page (voir « Anti-flash » en tête de head.part). DOIT RESTER LA DERNIÈRE RÈGLE DU DERNIER FICHIER. */
