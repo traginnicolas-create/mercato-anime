@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Hanko</title>
+<script>try { window.__CINE = location.hash === "#cine"; } catch {}</script>
 <script>
 /* Mode invité (« Jouer sans compte » sur l'écran de connexion) : doit s'installer avant tout le reste. Tant que l'onglet est ouvert en invité,
    tout ce que le jeu écrit sous « mercato-… » reste en mémoire vive et disparaît au rechargement ; les données déjà présentes sur l'appareil ne sont ni lues ni modifiées. */
@@ -10485,12 +10486,12 @@ function tcCine(c, o = {}){
       el.onpointermove = e => { const r = cd.getBoundingClientRect(), x = Math.min(1.4, Math.max(-.4, (e.clientX - r.left) / r.width)), y = Math.min(1.4, Math.max(-.4, (e.clientY - r.top) / r.height)); G.to(cd, {rotationY: (x - .5) * 34, rotationX: (.5 - y) * 24, duration: .35, overwrite: "auto"});
         cd.classList.add("hl"); cd.style.setProperty("--px", (Math.min(1, Math.max(0, x)) * 100).toFixed(1) + "%"); cd.style.setProperty("--py", (Math.min(1, Math.max(0, y)) * 100).toFixed(1) + "%"); cd.style.setProperty("--ph", Math.min(1, Math.hypot(x - .5, y - .5) / .5).toFixed(2)); }; };
     let riseOff = () => {};
-    const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); riseOff(); el.classList.add("s1", "s2", "s3", "s4"); GLc && GLc.reveal(); card3d(); SFX.play("fanfare"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
+    const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); riseOff(); el.classList.add("s1", "s2", "s3", "s4"); GLc && GLc.reveal(); card3d(); tcSnd(myth ? "impact3" : "impact2"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
       if (myth && !calm){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); } };
     const at = (ms, fn) => timers.push(setTimeout(fn, ms));
     if (calm) end();
-    else if (mini){ riseOff = tcRiser(1, .9); at(250, () => { el.classList.add("s2"); GLc && GLc.stage(2); SFX.play("pop"); }); at(1000, end); }
-    else { riseOff = tcRiser(3.7, myth ? 1.25 : 1.05); at(650, () => { el.classList.add("s1"); GLc && GLc.stage(1); SFX.play("pop"); }); at(1500, () => { el.classList.add("s2"); GLc && GLc.stage(2); SFX.play("pop"); }); at(2350, () => { el.classList.add("s3"); GLc && GLc.stage(3); SFX.play("win"); }); at(3700, end); }
+    else if (mini){ riseOff = tcRiser(1, .9); at(250, () => { el.classList.add("s2"); GLc && GLc.stage(2); tcSnd("st2"); }); at(1000, end); }
+    else { riseOff = tcRiser(3.7, myth ? 1.25 : 1.05); at(650, () => { el.classList.add("s1"); GLc && GLc.stage(1); tcSnd("st1"); }); at(1500, () => { el.classList.add("s2"); GLc && GLc.stage(2); tcSnd("st2"); }); at(2350, () => { el.classList.add("s3"); GLc && GLc.stage(3); tcSnd("st3"); }); at(3700, end); }
     el.onclick = () => { if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; GLc && GLc.stop(); if (G) G.killTweensOf(el.querySelector(".cardw .tc")); el.remove(); res(); };
   });
 }
@@ -10498,12 +10499,16 @@ function tcCine(c, o = {}){
 // Sons de l'ouverture, fabriqués à la volée (bruit filtré et notes) : froissement, montée, déchirure, distribution, et un carillon par niveau de rareté.
 // Montée de tension (« riser ») : un souffle dont le filtre s'ouvre et une note qui grimpe, de plus en plus fort pendant d secondes, pour finir pile sur la révélation.
 // Renvoie une fonction qui coupe le son en douceur (cinématique passée d'un toucher avant la fin).
-function tcRiser(d = 1, vol = 1){ const off = () => {}; if (!SFX.on) return off; try { const a = SFX.ac(); if (!a) return off; const t = a.currentTime, out = a.createGain(); out.gain.value = 1; out.connect(a.destination);
+function tcRiser(d = 1, vol = 1){ const off = () => {}; if (!SFX.on) return off; try { const a = SFX.ac(); if (!a) return off; const t = a.currentTime, out = a.createGain(), pul = a.createGain(); out.gain.value = 1; pul.gain.value = 1; pul.connect(out); out.connect(a.destination);
+    // audible dès la première seconde (départ à 30 % du niveau final), puis de plus en plus fort ; un très court silence juste avant la fin laisse la place à l'impact
+    const env = (g, v) => { g.gain.setValueAtTime(v * .3, t); g.gain.exponentialRampToValueAtTime(v, t + d * .94); g.gain.linearRampToValueAtTime(.0001, t + d); };
     const b = a.createBuffer(1, Math.floor(a.sampleRate * d), a.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-    const src = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); src.buffer = b; fl.type = "bandpass"; fl.Q.value = 2.4; fl.frequency.setValueAtTime(240, t); fl.frequency.exponentialRampToValueAtTime(7600, t + d);
-    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.1 * vol, t + d * .97); g.gain.exponentialRampToValueAtTime(.0001, t + d); src.connect(fl).connect(g).connect(out); src.start(t);
-    const os = [[1, "sawtooth", .024], [1.5, "sine", .045], [.5, "sine", .07]].map(([m, type, v]) => { const o = a.createOscillator(), og = a.createGain(); o.type = type; o.frequency.setValueAtTime(64 * m, t); o.frequency.exponentialRampToValueAtTime(820 * m, t + d);
-      og.gain.setValueAtTime(.0001, t); og.gain.exponentialRampToValueAtTime(v * vol, t + d * .97); og.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(og).connect(out); o.start(t); o.stop(t + d + .03); return o; });
+    const src = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(); src.buffer = b; fl.type = "bandpass"; fl.Q.value = 2.6; fl.frequency.setValueAtTime(320, t); fl.frequency.exponentialRampToValueAtTime(8200, t + d);
+    env(g, .1 * vol); src.connect(fl).connect(g).connect(pul); src.start(t);
+    const os = [[1, "sawtooth", .022], [1.5, "triangle", .04], [2, "sine", .03], [.5, "sine", .075]].map(([m, type, v]) => { const o = a.createOscillator(), og = a.createGain(); o.type = type; o.frequency.setValueAtTime(82 * m, t); o.frequency.exponentialRampToValueAtTime(880 * m, t + d);
+      env(og, v * vol); o.connect(og).connect(pul); o.start(t); o.stop(t + d + .03); return o; });
+    // battement qui s'accélère (de 3 à 16 par seconde) : c'est lui qui donne l'impression que ça « monte »
+    const lfo = a.createOscillator(), lg = a.createGain(); lfo.type = "sine"; lfo.frequency.setValueAtTime(3, t); lfo.frequency.exponentialRampToValueAtTime(16, t + d); lg.gain.value = .32; lfo.connect(lg).connect(pul.gain); lfo.start(t); lfo.stop(t + d + .03); os.push(lfo);
     return () => { try { const n = a.currentTime; out.gain.cancelScheduledValues(n); out.gain.setValueAtTime(out.gain.value, n); out.gain.linearRampToValueAtTime(0, n + .07); setTimeout(() => { try { src.stop(); os.forEach(o => o.stop()); out.disconnect(); } catch {} }, 150); } catch {} };
   } catch { return off; } }
 function tcSnd(n){ if (!SFX.on) return; try { const a = SFX.ac(); if (!a) return; const T0 = a.currentTime;
@@ -10519,6 +10524,12 @@ function tcSnd(n){ if (!SFX.on) return; try { const a = SFX.ac(); if (!a) return
     else if (n === "flip1"){ nz(.05, .05, 0, "bandpass", 2600, 1400, 2); bell(659, .22, .07, .02, "triangle"); bell(988, .3, .07, .11, "triangle"); }
     else if (n === "flip2"){ nz(.06, .06, 0, "bandpass", 3000, 1400, 2); [784, 988, 1175, 1568].forEach((f, i) => bell(f, .38, .075, .03 + i * .075)); SFX.tone(98, .5, "sine", .12, 0, 60); }
     else if (n === "flip3"){ nz(.5, .08, 0, "highpass", 6000, 2000, .7); SFX.tone(65, .9, "sine", .2, 0, 38); [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => bell(f, .6, .075, .05 + i * .065)); [1047, 1319, 1568].forEach(f => bell(f, 1.1, .05, .62)); }
+    else if (n === "st1" || n === "st2" || n === "st3"){ const k = +n[2]; nz(.42, .07 + k * .012, 0, "bandpass", 500 * k, 2600 * k, 3); SFX.tone(196 * k, .34, "triangle", .06, 0, 294 * k); SFX.tone(98 * k, .3, "sine", .09, 0, 147 * k); }
+    else if (n === "impact2" || n === "impact3"){ const big = n === "impact3";
+      SFX.tone(big ? 120 : 105, big ? 1.5 : 1.1, "sine", big ? .36 : .28, 0, 34); if (big) SFX.tone(70, 1.2, "sine", .22, .1, 30);
+      nz(big ? 1.1 : .8, big ? .2 : .15, 0, "lowpass", 6000, 260, .7); nz(.7, .08, 0, "highpass", 4500, 9500, .7);
+      (big ? [392, 523, 659, 784, 1047, 1319, 1568] : [392, 523, 659, 784, 1047]).forEach((f, i) => bell(f, big ? 1.5 : 1.15, .07, .02 + i * .03, "triangle"));
+      (big ? [1047, 1319, 1568, 2093] : [784, 1047, 1319]).forEach((f, i) => bell(f, .7, .055, .34 + i * .09)); }
     else if (n === "cele"){ SFX.tone(82, .5, "sine", .16, 0, 50); nz(.12, .12, 0, "lowpass", 900, 200, 1); [523, 784, 1047, 1568].forEach((f, i) => bell(f, .5, .07, .1 + i * .08)); }
   } catch {} }
 // Célébration plein écran (montée de niveau, récompenses réclamées) : un sceau qui se pose, des rayons, le texte lettre à lettre. Animée par GSAP, repli en simple fondu.
@@ -13803,6 +13814,24 @@ body:has(#tcg:not(.hidden)) #tcg #tcOpen,body:has(#tcg:not(.hidden)) #tcg #tcOpe
 body:has(#tcg:not(.hidden)) #tcg #tcClaimAll{padding:10px 22px!important;align-self:center}
 body:has(#tcg:not(.hidden)) #tcg .tclog button.primary,body:has(#tcg:not(.hidden)) #tcg .tclog button.primary:hover:not(:disabled),body:has(#tcg:not(.hidden)) #tcg .tcm button.primary,body:has(#tcg:not(.hidden)) #tcg .tcm button.primary:hover:not(:disabled){box-shadow:inset 0 0 0 1px rgba(255,255,255,.8)!important}
 </style>
+<style>
+.cinedemo{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9500;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:calc(100vw - 24px);padding:8px;border-radius:18px;background:#0b0b0c;box-shadow:inset 0 0 0 1.5px #e0162f,0 10px 30px rgba(0,0,0,.7)}
+.cinedemo span{flex:1 1 100%;text-align:center;font:700 12px/1.2 system-ui,sans-serif;color:#fff;padding:2px 6px}
+.cinedemo button{all:unset;cursor:pointer;font:700 13px/1 system-ui,sans-serif;color:#fff;padding:10px 14px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+.cinedemo button:hover{background:rgba(255,255,255,.12)}
+@media (min-width:641px){.cinedemo{bottom:18px}}
+body:has(.tccine) .cinedemo,body:has(.tcopen) .cinedemo{display:none}
+</style>
+<script>
+/* Démonstration des cinématiques de cartes : n'apparaît que si l'adresse se termine par #cine. Elle rejoue la cinématique d'une carte au hasard de la rareté choisie,
+   avec sa montée sonore, sans rien ajouter à la collection ni consommer de booster. */
+(() => { if (!window.__CINE && location.hash !== "#cine") return;
+  const go = async r => { try { tcLibs && tcLibs(); } catch {} const l = tcCards().filter(c => c.r === r && !c.late), c = l[Math.floor(Math.random() * l.length)]; if (!c || document.querySelector(".tccine")) return; await tcCine({...c, f: "", isNew: true}, {full: true}); };
+  const mk = () => { document.body.insertAdjacentHTML("beforeend", `<div class="cinedemo" role="group" aria-label="Démonstration des cinématiques"><span>Démo : rejouer une cinématique (le son doit être activé)</span>${[["E", "Épique"], ["L", "Légendaire"], ["M", "Mythique"]].map(([r, n]) => `<button data-r="${r}">${n}</button>`).join("")}<button data-r="">Fermer</button></div>`);
+    document.querySelectorAll(".cinedemo button").forEach(b => b.onclick = () => b.dataset.r ? go(b.dataset.r) : document.querySelector(".cinedemo").remove()); };
+  setTimeout(mk, 600);
+})();
+</script>
 <style>
 /* fin du fichier : tout est chargé, on révèle la page (voir « Anti-flash » en tête de head.part). DOIT RESTER LA DERNIÈRE RÈGLE DU DERNIER FICHIER. */
 body{opacity:1}
