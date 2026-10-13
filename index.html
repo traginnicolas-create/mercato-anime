@@ -14015,6 +14015,40 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 })();
 </script>
 <style>
+/* Carrière : bulles « Bon à savoir », affichées une seule fois, la première fois que chaque élément apparaît */
+#cr > .crcoach.crtip{align-items:center;margin-bottom:12px}
+#cr > .crcoach.crtip i{color:var(--ca,var(--accent))}
+#cr > .crcoach.crtip button{flex:none}
+</style>
+<script>
+/* Le didacticiel de départ (7 étapes) ne couvre que l'essentiel. Tout le reste est expliqué par une bulle la première fois qu'on le rencontre :
+   coupe, règle spéciale, plafond du jour, espion et objets, affinités, cellule de recrutement, classement, missions, palmarès.
+   Une bulle à la fois ; « Compris » la range pour toujours (clé hanko-cr-tips, sur l'appareil). Rien avant la fin du didacticiel. */
+(() => { if (typeof crRender !== "function") return;
+  const TIPS = {
+    cup: ["La coupe", "Trois tours à élimination directe (quart, demi, finale) s'intercalent dans la saison. Une défaite et la coupe est finie pour cette saison. Chaque tour paie plus que le précédent, et le vainqueur de la finale choisit un personnage."],
+    rule: ["Règle spéciale", "Certains matchs imposent une contrainte : trois combattants seulement, ordre tiré au sort, vedette suspendue… Elle est écrite au-dessus du match, et la prime de victoire est plus forte. Pendant la composition, « Remplir » propose la meilleure équipe qui la respecte."],
+    cap: ["Plafond du jour atteint", "Seuls les 5 premiers matchs de la journée comptent pour les cartes (éclats, boosters, missions du site). Tu peux continuer ta carrière sans limite : ces gains-là reprennent demain à 10 h."],
+    spy: ["L'espion et les objets", "Tu ne connais pas l'ordre dans lequel l'adversaire fera entrer ses combattants. « Envoyer un espion » le révèle pour ce match. La « Forme olympique » donne +4 à un combattant le temps d'un match. Ces objets sont en nombre limité : garde-les pour les matchs qui comptent."],
+    aff: ["Les affinités", "Chaque combattant appartient à un groupe de son univers (équipage, clan, royaume…), écrit sur sa tuile. Aligne-en trois du même groupe dans un match : +1 à leur note. Quatre : +2. Cinq : +3. Une équipe soudée peut battre une équipe mieux notée."],
+    scout: ["La cellule de recrutement", "Sous la boutique : tu paies une mission et ton recruteur revient avec un personnage tiré au sort, qui signe gratuitement. Une mission par match, et aucune garantie. Plus la mission est chère, plus tu as de chances de ramener une vedette."],
+    table: ["Le classement", "Une saison, c'est sept matchs contre sept clubs. Les deux premiers montent de division, les deux derniers descendent : oui, on peut redescendre. En Élite, seul le premier est champion."],
+    mis: ["Les missions du club", "Des objectifs propres à ta carrière, à remplir au fil des matchs. Chacun rapporte une récompense : pense à passer ici quand la pastille de l'onglet s'allume."],
+    club: ["Le palmarès", "Tes records et les grandes étapes de ta carrière. Chaque division atteinte pour la première fois, et le titre d'Élite, t'offrent un booster de cartes."]};
+  const seen = () => { try { return lsGet("hanko-cr-tips", {}) || {}; } catch { return {}; } };
+  const pick = S => { const s = seen(), ok = k => !s[k]; let rule = null; try { rule = crRule(S); } catch {}
+    if (CR.view === "result") return null;
+    if (CR.view === "compose") return rule && ok("rule") ? "rule" : null;
+    if (CR.tab === "match"){ if (S.cup && S.cup.pend && ok("cup")) return "cup"; if (rule && ok("rule")) return "rule"; let left = 1; try { left = crCapLeft(); } catch {} if (left <= 0 && ok("cap")) return "cap"; return ok("spy") ? "spy" : null; }
+    const byTab = {squad: "aff", shop: "scout", table: "table", mis: "mis", club: "club"}[CR.tab]; return byTab && ok(byTab) ? byTab : null; };
+  const tip = () => { try { const el = document.querySelector("#cr"), S = CR.S; if (!el || !S || S.tuto < 5 || el.querySelector(".crcoach")) return; const k = pick(S); if (!k) return;
+      const at = el.querySelector(".crtabs") || el.querySelector(".crhead"); if (!at) return;
+      at.insertAdjacentHTML("afterend", `<div class="crcoach crtip" data-tip="${k}"><div><i>Bon à savoir</i><b>${TIPS[k][0]}</b><p>${TIPS[k][1]}</p></div><button class="primary">Compris</button></div>`);
+      el.querySelector(".crtip button").onclick = () => { const s = seen(); s[k] = 1; try { lsSet("hanko-cr-tips", s); } catch {} el.querySelector(".crtip")?.remove(); tip(); }; } catch {} };
+  const base = crRender; crRender = function(){ const r = base.apply(this, arguments); tip(); return r; };
+})();
+</script>
+<style>
 /* fin du fichier : tout est chargé, on révèle la page (voir « Anti-flash » en tête de head.part). DOIT RESTER LA DERNIÈRE RÈGLE DU DERNIER FICHIER. */
 body{opacity:1}
 </style>
