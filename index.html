@@ -22,14 +22,15 @@ try { if (sessionStorage.getItem("hanko-invite") === "1"){ const mem = {}, P = S
 /* Anti-flash (13 oct. 2026) : les styles de la nouvelle direction artistique sont à la fin du fichier ; sans ceci, on voyait une fraction de seconde l'ancien thème vert
    à chaque chargement. La page reste donc invisible (sur fond noir) jusqu'à la toute dernière règle du fichier, à la fin de da.part, qui la révèle. Pas de script : rien ne peut la laisser cachée. */
 html{background:#050505}body{opacity:0}
+.hlogo [fill="url(#hlg)"],.hlogo [fill="url(#hlg2)"],.hlogo [fill="#3fe0a8"]{fill:var(--hc,#ff1e2d)}
 </style>
 <style>
 :root{
   /* Mise en page : une colonne large et calme. Identité « Encre et jade » (choisie par l'utilisateur le 13 oct. 2026, pour ne plus ressembler à Kyara) : fond d'encre vert-noir, texte papier, un seul vert jade pour agir (boutons en pilule), logo en hexagone taillé avec un H. --M reste le rouge des cartes Mythiques : les cartes et leurs raretés ne changent pas.
      l'or réservé aux raretés. Titres larges, petites étiquettes en chasse fixe doublées d'un kanji, chiffres en chasse fixe. */
   color-scheme:dark;
-  --bg:#080d0c; --panel:#0e1614; --panel2:#131d1b; --line:#20302c; --text:#eaf3ef; --muted:#8aa098;
-  --accent:#3fe0a8; --accent2:#17a57a; --accent3:#c9f26b; --ok:#a6e35a; --danger:#ff4d4d; --gold:#f5c518;
+  --bg:#050505; --panel:#0b0b0c; --panel2:#141416; --line:#26262a; --text:#f3f1f5; --muted:#a29ea8;
+  --accent:#ff1e2d; --accent2:#c8102e; --accent3:#ff7a86; --hc:#ff1e2d; --ok:#a6e35a; --danger:#ff4d4d; --gold:#f5c518;
   --M:#ff5a36; --L:#f5c518; --E:#b072ff; --R:#4d9bff; --C:#b5b1bb;
   --title:"Unbounded","Zen Kaku Gothic New",system-ui,sans-serif;     /* grands titres, nom du jeu */
   --disp:"Barlow Condensed","Arial Narrow",Impact,sans-serif;         /* titres serrés et gros chiffres à l'intérieur des jeux */
@@ -10988,9 +10989,9 @@ const VT = [
   ["d5", "Fidèle", "忠義", 3, "Connecte-toi 60 jours de suite", x => x.login, 60], ["d4", "Immortel", "不死", 4, "Connecte-toi 100 jours de suite", x => x.login, 100],
   ["t3", "Roi du troc", "商王", 3, "Fais 30 échanges", x => x.tr, 30], ["a3", "Capitaine", "船長", 3, "Ajoute 10 amis", x => x.fr, 10], ["o4", "Baron des boosters", "大富豪", 4, "Ouvre 1 500 boosters", x => x.opened, 1500], ["l4", "Grand maître", "師範", 4, "Atteins le niveau 30", x => x.lv, 30],
   // Carrière (14 oct. 2026) : noms tirés du vocabulaire des animés plutôt que du football (demande de l'utilisateur). x.cr vient de vtCareer().
-  ["k1", "Premier arc", "序章", 1, "Joue ton premier match de Carrière", x => x.cr.played, 1], ["k2", "Fin de l'entraînement", "修行", 1, "Carrière : monte en division Bronze", x => x.cr.top, 1],
-  ["k3", "Vainqueur du tournoi", "優勝", 2, "Carrière : remporte une coupe", x => x.cr.cups, 1], ["k4", "Examen réussi", "合格", 2, "Carrière : atteins la division Argent", x => x.cr.top, 2], ["k5", "Nouveau compagnon", "仲間", 2, "Carrière : recrute une vedette", x => x.cr.stars, 1],
-  ["k6", "Éveil", "覚醒", 3, "Carrière : atteins la division Or", x => x.cr.top, 3], ["k7", "Sans une égratignure", "無傷", 3, "Carrière : gagne 10 matchs d'affilée", x => x.cr.best, 10],
+  ["k1", "Premier arc", "序章", 1, "Joue ton premier match de Carrière", x => x.cr.played, 1], ["k2", "Fin de l'entraînement", "修行", 1, "Carrière : monte en division Argent", x => x.cr.top, 1],
+  ["k3", "Vainqueur du tournoi", "優勝", 2, "Carrière : remporte une coupe", x => x.cr.cups, 1], ["k4", "Examen réussi", "合格", 2, "Carrière : atteins la division Or", x => x.cr.top, 2], ["k5", "Nouveau compagnon", "仲間", 2, "Carrière : recrute une vedette", x => x.cr.stars, 1],
+  ["k6", "Éveil", "覚醒", 3, "Carrière : atteins la division Diamant", x => x.cr.top, 3], ["k7", "Sans une égratignure", "無傷", 3, "Carrière : gagne 10 matchs d'affilée", x => x.cr.best, 10],
   ["k8", "Rang S", "特級", 4, "Carrière : atteins la division Élite", x => x.cr.top, 4], ["k9", "Numéro un", "頂点", 4, "Carrière : deviens champion d'Élite", x => x.cr.champ, 1],
   ["l1", "Apprenti", "見習", 1, "Atteins le niveau 3", x => x.lv, 3], ["l2", "Senpai", "先輩", 2, "Atteins le niveau 8", x => x.lv, 8], ["l3", "Sensei", "先生", 3, "Atteins le niveau 15", x => x.lv, 15]];
 // progression en Carrière, tous univers confondus (le meilleur de chaque mesure) ; tout à zéro si le mode n'a jamais été ouvert
@@ -12305,7 +12306,7 @@ button.crc{cursor:pointer}
 .crc .pw.up{color:#9df0c0}
 .crc .t{padding:5px 7px 7px;font-size:11px;line-height:1.25;color:var(--muted)}
 .crc .t b{display:block;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crc .ord{position:absolute;z-index:1;top:5px;right:5px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#06110d;font-weight:900;font-size:13px}
+.crc .ord{position:absolute;z-index:1;top:5px;right:5px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#050505;font-weight:900;font-size:13px}
 .crc.sel{outline:3px solid var(--accent);outline-offset:1px}.crc.off{opacity:.38;filter:grayscale(.8)}
 .crc.crpulse,.crpulse{animation:crpulse 1.5s ease-in-out infinite}
 @keyframes crpulse{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 45%,transparent)}}
@@ -12371,18 +12372,18 @@ button.crc{cursor:pointer}
 .cruni b{font-family:var(--title);font-weight:900;font-size:20px}.cruni small{color:var(--muted);font-size:12.5px}.cruni em{font-style:normal;margin-top:8px;padding:8px;border-radius:999px;background:var(--uc);color:#0b0a0e;font-weight:800;font-size:14px}
 .crwel{position:relative;display:grid;justify-items:center;gap:10px;text-align:center;padding:10px 0 30px;perspective:1000px;--mx:0;--my:0}
 .crwel .eb{margin:0;font-family:var(--mono);font-size:11.5px;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
-.crwel h2{margin:0;font-family:var(--title);font-weight:900;font-size:clamp(26px,6vw,40px);line-height:1.02;letter-spacing:-.02em}.crwel h2 b{font-size:1.7em;background:linear-gradient(120deg,#3fe0a8,#c9f26b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.crwel h2{margin:0;font-family:var(--title);font-weight:900;font-size:clamp(26px,6vw,40px);line-height:1.02;letter-spacing:-.02em}.crwel h2 b{font-size:1.7em;background:var(--wg,linear-gradient(120deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff)));-webkit-background-clip:text;background-clip:text;color:transparent}
 .crwel .lead{max-width:46ch;margin:0;color:#d9d5df;font-size:15px;line-height:1.5}
-.crtun{position:relative;width:min(100%,460px);aspect-ratio:1/.84;margin:-6px 0 -10px;container-type:inline-size;perspective:520px;overflow:hidden;border-radius:26px;background:radial-gradient(ellipse 80% 60% at 50% 46%,#12332a,transparent 72%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 80%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 80%,transparent 100%)}
-.crtun .floor,.crtun .ceil{position:absolute;left:-50%;width:200%;height:70%;background:linear-gradient(90deg,rgba(63,224,168,.24) 1px,transparent 1px) 0 0/9cqw 9cqw,linear-gradient(0deg,rgba(63,224,168,.24) 1px,transparent 1px) 0 0/9cqw 9cqw;animation:crtrun 2.2s linear infinite}
+.crtun{position:relative;width:min(100%,460px);aspect-ratio:1/.84;margin:-6px 0 -10px;container-type:inline-size;perspective:520px;overflow:hidden;border-radius:26px;background:radial-gradient(ellipse 80% 60% at 50% 46%,color-mix(in srgb,var(--wa,var(--accent)) 14%,#050505),transparent 72%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 80%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 80%,transparent 100%)}
+.crtun .floor,.crtun .ceil{position:absolute;left:-50%;width:200%;height:70%;background:linear-gradient(90deg,color-mix(in srgb,var(--wa,var(--accent)) 24%,transparent) 1px,transparent 1px) 0 0/9cqw 9cqw,linear-gradient(0deg,color-mix(in srgb,var(--wa,var(--accent)) 24%,transparent) 1px,transparent 1px) 0 0/9cqw 9cqw;animation:crtrun 2.2s linear infinite}
 .crtun .floor{bottom:-6%;transform-origin:50% 100%;transform:rotateX(74deg);-webkit-mask-image:linear-gradient(0deg,#000 10%,transparent 85%);mask-image:linear-gradient(0deg,#000 10%,transparent 85%)}
 .crtun .ceil{top:-26%;transform-origin:50% 0;transform:rotateX(-74deg);opacity:.5;-webkit-mask-image:linear-gradient(180deg,#000 10%,transparent 85%);mask-image:linear-gradient(180deg,#000 10%,transparent 85%)}
 @keyframes crtrun{to{background-position:0 9cqw,0 9cqw}}
-.crtun .beam{position:absolute;top:-12%;left:50%;width:26cqw;height:100%;background:linear-gradient(180deg,rgba(201,242,107,.34),transparent 78%);filter:blur(3cqw);transform-origin:50% 0;animation:crtsweep 5s ease-in-out infinite alternate}
-.crtun .beam.b2{animation-delay:-2.5s;background:linear-gradient(180deg,rgba(63,224,168,.34),transparent 78%)}
+.crtun .beam{position:absolute;top:-12%;left:50%;width:26cqw;height:100%;background:linear-gradient(180deg,color-mix(in srgb,var(--wa,var(--accent)) 34%,transparent),transparent 78%);filter:blur(3cqw);transform-origin:50% 0;animation:crtsweep 5s ease-in-out infinite alternate}
+.crtun .beam.b2{animation-delay:-2.5s;background:linear-gradient(180deg,color-mix(in srgb,var(--wa,var(--accent)) 34%,transparent),transparent 78%)}
 @keyframes crtsweep{from{transform:translateX(-50%) rotate(-24deg)}to{transform:translateX(-50%) rotate(24deg)}}
 .crtun .trio{position:absolute;inset:14% 0 auto 0;height:62%;transform-style:preserve-3d;transform:rotateY(calc(var(--mx) * 18deg)) rotateX(calc(var(--my) * -10deg));transition:transform .2s ease-out}
-.crtun .trio span{position:absolute;left:50%;top:8%;width:31cqw;height:42cqw;margin-left:-15.5cqw;border-radius:3.4cqw;overflow:hidden;border:.8cqw solid var(--accent);background:#111;box-shadow:0 5cqw 10cqw rgba(0,0,0,.6),0 0 7cqw rgba(63,224,168,.45);animation:crtrise 1s cubic-bezier(.2,.9,.2,1) both}
+.crtun .trio span{position:absolute;left:50%;top:8%;width:31cqw;height:42cqw;margin-left:-15.5cqw;border-radius:3.4cqw;overflow:hidden;border:.8cqw solid var(--accent);background:#111;box-shadow:0 5cqw 10cqw rgba(0,0,0,.6),0 0 7cqw color-mix(in srgb,var(--wa,var(--accent)) 45%,transparent);animation:crtrise 1s cubic-bezier(.2,.9,.2,1) both}
 .crtun .trio span:nth-child(1){transform:translate3d(-27cqw,5cqw,-16cqw) rotateY(22deg);animation-delay:.15s}
 .crtun .trio span:nth-child(2){transform:translate3d(0,0,6cqw);z-index:2;width:36cqw;height:48cqw;margin-left:-18cqw;border-color:#f7c64a;box-shadow:0 5cqw 10cqw rgba(0,0,0,.6),0 0 8cqw rgba(247,198,74,.5)}
 .crtun .trio span:nth-child(3){transform:translate3d(27cqw,5cqw,-16cqw) rotateY(-22deg);animation-delay:.3s}
@@ -12401,7 +12402,7 @@ button.crc{cursor:pointer}
 .crwel #crWelGo{font-size:18px;padding:14px 34px;margin-top:6px}
 @media (prefers-reduced-motion:reduce){.crtun .floor,.crtun .ceil,.crtun .beam,.crtun .trio span,.crtun .trio span::after{animation:none}}
 .crtop{all:unset;box-sizing:border-box;cursor:pointer;flex:none;margin-left:auto;display:flex;align-items:center;gap:9px;height:42px;padding:0 14px 0 6px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dc,var(--accent)) 55%,var(--line));transition:transform .15s,box-shadow .2s}
-.crtop svg{flex:none;width:30px;height:30px;padding:5px;box-sizing:border-box;border-radius:50%;background:linear-gradient(140deg,#3fe0a8,#c9f26b);color:#06110d}
+.crtop svg{flex:none;width:30px;height:30px;padding:5px;box-sizing:border-box;border-radius:50%;background:linear-gradient(140deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff));color:#050505}
 .crtop span{display:grid;line-height:1.1}.crtop b{font-size:13.5px}.crtop small{font-family:var(--mono);font-size:10px;letter-spacing:.6px;color:var(--dc,var(--accent))}
 .crtop:hover{transform:translateY(-1px);box-shadow:inset 0 0 0 1.5px var(--dc,var(--accent)),0 6px 18px rgba(0,0,0,.4)}.crtop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .crtop + .hpill{margin-left:8px}
@@ -12410,7 +12411,7 @@ button.crc{cursor:pointer}
 </style>
 <script>
 /* =====================================================================
-   MODE CARRIÈRE (solo contre l'IA) : un univers, 5 divisions (Fer → Élite), saisons de 7 matchs contre 7 clubs gérés par l'ordinateur.
+   MODE CARRIÈRE (solo contre l'IA) : un univers, 5 divisions (Bronze → Élite), saisons de 7 matchs contre 7 clubs gérés par l'ordinateur.
    - Les personnages sont ceux du Mercato (DATA[u]), avec leur note. Ils ne montent pas en niveau : on progresse en recrutant.
    - Tout est réglé sur le RANG du personnage dans son univers (q de 0 à 1), pas sur sa note brute : les trois univers n'ont pas la même répartition.
    - Combat : le moteur du Mercato (simulateFight / playFight), avec un G fabriqué pour l'occasion.
@@ -12421,7 +12422,8 @@ button.crc{cursor:pointer}
    - Cartes à collectionner : seuls les CR_CAP premiers matchs du jour comptent comme une partie (éclats, boosters, missions).
    ===================================================================== */
 const CR_KEY = "mercato-carriere", CR_MAXSQ = 8, CR_DAYS = 7, CR_CAP = 5;
-const CR_DIV = [["Fer", "鉄", "#9aa3ad"], ["Bronze", "銅", "#c98a4b"], ["Argent", "銀", "#cfd6e0"], ["Or", "金", "#f7c64a"], ["Élite", "極", "#ff5a6a"]];
+/* divisions (14 oct. 2026) : Bronze, Argent, Or, Diamant, Élite. Le Fer a disparu (trop proche de l'Argent à l'écran) ; l'indice ne change pas : une carrière en 3e division y reste, elle s'appelle Or. */
+const CR_DIV = [["Bronze", "銅", "#c98a4b"], ["Argent", "銀", "#cfd6e0"], ["Or", "金", "#f7c64a"], ["Diamant", "晶", "#59c2ff"], ["Élite", "極", "#ff5a6a"]];
 // tranche de rang (0 = le plus faible de l'univers, 1 = le plus fort) où piochent la boutique et les clubs de chaque division
 const CR_BAND = [[0, .30], [.16, .48], [.36, .68], [.56, .86], [.74, 1]];
 // économie : réglée par simulation (tools/sim-carriere.js), voir CLAUDE.md
@@ -12434,15 +12436,16 @@ const CR_NAMES = {
   na: ["Village d'Oto", "Racine de Danzô", "Village de Suna", "Village de Kiri", "Village de Kumo", "Village d'Iwa", "Village d'Ame", "Équipe Taka", "Sept épéistes de la Brume", "Quartet du Son", "Escouade Anbu", "Clan Hyûga", "Clan Uchiha", "Académie de Konoha", "Samouraïs du Pays du Fer", "Alliance shinobi"]};
 const CR_RIVALS = {op: "Pirates de Barbe Noire", db: "Armée de Freezer", na: "Akatsuki"};
 /* écussons de division (famille choisie par l'utilisateur le 13 oct. 2026, à la place des kanji) : un bouclier qui gagne un galon par division, une étoile en Or, la couronne et les ailes en Élite */
-const CR_METAL = [["#e3e8ed", "#8b949e", "#3f464e"], ["#f6cfa6", "#c98a4b", "#6d3f18"], ["#ffffff", "#cfd6e0", "#75808f"], ["#fff6cf", "#f7c64a", "#9a6a08"], ["#ffd9de", "#ff5a6a", "#7d1228"]];
+const CR_METAL = [["#f6cfa6", "#c98a4b", "#6d3f18"], ["#ffffff", "#cfd6e0", "#75808f"], ["#fff6cf", "#f7c64a", "#9a6a08"], ["#e2f6ff", "#59c2ff", "#0d4f8f"], ["#ffd9de", "#ff5a6a", "#7d1228"]];
 let CR_BID = 0;
 function crBadge(k, cls = ""){ const c = CR_METAL[k], id = "crb" + (++CR_BID), g = `url(#${id})`, dk = `url(#${id}d)`, e = k === 4, y0 = e ? 10 : 5, y1 = e ? 17 : 12;
   const star = (cx, cy, r) => { let d = ""; for (let i = 0; i < 10; i++){ const a = (-90 + i * 36) * Math.PI / 180, R = i % 2 ? r * .45 : r; d += (i ? "L" : "M") + (cx + R * Math.cos(a)).toFixed(1) + " " + (cy + R * Math.sin(a)).toFixed(1); } return d + "Z"; };
   let s = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset=".5" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient><linearGradient id="${id}d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[2]}"/><stop offset="1" stop-color="#0b0d10"/></linearGradient></defs>`;
   if (e) s += `<path d="M10 22C2 20 0 28 3 36c3-3 6-3 9-2zM54 22c8-2 10 6 7 14-3-3-6-3-9-2z" fill="${g}"/>`;
   s += `<path d="M32 ${y0}L55 ${y1}v18c0 15-11 24-23 29C20 54 9 45 9 30V${y1}z" fill="${g}"/><path d="M32 ${y0 + 5}L50 ${y1 + 4}v14c0 12-8 19-18 23-10-4-18-11-18-23V${y1 + 4}z" fill="${dk}"/>`;
-  if (k <= 2) for (let i = 0; i <= k; i++) s += `<path d="M20 ${40 - k * 4.5 + i * 9}l12 -8 12 8" fill="none" stroke="${g}" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if (k === 3) s += `<path d="${star(32, 32, 12)}" fill="${g}"/><path d="M21 49l11-6 11 6" fill="none" stroke="${g}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (k <= 1) for (let i = 0; i <= k; i++) s += `<path d="M20 ${40 - k * 4.5 + i * 9}l12 -8 12 8" fill="none" stroke="${g}" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (k === 2) s += `<path d="${star(32, 32, 12)}" fill="${g}"/><path d="M21 49l11-6 11 6" fill="none" stroke="${g}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (k === 3) s += `<path d="M24 23h16l8 9.500L32 51 16 32.500z" fill="${g}"/><path d="M16 32.500h32M24 23l4 9.500 4 18.500 4-18.500 4-9.500M28 32.500l4-9.500 4 9.500" fill="none" stroke="${c[2]}" stroke-width="1.5" stroke-linejoin="round" opacity=".85"/><path d="M28 32.500l4-9.500 4 9.500z" fill="#fff" opacity=".7"/>`;
   if (e) s += `<path d="${star(32, 37, 11)}" fill="${g}"/><path d="M21 12l1.1-8.2 5 4.400 4.900-6.600 4.900 6.600 5-4.400 1.100 8.200z" fill="${g}"/><circle cx="32" cy="52" r="2.4" fill="${c[0]}"/>`;
   return `<svg class="crbdg ${cls}" viewBox="0 0 64 64" role="img" aria-label="Division ${CR_DIV[k][0]}">${s}</svg>`; }
 const CR = {S: null, tab: "match", view: "hub", pick: [], boost: null, useBoost: false, res: null, ask: null, auc: null};
@@ -12500,7 +12503,7 @@ function crNewDay(S){
 }
 // quelques phrases d'histoire, selon l'étape
 function crNews(S, k, x = {}){ const d = CR_DIV[S.div][0]; S.news = ({
-  start: `Tout commence en division Fer. Personne ne connaît encore ${S.club} : à toi de bâtir une équipe et de grimper jusqu'en Élite.`,
+  start: `Tout commence en division Bronze. Personne ne connaît encore ${S.club} : à toi de bâtir une équipe et de grimper jusqu'en Élite.`,
   up: `${S.club} monte en division ${d} ! Les adversaires sont plus forts, mais les recettes aussi, et de meilleurs personnages arrivent sur le marché.`,
   down: `Saison ratée : ${S.club} redescend en division ${d}. Reconstruis ton équipe et remonte.`,
   stay: `Nouvelle saison en division ${d}. Il faut finir dans les deux premiers pour monter.`,
@@ -12678,7 +12681,7 @@ function crCount(S, res){ const r = crLoad(); if (!r.cap || r.cap.d !== tcDay())
 const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}<span class="tr">${TIER[c.t]}</span></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
 function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); }
 const CR_TUTO = [
-  ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Fer, Bronze, Argent, Or, Élite) et deviens champion d'Élite.", "Compris"],
+  ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Bronze, Argent, Or, Diamant, Élite) et deviens champion d'Élite.", "Compris"],
   ["Ton effectif", "Voici tes combattants. Le chiffre est leur note : plus elle est haute, plus ils sont forts. Ils ne progressent pas : pour avancer, il faudra en recruter de meilleurs.", "Suivant", "squad"],
   ["Ton adversaire", "Chaque match t'oppose à un club. Regarde ses cinq combattants, puis prépare ton équipe.", "", "match"],
   ["Compose ton équipe", "Touche cinq combattants dans l'ordre où ils entreront. Le vainqueur d'un duel reste en jeu, fatigué : l'ordre compte autant que les notes."],
@@ -12822,14 +12825,26 @@ function crAuction(S){
 
 /* ---------- raccourcis : onglet du milieu sur téléphone (theme.part), bouton dans la barre du haut sur ordinateur ---------- */
 const CR_ICON = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4"/><path d="M12 14v3.5M8.5 20.5h7M9.5 17.5h5"/><path d="M12 6.4l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z" fill="currentColor" stroke="none"/></svg>`;
-function crOpen(){ const r = crLoad(); if (r.cur && r.saves[r.cur]){ CR.S = r.saves[r.cur]; CR.tab = "match"; return crShow(); } CR.S = null; CR.intro = "welcome"; show("cr"); crIntro(); }
+// « Retour au club » : la page de bienvenue aux couleurs de la division, une seule fois par jour (journée de jeu, voir tcDay), pour un joueur qui a déjà joué au moins un match
+function crReturn(S){ const el = $("#cr"); if (!el) return crShow(); try { lsSet("hanko-cr-ret", tcDay()); } catch {}
+  show("cr"); document.body.classList.add("crret"); el.style.setProperty("--dc", CR_DIV[S.div][2]);
+  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>` + crWelcomeHTML();
+  const w = el.querySelector(".crwel"), go = () => { document.body.classList.remove("crret"); crShow(); };
+  w.querySelector(".eb").textContent = S.club + " · saison " + S.season;
+  w.querySelector("h2").innerHTML = "Bon retour en<br><b>Division " + CR_DIV[S.div][0] + "</b>";
+  w.querySelector(".lead").textContent = "Match " + Math.min(CR_DAYS, (S.day || 0) + 1) + "/" + CR_DAYS + " · " + (S.pts || 0) + " point" + ((S.pts || 0) > 1 ? "s" : "") + ". " + (S.div < 4 ? "Termine dans les deux premiers pour monter en " + CR_DIV[S.div + 1][0] + "." : "Il ne te reste qu'un titre à aller chercher.");
+  w.querySelectorAll(".crwel-steps span").forEach((sp, k) => { sp.classList.toggle("cur", k === S.div); sp.classList.toggle("off", k > S.div); });
+  const b = w.querySelector("#crWelGo"); b.textContent = "Reprendre"; b.onclick = go; const sm = w.querySelector(".small"); if (sm) sm.textContent = "Ta progression est sauvegardée.";
+  el.querySelector("#crQuit").onclick = () => { document.body.classList.remove("crret"); show("home"); }; try { crWelcomeFx(el); } catch {} window.scrollTo(0, 0); }
+function crOpen(){ const r = crLoad(); document.body.classList.remove("crret"); if (r.cur && r.saves[r.cur]){ CR.S = r.saves[r.cur]; CR.tab = "match"; let seen = ""; try { seen = lsGet("hanko-cr-ret", ""); } catch {}
+    if ((CR.S.stat?.played || 0) >= 1 && CR.S.tuto >= 5 && seen !== tcDay()) return crReturn(CR.S); return crShow(); } CR.S = null; CR.intro = "welcome"; show("cr"); crIntro(); }
 // avant la première carrière : page d'accueil du mode, puis les deux premières étapes du didacticiel (univers, nom du club). Sert aussi à changer d'univers.
 function crIntro(){ const el = $("#cr"); if (!el) return; const r = crLoad(), step = CR.intro || "welcome", top = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>`;
   el.style.removeProperty("--dc");
   if (step === "welcome") el.innerHTML = top + crWelcomeHTML();
   else if (step === "uni") el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 1/7</i><b>Choisis ton univers</b><p>Toute ta carrière se joue dans un seul univers : tu ne recrutes que ses personnages. Tu pourras lancer une autre carrière dans un autre univers plus tard.</p></div></div>
       <div class="cruni">${Object.keys(UNI).map(u => { const s = r.saves[u], pv = (UNI[u].preview || []).map(n => DATA[u].find(c => c.n === n)).filter(Boolean); return `<button data-cru="${u}" style="--uc:${TC_PACKS[u][2]}"><span class="fan">${pv.map(c => img(c)).join("")}</span><b>${UNI[u].name}</b><small>${s ? `Carrière en cours · division ${CR_DIV[s.div][0]}, saison ${s.season}` : DATA[u].length + " personnages"}</small><em>${s ? "Continuer" : "Choisir"}</em></button>`; }).join("")}</div>`;
-  else { const u = CR.introU; el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 2/7</i><b>Donne un nom à ton club</b><p>C'est lui qui apparaîtra au classement de ${UNI[u].name}. Tu commences en division Fer, avec six personnages modestes et ${CR_ECO.start}M en caisse.</p></div></div>
+  else { const u = CR.introU; el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 2/7</i><b>Donne un nom à ton club</b><p>C'est lui qui apparaîtra au classement de ${UNI[u].name}. Tu commences en division Bronze, avec six personnages modestes et ${CR_ECO.start}M en caisse.</p></div></div>
       <div class="crbox" style="max-width:520px;margin:0 auto"><label class="f" for="crName">Nom du club</label><input id="crName" maxlength="16" placeholder="Mon club" value="${esc(profGet()?.name || "")}"><div class="row" style="margin-top:14px;justify-content:space-between"><button class="ghost" id="crBackU">Changer d'univers</button><button class="primary" id="crGoNew" style="font-size:16px;padding:12px 22px">Lancer ma carrière</button></div></div>`; }
   $("#crQuit").onclick = () => show("home");
   $("#crWelGo") && ($("#crWelGo").onclick = () => { CR.intro = "uni"; crIntro(); window.scrollTo(0, 0); });
@@ -12838,7 +12853,7 @@ function crIntro(){ const el = $("#cr"); if (!el) return; const r = crLoad(), st
   $("#crGoNew") && ($("#crGoNew").onclick = () => { CR.S = crStart(CR.introU, $("#crName").value); CR.tab = "match"; crSave(); crShow(); window.scrollTo(0, 0); });
   try { crWelcomeFx(el); } catch {} }
 // page d'accueil du mode : « le tunnel » (proposition A, choisie par l'utilisateur le 13 oct. 2026) : sol et plafond en perspective qui défilent, deux projecteurs qui balaient, trois cartes qui surgissent du fond et suivent la souris ou le doigt
-function crWelcomeHTML(){ const pick = (u, n) => DATA[u] && DATA[u].find(c => c.n === n), cs = [pick("op", "Roronoa Zoro"), pick("op", "Monkey D. Luffy"), pick("na", "Naruto Uzumaki")].filter(Boolean);
+function crWelcomeHTML(){ const pick = (u, n) => DATA[u] && DATA[u].find(c => c.n === n), cs = [pick("na", "Naruto Uzumaki"), pick("op", "Monkey D. Luffy"), pick("db", "Son Goku")].filter(Boolean);
   return `<div class="crwel"><div class="crtun" aria-hidden="true"><i class="floor"></i><i class="ceil"></i><i class="beam"></i><i class="beam b2"></i><div class="trio">${cs.map(c => `<span>${img(c)}</span>`).join("")}</div></div>
     <p class="eb">Mode solo · 道</p><h2>Bienvenue dans<br><b>Carrière</b></h2><p class="lead">Pars de tout en bas avec une équipe modeste. Gagne, recrute, monte de division en division, et deviens champion d'Élite.</p>
     <div class="crwel-steps">${CR_DIV.map((d, k) => `<span style="--c:${d[2]}">${crBadge(k)}${d[0]}</span>`).join("<u></u>")}</div>
@@ -12864,7 +12879,7 @@ function crTopRefresh(){ const b = document.querySelector(".crtop"); if (!b) ret
 /* barre du haut dans une partie : le nom du jeu à gauche, « Quitter » à droite, collée en haut */
 section:not(#home):not(#game) > .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 0 16px;padding:12px 0;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .topbar h1{font-size:clamp(15px,3.6vw,20px);letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
-.topbar h1::before{content:"";display:inline-block;width:26px;height:26px;margin-right:10px;vertical-align:-6px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='hlg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233fe0a8'/%3E%3Cstop offset='1' stop-color='%23c9f26b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z' fill='url(%23hlg)'/%3E%3Cpath d='M50 12l32.9 19v38L50 88 17.1 69V31z' fill='%230c1312'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Cpath d='M27 60l46-21v10L27 70z' fill='%233fe0a8'/%3E%3C/svg%3E") center/contain no-repeat}
+.topbar h1::before{content:"";display:inline-block;width:26px;height:26px;margin-right:10px;vertical-align:-6px;background:var(--accent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill-rule='evenodd' d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47zM50 12l32.9 19v38L50 88 17.1 69V31z'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5'/%3E%3Cpath d='M27 60l46-21v10L27 70z'/%3E%3C/svg%3E") center/contain no-repeat}
 .topbar button{flex:none;border-radius:999px;padding:8px 14px;font-size:13.5px}
 /* panneaux, titres et textes */
 .panel h2{margin-bottom:6px}
@@ -13110,7 +13125,7 @@ body.scrolled .sitebar .logo,body.scrolled section:not(#home):not(#game) > .topb
   .tabbar a:active{background:var(--panel2)}
   /* onglet Carrière : au milieu, icône propre (coupe étoilée) dans un bouton rond qui dépasse de la barre */
   .tabbar a.tcr{color:var(--text)}
-  .tabbar a.tcr i{display:grid;place-items:center;width:50px;height:50px;margin:-24px 0 1px;border-radius:50%;background:linear-gradient(140deg,#3fe0a8,#c9f26b);color:#06110d;box-shadow:0 0 0 4px var(--bg),0 8px 20px rgba(63,224,168,.35)}
+  .tabbar a.tcr i{display:grid;place-items:center;width:50px;height:50px;margin:-24px 0 1px;border-radius:50%;background:var(--hc,var(--accent));color:#fff;box-shadow:0 0 0 4px var(--bg),0 8px 20px color-mix(in srgb,var(--hc,var(--accent)) 35%,transparent)}
   .tabbar a.tcr:active{background:none}.tabbar a.tcr:active i{transform:scale(.94)}
   .tabbar a i{position:relative}
   .tabbar .tdot{position:absolute;top:-5px;left:calc(100% - 2px);min-width:13px;height:13px;padding:0 3px;box-sizing:border-box;border-radius:7px;background:#ff3b4e;color:#fff;font-family:var(--mono);font-weight:700;font-size:8.5px;line-height:13px;text-align:center;box-shadow:0 0 0 2px var(--bg)}
@@ -13167,22 +13182,22 @@ button.primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY
    COULEURS D'ACCOMPAGNEMENT (15 oct. 2026) — le site était trop uniformément jade. On garde le jade pour agir, et on l'entoure d'un dégradé
    « aurore » tiré du logo (jade → citron) prolongé vers le cyan et le violet, avec une pointe d'ambre. Rien ici ne touche aux cartes (.tc) ni aux raretés.
    ===================================================================== */
-:root{--cyan:#3fd8ff;--violet:#8f7bff;--amber:#ffc45a;
-  --grad:linear-gradient(115deg,#3fe0a8,#c9f26b);                      /* dégradé du logo : boutons principaux, onglet actif */
-  --grad-cool:linear-gradient(115deg,#3fd8ff,#3fe0a8 55%,#c9f26b);     /* barres de progression */
-  --grad-aurora:linear-gradient(115deg,#8f7bff,#3fd8ff 38%,#3fe0a8 68%,#c9f26b)}   /* titres et filets d'apparat */
+:root{--cyan:#ff7a86;--violet:#8f7bff;--amber:#ffc45a;
+  --grad:linear-gradient(115deg,var(--accent),color-mix(in srgb,var(--accent) 68%,#fff));                       /* boutons principaux, onglet actif : suit la couleur d'accent de l'écran */
+  --grad-cool:linear-gradient(115deg,color-mix(in srgb,var(--accent) 75%,#000),var(--accent));                 /* barres de progression */
+  --grad-aurora:linear-gradient(115deg,color-mix(in srgb,var(--accent) 70%,#000),var(--accent),color-mix(in srgb,var(--accent) 60%,#fff))}   /* titres et filets d'apparat */
 /* fond : trois halos de couleurs différentes au lieu d'un seul halo jade */
-body{background-image:radial-gradient(ellipse 60% 38% at 18% -8%,rgba(63,224,168,.16),transparent 70%),radial-gradient(ellipse 55% 36% at 92% 4%,rgba(143,123,255,.15),transparent 70%),radial-gradient(ellipse 70% 30% at 60% 108%,rgba(63,216,255,.09),transparent 70%);background-repeat:no-repeat;background-attachment:fixed}
+body{background-image:none}
 /* boutons principaux et éléments actifs : dégradé du logo */
 button.primary{background:var(--grad);box-shadow:0 0 30px color-mix(in srgb,var(--accent) 26%,transparent)}
 button.primary:hover:not(:disabled){background:var(--grad);box-shadow:0 0 40px color-mix(in srgb,var(--accent) 40%,transparent)}
 .tctabs button.sel{background:var(--grad);border-color:transparent;color:#03140e}
-.tabbar .on,.tabbar [aria-current="page"],.tabbar .sel{background:linear-gradient(180deg,rgba(63,224,168,.2),rgba(143,123,255,.12))}
+.tabbar .on,.tabbar [aria-current="page"],.tabbar .sel{background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .mode.sel{border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad-aurora) border-box;box-shadow:0 0 22px color-mix(in srgb,var(--accent) 14%,transparent)}
 .opt:has(input:checked){border-color:transparent;background:linear-gradient(var(--panel2),var(--panel2)) padding-box,var(--grad) border-box;box-shadow:none}
 /* nom du site et grands titres : dégradé aurore */
 .logo span{background:var(--grad-aurora);-webkit-background-clip:text;background-clip:text;color:transparent}
-#home .hero h1,.tcsec h3,.tcopen h2{background:linear-gradient(115deg,#ffffff 30%,#c9f26b 70%,#3fe0a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+#home .hero h1,.tcsec h3,.tcopen h2{background:linear-gradient(115deg,#ffffff 30%,color-mix(in srgb,var(--accent) 60%,#fff) 70%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
 .tcsec h3 i{-webkit-text-fill-color:var(--cyan);color:var(--cyan)}
 .tcsec em{background:var(--grad)}
 /* barres de progression */
@@ -13192,9 +13207,9 @@ button.primary:hover:not(:disabled){background:var(--grad);box-shadow:0 0 40px c
 .panel{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 90%,var(--accent)),var(--panel) 120px)}
 .tcstats div{position:relative;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--sc,var(--accent)) 12%,var(--panel)),var(--panel) 70%)}
 .tcstats div::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--sc,var(--accent))}
-.tcstats div:nth-child(1){--sc:#3fe0a8}.tcstats div:nth-child(2){--sc:#3fd8ff}.tcstats div:nth-child(3){--sc:#c9f26b}.tcstats div:nth-child(4){--sc:#8f7bff}
+.tcstats div:nth-child(1){--sc:var(--accent)}.tcstats div:nth-child(2){--sc:#3fd8ff}.tcstats div:nth-child(3){--sc:#c9f26b}.tcstats div:nth-child(4){--sc:#8f7bff}
 .tcstats div:nth-child(2) b{color:#bff1ff}.tcstats div:nth-child(3) b{color:#e6fbb4}.tcstats div:nth-child(4) b{color:#d6cdff}
-.tcmhead > div:nth-child(1){border-color:color-mix(in srgb,#3fe0a8 45%,var(--line))}.tcmhead > div:nth-child(2){border-color:color-mix(in srgb,#ffc45a 45%,var(--line))}.tcmhead > div:nth-child(3){border-color:color-mix(in srgb,#3fd8ff 45%,var(--line))}
+.tcmhead > div:nth-child(1){border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}.tcmhead > div:nth-child(2){border-color:color-mix(in srgb,#ffc45a 45%,var(--line))}.tcmhead > div:nth-child(3){border-color:color-mix(in srgb,#3fd8ff 45%,var(--line))}
 .tcmhead > div:nth-child(2) b{color:var(--amber)}.tcmhead > div:nth-child(3) b{color:var(--cyan)}
 /* petites étiquettes : on alterne jade, cyan et violet plutôt que tout en jade */
 .eyebrow{color:var(--cyan)}
@@ -13958,6 +13973,46 @@ body:has(#tcg:not(.hidden)) #tcg .tchero .row button.tcall{color:#fff}
     try { if (k === "join"){ document.querySelector("#joinBox").scrollIntoView({block: "center"}); setTimeout(() => document.querySelector("#qjCode")?.focus(), 200); }
       else if (k === "cartes") document.querySelector("#tabTcg").click();
       else if (k === "amis"){ if (typeof frMe === "function" && frMe()) frShow(); else document.querySelector("#profBox").scrollIntoView({block: "center"}); } } catch {} })); })();
+</script>
+<style>
+/* Carrière, choix de l'univers : l'éventail de cartes était positionné en absolu par une règle d'un autre écran (même nom de classe « fan ») et recouvrait le nom de l'univers et son bouton.
+   Il reprend sa place au-dessus du texte, dans la tuile. */
+#cr .cruni .fan{position:static;inset:auto;width:100%;aspect-ratio:auto;justify-self:stretch;transform:none;display:flex;justify-content:center;align-items:flex-end;height:124px;margin:0 0 10px;pointer-events:none}
+#cr .cruni .fan img{position:static;width:78px;height:112px;aspect-ratio:auto;margin:0 -14px;border:2px solid var(--uc);box-shadow:0 8px 18px rgba(0,0,0,.5);transform-origin:50% 50%}
+#cr .cruni .fan img:nth-child(1){transform:rotate(-9deg) translateY(6px)}
+#cr .cruni .fan img:nth-child(2){transform:none;z-index:1}
+#cr .cruni .fan img:nth-child(3){transform:rotate(9deg) translateY(6px);border-color:var(--uc);box-shadow:0 8px 18px rgba(0,0,0,.5)}
+#cr .cruni button{align-content:start}
+</style>
+<style>
+/* =====================================================================
+   DA DE LA CARRIÈRE (publiée le 14 oct. 2026, variante « Division » choisie par l'utilisateur) : noir + la couleur de la division du joueur.
+   --crdc (sur body) est recopié depuis --dc de #cr par le script plus bas ; avant la création du club (bienvenue, didacticiel 1 et 2) c'est la couleur de la division de départ.
+   ===================================================================== */
+body:has(#cr:not(.hidden)){--ca:var(--crdc,#c98a4b);--bg:#050505;--panel:#0b0b0c;--panel2:#141416;--line:color-mix(in srgb,var(--ca) 16%,#222226);--text:#f3f1f5;--muted:#a9a5b0;--accent:var(--ca);--accent2:color-mix(in srgb,var(--ca) 70%,#000);--accent3:color-mix(in srgb,var(--ca) 60%,#fff);--cyan:var(--ca);background:#050505;background-image:none}
+body:has(#cr:not(.hidden)) button.primary,body:has(#cr:not(.hidden)) button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--ca) 20%,#050505);background-image:none;color:#fff;box-shadow:inset 0 0 0 1.5px var(--ca);text-shadow:none;filter:none}
+body:has(#cr:not(.hidden)) button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--ca) 34%,#050505)}
+:where(body:has(#cr:not(.hidden))) button:hover:not(:disabled){border-color:color-mix(in srgb,var(--ca) 55%,#1d1d20);background:color-mix(in srgb,var(--ca) 12%,#0b0b0c)}
+:where(body:has(#cr:not(.hidden))) .panel{background:var(--panel)}
+/* grands rectangles de texte (jamais ceux qui sont à l'intérieur d'un autre) : contour 1,5 px et léger halo extérieur */
+body:has(#cr:not(.hidden)) #cr > .crbox,body:has(#cr:not(.hidden)) #cr > .crcoach,body:has(#cr:not(.hidden)) #cr .crstats > span{border-color:transparent;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--ca) 60%,#26262a),0 0 12px color-mix(in srgb,var(--ca) 24%,transparent)}
+body:has(#cr:not(.hidden)) #cr > .crnews{box-shadow:inset 3px 0 0 var(--ca),inset 0 0 0 1.5px color-mix(in srgb,var(--ca) 60%,#26262a),0 0 12px color-mix(in srgb,var(--ca) 24%,transparent)}
+body:has(#cr:not(.hidden)) #cr > .crcoach{background:color-mix(in srgb,var(--ca) 9%,#0b0b0c)}
+/* page de bienvenue : sobre (noir et ivoire) à la première visite ; aux couleurs de la division pour « Retour au club » (body.crret) */
+body:has(#cr:not(.hidden)){--wa:#f3efe6;--wg:linear-gradient(#f3efe6,#f3efe6)}
+body.crret:has(#cr:not(.hidden)){--wa:var(--crdc,#f3efe6);--wg:linear-gradient(120deg,var(--crdc,#f3efe6),color-mix(in srgb,var(--crdc,#f3efe6) 55%,#fff))}
+body:has(#cr:not(.hidden)) .crwel .eb{color:var(--wa)}
+body:has(#cr:not(.hidden)) .crtun .trio span,body:has(#cr:not(.hidden)) .crtun .trio span:nth-child(2){border-color:var(--wa);box-shadow:0 5cqw 10cqw rgba(0,0,0,.6),0 0 7cqw color-mix(in srgb,var(--wa) 36%,transparent)}
+body:has(#cr:not(.hidden)) .crwel #crWelGo,body:has(#cr:not(.hidden)) .crwel #crWelGo:hover:not(:disabled){background:#f3efe6;color:#050505;box-shadow:none}
+body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)) .crwel #crWelGo:hover:not(:disabled){background:color-mix(in srgb,var(--crdc,#f3efe6) 22%,#050505);color:#fff;box-shadow:inset 0 0 0 1.5px var(--crdc,#f3efe6),0 0 16px color-mix(in srgb,var(--crdc,#f3efe6) 35%,transparent)}
+.crwel-steps span.off{opacity:.3}.crwel-steps span.cur .crbdg{width:56px;height:56px;filter:drop-shadow(0 0 10px var(--c))}
+</style>
+<script>
+/* la couleur de la division, posée sur #cr par la Carrière, est recopiée sur body pour que tout l'écran (fond, menus, fenêtres) la suive */
+(() => { const c = document.querySelector("#cr"); if (!c) return;
+  const sync = () => { try { const v = c.style.getPropertyValue("--dc").trim() || (typeof CR_DIV !== "undefined" ? CR_DIV[0][2] : "#c98a4b"); if (document.body.style.getPropertyValue("--crdc") !== v) document.body.style.setProperty("--crdc", v); } catch {} };
+  try { new MutationObserver(sync).observe(c, {attributes: true, attributeFilter: ["style", "class"], childList: true}); } catch {} sync();
+})();
 </script>
 <style>
 /* fin du fichier : tout est chargé, on révèle la page (voir « Anti-flash » en tête de head.part). DOIT RESTER LA DERNIÈRE RÈGLE DU DERNIER FICHIER. */
