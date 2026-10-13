@@ -10133,6 +10133,7 @@ const TC_TUTO = [
   {k: "tview", t: "Touche une carte de ta collection pour la voir en 3D", g: 1, v: s => s.tuto?.view ? 1 : 0, rw: {g: 30}},
   {k: "tplay", t: "Termine ta première partie (le solo compte)", g: 1, v: s => s.stat?.g || 0, rw: {g: 50}},
   {k: "twin", t: "Gagne une partie, en solo ou à plusieurs", g: 1, v: s => s.stat?.w || 0, rw: {p: "mix:0"}},
+  {k: "tcareer", t: "Joue ton premier match de Carrière", g: 1, v: () => { try { return vtCareer().played ? 1 : 0; } catch { return 0; } }, rw: {g: 50}},
   {k: "tmodes", t: "Essaie 3 jeux différents", g: 3, v: s => (s.stat?.modes || []).length, rw: {p: "mix:1"}},
   {k: "tnew25", t: "Obtiens 25 cartes différentes", g: 25, v: s => Object.keys(s.own || {}).length, rw: {p: "mix:1"}},
   {k: "tfriend", t: "Ajoute un ami avec son identifiant", g: 1, v: () => { try { return frList().length; } catch { return 0; } }, rw: {g: 100}},
@@ -10140,6 +10141,7 @@ const TC_TUTO = [
 const tcTuto = s => { s.tuto = s.tuto || {claimed: []}; s.tuto.claimed = s.tuto.claimed || []; return TC_TUTO.filter(m => !m.only || m.only()).map(m => ({...m, cur: Math.min(m.g, m.v(s))})); };
 // où aller pour accomplir une mission
 function tcGo(k){ if (/days/.test(k) || k === "tlogin") return;
+  if (k === "tcareer"){ try { crOpen(); } catch {} return; }
   if (k === "tview"){ TC_TAB = "album"; tcRender(); window.scrollTo(0, 0); return; }
   if (k === "tfriend"){ try { if (frMe()) frShow(); else { show("home"); setTimeout(() => document.querySelector("#frHome")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); } } catch {} return; }
   if (k === "tname" || k === "tacc"){ show("home"); setTimeout(() => document.querySelector(k === "tacc" ? "#cpBox" : "#profBox")?.scrollIntoView({behavior: "smooth", block: "center"}), 60); return; } if (/open|new/.test(k)){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); window.scrollTo(0, 0); } else { show("home"); setTimeout(() => document.querySelector("#cat1")?.scrollIntoView({behavior: "smooth", block: "start"}), 60); } }
@@ -13279,7 +13281,8 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
   document.querySelectorAll(".panel.rules").forEach(p => { const h = p.querySelector(":scope > b:first-child"); if (!h) return; p.classList.add("fold");
     h.setAttribute("role", "button"); h.tabIndex = 0; const tog = () => p.classList.toggle("open"); h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
   // téléphone : onglets en bas de l'accueil
-  document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#cat1"><i>遊</i>Jeux</a><a href="#" id="tabCr" class="tcr"><i><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4"/><path d="M12 14v3.5M8.5 20.5h7M9.5 17.5h5"/><path d="M12 6.4l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z" fill="currentColor" stroke="none"/></svg></i>Carrière</a><a href="#" id="tabTcg"><i>札</i>Cartes</a></nav>`);
+  document.body.insertAdjacentHTML("beforeend", `<nav class="tabbar" aria-label="Accueil"><a href="#" id="tabJoin"><i>参</i>Rejoindre</a><a href="#" id="tabCr" class="tcr"><i><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4"/><path d="M12 14v3.5M8.5 20.5h7M9.5 17.5h5"/><path d="M12 6.4l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z" fill="currentColor" stroke="none"/></svg></i>Carrière</a><a href="#" id="tabTcg"><i>札</i>Cartes</a></nav>`);
+  document.querySelector("#tabJoin").onclick = e => { e.preventDefault(); try { document.querySelector("#joinBox").scrollIntoView({block: "center"}); setTimeout(() => document.querySelector("#qjCode, #joinBox input")?.focus(), 200); } catch {} };
   document.querySelector("#tabCr").onclick = e => { e.preventDefault(); try { crOpen(); } catch {} };   // « Rejoindre » et « Profil » sont dans le menu en haut à droite
   /* « Cartes » ouvre toujours les boosters : ceux à ouvrir s'il y en a (gratuits ou gagnés), sinon la boutique */
   document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); try { const s = tcLoad(), n = s.free.n, won = Object.keys(s.packs).find(k => s.packs[k] > 0); TC_SUB = n || won ? "mine" : "shop"; if (n) TC_PICK = "free"; else if (won) TC_PICK = won; } catch {} tcShow("packs"); window.scrollTo(0, 0); };
@@ -13427,7 +13430,7 @@ body:has(#home:not(.hidden)),body:has(#launch:not(.hidden)){--bg:#050505;backgro
   try { const secs = [...document.querySelectorAll("#home section.cat")], home = document.querySelector("#home"); let last = "", tick = 0;
     const upd = () => { tick = 0; if (!home || home.classList.contains("hidden")) return; let cur = secs[0]; for (const s of secs){ if (s.getBoundingClientRect().top <= innerHeight * .4) cur = s; }
       const c = getComputedStyle(cur).getPropertyValue("--fb").trim() || getComputedStyle(cur).getPropertyValue("--f1").trim(); if (c && c !== last){ last = c; document.body.style.setProperty("--hc", c); } };
-    addEventListener("scroll", () => { if (!tick) tick = requestAnimationFrame(upd); }, {passive: true}); upd(); setTimeout(upd, 600); } catch {}
+    addEventListener("scroll", () => { if (!tick) tick = requestAnimationFrame(upd); }, {passive: true}); upd(); setTimeout(upd, 600); window.hcUpd = upd; } catch {}
   // les pastilles de familles ont été créées avec les anciennes couleurs : on leur donne celles de la nouvelle direction
   try { const secs = [...document.querySelectorAll("#home section.cat")]; document.querySelectorAll("#famNav button").forEach((b, k) => { if (secs[k]) b.style.setProperty("--fc", getComputedStyle(secs[k]).getPropertyValue("--fb").trim() || getComputedStyle(secs[k]).getPropertyValue("--f1")); }); } catch {}
 })();
@@ -13572,8 +13575,8 @@ body[data-fam]:not(:has(#home:not(.hidden))):not(:has(#tcg:not(.hidden))):not(:h
 </style>
 <script>
 (() => { const fam = () => { try { const c = document.querySelector("#home .gcards .mode.sel"), sec = c && c.closest("section.cat"), k = sec ? [...document.querySelectorAll("#home section.cat")].indexOf(sec) + 1 : 0; if (k) document.body.dataset.fam = k; else delete document.body.dataset.fam; } catch {} };
-  if (typeof show === "function"){ const _show = show; show = function(id){ const r = _show.apply(this, arguments); fam(); return r; }; }
-  document.addEventListener("click", () => setTimeout(fam, 0), true); fam();
+  if (typeof show === "function"){ const _show = show; show = function(id){ const r = _show.apply(this, arguments); fam(); try { hcUpd(); setTimeout(hcUpd, 120); } catch {} return r; }; }
+  document.addEventListener("click", () => setTimeout(() => { fam(); try { hcUpd(); } catch {} }, 0), true); fam();
 })();
 </script>
 <style>
