@@ -14757,6 +14757,8 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
    Holo : le reflet arc-en-ciel devient un reflet aux couleurs de la carte (--hm couleur, --hl clair, --hd sombre, calculées par build.py).
    AR classiques (sans scène) : contour et lueur aux couleurs de leur illustration, comme les AR façon Pokémon. */
 .tc.tc.tc.f-H[style*="--hm"] .fx,.tc.tc.lx.f-H[style*="--hm"] .fx{background:linear-gradient(118deg,transparent 38%,rgba(255,255,255,.35) 50%,transparent 62%),repeating-linear-gradient(112deg,var(--hl) 0,var(--hm) 6%,var(--hd) 12%,var(--hm) 18%,var(--hl) 24%)!important;background-size:auto,260% 260%!important;mix-blend-mode:color-dodge}
+.tc.tc.tc.f-A[style*="--hm"]:not(.arp) .fx{background:linear-gradient(118deg,transparent 40%,color-mix(in srgb,var(--hl) 75%,transparent) 49%,color-mix(in srgb,var(--hm) 45%,transparent) 54%,transparent 62%),linear-gradient(125deg,color-mix(in srgb,var(--hm) 14%,transparent),color-mix(in srgb,var(--hl) 10%,transparent))!important;background-size:250% 250%,auto!important}
+.tc.tc.tc.f-A[style*="--hm"]:not(.arp) .fx::after{background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--hl) 90%,transparent),color-mix(in srgb,var(--hm) 30%,transparent) 32%,transparent 64%)!important}
 .tc.tc.f-A[style*="--hm"]:not(.arp),.tc.tc.f-B[style*="--hm"]:not(.arp){border-color:var(--hm)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--hl) 60%,transparent) inset,0 0 14px color-mix(in srgb,var(--hm) 55%,transparent)!important}
 /* les AR façon Pokémon reprennent ces mêmes variables si leur texte n'en fournit pas */
 .tc.arp{--am:var(--hm,#888);--al:var(--hl,#ccc);--ad:var(--hd,#222)}
