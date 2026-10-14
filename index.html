@@ -3051,6 +3051,11 @@ Object.assign(FACTORS, {
 .olist{display:grid;gap:8px;margin:12px 0}
 /* arène */
 #arena{position:fixed;inset:0;z-index:60;background:color-mix(in srgb,var(--bg) 94%,black);overflow:auto;padding:16px}
+/* iPhone : la page du dessous pouvait s'afficher par-dessus le combat (bande au milieu de l'écran). On isole l'arène sur son propre calque,
+   on masque les écrans de jeu et de carrière pendant le combat et on bloque le défilement de l'arrière-plan (14 oct. 2026). */
+#arena{z-index:9000;height:100dvh;isolation:isolate;transform:translateZ(0);-webkit-transform:translateZ(0);overscroll-behavior:contain;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+html:has(#arena),html:has(#arena) body{overflow:hidden;overscroll-behavior:none}
+body:has(#arena) > section:not(#arena),body:has(#arena) .wrap > section{visibility:hidden}
 #arena .in{max-width:900px;margin:0 auto;display:grid;gap:14px}
 #arena .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 #arena .ring{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
