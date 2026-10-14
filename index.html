@@ -17,7 +17,7 @@ try { if (sessionStorage.getItem("hanko-invite") === "1"){ const mem = {}, P = S
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='hlg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233fe0a8'/%3E%3Cstop offset='1' stop-color='%23c9f26b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z' fill='url(%23hlg)'/%3E%3Cpath d='M50 12l32.9 19v38L50 88 17.1 69V31z' fill='%230c1312'/%3E%3Crect x='31' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Crect x='58' y='28' width='11' height='44' rx='2.5' fill='url(%23hlg)'/%3E%3Cpath d='M27 60l46-21v10L27 70z' fill='%233fe0a8'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Shippori+Mincho+B1:wght@800&family=Rye&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=Shippori+Mincho+B1:wght@800&family=Rye&family=JetBrains+Mono:wght@500&family=Unbounded:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 /* Anti-flash (13 oct. 2026) : les styles de la nouvelle direction artistique sont à la fin du fichier ; sans ceci, on voyait une fraction de seconde l'ancien thème vert
    à chaque chargement. La page reste donc invisible (sur fond noir) jusqu'à la toute dernière règle du fichier, à la fin de da.part, qui la révèle. Pas de script : rien ne peut la laisser cachée. */
@@ -9579,8 +9579,9 @@ setInterval(voxRender, 2000);
 @keyframes tcquake{0%,100%{transform:none}20%{transform:translate(-7px,4px)}40%{transform:translate(6px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(5px,4px)}}
 /* ---- grande scène Légendaire / Mythique ---- */
 
-.tccine{position:fixed;inset:0;z-index:99;display:grid;place-items:center;align-content:center;gap:10px;overflow:hidden;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--rc) 30%,#0b0a0e) 0,#050407 72%);padding:20px;cursor:pointer}
+.tccine{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;position:fixed;inset:0;z-index:99;display:grid;place-items:center;align-content:center;gap:10px;overflow:hidden;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--rc) 30%,#0b0a0e) 0,#050407 72%);padding:20px;cursor:pointer}
 .tccine > *{grid-column:1}
+html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,html:has(.crcine),html:has(.crcine) body,html:has(.tcopen),html:has(.tcopen) body{overflow:hidden;overscroll-behavior:none}
 .tccine .fl{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .tccine .rays{position:absolute;left:50%;top:50%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc) 46%,transparent) 0 5deg,transparent 5deg 16deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 58%);mask-image:radial-gradient(circle,#000 0,transparent 58%);opacity:.55;pointer-events:none}
 .tccine .rays.two{background:repeating-conic-gradient(from 8deg,rgba(176,124,255,.4) 0 3deg,transparent 3deg 22deg);opacity:.5}
@@ -9651,8 +9652,8 @@ setInterval(voxRender, 2000);
 .tccine .seal{color:color-mix(in srgb,var(--yc) 22%,transparent)}
 /* styles : orage (Mythique, Éveil), cases de manga (SAR), pluie d'or (UR) */
 .tccine .bolts,.tccine .pans,.tccine .rain{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.tccine .bolts i{position:absolute;top:0;bottom:30%;width:12%;background:linear-gradient(180deg,#fff,var(--yc));clip-path:polygon(46% 0,62% 0,40% 38%,70% 38%,22% 100%,44% 52%,18% 52%);opacity:0;filter:drop-shadow(0 0 14px var(--yc))}
-.tccine .bolts i:nth-child(1){left:8%}.tccine .bolts i:nth-child(2){left:74%;transform:scaleX(-1)}.tccine .bolts i:nth-child(3){left:42%;bottom:55%}
+.tccine .bolts i{position:absolute;top:0;height:min(64%,560px);width:min(30vw,170px);background:linear-gradient(180deg,#fff,var(--yc));clip-path:polygon(46% 0,62% 0,40% 38%,70% 38%,22% 100%,44% 52%,18% 52%);opacity:0;filter:drop-shadow(0 0 14px var(--yc))}
+.tccine .bolts i:nth-child(1){left:-4%}.tccine .bolts i:nth-child(2){right:-4%;transform:scaleX(-1)}.tccine .bolts i:nth-child(3){left:50%;margin-left:min(-15vw,-85px);height:min(36%,300px)}@media (max-width:700px){.tccine .bolts i:nth-child(3){display:none}}
 .tccine .pans i{position:absolute;left:-10%;right:-10%;height:20%;background:#fff;opacity:.92;transform:skewY(-7deg) translateX(-120%);box-shadow:0 0 0 4px #0b0a0e;background-image:repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,0,0,.5) 14px 15px)}
 .tccine .pans i:nth-child(1){top:4%}.tccine .pans i:nth-child(2){top:70%}.tccine .pans i:nth-child(3){top:86%;height:9%}
 .tccine .rain{background:radial-gradient(circle,#fff6c9 0 1.4px,transparent 2.6px),radial-gradient(circle,#ffd23f 0 1.8px,transparent 3px),radial-gradient(circle,#ffe58a 0 1.2px,transparent 2.4px);background-size:53px 71px,89px 97px,37px 61px}
@@ -10493,6 +10494,7 @@ function tcWinOdds(streak, record){
 const tcDropChance = streak => Math.min(TC_GAIN.dropMax, TC_GAIN.drop + TC_GAIN.dropStreak * Math.max(0, streak - 1));
 // ---- gains ----
 function tcToast(txt, t = 0){
+  if (document.querySelector("#arena")) return void setTimeout(() => tcToast(txt, t), 800);   // pas d'annonce pendant un combat : elle dévoilerait le résultat
   document.querySelector(".tctoast")?.remove();
   document.body.insertAdjacentHTML("beforeend", `<div class="tctoast t${t}" role="status"><i>${TC_T[t].k || "札"}</i><span>${esc(txt)}</span></div>`);
   const el = document.querySelector(".tctoast"); el.onclick = () => { el.remove(); tcShow("packs"); }; setTimeout(() => el.remove(), 7000);
@@ -10970,7 +10972,8 @@ function tcCine(c, o = {}){
     const card3d = () => { const cd = el.querySelector(".cardw .tc"); if (!G || !cd) return; el.classList.add("gs");
       G.fromTo(cd, {rotationY: -540, rotationX: 24, scale: .12, y: 160, opacity: 0, transformPerspective: 900}, {rotationY: 0, rotationX: 0, scale: 1, y: 0, opacity: 1, duration: 1.15, ease: "expo.out", onComplete: () => G.to(cd, {y: -9, duration: 1.9, yoyo: true, repeat: -1, ease: "sine.inOut"})});
       G.from(el.querySelectorAll(".lab,.who,.tap"), {y: 22, opacity: 0, duration: .5, stagger: .12, delay: .55, clearProps: "transform,opacity"});
-      el.onpointermove = e => { const r = cd.getBoundingClientRect(), x = Math.min(1.4, Math.max(-.4, (e.clientX - r.left) / r.width)), y = Math.min(1.4, Math.max(-.4, (e.clientY - r.top) / r.height)); G.to(cd, {rotationY: (x - .5) * 34, rotationX: (.5 - y) * 24, duration: .35, overwrite: "auto"});
+      el.onpointermove = e => {
+        const r = cd.getBoundingClientRect(), k = e.pointerType === "touch" ? 1.6 : 1, x = Math.min(1.4, Math.max(-.4, .5 + ((e.clientX - r.left) / r.width - .5) * k)), y = Math.min(1.4, Math.max(-.4, .5 + ((e.clientY - r.top) / r.height - .5) * k)); G.to(cd, {rotationY: (x - .5) * 34, rotationX: (.5 - y) * 24, duration: e.pointerType === "touch" ? .2 : .35, overwrite: "auto"});
         cd.classList.add("hl"); cd.style.setProperty("--px", (Math.min(1, Math.max(0, x)) * 100).toFixed(1) + "%"); cd.style.setProperty("--py", (Math.min(1, Math.max(0, y)) * 100).toFixed(1) + "%"); cd.style.setProperty("--ph", Math.min(1, Math.hypot(x - .5, y - .5) / .5).toFixed(2)); }; };
     let riseOff = () => {};
     const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); riseOff(); el.classList.add("s1", "s2", "s3", "s4"); GLc && GLc.reveal(); card3d(); tcSnd(myth ? "impact3" : "impact2"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
@@ -10979,7 +10982,11 @@ function tcCine(c, o = {}){
     if (calm) end();
     else if (mini){ riseOff = tcRiser(1, .9); at(250, () => { el.classList.add("s2"); GLc && GLc.stage(2); tcSnd("st2"); }); at(1000, end); }
     else { riseOff = tcRiser(3.7, myth ? 1.25 : 1.05); at(650, () => { el.classList.add("s1"); GLc && GLc.stage(1); tcSnd("st1"); }); at(1500, () => { el.classList.add("s2"); GLc && GLc.stage(2); tcSnd("st2"); }); at(2350, () => { el.classList.add("s3"); GLc && GLc.stage(3); tcSnd("st3"); }); at(3700, end); }
-    el.onclick = () => { if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; GLc && GLc.stop(); if (G) G.killTweensOf(el.querySelector(".cardw .tc")); el.remove(); res(); };
+    el.onpointerdown = e => { el._p0 = [e.clientX, e.clientY]; el._drag = 0; };
+    el.addEventListener("pointermove", e => { if (el._p0 && Math.hypot(e.clientX - el._p0[0], e.clientY - el._p0[1]) > 10) el._drag = 1; });
+    el.addEventListener("pointerup", () => { el._p0 = null; });   /* au doigt : glisser incline la carte sans la fermer */
+    el.addEventListener("touchmove", e => e.preventDefault(), {passive: false});
+    el.onclick = () => { if (el._drag){ el._drag = 0; return; } if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; GLc && GLc.stop(); if (G) G.killTweensOf(el.querySelector(".cardw .tc")); el.remove(); res(); };
   });
 }
 // ouverture : le sachet se charge et se déchire (la couleur de l'éclair annonce le meilleur tirage), puis on retourne les cinq cartes
@@ -11547,14 +11554,15 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vtseg button small{display:block;font-family:var(--mono);font-weight:500;font-size:11px;margin-top:2px;opacity:.8}
 .vtseg button.on{color:var(--text);background:var(--panel2,var(--panel));box-shadow:inset 0 0 0 1px var(--accent)}.vtseg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* annonce d'une carte de visite débloquée : panneau en haut de l'écran (remplace l'ancienne bulle du bas) */
-.vtnote{--nc:#c9a36a;position:fixed;left:0;right:0;top:0;z-index:9999;display:grid;justify-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 0;pointer-events:none}
+.vtnote{--nc:#c9a36a;position:fixed;left:0;right:0;bottom:0;z-index:9999;display:grid;justify-items:center;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px) + var(--vnb,0px));pointer-events:none}
+.vtnote.top{bottom:auto;top:0;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 0}
 .vtnote.t2{--nc:#dfe5ee}.vtnote.t3{--nc:#f2c230}.vtnote.t4{--nc:#c9a2ff}
 .vtnote .vn-in{position:relative;pointer-events:auto;width:min(100%,440px);display:grid;gap:10px;padding:12px 12px 14px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(26,24,32,.96),rgba(14,13,18,.97));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--nc) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.14),0 24px 60px rgba(0,0,0,.65),0 0 44px color-mix(in srgb,var(--nc) 26%,transparent)}
 .vtnote .vn-in::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--nc) 34%,transparent) 50%,transparent 65%);background-size:260% 100%;background-position:120% 0;mix-blend-mode:screen}
 .vtnote .vn-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .vtnote .vn-e{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--nc)}.vtnote .vn-e i{font-style:normal;font-family:var(--brand);letter-spacing:.06em;color:var(--muted)}
-.vtnote .vn-x{all:unset;cursor:pointer;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;font-size:12px;color:var(--muted);background:rgba(255,255,255,.06)}
+.vtnote .vn-x{all:unset;cursor:pointer;display:grid;place-items:center;width:38px;height:38px;margin:-6px -4px -6px 0;border-radius:50%;font-size:16px;color:#fff;background:rgba(255,255,255,.14)}.vtnote .vn-x:hover{background:rgba(255,255,255,.22)}
 .vtnote .vt{width:100%}
 .vtnote .vn-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .vtnote .vn-g{font-family:var(--title);font-weight:900;font-size:17px;color:var(--nc)}
@@ -11563,9 +11571,10 @@ function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.tim
 .vtnote .vn-bar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--nc);transform-origin:0 50%;opacity:.8}
 @keyframes vnin{from{transform:translateY(-120%) scale(.96);opacity:0}to{transform:none;opacity:1}}
 @keyframes vnbar{to{transform:scaleX(0)}}@keyframes vnsweep{to{background-position:-120% 0}}
-.vtnote .vn-bar{animation:vnbar 7s linear both}
-@media (prefers-reduced-motion:no-preference){.vtnote .vn-in{animation:vnin .55s cubic-bezier(.2,.9,.25,1.15) both}.vtnote .vn-in::before{animation:vnsweep 1.1s ease-out .45s both}
-  .vtnote.out .vn-in{transition:transform .35s ease-in,opacity .35s;transform:translateY(-120%);opacity:0}}
+.vtnote .vn-bar{animation:vnbar 3s linear both}
+@keyframes vnup{from{transform:translateY(120%);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:no-preference){.vtnote .vn-in{animation:vnup .5s cubic-bezier(.2,.9,.25,1.1) both}.vtnote.top .vn-in{animation-name:vnin}.vtnote .vn-in::before{animation:vnsweep 1.1s ease-out .45s both}
+  .vtnote.out .vn-in{transition:transform .35s ease-in,opacity .35s;transform:translateY(120%);opacity:0}.vtnote.top.out .vn-in{transform:translateY(-120%)}}
 .vtnote.out .vn-in{opacity:0}
 /* récompenses d'une carte de visite : pastilles sous chaque carte à débloquer, et dans l'annonce */
 .vtrw,.vn-rw{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
@@ -11676,17 +11685,21 @@ function vtCheck(s){
   const more = neu.length - 1;
   // annonce : un panneau qui descend du haut de l'écran avec la carte de visite elle-même (animée), sa récompense et un accès à la vitrine.
   // Il attend la fin d'une ouverture de booster ou d'une cinématique pour ne pas passer par-dessus.
-  let tries = 0; const showIt = () => { if (document.querySelector(".tccine,.tccele,.tcopen:not(.res)") && ++tries < 30) return setTimeout(showIt, 700);
+  let tries = 0; const showIt = () => { if (document.querySelector("#arena,.crpov") || document.querySelector(".tccine,.tccele,.tcopen:not(.res)") && ++tries < 30) return setTimeout(showIt, 700);   /* jamais pendant un combat (#arena) : le résultat serait dévoilé */
     document.querySelector(".vtnote")?.remove();
-    document.body.insertAdjacentHTML("beforeend", `<div class="vtnote t${top[3]}" role="status" aria-live="polite"><div class="vn-in"><div class="vn-h"><span class="vn-e">Carte de visite débloquée <i>· 解放</i></span><button class="vn-x" aria-label="Fermer">✕</button></div>
+    document.body.insertAdjacentHTML("beforeend", `<div class="vtnote t${top[3]}" role="status" aria-live="polite"><div class="vn-in"><div class="vn-h"><span class="vn-e">Carte de visite obtenue</span><button class="vn-x" aria-label="Fermer">✕</button></div>
       ${vtCardHTML(top[0], {cls: "main"})}
       <div class="vn-rw"><span class="g">+${won.g} ◆</span><span class="x">+${won.xp} XP</span>${Object.entries(won.packs).map(([k, n]) => `<span class="p t${tcParse(k).t}">${n > 1 ? n + " boosters " : "Booster "}${TC_T[tcParse(k).t].n}</span>`).join("")}${won.cards.map(n => `<span class="c">${esc(n)}</span>`).join("")}${won.lv.length ? `<span class="x">Niveau ${won.lv[won.lv.length - 1]}</span>` : ""}</div>
       <div class="vn-f">${more > 0 ? `<span class="vn-m">+${more} autre${more > 1 ? "s" : ""} carte${more > 1 ? "s" : ""} de visite</span>` : ""}<button class="vn-go">Voir ma vitrine</button></div><i class="vn-bar"></i></div></div>`);
     const el = document.querySelector(".vtnote"), bye = () => { if (!el.isConnected) return; el.classList.add("out"); setTimeout(() => el.remove(), 380); };
     el.querySelector(".vn-x").onclick = e => { e.stopPropagation(); bye(); }; el.querySelector(".vn-go").onclick = e => { e.stopPropagation(); el.remove(); tcShow("vitrine"); };
-    setTimeout(bye, 7000); SFX.play(top[3] >= 3 ? "fanfare" : "win"); try { navigator.vibrate?.(top[3] >= 3 ? [40, 30, 90] : 35); } catch {} };
+    vtNoteDock(el); setTimeout(bye, 3000); SFX.play(top[3] >= 3 ? "fanfare" : "win"); try { navigator.vibrate?.(top[3] >= 3 ? [40, 30, 90] : 35); } catch {} };
   setTimeout(showIt, 2600);
 }
+// bandeau « B+ » (14 oct. 2026) : en bas de l'écran, posé juste au-dessus des boutons visibles pour n'en cacher aucun
+function vtNoteDock(el){ const box = el.querySelector(".vn-in"), h = box.offsetHeight, H = innerHeight, mine = new Set(el.querySelectorAll("button"));
+  let lim = H; document.querySelectorAll("button,a.btn,[role=button]").forEach(b => { if (mine.has(b) || !b.offsetParent) return; const r = b.getBoundingClientRect(); if (r.bottom > H - h - 24 && r.top < H && r.height) lim = Math.min(lim, r.top); });
+  const off = Math.max(0, H - lim + 8); if (H - off - h < 70) el.classList.add("top"); else el.style.setProperty("--vnb", off + "px"); }
 // illustration de chaque famille de cartes : motif de fond et personnages (pris dans les images du jeu), du palier le plus bas au plus haut
 const VT_ART = {k: ["burst", []], g: ["speed", ["op:Usopp", "op:Tony Tony Chopper", "db:Krilin", "op:Monkey D. Luffy"]], w: ["burst", ["na:Neji Hyûga", "op:Roronoa Zoro", "db:Vegeta", "op:Kaido"]], s: ["flame", ["op:Portgas D. Ace", "op:Sabo", "na:Gaï Maito"]],
   c: ["grid", ["op:Nami", "op:Nico Robin", "na:Tenten", "op:Gol D. Roger"]], u: ["wave", []], m: ["burst", ["db:Beerus", "db:Whis", "db:Zeno"]], x: ["bolt", ["db:Son Gohan", "db:Son Goku"]],
@@ -12941,7 +12954,7 @@ body:has(.gcards [data-g="cr"].sel) .crh{display:block}
 .crcoach{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--accent) 11%,var(--panel));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 55%,transparent);margin-bottom:12px}
 .crcoach > div{flex:1 1 240px;min-width:0}.crcoach i{display:block;font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)}
 .crcoach b{display:block;font-size:16px;margin:2px 0 3px}.crcoach p{margin:0;font-size:13.5px;color:#d9d5df;line-height:1.45}
-.crtabs{display:flex;gap:4px;overflow-x:auto;margin:0 0 14px;border-bottom:1px solid var(--line);scrollbar-width:none}.crtabs::-webkit-scrollbar{display:none}
+.crtabs{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;touch-action:pan-x;overscroll-behavior:contain;margin:0 0 14px;border-bottom:1px solid var(--line);scrollbar-width:none}.crtabs::-webkit-scrollbar{display:none}
 .crtabs button{all:unset;cursor:pointer;flex:none;padding:10px 13px;font-weight:700;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
 .crtabs button.sel{color:var(--text);border-bottom-color:var(--accent)}.crtabs button small{margin-left:5px;font-family:var(--mono);font-size:11px;color:var(--accent)}
 .crtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
@@ -13061,6 +13074,83 @@ button.crc{cursor:pointer}
 .crtop + .hpill{margin-left:8px}
 @media (max-width:640px){.crtop{display:none}.crtop + .hpill{margin-left:auto}}
 @media (max-width:640px){.crhead{grid-template-columns:1fr}.crstats{justify-content:flex-start}.crgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.crlot{grid-template-columns:96px minmax(0,1fr)}.crstats span{padding:6px 9px;font-size:13px}}
+/* page de montée de division (première fois seulement) : validée le 14 oct. 2026 */
+.crpov{position:fixed;inset:0;z-index:9990;display:grid;place-items:center;background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.crpromo{position:relative;width:min(460px,calc(92dvh * .5));height:min(92dvh,946px);border-radius:28px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 80px rgba(0,0,0,.7);container-type:inline-size;overflow:hidden;background:#07070a;color:#f4f1ea}
+@media (max-width:599px){.crpromo{width:100vw;height:100dvh;border-radius:0;box-shadow:none}}
+.crpromo .ct{padding-top:calc(9cqw + env(safe-area-inset-top,0px));padding-bottom:calc(9cqw + env(safe-area-inset-bottom,0px))}
+.crpromo .crbdg{padding:0;background:none;border-radius:0;box-shadow:none}
+.crpromo button:hover:not(:disabled){background:color-mix(in srgb,var(--c) 30%,#050505);border:0}.crpromo button:focus-visible{outline:none;box-shadow:inset 0 0 0 2.5px var(--c),0 0 6cqw color-mix(in srgb,var(--c) 60%,transparent)}
+.crpromo .fx{position:absolute;inset:0}
+.crpromo .ct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4.5cqw;padding:9cqw}
+.crpromo .eb{font:600 3.6cqw var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--c);font-style:normal}
+.crpromo .bw{width:42cqw;aspect-ratio:1;display:grid;place-items:center;position:relative;animation:crppop 1s cubic-bezier(.2,1.4,.4,1) both}
+.crpromo .bw::before{content:"";position:absolute;inset:-12%;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 50%,transparent),transparent 65%);animation:crppulse 2.6s ease-in-out infinite}
+.crpromo .bdg{width:100%;height:100%;position:relative;filter:drop-shadow(0 0 4cqw color-mix(in srgb,var(--c) 70%,transparent))}
+.crpromo h2{font:800 7cqw/1.15 var(--title);margin:0}.crpromo h2 b{display:block;font-size:10cqw;color:var(--c);text-shadow:0 0 6cqw color-mix(in srgb,var(--c) 60%,transparent)}
+.crpromo ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2cqw;font:500 3.6cqw/1.35 Inter,var(--body);color:#d9d4cb}.crpromo li.gift{color:var(--c);font-weight:700}
+.crpromo button{all:unset;cursor:pointer;margin-top:2cqw;padding:3.4cqw 8cqw;border-radius:99px;font:700 4cqw Inter,var(--body);background:color-mix(in srgb,var(--c) 22%,#050505);box-shadow:inset 0 0 0 1.5px var(--c),0 0 5cqw color-mix(in srgb,var(--c) 40%,transparent)}
+.crpromo small{font:500 3cqw Inter,var(--body);color:#777}
+@keyframes crppop{from{transform:scale(.3);opacity:0}}@keyframes crppulse{50%{transform:scale(1.12);opacity:.6}}
+.crpromo.d1 .fx{background:radial-gradient(60% 40% at 50% 30%,rgba(207,214,224,.28),transparent 70%),linear-gradient(180deg,#0d1016,#050608)}
+.crpromo.d1 .fx::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px);background-size:22px 30px;animation:crpfall 6s linear infinite;-webkit-mask-image:linear-gradient(#000,transparent 80%);mask-image:linear-gradient(#000,transparent 80%)}
+@keyframes crpfall{to{background-position:0 300px}}
+.crpromo.d2 .fx{background:repeating-conic-gradient(from 0deg at 50% 32%,rgba(247,198,74,.16) 0 6deg,transparent 6deg 18deg),radial-gradient(55% 40% at 50% 32%,rgba(247,198,74,.4),transparent 70%),#0b0803;animation:crpspin 30s linear infinite}
+@keyframes crpspin{to{filter:hue-rotate(0deg)}}
+.crpromo.d3 .fx{background:radial-gradient(48% 30% at 50% 32%,rgba(89,194,255,.38),transparent 72%),radial-gradient(120% 80% at 50% 110%,rgba(13,79,143,.45),transparent 60%),linear-gradient(180deg,#02060c,#041120 55%,#02060c)}
+.crpromo.d3 .fx::before{content:"";position:absolute;left:50%;top:32%;width:115%;aspect-ratio:1;translate:-50% -50%;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%239fdcff%27%20stroke-width%3D%27.6%27%3E%3Cpolygon%20points%3D%27100%2C8%20170%2C60%20145%2C188%2055%2C188%2030%2C60%27/%3E%3Cpolyline%20points%3D%2730%2C60%20100%2C82%20170%2C60%27/%3E%3Cpolyline%20points%3D%27100%2C8%20100%2C82%20145%2C188%27/%3E%3Cpolyline%20points%3D%27100%2C82%2055%2C188%27/%3E%3Cpolyline%20points%3D%2762%2C40%20100%2C82%20138%2C40%27/%3E%3Cpolyline%20points%3D%2730%2C60%2080%2C120%2055%2C188%27/%3E%3Cpolyline%20points%3D%27170%2C60%20120%2C120%20145%2C188%27/%3E%3Cpolyline%20points%3D%2780%2C120%20120%2C120%20100%2C82%27/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;opacity:.22;filter:drop-shadow(0 0 6px #59c2ff);animation:crpfacet 9s ease-in-out infinite}
+.crpromo.d3 .fx::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,#fff 0 1.2px,transparent 2px),radial-gradient(circle,#bfe9ff 0 1px,transparent 1.6px);background-size:83px 97px,61px 71px;background-position:12px 30px,40px 8px;-webkit-mask-image:radial-gradient(60% 45% at 50% 34%,#000,transparent 75%);mask-image:radial-gradient(60% 45% at 50% 34%,#000,transparent 75%);animation:crptw 2.8s ease-in-out infinite alternate}
+.crpromo.d3 .bw::after{content:"";position:absolute;inset:-22%;border-radius:50%;border:1px solid rgba(159,220,255,.35);box-shadow:0 0 18px rgba(89,194,255,.35),inset 0 0 18px rgba(89,194,255,.2);animation:crpring 6s linear infinite;background:conic-gradient(from 0deg,transparent 0 80%,rgba(255,255,255,.55) 88%,transparent 96%);-webkit-mask:radial-gradient(circle,transparent 66%,#000 67%,#000 70%,transparent 71%);mask:radial-gradient(circle,transparent 66%,#000 67%,#000 70%,transparent 71%)}
+.crpromo.d3 h2 b{background:linear-gradient(100deg,#bfe9ff 20%,#fff 45%,#59c2ff 55%,#bfe9ff 80%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:crpshine 4s ease-in-out infinite}
+@keyframes crpfacet{50%{opacity:.34;transform:scale(1.03)}}@keyframes crptw{to{opacity:.35}}@keyframes crpring{to{rotate:360deg}}@keyframes crpshine{from{background-position:120% 0}to{background-position:-20% 0}}
+@keyframes crpsh{from{background-position:120% 0}to{background-position:-20% 0}}
+.crpromo.d4 .fx{background:radial-gradient(70% 45% at 50% 32%,rgba(255,90,106,.45),transparent 70%),radial-gradient(90% 40% at 50% 115%,rgba(255,120,40,.35),transparent 70%),#0d0204}
+.crpromo.d4 .fx::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:radial-gradient(4px 4px at 20% 80%,#ffb36b,transparent),radial-gradient(3px 3px at 60% 70%,#ff5a6a,transparent),radial-gradient(3px 3px at 80% 90%,#ffd28a,transparent),radial-gradient(2px 2px at 40% 95%,#ff8a5a,transparent);background-size:120px 160px;animation:crprise 3s linear infinite}
+@keyframes crprise{to{background-position:0 -160px}}
+.crpromo.d2 .fx{background:conic-gradient(from 160deg at 50% -5%,transparent 0 12deg,rgba(255,230,150,.22) 18deg,transparent 26deg),radial-gradient(40% 10% at 50% 47%,rgba(247,198,74,.55),transparent 70%),radial-gradient(45% 30% at 50% 32%,rgba(247,198,74,.3),transparent 70%),#070605!important;animation:none}
+.crpromo.d2 .fx::after{content:"";position:absolute;inset:0;background-image:radial-gradient(1.5px 3px at 20% 10%,#f7c64a,transparent),radial-gradient(1.5px 3px at 70% 30%,#fff1c9,transparent),radial-gradient(1px 2px at 45% 60%,#e2a83a,transparent);background-size:110px 150px;animation:crpfall 9s linear infinite}
+.crpromo.d4 .fx{background:radial-gradient(80% 50% at 50% 32%,rgba(40,0,8,.0),#030001 75%),#030001!important}
+.crpromo.d4 .fx::after{display:none}
+.crpromo.d4 .bw::before{background:none!important}
+.crpromo.d4 .bw::after{content:"";position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,#030001 0 44%,rgba(255,90,106,.95) 46%,rgba(255,90,106,.35) 52%,rgba(255,90,106,0) 70%);box-shadow:0 0 12cqw rgba(255,60,80,.45);z-index:-1;animation:crpcorona 3.6s ease-in-out infinite}
+.crpromo.d4 .bw{isolation:isolate}
+@keyframes crpcorona{50%{filter:brightness(1.35);transform:scale(1.04)}}
+.crpromo.d4 h2 b{color:#ff7a88;text-shadow:0 0 6cqw rgba(255,60,80,.7)}
+.crpromo.d4 .fx{background:radial-gradient(60% 42% at 50% 32%,rgba(255,40,70,.42),transparent 72%),radial-gradient(90% 40% at 50% 112%,rgba(200,20,50,.35),transparent 70%),linear-gradient(180deg,#0a0105,#1a0208 60%,#070103)!important}
+.crpromo.d4 .fx::after{display:block!important;content:"";position:absolute;inset:0;height:auto;background:radial-gradient(circle,#ffe6a8 0 1.1px,transparent 1.8px);background-size:67px 79px;-webkit-mask-image:radial-gradient(55% 40% at 50% 34%,#000,transparent 75%);mask-image:radial-gradient(55% 40% at 50% 34%,#000,transparent 75%);animation:crptw 2.4s ease-in-out infinite alternate}
+.crpromo.d4 .bw::after{background:radial-gradient(circle,#050002 0 44%,rgba(255,90,106,1) 46%,rgba(255,150,160,.5) 50%,rgba(255,60,80,.25) 58%,rgba(255,90,106,0) 74%);box-shadow:0 0 16cqw rgba(255,40,70,.6)}
+.crpromo.d4 h2 b{background:linear-gradient(100deg,#ffb3bd 20%,#fff 45%,#ff2b4a 55%,#ffb3bd 80%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:crpshine 4s ease-in-out infinite;text-shadow:none;filter:drop-shadow(0 0 4cqw rgba(255,60,80,.6))}
+.crpromo.d4 .eb{color:#ffe1e5;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 3cqw rgba(0,0,0,.8),0 0 6cqw rgba(255,60,80,.55);position:relative;z-index:2}
+/* récapitulatif médaillon */
+.crnextw{max-width:460px;margin:0 auto 12px}.crnext{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;cursor:pointer;padding:15px 0;border-radius:99px;font:700 16px Inter,var(--body);background:#f4f1ea;color:#0a0a0a}.crnext:hover{background:#fff}.crnext:focus-visible{outline:2px solid #f4f1ea;outline-offset:3px}
+.crmed{--c:#f3c54a;--k:color-mix(in srgb,var(--c) 70%,#fff);position:relative;container-type:inline-size;max-width:460px;margin:0 auto 12px;border-radius:22px;overflow:hidden;background:radial-gradient(75% 42% at 50% 22%,color-mix(in srgb,var(--c) 26%,transparent),transparent 70%),#060607;box-shadow:inset 0 0 0 1px var(--line)}
+.crmed.l{--c:#ff2440;background:radial-gradient(75% 42% at 50% 22%,rgba(255,30,60,.3),transparent 70%),#060304}.crmed.d{--c:#cfd6e0}
+.crmed{font-family:Inter,var(--body)}.crmed .in{display:flex;flex-direction:column;align-items:center;gap:3.4cqw;padding:7cqw 6cqw 6cqw;text-align:center}
+.crmed .rk{font:800 3.4cqw var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--k);font-style:normal;text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 4cqw color-mix(in srgb,var(--c) 45%,transparent)}
+.crmed .med{position:relative;width:min(40cqw,190px);aspect-ratio:1;margin:3cqw 0 1cqw;perspective:500px}
+.crmed .med::before{content:"";position:absolute;inset:-38%;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 55%,transparent) 0,color-mix(in srgb,var(--c) 22%,transparent) 38%,transparent 66%);animation:crppulse 3s ease-in-out infinite}
+.crmed .disc{position:relative;width:100%;height:100%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 35% 28%,color-mix(in srgb,var(--c) 30%,#fff) 0,var(--c) 22%,color-mix(in srgb,var(--c) 45%,#000) 70%,color-mix(in srgb,var(--c) 25%,#000));
+ box-shadow:inset 0 0 0 2.2cqw color-mix(in srgb,var(--c) 55%,#000),inset 0 0 0 2.6cqw color-mix(in srgb,var(--c) 40%,#fff),inset 0 -2cqw 4cqw rgba(0,0,0,.45),0 4cqw 10cqw rgba(0,0,0,.7),0 0 18cqw color-mix(in srgb,var(--c) 60%,transparent),0 0 6cqw color-mix(in srgb,var(--c) 70%,transparent);
+ animation:crmcoin 1.1s cubic-bezier(.2,.9,.2,1) both,crmcoin2 7s 1.2s ease-in-out infinite}
+.crmed.l .disc{background:radial-gradient(circle at 35% 28%,#ff9aa6 0,#e0162f 24%,#7a0614 70%,#3a0208)}
+@keyframes crmcoin{from{transform:rotateY(-180deg) scale(.6);opacity:0}}@keyframes crmcoin2{50%{transform:rotateY(14deg) rotateX(6deg)}}
+.crmed .disc b{font:900 min(17cqw,80px)/1 var(--title);color:#1a1204;text-shadow:0 .4cqw 0 rgba(255,255,255,.5),0 -.3cqw 0 rgba(0,0,0,.35);display:flex;align-items:baseline}
+.crmed .disc b i{font-style:normal;font-size:.47em;margin-left:.4cqw;opacity:.8}
+.crmed .disc span{font:800 min(3.2cqw,15px) var(--mono);letter-spacing:.22em;text-transform:uppercase;color:rgba(26,18,4,.85);margin-top:.6cqw}
+.crmed.l .disc b,.crmed.l .disc span{color:#1c0104}
+.crmed .pips{display:flex;gap:1.8cqw;margin-top:-1cqw}.crmed .pips i{width:2.4cqw;height:2.4cqw;max-width:11px;max-height:11px;border-radius:50%;background:rgba(255,255,255,.12)}.crmed .pips i.on{background:var(--c);box-shadow:0 0 2.5cqw var(--c)}
+.crmed h3{margin:0;font:900 11cqw/1 var(--title);letter-spacing:-.02em;color:var(--k)}
+.crmed p{font-size:3.4cqw;color:#a8a296;margin:0}.crmed p.small{font-size:12px;color:var(--muted)}
+.crmed .chips{display:grid;grid-template-columns:1fr 1fr;gap:2cqw;width:100%;margin-top:2cqw}
+.crmed .chips div{padding:3cqw 2cqw;border-radius:3.5cqw;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;gap:.6cqw;min-width:0}
+.crmed .chips div:last-child:nth-child(odd){grid-column:1/-1}
+.crmed .chips b{font:800 min(5cqw,22px) var(--mono);color:#fff}.crmed .chips span{font-size:min(2.9cqw,13px);color:#8d877c}
+.crmed .ms{font-weight:600;font-size:min(3.2cqw,14px);color:var(--k);padding:2.2cqw 3.4cqw;border-radius:99px;background:color-mix(in srgb,var(--c) 12%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent)}
+.crmed .tot{width:100%;display:flex;justify-content:space-between;align-items:baseline;padding:3cqw 1cqw 0;margin-top:2cqw;border-top:1px solid color-mix(in srgb,var(--c) 40%,transparent);font-weight:600;font-size:min(3.4cqw,15px);color:#a8a296}.crmed .tot b{font:900 min(6.5cqw,30px) var(--title);color:var(--k)}
+.crmed .in>*{animation:crmUp .6s cubic-bezier(.2,.8,.2,1) both}.crmed .in>*:nth-child(n+3){animation-delay:.2s}.crmed .in>*:nth-child(n+5){animation-delay:.35s}.crmed .in>*:nth-child(n+7){animation-delay:.5s}
+@keyframes crmUp{from{opacity:0;transform:translateY(5cqw)}}
+@media (prefers-reduced-motion:reduce){.crmed *,.crpromo *{animation:none!important}}
 </style>
 <script>
 /* =====================================================================
@@ -13150,6 +13240,9 @@ function crNewDay(S){
   const D = DATA[S.u], fifth = [...own].sort((a, b) => D[b].p - D[a].p)[4], useful = i => fifth == null || D[i].p > D[fifth].p;
   const sh = crShuffle(P.ix.filter(i => !own.includes(i) && P.q[i] >= Math.max(0, lo - .04) && P.q[i] <= star));
   S.shop = [...sh.filter(useful).slice(0, 2), ...sh.filter(i => !useful(i))].slice(0, 4); if (S.shop.length < 4) S.shop = sh.slice(0, 4);
+  /* toujours au moins deux vrais renforts (meilleurs que le 5e de l'effectif), pris dans la tranche de la division si la boutique n'en a pas assez (15 oct. 2026) */
+  { const have = S.shop.filter(useful).length; if (have < 2){ const more = crShuffle(P.ix.filter(i => !own.includes(i) && !S.shop.includes(i) && useful(i) && P.q[i] >= lo && P.q[i] <= hi)).sort((a, b) => P.q[a] - P.q[b]).slice(0, 2 - have);
+    S.shop = [...more, ...S.shop.filter(useful), ...S.shop.filter(i => !useful(i))].slice(0, 4); } }
   // la vedette du jour : au-dessus de ce que vend la boutique, jusqu'un peu au-delà du haut de la division
   const cand = P.ix.filter(i => !own.includes(i) && P.q[i] > star && P.q[i] <= Math.min(1, hi + crLotUp(S.u)));
   S.lot = null;
@@ -13245,8 +13338,8 @@ function crCupClub(S){ const r = S.cup.r, used = S.clubs.map(c => c.name), name 
 function crCupPick(S){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u); return crShuffle(P.ix.filter(i => !S.squad.includes(i) && P.q[i] > hi - .05 && P.q[i] <= Math.min(1, hi + CR_ECO.cupUp))).slice(0, 3); }
 const crOpp = S => S.cup && S.cup.pend && S.cup.opp ? S.cup.opp : S.clubs[S.order[S.day]];
 // carrières commencées avant l'arrivée de la coupe, des règles spéciales et du palmarès : champs manquants ajoutés
-function crFix(S){ if (!S) return S; S.cup = S.cup || {r: 0, alive: S.day < 2, pend: false, opp: null}; S.stat = Object.assign({played: 0, wins: 0, titles: 0, top: 0, ups: 0, cups: 0, best: 0, sale: 0, buy: 0, ex: 0, exN: ""}, S.stat || {}); S.reach = S.reach || {}; return S; }
-const crAvail = S => S.squad.filter(i => !(S.out[i] > 0));
+function crFix(S){ if (!S) return S; S.out = {}; S.cup = S.cup || {r: 0, alive: S.day < 2, pend: false, opp: null}; S.stat = Object.assign({played: 0, wins: 0, titles: 0, top: 0, ups: 0, cups: 0, best: 0, sale: 0, buy: 0, ex: 0, exN: ""}, S.stat || {}); S.reach = S.reach || {}; return S; }
+const crAvail = S => S.squad.slice();   /* plus aucun personnage indisponible : un match est toujours jouable avec 5 personnages */
 const crWeakest = S => S.squad.reduce((a, i) => crCard(S.u, i).p < crCard(S.u, a).p ? i : a, S.squad[0]);
 const crSum = (u, l) => l.reduce((a, i) => a + crCard(u, i).p, 0);
 
@@ -13274,7 +13367,7 @@ function crPlay(S, mine, boost){
   const cup = !!(S.cup && S.cup.pend && S.cup.opp), opp = crOpp(S), rule = crRule(S), g = crFight(S, mine, boost, opp, S.oppOrd, rule), u = S.u, sumO = crSum(u, g.ot), sumM = crSum(u, mine);
   let w = g.fight.winner; if (cup && w < 0) w = sumM <= sumO ? 0 : 1;   /* coupe : pas de match nul, l'équipe au plus petit niveau cumulé passe */
   const won = w === 0, draw = w < 0, base = crWinPay(S), pay = crR5(base * (rule ? 1.5 : 1) * (cup ? CR_CUP.pay[S.cup.r] : 1));
-  const res = {g, won, draw, opp: opp.name, rival: !cup && opp.rival, gains: [], mis: [], cap: false, cup: cup ? CR_CUP.names[S.cup.r] : "", rule: rule ? CR_RULES[rule.k][0] : ""};
+  const res = {div: S.div, day: S.day + 1, g, won, draw, opp: opp.name, rival: !cup && opp.rival, gains: [], mis: [], cap: false, cup: cup ? CR_CUP.names[S.cup.r] : "", rule: rule ? CR_RULES[rule.k][0] : ""};
   const gain = draw ? crR5(pay * .6) : won ? pay : crR5(base * CR_ECO.loss); S.money += gain; res.gains.push([(won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match") + (cup ? " · coupe" : "") + (rule && won ? " · règle spéciale" : ""), "+" + crMoney(S, gain)]);
   S.stat.played++; setTimeout(() => { try { tcSave(tcLoad()); } catch {} }, 600);
   if (won){ S.stat.wins++; S.streak++; S.stat.best = Math.max(S.stat.best || 0, S.streak); S.prestige += 2 + S.div; res.gains.push(["Prestige", "+" + (2 + S.div)]); if (sumO - sumM > (S.stat.ex || 0)){ S.stat.ex = sumO - sumM; S.stat.exN = opp.name; } } else S.streak = 0;
@@ -13292,19 +13385,20 @@ function crPlay(S, mine, boost){
   S.ev = null;
   if (cup){ S.cup.pend = false; S.cup.opp = null;
     if (won){ S.cup.r++; if (S.cup.r >= 3){ S.cup.alive = false; S.cup.won = true; S.stat.cups = (S.stat.cups || 0) + 1; S.prestige += 8; res.gains.push(["Coupe remportée : prestige", "+8"]); const pk = crCupPick(S); if (pk.length) S.pick = pk; else { const b = crR5(base * 8); S.money += b; res.gains.push(["Dotation de la coupe", "+" + crMoney(S, b)]); } res.cupWon = true; crNews(S, "cupwin"); } }
+    else if (!S.cup.rep && S.cup.r < 2){ S.cup.rep = true; S.cup.retry = S.day + 1; res.gains.push(["Coupe", "Repêchage : tu rejoues ce tour au prochain match"]); S.news = `${S.club} est repêché : le ${CR_CUP.names[S.cup.r].toLowerCase()} se rejoue après le prochain match.`; }   /* une seconde chance par saison (15 oct. 2026) */
     else { S.cup.alive = false; crNews(S, "cupout"); }
     crMissions(S); crNewDay(S); return res; }
   S.day++;
   if (S.day >= CR_DAYS) res.season = crSeasonEnd(S);
   else { crMissions(S);
-    if (S.cup && S.cup.alive && S.day === CR_CUP.after[S.cup.r]){ S.cup.pend = true; S.cup.opp = crCupClub(S); crNewDay(S); crNews(S, "cup", {r: CR_CUP.names[S.cup.r].toLowerCase(), n: S.cup.opp.name}); }
+    if (S.cup && S.cup.alive && (S.day === CR_CUP.after[S.cup.r] || S.cup.retry === S.day)){ S.cup.retry = null; S.cup.pend = true; S.cup.opp = crCupClub(S); crNewDay(S); crNews(S, "cup", {r: CR_CUP.names[S.cup.r].toLowerCase(), n: S.cup.opp.name}); }
     else { crNewDay(S); crEvent(S); const nx = S.clubs[S.order[S.day]]; if (nx.rival && !opp.rival) crNews(S, "rival"); } }
   return res;
 }
 // événement entre deux matchs : indisponibilité, offre de rachat, sponsor
 function crEvent(S){ if (S.tuto < 5 || Math.random() > .3) return; const r = Math.random(), u = S.u;
-  if (r < .34 && S.squad.length >= 6){ const i = crShuffle(crAvail(S))[0]; S.out[i] = 2; S.ev = {k: "out", i}; crNews(S, "out", {n: crCard(u, i).n, k: 2}); }
-  else if (r < .67 && S.squad.length >= 6){ const best = S.squad.reduce((a, i) => crCard(u, i).p > crCard(u, a).p ? i : a, S.squad[0]), club = S.clubs[Math.floor(Math.random() * S.clubs.length)].name; S.ev = {k: "offer", i: best, price: crR5(crVal(u, best) * 1.35), club}; }
+  /* plus d'indisponibilité tirée au hasard (15 oct. 2026) : elle pouvait bloquer un petit effectif */
+  if (r < .5 && S.squad.length >= 6){ const best = S.squad.reduce((a, i) => crCard(u, i).p > crCard(u, a).p ? i : a, S.squad[0]), club = S.clubs[Math.floor(Math.random() * S.clubs.length)].name; S.ev = {k: "offer", i: best, price: crR5(crVal(u, best) * 1.35), club}; }
   else { const m = crR5(crWinPay(S) * crRnd(.8, 1.6)); S.money += m; S.ev = {k: "sponsor", m}; crNews(S, "sponsor", {m: crMoney(S, m)}); } }
 const CR_OBJ = {top: S => ["Termine dans les 4 premiers", (S, r) => r <= 4], cash: S => [`Finis la saison avec au moins ${crMoney(S, crWinPay(S) * 4)} en caisse`, (S) => S.money >= crWinPay(S) * 4],
   young: S => ["Gagne 3 matchs en alignant ton combattant le plus faible", S => S.young >= 3], rival: S => ["Bats ton rival", S => S.beatRival]};
@@ -13321,7 +13415,7 @@ function crSeasonEnd(S){
   else { out.move = "stay"; crNews(S, "stay"); }
   /* jalons : un booster de cartes à la première accession à chaque division, et au premier titre (une seule fois par carrière) */
   S.reach = S.reach || {}; const key = out.move === "title" ? "t" : out.move === "up" ? "d" + S.div : "";
-  if (key && !S.reach[key]){ S.reach[key] = 1; const t = key === "t" ? 3 : S.div >= 3 ? 2 : 1; out.gift = `Booster ${TC_T[t].n} offert : ${key === "t" ? "premier titre d'Élite" : "première montée en division " + CR_DIV[S.div][0]}`; if (!S.bot) try { const s = tcLoad(); tcGive(s, tcKey("mix", t)); tcSave(s); } catch {} }
+  if (key && !S.reach[key]){ S.reach[key] = 1; const t = key === "t" ? 3 : S.div - 1, pk = tcKey(TC_PACKS[S.u] ? S.u : "mix", t); out.gift = `Booster ${tcName(pk)} offert : ${key === "t" ? "premier titre d'Élite" : "première montée en division " + CR_DIV[S.div][0]}`; out.pk = pk; if (key !== "t") out.promo = S.div; if (!S.bot) try { const s = tcLoad(); tcGive(s, pk); tcSave(s); } catch {} }   /* booster de l'univers joué (14 oct. 2026) */
   out.cup = S.cup && S.cup.won ? "Coupe remportée" : "";
   S.season++; S.out = {}; crNewSeason(S); crMissions(S); return out;
 }
@@ -13384,14 +13478,33 @@ function crComposeHTML(S){ const u = S.u, opp = crOpp(S), av = crAvail(S), n = C
       <p class="small" style="margin:12px 0 0">${af ? `<b style="color:var(--accent)">Affinité : ${esc(af.name)}, +${af.b} à la note de ${af.ids.length} combattants.</b>` : "Affinité : aligne au moins trois combattants d'un même groupe (indiqué sous leur nom) pour un bonus de note."}${n === need && bad ? ` <b style="color:#ff8f9a">${esc(bad)}.</b>` : ""}</p>
       <div class="crrow" style="margin:12px 0 0"><div class="crit"><button id="crAuto">Remplir : meilleure équipe permise</button>${n ? `<button id="crClear">Vider</button>` : ""}${S.items.boost ? `<button id="crBoost" class="${CR.useBoost || CR.boost != null ? "sel" : ""}">Forme olympique (${S.items.boost})</button>` : ""}</div>
         <button class="primary" id="crGo" style="font-size:16px;padding:12px 22px" ${bad ? "disabled" : ""}>Lancer le combat</button></div></div>`; }
-function crResultHTML(S){ const r = CR.res, se = r.season, af = r.g.aff && r.g.aff[0]; let h = `<div class="crbox" style="text-align:center">${r.cup ? `<p class="small" style="margin:0 0 6px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)">Coupe · ${r.cup}</p>` : ""}<p class="crbang" style="color:${r.won ? "var(--accent)" : r.draw ? "var(--text)" : "#ff5a6a"}">${r.cupWon ? "Coupe remportée !" : r.won ? (r.cup ? "Qualifié !" : "Victoire !") : r.draw ? "Match nul" : r.cup ? "Éliminé" : "Défaite"}</p><p class="muted" style="margin:0">${r.won ? fightSummaryCr(r) : "Contre " + esc(r.opp) + "."}${af ? ` Affinité ${esc(af.name)} : +${af.b}.` : ""}</p>
-      <div class="crgain">${r.gains.map(g => `<div><span>${g[0]}</span><b>${g[1]}</b></div>`).join("")}${r.mis.map(m => `<div><span>Mission remplie : ${m.t}</span><b>${m.rw}</b></div>`).join("")}</div>
-      <p class="small">${r.cap ? `Ce match compte pour tes cartes (éclats, boosters, missions) : ${CR_CAP - crCapLeft()}/${CR_CAP} aujourd'hui.` : `Plafond du jour atteint (${CR_CAP} matchs) : la carrière continue, mais ce match ne rapporte plus d'éclats ni de boosters.`}</p></div>`;
+function crResultHTML(S){ const r = CR.res, se = r.season, af = r.g.aff && r.g.aff[0], f = r.g.fight, up = r.won ? f.survivors.length : 0, n = r.g.players[0].team.length || 5;
+  /* récapitulatif « médaillon » validé le 14 oct. 2026 : survivants gravés sur une médaille (or en victoire, rouge en défaite), gains en pastilles, caisse en bas */
+  const t = r.cupWon ? "Coupe remportée" : r.won ? (r.cup ? "Qualifié" : "Victoire") : r.draw ? "Match nul" : r.cup ? "Éliminé" : "Défaite", k = r.won ? "w" : r.draw ? "d" : "l";
+  const sub = r.won ? (f.mvp ? "Meilleur combattant · " + esc(f.mvp.n) : "Contre " + esc(r.opp)) : "Contre " + esc(r.opp);
+  const sh = g => /^[+−-]?[\d ,.]+\s*[M¥◆]?$|^\+/.test(g[1]) && String(g[1]).length <= 9;
+  let h = `<div class="crmed ${k}"><div class="in"><em class="rk">${r.cup ? "Coupe · " + esc(r.cup) : `Division ${CR_DIV[r.div ?? S.div][0]} · Match ${r.day || ""}/${CR_DAYS}`}</em>
+      <div class="med"><div class="disc"><b>${up}<i>/${n}</i></b><span>debout</span></div></div>
+      <div class="pips">${Array.from({length: n}, (_, x) => `<i class="${x < up ? "on" : ""}"></i>`).join("")}</div>
+      <h3>${t}</h3><p>${sub}${af ? ` · affinité ${esc(af.name)} +${af.b}` : ""}</p>
+      <div class="chips">${r.gains.filter(sh).map(g => `<div><b>${g[1]}</b><span>${g[0]}</span></div>`).join("")}</div>
+      ${r.gains.filter(g => !sh(g)).map(g => `<div class="ms">${g[0]} · ${g[1]}</div>`).join("")}${r.mis.map(m => `<div class="ms">✓ Mission « ${m.t} » · ${m.rw}</div>`).join("")}
+      <div class="tot"><span>Caisse</span><b>${crMoney(S, S.money)}</b></div>
+      <p class="small">${r.cap ? `Ce match compte pour tes cartes : ${CR_CAP - crCapLeft()}/${CR_CAP} aujourd'hui.` : `Plafond du jour atteint (${CR_CAP} matchs) : ce match ne rapporte plus d'éclats ni de boosters.`}</p></div></div>`;
   if (se){ const dn = CR_DIV[S.div][0];
     h += `<div class="crbox"><div class="crrow"><div class="crid">${crBadge(S.div)}<div><h3>Fin de la saison</h3><p>${se.move === "title" ? "Champion d'Élite !" : se.move === "up" ? "Montée en division " + dn + " !" : se.move === "down" ? "Descente en division " + dn + "." : `Tu restes en division ${dn}.`}</p></div></div></div>
       <table class="crtable">${se.table.map((t, k) => `<tr class="${t.me ? "me" : ""} ${k < 2 && se.div0 < 4 ? "up" : ""} ${k >= 6 && se.div0 > 0 ? "dn" : ""}"><td>${k + 1}</td><td>${esc(t.name)}${t.rival ? " · rival" : ""}</td><td>${t.pts}</td></tr>`).join("")}</table>
       <div class="crgain">${se.obj.map(o => `<div><span>Objectif : ${o.t}</span><b>${o.done ? "Rempli" : "Manqué"}</b></div>`).join("")}${se.gains.map(g => `<div><span>${g[0]}</span><b>${g[1]}</b></div>`).join("")}${se.gift ? `<div><span>${se.gift}</span><b>Cartes</b></div>` : ""}</div></div>`; }
-  return h + `<div class="row" style="justify-content:center"><button class="primary" id="crNext" style="font-size:16px;padding:12px 24px">${se ? "Commencer la saison " + S.season : "Continuer"}</button></div>`; }
+  return h + `<div class="crnextw"><button class="crnext" id="crNext">${se ? "Commencer la saison " + S.season : "Continuer"}</button></div>`; }
+// page de montée de division : plein écran, une seule fois par division (out.promo est posé à la première accession)
+const CR_PROMO_TXT = ["", "Le marché s'ouvre aux personnages du top 50 % de l'univers.", "Les personnages du top 35 % arrivent au marché.", "Les cracks du top 15 % deviennent recrutables, avec assez de prestige.", "Tous les personnages de l'univers, jusqu'aux plus grands."];
+function crPromo(S, se){ const d = se.promo, dv = CR_DIV[d]; if (!d || document.querySelector(".crpov")) return;
+  document.body.insertAdjacentHTML("beforeend", `<div class="crpov" role="dialog" aria-modal="true" aria-label="Montée en division ${dv[0]}"><div class="crpromo d${d}" style="--c:${dv[2]}"><div class="fx"></div>
+    <div class="ct"><i class="eb">Promotion · Saison ${S.season - 1}</i><div class="bw">${crBadge(d, "bdg")}</div><h2>Bienvenue en<br><b>Division ${dv[0]}</b></h2>
+    <ul><li>Recettes : ${CR_ECO.pay[d]}M par victoire.</li><li>${CR_PROMO_TXT[d]}</li>${se.pk ? `<li class="gift">Booster ${esc(tcName(se.pk))} offert</li>` : ""}</ul>
+    <button id="crPromoGo">Entrer en ${dv[0]}</button><small>Première montée · cette page ne s'affiche qu'une fois</small></div></div></div>`);
+  const el = document.querySelector(".crpov"), b = el.querySelector("#crPromoGo"); b.onclick = () => el.remove();
+  try { SFX.play("fanfare"); navigator.vibrate?.([40, 30, 90]); } catch {} }
 const fightSummaryCr = r => { const f = r.g.fight; return `${f.survivors.length} combattant${f.survivors.length > 1 ? "s" : ""} encore debout contre ${esc(r.opp)}${f.mvp ? " · meilleur combattant : " + esc(f.mvp.n) : ""}.`; };
 function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.</p></div></div>
     <div class="crgrid">${[...S.squad].sort((a, b) => crCard(u, b).p - crCard(u, a).p).map(i => crTile(S, i, {cls: S.out[i] ? "off" : "", sub: S.out[i] ? `Indisponible (${S.out[i]} match${S.out[i] > 1 ? "s" : ""})` : "Valeur " + crVal(u, i) + "M",
@@ -13420,10 +13533,10 @@ function crTableHTML(S){ const t = [...S.clubs.map(c => ({name: c.name, pts: c.p
     <div class="crbox"><div class="crrow"><div><h3>Coupe</h3><p>Trois tours à élimination directe, joués après tes matchs 2, 4 et 6. La finale t'oppose à un club de la division du dessus ; le vainqueur choisit un personnage parmi trois.</p></div></div>
       <div class="crmis">${CR_CUP.names.map((n, k) => `<div class="crmi ${c.r > k ? "ok" : ""}"><b>${n}</b><span>${c.r > k ? "Passé" : c.pend && c.r === k ? "À jouer maintenant" : c.alive && c.r === k ? `Après ton match ${CR_CUP.after[k]}` : c.alive ? "À venir" : c.won ? "" : "Éliminé"}</span></div>`).join("")}</div></div>`; }
 function crClubHTML(S){ const st = S.stat, row = (a, b) => `<div><span>${a}</span><b>${b}</b></div>`;
-  return `<div class="crbox"><div class="crrow"><div><h3>Palmarès de ${esc(S.club)}</h3><p>Ce que ton club a accompli depuis le début de la carrière.</p></div></div>
+  return `<div class="crbox"><h3>À quoi sert le prestige ?</h3><p>Le prestige mesure la réputation de ton club. Les meilleurs personnages de l'univers refusent de signer dans un club trop peu connu : il faut <b>60 de prestige</b> pour recruter le top 20 %, <b>150</b> pour le top 10 % et <b>300</b> pour le top 4 %. Tu en gagnes à chaque victoire (plus en haute division), en battant ton rival, en finissant une mission, en gagnant la coupe (+8) et en remportant un titre. Ton club en a <b>${S.prestige}</b>.</p></div><div class="crbox"><div class="crrow"><div><h3>Palmarès de ${esc(S.club)}</h3><p>Ce que ton club a accompli depuis le début de la carrière.</p></div></div>
     <div class="crgain">${row("Titres de champion d'Élite", st.titles)}${row("Coupes remportées", st.cups || 0)}${row("Montées de division", st.ups)}${row("Plus haute division atteinte", CR_DIV[Math.max(st.top, S.div)][0])}${row("Matchs joués · victoires", st.played + " · " + st.wins + (st.played ? " (" + Math.round(st.wins / st.played * 100) + " %)" : ""))}${row("Plus longue série de victoires", st.best || 0)}${row("Plus bel exploit", st.ex ? `${esc(st.exN)}, ${st.ex} de niveau cumulé en plus` : "Aucun pour l'instant")}${row("Achat le plus cher", st.buy ? crMoney(S, st.buy) : "Aucun")}${row("Vente la plus chère", st.sale ? crMoney(S, st.sale) : "Aucune")}${row("Prestige", S.prestige)}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Jalons</h3><p>Chaque première accession à une division offre un booster de cartes à collectionner ; le premier titre d'Élite offre un booster Divin.</p></div></div>
-      <div class="crmis">${[1, 2, 3, 4].map(d => `<div class="crmi ${S.reach["d" + d] ? "ok" : ""}"><b class="crwb">${crBadge(d)}Monter en division ${CR_DIV[d][0]}</b><span>${S.reach["d" + d] ? "Booster reçu" : "Booster " + TC_T[d >= 3 ? 2 : 1].n}</span></div>`).join("")}<div class="crmi ${S.reach.t ? "ok" : ""}"><b class="crwb">${crBadge(4)}Devenir champion d'Élite</b><span>${S.reach.t ? "Booster reçu" : "Booster Divin"}</span></div></div></div>
+      <div class="crmis">${[1, 2, 3, 4].map(d => `<div class="crmi ${S.reach["d" + d] ? "ok" : ""}"><b class="crwb">${crBadge(d)}Monter en division ${CR_DIV[d][0]}</b><span>${S.reach["d" + d] ? "Booster reçu" : "Booster " + tcName(tcKey(TC_PACKS[S.u] ? S.u : "mix", d - 1))}</span></div>`).join("")}<div class="crmi ${S.reach.t ? "ok" : ""}"><b class="crwb">${crBadge(4)}Devenir champion d'Élite</b><span>${S.reach.t ? "Booster reçu" : "Booster " + tcName(tcKey(TC_PACKS[S.u] ? S.u : "mix", 3))}</span></div></div></div>
     <div class="crbox"><div class="crrow"><div><h3>Autre carrière</h3><p>Chaque univers a sa propre carrière, sauvegardée à part.</p></div><span class="row"><button id="crOther">Changer d'univers</button>${CR.ask === "reset" ? `<button class="red" id="crResetOk">Effacer cette carrière</button><button class="ghost" id="crResetNo">Annuler</button>` : `<button class="ghost" id="crReset">Recommencer de zéro</button>`}</span></div></div>`; }
 function crMisHTML(S){ return `<div class="crbox"><div class="crrow"><div><h3>Missions</h3><p>Elles donnent de l'argent et des atouts pour passer un adversaire qui te bloque.</p></div></div>
       <div class="crmis">${S.mis.map(m => { const T = CR_MIS[m.k]; return `<div class="crmi ${m.done ? "ok" : ""}"><b>${T.t}</b><span>${m.done ? "Récompense reçue" : crRwTxt(S, T.rw)}</span><i><u style="width:${Math.min(100, m.cur / T.g * 100)}%"></u></i></div>`; }).join("")}</div></div>
@@ -13445,7 +13558,7 @@ function crWire(S){
   $("#crClear") && ($("#crClear").onclick = () => { CR.pick = []; CR.boost = null; CR.useBoost = false; crRender(); });
   $("#crBoost") && ($("#crBoost").onclick = () => { if (CR.boost != null){ CR.boost = null; CR.useBoost = false; } else CR.useBoost = !CR.useBoost; crRender(); });
   $("#crGo") && ($("#crGo").onclick = () => { if (crRuleOk(S, CR.pick) || CR.busy) return; CR.busy = true; const res = crPlay(S, [...CR.pick], CR.boost); if (S.tuto === 3) S.tuto = 4; res.cap = crCount(S, res); crSave(); CR.res = res;
-    const keep = G; G = res.g; const end = () => { G = keep && keep !== res.g ? keep : null; CR.busy = false; CR.view = "result"; show("cr"); crRender(); try { SFX.play(res.won ? "fanfare" : "pop"); } catch {} };
+    const keep = G; G = res.g; const end = () => { G = keep && keep !== res.g ? keep : null; CR.busy = false; CR.view = "result"; show("cr"); crRender(); try { SFX.play(res.won ? "fanfare" : "pop"); } catch {} if (res.season && res.season.promo) setTimeout(() => crPromo(S, res.season), 900); };
     try { playFight(end); } catch { end(); } });
   $("#crNext") && ($("#crNext").onclick = () => { CR.view = "hub"; CR.res = null; CR.tab = S.tuto === 4 ? "shop" : "match"; crRender(); window.scrollTo(0, 0); });
   el.querySelectorAll("[data-crsell]").forEach(b => b.onclick = () => { const i = +b.dataset.crsell; if (!b.dataset.ok){ CR.ask = "s" + i; return crRender(); } CR.ask = null; crSell(S, i); save(); });
@@ -13459,25 +13572,42 @@ function crWire(S){
 }
 /* ---------- l'enchère en direct : prix qui monte, compte à rebours, relance du chrono quand quelqu'un mise dans les dernières secondes ---------- */
 function crAuction(S){
+  /* refonte du 15 oct. 2026 (façon FUT) : la fenêtre est construite UNE fois et seuls les textes changent ensuite (avant, tout était redessiné 4 fois par seconde
+     et les images clignotaient sur téléphone). Montant saisi à la main, boutons −/+, achat immédiat dans la même fenêtre. */
   const L = S.lot, u = S.u; if (!L || L.done || crCanBuy(S, L.i, L.start) || CR.auc) return;
   const A = CR.auc = {price: L.start, lead: null, t: 16000, next: 1400 + Math.random() * 1500, feed: [], first: true, timer: 0};
-  document.body.insertAdjacentHTML("beforeend", `<div class="crauc" role="dialog" aria-label="Enchère"><div class="in"></div></div>`); const box = document.querySelector(".crauc .in");
+  document.body.insertAdjacentHTML("beforeend", `<div class="crauc" role="dialog" aria-label="Enchère"><div class="in">${crTile(S, L.i)}
+    <div class="price"></div><div class="lead"></div><div class="bar"><u></u></div><div class="feed"></div>
+    <div class="crbid"><button class="ghost" data-bd="-" aria-label="Baisser l'offre">−</button><label><span>Ton offre</span><input id="crBidIn" type="number" inputmode="numeric" min="1" step="1"><i>M</i></label><button class="ghost" data-bd="+" aria-label="Monter l'offre">+</button></div>
+    <div class="row" style="justify-content:center"><button class="primary" id="crBidGo"></button><button id="crBidNow"></button></div>
+    <div class="row" style="justify-content:center"><button class="ghost" id="crBidOut">Abandonner</button></div>
+    <p class="small cap" style="margin-top:6px"></p></div></div>`);
+  const box = document.querySelector(".crauc .in"), q = sel => box.querySelector(sel), inp = q("#crBidIn");
   const say = t => { A.feed.unshift(t); A.feed.length = Math.min(3, A.feed.length); };
-  const draw = () => { const inc = crLotInc(A.price), nextP = A.lead === null && A.first ? A.price : A.price + inc, can = A.lead !== "me" && S.money >= nextP;
-    box.innerHTML = `${crTile(S, L.i)}<div class="price">${crMoney(S, A.price)}</div><div class="lead ${A.lead === "me" ? "me" : ""}">${A.lead === "me" ? "Tu mènes l'enchère" : A.lead === null ? "Aucune offre pour l'instant" : esc(S.clubs[A.lead].name) + " mène"}</div>
-      <div class="bar ${A.t < 5000 ? "hot" : ""}"><u style="width:${Math.max(0, Math.min(100, A.t / 16000 * 100))}%"></u></div><div class="feed">${A.feed.map(t => `<div>${t}</div>`).join("")}</div>
-      <div class="row" style="justify-content:center"><button class="primary" id="crBidGo" ${can ? "" : "disabled"} style="font-size:16px;padding:12px 20px">${A.lead === "me" ? "Tu mènes" : S.money < nextP ? "Trop cher pour ta caisse" : "Enchérir · " + nextP + "M"}</button><button class="ghost" id="crBidOut">Abandonner</button></div>
-      <p class="small" style="margin-top:10px">Caisse : ${crMoney(S, S.money)}. Une offre dans les dernières secondes relance le chrono.</p>`;
-    $("#crBidGo").onclick = () => { if (A.lead === "me" || S.money < nextP) return; A.price = nextP; A.first = false; A.lead = "me"; if (A.t < 5000) A.t = 5000; A.next = 700 + Math.random() * 1700; say(`Tu proposes ${nextP}M.`); try { SFX.play("pop"); } catch {} draw(); };
-    $("#crBidOut").onclick = () => finish(true); };
+  const minBid = () => A.lead === null && A.first ? A.price : A.price + crLotInc(A.price);
+  const fit = () => { const m = minBid(); let v = Math.round(+inp.value || 0); if (v < m) v = m; inp.value = v; return v; };
+  let shown = "";
+  const draw = () => { const m = minBid(), mine = A.lead === "me"; if (+inp.value < m || document.activeElement !== inp && !inp.value) inp.value = m;
+    q(".price").textContent = crMoney(S, A.price);
+    const ld = mine ? "Tu mènes l'enchère" : A.lead === null ? "Aucune offre pour l'instant" : S.clubs[A.lead].name + " mène"; if (q(".lead").textContent !== ld){ q(".lead").textContent = ld; q(".lead").classList.toggle("me", mine); }
+    q(".bar").classList.toggle("hot", A.t < 5000); q(".bar u").style.width = Math.max(0, Math.min(100, A.t / 16000 * 100)) + "%";
+    const fd = A.feed.map(t => `<div>${t}</div>`).join(""); if (fd !== shown){ shown = fd; q(".feed").innerHTML = fd; }
+    const v = Math.max(m, Math.round(+inp.value || 0)), go = q("#crBidGo"); go.disabled = mine || S.money < v; go.textContent = mine ? "Tu mènes" : S.money < v ? "Trop cher pour ta caisse" : "Enchérir · " + v + "M";
+    const now = q("#crBidNow"); now.disabled = !!crCanBuy(S, L.i, L.now); now.textContent = "Achat immédiat · " + L.now + "M";
+    q(".cap").textContent = `Caisse : ${crMoney(S, S.money)}. Mise minimale : ${m}M. Une offre dans les dernières secondes relance le chrono.`; };
+  box.querySelectorAll("[data-bd]").forEach(b => b.onclick = () => { const st = crLotInc(A.price); inp.value = Math.max(minBid(), Math.round(+inp.value || 0) + (b.dataset.bd === "+" ? st : -st)); draw(); });
+  inp.oninput = () => draw(); inp.onblur = () => { fit(); draw(); };
+  q("#crBidGo").onclick = () => { const v = fit(); if (A.lead === "me" || S.money < v) return; A.price = v; A.first = false; A.lead = "me"; if (A.t < 5000) A.t = 5000; A.next = 700 + Math.random() * 1700; say(`Tu proposes ${v}M.`); try { SFX.play("pop"); } catch {} inp.value = ""; draw(); };
+  q("#crBidNow").onclick = () => { if (crCanBuy(S, L.i, L.now)) return; A.lead = "me"; A.price = L.now; A.now = true; finish(false); };
+  q("#crBidOut").onclick = () => finish(true);
   const finish = quit => { clearInterval(A.timer); document.querySelector(".crauc")?.remove(); CR.auc = null;
     if (quit && A.lead === "me") A.lead = null;
-    if (A.lead === "me" && crBuy(S, L.i, A.price, true)){ L.done = `${crCard(u, L.i).n} rejoint ${S.club} pour ${crMoney(S, A.price)} !`; try { SFX.play("fanfare"); } catch {} }
+    if (A.lead === "me" && crBuy(S, L.i, A.price, true)){ L.done = `${crCard(u, L.i).n} rejoint ${S.club} ${A.now ? "en achat immédiat " : ""}pour ${crMoney(S, A.price)} !`; try { SFX.play("fanfare"); } catch {} }
     else { const top = L.maxes[0], c = A.lead !== null && A.lead !== "me" ? S.clubs[A.lead] : top && top.m >= L.start ? S.clubs[top.c] : null; L.done = c ? `${c.name} remporte ${crCard(u, L.i).n}${A.lead !== null && A.lead !== "me" ? " pour " + crMoney(S, A.price) : ""}.` : `${crCard(u, L.i).n} n'a trouvé preneur chez personne.`; }
     crSave(); crRender(); };
   draw(); let last = Date.now();
   A.timer = setInterval(() => { const now = Date.now(), dt = Math.min(1000, now - last); last = now; A.t -= dt; A.next -= dt;
-    if (A.next <= 0){ const inc = crLotInc(A.price), np = A.lead === null && A.first ? A.price : A.price + inc, ok = L.maxes.filter(x => x.m >= np && x.c !== A.lead);
+    if (A.next <= 0){ const np = minBid(), ok = L.maxes.filter(x => x.m >= np && x.c !== A.lead);
       if (ok.length && (A.lead === "me" || A.lead === null || Math.random() < .3)){ const b = ok[Math.floor(Math.random() * ok.length)]; A.price = np; A.first = false; A.lead = b.c; if (A.t < 5000) A.t = 5000; say(`${esc(S.clubs[b.c].name)} monte à ${np}M.`); }
       A.next = 900 + Math.random() * 2200; }
     if (A.t <= 0) return finish(false);
@@ -14770,6 +14900,17 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 /* ---- AR : la brillance n'apparaît qu'en inclinant la carte (validé le 15 oct. 2026) : rien au repos, plus forte à mesure qu'on incline (--ph, 0 au centre → 1 dans un coin) ---- */
 .tc.arp .ap,.tc.tc.tc.f-A:not(.arp) .fx{opacity:0!important;transition:opacity .35s ease!important}
 :is(.tc.hl,.vcard.live .tc).arp .ap,:is(.tc.hl,.vcard.live .tc).tc.tc.f-A:not(.arp) .fx{opacity:calc(.2 + var(--ph,0) * .9)!important}
+</style>
+<style>
+/* enchère façon FUT : champ de saisie du montant entre deux boutons −/+ */
+.crauc .crbid{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 6px}
+.crauc .crbid button{min-width:44px;height:44px;padding:0;font-size:22px;font-weight:700;border-radius:12px}
+.crauc .crbid label{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:12px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.18)}
+.crauc .crbid label span{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.crauc .crbid input{all:unset;width:90px;text-align:right;font:800 22px var(--title);color:var(--text)}
+.crauc .crbid input::-webkit-inner-spin-button{-webkit-appearance:none}
+.crauc .crbid i{font-style:normal;font-weight:700}
+.crtabs{overflow-y:hidden!important;touch-action:pan-x!important;overscroll-behavior:contain}
 </style>
 <style>
 /* fin du fichier : tout est chargé, on révèle la page (voir « Anti-flash » en tête de head.part). DOIT RESTER LA DERNIÈRE RÈGLE DU DERNIER FICHIER. */
