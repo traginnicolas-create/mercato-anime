@@ -1658,12 +1658,12 @@ const ELEM_N = {FI:"feu", WI:"vent", LI:"foudre", EA:"terre", WA:"eau"};
 function edge(a, b){
   const ta = tags(a), tb = tags(b), why = [];
   let m = 1, ko = null;
-  const add = (x, txt) => { m *= x; why.push(txt); };
+  const sg = [], add = (x, txt) => { m *= x; sg.push(1); why.push(txt); }, sub = txt => { sg.push(-1); why.push(txt); };   /* sg : +1 aide l'attaquant, -1 le gêne (pour la fiche) */
   for (const [x, y, k, txt] of COUNTERS[G.u] || []) if (x === a.n && y === b.n) add(k, txt);
-  if (typeof UX_RULES !== "undefined" && UX_RULES[G.u]) for (const r of UX_RULES[G.u](a, b, ta, tb)) if (r){ if (r[0] >= 1) add(r[0], r[1]); else { m *= r[0]; why.push(r[1]); } }
+  if (typeof UX_RULES !== "undefined" && UX_RULES[G.u]) for (const r of UX_RULES[G.u](a, b, ta, tb)) if (r){ if (r[0] >= 1) add(r[0], r[1]); else { m *= r[0]; sub(r[1]); } }
   if (G.u === "op"){
     if (ta.has("C") && b.p <= a.p - 15) ko = `${b.n} s'évanouit sous le haki des rois de ${a.n}`;
-    if (tb.has("L") && !ta.has("A") && !(a.n === "Monkey D. Luffy" && b.n === "Ener")) { m /= b.n === "Caesar Clown" ? 1.5 : 2.2; why.push(`${a.n} ne peut pas toucher ${b.n} (Logia) sans haki de l'armement`);   /* ÷3 → ÷2,2 (équilibrage 14 oct. 2026 : Caesar écrasait le Bronze) */ }
+    if (tb.has("L") && !ta.has("A") && !(a.n === "Monkey D. Luffy" && b.n === "Ener")) { m /= b.n === "Caesar Clown" ? 1.5 : 2.2; sub(`${a.n} ne peut pas toucher ${b.n} (Logia) sans haki de l'armement`);   /* ÷3 → ÷2,2 (équilibrage 14 oct. 2026 : Caesar écrasait le Bronze) */ }
     if (ta.has("C2") && !tb.has("C")) add(1.3, `${a.n} imprègne ses coups de haki des rois`);
     if (ta.has("A2") && !tb.has("A2")) add(1.15, `haki de l'armement avancé de ${a.n}`);
     if (ta.has("O2") && !tb.has("O2")) add(1.15, `${a.n} voit l'avenir grâce au haki de l'observation`);
@@ -1693,14 +1693,14 @@ function edge(a, b){
   if (G.u === "na"){
     if (ta.has("G8")) add(1.6, `la Nuit de la Mort de ${a.n}, avec la huitième porte`);
     if (ta.has("KG") && !tb.has("SP")) add(2, "seul le chakra des Six Chemins peut sceller Kaguya");
-    if (tb.has("KM") && !["KM","HR","SGM","SP","RG"].some(k => ta.has(k))) { m /= 2.5; why.push(`${a.n} ne peut pas toucher ${b.n}, qui devient intangible avec le Kamui`); }
+    if (tb.has("KM") && !["KM","HR","SGM","SP","RG"].some(k => ta.has(k))) { m /= 2.5; sub(`${a.n} ne peut pas toucher ${b.n}, qui devient intangible avec le Kamui`); }
     if (ta.has("SP") && !tb.has("SP")) add(1.3, `le chakra des Six Chemins de ${a.n}`);
     if (ta.has("RG") && !tb.has("RG") && !tb.has("SP")) add(1.3, `le Rinnegan de ${a.n} (Shinra Tensei, absorption de chakra)`);
     if (ta.has("SU") && !tb.has("SU") && !tb.has("SP")) add(1.2, `le Susanoo de ${a.n} le protège`);
     if (ta.has("SGM") && !tb.has("SGM") && !tb.has("SP")) add(1.15, `le Mode Ermite de ${a.n}`);
     if (ta.has("KT") && !tb.has("SH")) add(1.5, `le Kotoamatsukami de ${a.n} prend le contrôle de l'esprit de ${b.n}`);
     const guy = b.n === "Gaï Maito";
-    if (ta.has("MS") && guy) why.push("Gaï combat en regardant les pieds : le Sharingan n'a pas prise sur lui");
+    if (ta.has("MS") && guy) sub("Gaï combat en regardant les pieds : le Sharingan n'a pas prise sur lui");
     else if (ta.has("MS")){
       // Sharingan, démon à queues, Mode Ermite ou Six Chemins : on résiste aux illusions
       const resist = ["SH","JK","SGM","SP"].some(k => tb.has(k));
@@ -1717,7 +1717,7 @@ function edge(a, b){
     if (ta.has("PO") && !tb.has("R")) add(1.3, `le poison de ${a.n}`);
     if (ta.has("EX") && tb.has("TJ")) add(1.3, `${a.n} bombarde depuis les airs`);
     if (tb.has("EX") && ta.has("LI")) add(1.5, `la foudre de ${a.n} neutralise l'argile explosive de ${b.n}`);
-    if (tb.has("HY")) { if (ta.has("LI")) add(1.4, `la foudre traverse le corps liquide de ${b.n}`); else { m /= 1.4; why.push(`${b.n} se liquéfie sous les coups de ${a.n}`); } }
+    if (tb.has("HY")) { if (ta.has("LI")) add(1.4, `la foudre traverse le corps liquide de ${b.n}`); else { m /= 1.4; sub(`${b.n} se liquéfie sous les coups de ${a.n}`); } }
     if (ta.has("HR") && !tb.has("HR")) add(1.25, `le Hiraishin rend ${a.n} insaisissable`);
     if (ta.has("SM") && !tb.has("TJ")) add(1.3, `Samehada dévore le chakra de ${b.n}`);
     if (ta.has("SA") && tb.has("TJ")) add(1.3, `la défense absolue du sable arrête les coups de ${b.n}`);
@@ -1726,7 +1726,7 @@ function edge(a, b){
     if (ta.has("KI") && !tb.has("TJ")) add(1.15, `les insectes de ${a.n} aspirent le chakra de ${b.n}`);
     for (const e in ELEM) if (ta.has(e) && tb.has(ELEM[e])) { add(1.15, `avantage élémentaire : ${ELEM_N[e]} contre ${ELEM_N[ELEM[e]]}`); break; }
   }
-  return {m: Math.min(6, Math.max(1/6, m)), ko, why};
+  return {m: Math.min(6, Math.max(1/6, m)), ko, why, sg};
 }
 
 // Ce que coûte une victoire au vainqueur (régénération, fatigue)
@@ -13151,6 +13151,29 @@ button.crc{cursor:pointer}
 .crmed .in>*{animation:crmUp .6s cubic-bezier(.2,.8,.2,1) both}.crmed .in>*:nth-child(n+3){animation-delay:.2s}.crmed .in>*:nth-child(n+5){animation-delay:.35s}.crmed .in>*:nth-child(n+7){animation-delay:.5s}
 @keyframes crmUp{from{opacity:0;transform:translateY(5cqw)}}
 @media (prefers-reduced-motion:reduce){.crmed *,.crpromo *{animation:none!important}}
+/* fiche détaillée */
+.crc .crinf{position:absolute;right:6px;bottom:6px;z-index:2;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;font:700 13px/1 Georgia,serif;font-style:italic;color:#fff;background:rgba(10,10,14,.72);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55);cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.crc .crinf::after{content:"";position:absolute;inset:-9px}.crc .crinf:hover{background:rgba(255,255,255,.2)}.crc .crinf:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.crfiche{position:fixed;inset:0;z-index:9980;display:grid;place-items:end center;background:rgba(0,0,0,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overscroll-behavior:contain}
+.crfin{position:relative;width:min(560px,100%);max-height:92dvh;overflow:auto;overscroll-behavior:contain;background:#0d0c11;border-radius:22px 22px 0 0;box-shadow:0 0 0 1px var(--line),0 -20px 60px rgba(0,0,0,.6);padding:18px 18px calc(22px + env(safe-area-inset-bottom,0px));font-family:Inter,var(--body);animation:crfup .35s cubic-bezier(.2,.9,.25,1) both}
+@media (min-width:640px){.crfiche{place-items:center}.crfin{border-radius:22px;max-height:88dvh}}
+@keyframes crfup{from{transform:translateY(30px);opacity:0}}
+.crfx{all:unset;position:sticky;top:0;float:right;z-index:3;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;font-size:16px;color:#fff;background:rgba(255,255,255,.12);cursor:pointer}.crfx:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.crfh{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;margin-bottom:12px}
+.crfp{aspect-ratio:3/4;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}.crfp img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.crfe{margin:0;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.crfh h2{margin:4px 0 10px;font:900 clamp(20px,5.4vw,26px)/1.05 var(--title);letter-spacing:-.01em}
+.crfs{display:flex;gap:6px;flex-wrap:wrap}.crfs div{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}.crfs small{display:block;font-size:10.5px;color:var(--muted)}.crfs b{font:700 15px var(--mono)}
+.crfbio{margin:0 0 10px;font-size:14px;line-height:1.5;color:#d9d5df}
+.crfdl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 6px;font-size:13.5px}.crfdl dt{color:var(--muted)}.crfdl dd{margin:0}
+.crfin h3{margin:16px 0 8px;font:700 11.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.crfl{list-style:none;margin:0;padding:0;display:grid;gap:6px}.crfl li{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.04);font-size:13.5px;line-height:1.4}
+.crfl li b{font-weight:700;color:#fff}.crfl em{flex:none;font-style:normal;font:600 11.5px var(--mono);color:#7ee0a8;align-self:center;text-align:right}.crfl em.neg{color:#ff8f9a}
+.crfk{margin:0;font-size:13.5px;color:#d9d5df}
+.crfg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.crfm{padding:8px 10px;border-radius:10px;background:rgba(126,224,168,.07);box-shadow:inset 0 0 0 1px rgba(126,224,168,.25);min-width:0}.crfg.neg .crfm{background:rgba(255,90,106,.07);box-shadow:inset 0 0 0 1px rgba(255,90,106,.28)}
+.crfm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.crfm span{font:500 11px var(--mono);color:var(--muted)}
+.crfn{margin:16px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
+html:has(.crfiche),html:has(.crfiche) body{overflow:hidden}
 </style>
 <script>
 /* =====================================================================
@@ -13171,7 +13194,7 @@ const CR_DIV = [["Bronze", "銅", "#c98a4b"], ["Argent", "銀", "#cfd6e0"], ["Or
 const CR_BAND = [[0, .30], [.16, .48], [.36, .68], [.56, .86], [.74, 1]];
 // économie : réglée par simulation (tools/sim-carriere.js), voir CLAUDE.md
 // Les sommes suivent l'échelle du vrai marché des transferts du football (demande de l'utilisateur) : un personnage moyen vaut 1 à 20M, un crack plusieurs centaines de millions, jamais un milliard.
-const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .5, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .24, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
+const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .5, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .38, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
 // noms des clubs IA : des groupes qui existent dans chaque univers (leur effectif, lui, est tiré selon la division)
 const CR_NAMES = {
   op: ["Pirates du Clown", "Baroque Works", "Équipage d'Arlong", "Marine de Loguetown", "Pirates de Krieg", "Pirates du Chat Noir", "CP9", "Thriller Bark", "Pirates de Foxy", "Brigade de Wapol", "Pirates de Bellamy", "Garnison d'Impel Down", "Armée de Dressrosa", "Pirates du Soleil", "Germa 66", "Pirates aux Cent Bêtes", "Marine de G-5", "Tontattas de Green Bit"],
@@ -13216,7 +13239,7 @@ const crCapLeft = () => { const r = crLoad(); return r.cap && r.cap.d === tcDay(
 /* ---------- saison, clubs, mercato du jour ---------- */
 /* sous-divisions (14 oct. 2026) : chaque division a trois niveaux, 1 → 3. Niveaux 1 et 2 : les deux premiers montent d’un niveau, le dernier redescend.
    Niveau 3 : les deux premiers montent de division (le premier est champion en Élite 3), les deux derniers redescendent. Les clubs sont un peu plus faibles aux niveaux 1 et 2. */
-const CR_SUB = {up: 2, down: 1, k: .01};   /* réglé par simulation : titre en ~300 matchs (≈ +12 % par rapport aux divisions seules) */
+const CR_SUB = {up: 2, down: 1, k: .05};   /* réglé par simulation (avec clubLo .38) : titre en ~405 matchs pour un robot, ~470-520 pour un joueur, soit 13 à 16 h de jeu (demande du 14 oct. 2026) */
 const crSub = S => S.sub || 0, crDivN = (S, d = S.div, b = crSub(S)) => CR_DIV[d][0] + " " + (b + 1);
 const crUpN = S => crSub(S) < 2 ? CR_SUB.up : S.div < 4 ? 2 : 1, crDnN = S => crSub(S) > 0 ? CR_SUB.down : S.div > 0 ? 2 : 0;
 const crUpTxt = S => crSub(S) < 2 ? `Les ${CR_SUB.up === 2 ? "deux" : CR_SUB.up} premiers montent en ${crDivN(S, S.div, crSub(S) + 1)}` : S.div < 4 ? `Les deux premiers montent en ${crDivN(S, S.div + 1, 0)}` : "Le premier est champion";
@@ -13446,7 +13469,7 @@ function crCount(S, res){ const r = crLoad(); if (!r.cap || r.cap.d !== tcDay())
   return true; }
 
 /* ---------- affichage ---------- */
-const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}<span class="tr">${TIER[c.t]}</span></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
+const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}<span class="tr">${TIER[c.t]}</span><i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(c.n)}" data-crinf="${i}">i</i></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
 function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); }
 const CR_TUTO = [
   ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Bronze, Argent, Or, Diamant, Élite) et deviens champion d'Élite.", "Compris"],
@@ -13518,6 +13541,50 @@ function crPromo(S, se){ const d = se.promo, dv = CR_DIV[d]; if (!d || document.
     <button id="crPromoGo">Entrer en ${dv[0]}</button><small>Première montée · cette page ne s'affiche qu'une fois</small></div></div></div>`);
   const el = document.querySelector(".crpov"), b = el.querySelector("#crPromoGo"); b.onclick = () => el.remove();
   try { SFX.play("fanfare"); navigator.vibrate?.([40, 30, 90]); } catch {} }
+/* ---------- fiche détaillée d'un personnage (14 oct. 2026) : tout vient du moteur de combat, rien n'est écrit à la main ----------
+   On fait combattre le personnage contre tous ceux de son univers et on regroupe les raisons données par edge() et wear(). */
+function crFicheData(u, i){
+  const D = DATA[u], a = D[i], keep = G, gen = new Map(), weak = new Map(), duel = [], koOn = [], koBy = []; let r = [];
+  const neutral = (t, x) => cap1(t.split(x.n).join("l'adversaire").replace(/l'adversaire, qui/g, "l'adversaire, qui"));
+  try { G = {...(keep || {}), u, players: (keep && keep.players) || []};
+    D.forEach((b, j) => { if (j === i) return; const ab = edge(a, b), ba = edge(b, a), k = Math.log2(ab.m / ba.m);
+      r.push({j, k, why: [...ab.why, ...ba.why]});
+      if (ab.ko) koOn.push(b.n); if (ba.ko) koBy.push(b.n);
+      const put = (M, w) => { const key = neutral(w, b), m = M.get(key) || {n: 0, who: []}; m.n++; if (m.who.length < 3) m.who.push(b.n); M.set(key, m); };
+      ab.why.forEach((w, k) => put((ab.sg || [])[k] < 0 ? weak : gen, w));   /* effet de son attaque : aide (+1) ou gêne (-1) */
+      ba.why.forEach((w, k) => put((ba.sg || [])[k] < 0 ? gen : weak, w)); });   /* effet de l'attaque adverse : ce qui gêne l'adversaire est un atout */
+    var wr = wear(a), tg = [...tags(a)]; } finally { G = keep; }
+  const tot = D.length - 1, pct = n => Math.round(n / tot * 100);
+  const split = M => { const g = [], d = []; for (const [t, m] of M) (m.n >= 3 ? g : d).push({t, n: m.n, p: pct(m.n), who: m.who}); g.sort((x, y) => y.n - x.n); return [g, d]; };
+  const [atk, atkD] = split(gen), [def, defD] = split(weak);
+  const near = r.filter(x => Math.abs(D[x.j].p - a.p) <= 8);
+  const prey = near.filter(x => x.k > .2 && D[x.j].p >= a.p - 3).sort((x, y) => y.k - x.k).slice(0, 4), fear = near.filter(x => x.k < -.2 && D[x.j].p <= a.p + 3).sort((x, y) => x.k - y.k).slice(0, 4);
+  return {a, atk, atkD, def, defD, wr, tg, prey, fear, koOn, koBy, tot};
+}
+function crFicheHTML(S, i){ const u = S.u, F = crFicheData(u, i), a = F.a, inf = INFO[u] && INFO[u][a.n], ln = crLinksOf(u, i), D = DATA[u];
+  /* les effets « ×1,2 » dans la phrase brute deviennent des pourcentages de force, plus lisibles */
+  const li = (x, neg) => `<li><span>${esc(x.t)}</span><em class="${neg ? "neg" : ""}">${x.p >= 95 ? "contre presque tous" : x.p + " % des adversaires"}</em></li>`;
+  const duelL = (l, neg) => l.map(x => `<li><span>${/l'adversaire/i.test(x.t) ? `<b>Contre ${esc(x.who.join(", "))}</b> · ` : ""}${esc(x.t)}</span></li>`).join("");
+  const tile = x => `<div class="crfm"><b>${esc(D[x.j].n)}</b><span>Niv. ${D[x.j].p}</span></div>`;
+  const endu = F.wr.why.length ? F.wr.why.map(w => `<li><span>${esc(cap1(w))}</span></li>`).join("") : "";
+  return `<div class="crfiche" role="dialog" aria-modal="true" aria-label="Fiche de ${esc(a.n)}"><div class="crfin">
+    <button class="crfx" aria-label="Fermer">✕</button>
+    <div class="crfh"><div class="crfp">${img(a)}</div><div><p class="crfe">${esc(TIER[a.t] || "")}${ln.length ? " · " + esc(ln.join(" · ")) : ""}</p><h2>${esc(a.n)}</h2>
+      <div class="crfs"><div><small>Niveau</small><b>${a.p}</b></div><div><small>Valeur</small><b>${crVal(u, i)}M</b></div><div><small>Prestige requis</small><b>${crGate(u, i) || "—"}</b></div></div></div></div>
+    ${inf ? `<p class="crfbio">${esc(inf[0])}</p><dl class="crfdl"><dt>${u === "op" ? "Fruit du démon" : "Pouvoirs"}</dt><dd>${esc(inf[1])}</dd>${u === "op" ? `<dt>Haki</dt><dd>${esc(hakiText(u, a))}</dd>` : ""}</dl>` : ""}
+    ${F.koOn.length ? `<h3>Victoire immédiate</h3><p class="crfk">Met K.-O. d'un coup ${F.koOn.length > 4 ? F.koOn.length + " adversaires" : esc(F.koOn.join(", "))} (si son niveau le permet).</p>` : ""}
+    ${F.atk.length || F.atkD.length ? `<h3>Atouts en combat</h3><ul class="crfl">${F.atk.map(x => li(x)).join("")}${duelL(F.atkD)}</ul>` : `<h3>Atouts en combat</h3><p class="crfk">Aucun pouvoir particulier : il compte sur son niveau.</p>`}
+    ${F.def.length || F.defD.length ? `<h3>Points faibles</h3><ul class="crfl">${F.def.map(x => li(x, 1)).join("")}${duelL(F.defD, 1)}</ul>` : ""}
+    ${endu ? `<h3>Endurance</h3><ul class="crfl">${endu}</ul>` : ""}
+    ${F.prey.length ? `<h3>Bons duels</h3><div class="crfg">${F.prey.map(tile).join("")}</div>` : ""}
+    ${F.fear.length ? `<h3>Duels à éviter</h3><div class="crfg neg">${F.fear.map(tile).join("")}</div>` : ""}
+    <p class="crfn">Dans un duel, la force double tous les 5 niveaux ; les pouvoirs ci-dessus la multiplient ou la divisent. Le vainqueur garde une partie de son énergie pour le duel suivant.</p></div></div>`; }
+function crFiche(S, i){ document.querySelector(".crfiche")?.remove(); document.body.insertAdjacentHTML("beforeend", crFicheHTML(S, i));
+  const el = document.querySelector(".crfiche"), bye = () => { el.remove(); document.removeEventListener("keydown", esc_); }, esc_ = e => { if (e.key === "Escape") bye(); };
+  el.querySelector(".crfx").onclick = bye; el.onclick = e => { if (e.target === el) bye(); }; document.addEventListener("keydown", esc_); setTimeout(() => el.querySelector(".crfx").focus({preventScroll: true}), 50); }
+/* un seul écouteur pour toutes les tuiles : le « i » ouvre la fiche sans sélectionner le personnage */
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-crinf]"); if (!b || !CR.S) return; e.preventDefault(); e.stopPropagation(); crFiche(CR.S, +b.dataset.crinf); }, true);
+document.addEventListener("keydown", e => { const b = e.target.closest && e.target.closest("[data-crinf]"); if (!b || !CR.S || (e.key !== "Enter" && e.key !== " ")) return; e.preventDefault(); e.stopPropagation(); crFiche(CR.S, +b.dataset.crinf); }, true);
 const fightSummaryCr = r => { const f = r.g.fight; return `${f.survivors.length} combattant${f.survivors.length > 1 ? "s" : ""} encore debout contre ${esc(r.opp)}${f.mvp ? " · meilleur combattant : " + esc(f.mvp.n) : ""}.`; };
 function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.</p></div></div>
     <div class="crgrid">${[...S.squad].sort((a, b) => crCard(u, b).p - crCard(u, a).p).map(i => crTile(S, i, {cls: S.out[i] ? "off" : "", sub: S.out[i] ? `Indisponible (${S.out[i]} match${S.out[i] > 1 ? "s" : ""})` : "Valeur " + crVal(u, i) + "M",
