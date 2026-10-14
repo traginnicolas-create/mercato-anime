@@ -13269,10 +13269,12 @@ function crNewDay(S){
   // la boutique et la vedette proposent en priorité des personnages qui renforceraient vraiment l'équipe (meilleurs que le 5e de l'effectif)
   const D = DATA[S.u], fifth = [...own].sort((a, b) => D[b].p - D[a].p)[4], useful = i => fifth == null || D[i].p > D[fifth].p;
   const sh = crShuffle(P.ix.filter(i => !own.includes(i) && P.q[i] >= Math.max(0, lo - .04) && P.q[i] <= star));
-  S.shop = [...sh.filter(useful).slice(0, 2), ...sh.filter(i => !useful(i))].slice(0, 4); if (S.shop.length < 4) S.shop = sh.slice(0, 4);
-  /* toujours au moins deux vrais renforts (meilleurs que le 5e de l'effectif), pris dans la tranche de la division si la boutique n'en a pas assez (15 oct. 2026) */
-  { const have = S.shop.filter(useful).length; if (have < 2){ const more = crShuffle(P.ix.filter(i => !own.includes(i) && !S.shop.includes(i) && useful(i) && P.q[i] >= lo && P.q[i] <= hi)).sort((a, b) => P.q[a] - P.q[b]).slice(0, 2 - have);
-    S.shop = [...more, ...S.shop.filter(useful), ...S.shop.filter(i => !useful(i))].slice(0, 4); } }
+  /* boutique (14 oct. 2026) : pas de personnage trop fort. Un seul renfort « à la limite », juste meilleur que le 5e titulaire
+     (pris parmi les trois plus proches au-dessus de lui), et trois personnages de complément qui ne le dépassent pas. */
+  const lim = crShuffle(crByP(S, P.ix.filter(i => !own.includes(i) && useful(i) && P.q[i] >= lo - .04 && P.q[i] <= hi)).slice(0, 2))[0], capP = lim != null ? D[lim].p : D[fifth] ? D[fifth].p : 0;
+  const rest = sh.filter(i => i !== lim && !useful(i));
+  S.shop = [...(lim != null ? [lim] : []), ...rest].slice(0, 4);
+  if (S.shop.length < 4) S.shop = [...S.shop, ...crByP(S, P.ix.filter(i => !own.includes(i) && !S.shop.includes(i) && D[i].p <= capP), true)].slice(0, 4);   /* complément : jamais au-dessus du renfort */
   // la vedette du jour : au-dessus de ce que vend la boutique, jusqu'un peu au-delà du haut de la division
   const cand = P.ix.filter(i => !own.includes(i) && P.q[i] > star && P.q[i] <= Math.min(1, hi + crLotUp(S.u)));
   S.lot = null;
@@ -13574,7 +13576,7 @@ function crFicheHTML(S, i){ const u = S.u, F = crFicheData(u, i), a = F.a, inf =
     ${inf ? `<p class="crfbio">${esc(inf[0])}</p><dl class="crfdl"><dt>${u === "op" ? "Fruit du démon" : "Pouvoirs"}</dt><dd>${esc(inf[1])}</dd>${u === "op" ? `<dt>Haki</dt><dd>${esc(hakiText(u, a))}</dd>` : ""}</dl>` : ""}
     ${F.koOn.length ? `<h3>Victoire immédiate</h3><p class="crfk">Met K.-O. d'un coup ${F.koOn.length > 4 ? F.koOn.length + " adversaires" : esc(F.koOn.join(", "))} (si son niveau le permet).</p>` : ""}
     ${F.atk.length || F.atkD.length ? `<h3>Atouts en combat</h3><ul class="crfl">${F.atk.map(x => li(x)).join("")}${duelL(F.atkD)}</ul>` : `<h3>Atouts en combat</h3><p class="crfk">Aucun pouvoir particulier : il compte sur son niveau.</p>`}
-    ${F.def.length || F.defD.length ? `<h3>Points faibles</h3><ul class="crfl">${F.def.map(x => li(x, 1)).join("")}${duelL(F.defD, 1)}</ul>` : ""}
+    ${F.def.length ? `<h3>Points faibles</h3><ul class="crfl">${F.def.slice(0, 3).map(x => li(x, 1)).join("")}</ul>` : ""}
     ${endu ? `<h3>Endurance</h3><ul class="crfl">${endu}</ul>` : ""}
     ${F.prey.length ? `<h3>Bons duels</h3><div class="crfg">${F.prey.map(tile).join("")}</div>` : ""}
     ${F.fear.length ? `<h3>Duels à éviter</h3><div class="crfg neg">${F.fear.map(tile).join("")}</div>` : ""}
