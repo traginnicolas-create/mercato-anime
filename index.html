@@ -13214,12 +13214,12 @@ function crSave(){ if (!CR.S) return; const r = crLoad(); r.saves[CR.S.u] = CR.S
 const crCapLeft = () => { const r = crLoad(); return r.cap && r.cap.d === tcDay() ? Math.max(0, CR_CAP - r.cap.n) : CR_CAP; };
 
 /* ---------- saison, clubs, mercato du jour ---------- */
-/* sous-divisions (14 oct. 2026) : chaque division a trois niveaux, 1 → 3. Niveaux 1 et 2 : les trois premiers montent d’un niveau, le dernier redescend.
+/* sous-divisions (14 oct. 2026) : chaque division a trois niveaux, 1 → 3. Niveaux 1 et 2 : les deux premiers montent d’un niveau, le dernier redescend.
    Niveau 3 : les deux premiers montent de division (le premier est champion en Élite 3), les deux derniers redescendent. Les clubs sont un peu plus faibles aux niveaux 1 et 2. */
-const CR_SUB = {up: 3, down: 1, k: .01};   /* réglé par simulation : titre en ~290 matchs (≈ +10 % par rapport aux divisions seules) */
+const CR_SUB = {up: 2, down: 1, k: .01};   /* réglé par simulation : titre en ~300 matchs (≈ +12 % par rapport aux divisions seules) */
 const crSub = S => S.sub || 0, crDivN = (S, d = S.div, b = crSub(S)) => CR_DIV[d][0] + " " + (b + 1);
 const crUpN = S => crSub(S) < 2 ? CR_SUB.up : S.div < 4 ? 2 : 1, crDnN = S => crSub(S) > 0 ? CR_SUB.down : S.div > 0 ? 2 : 0;
-const crUpTxt = S => crSub(S) < 2 ? `Les ${CR_SUB.up} premiers montent en ${crDivN(S, S.div, crSub(S) + 1)}` : S.div < 4 ? `Les deux premiers montent en ${crDivN(S, S.div + 1, 0)}` : "Le premier est champion";
+const crUpTxt = S => crSub(S) < 2 ? `Les ${CR_SUB.up === 2 ? "deux" : CR_SUB.up} premiers montent en ${crDivN(S, S.div, crSub(S) + 1)}` : S.div < 4 ? `Les deux premiers montent en ${crDivN(S, S.div + 1, 0)}` : "Le premier est champion";
 const crDnTxt = S => crDnN(S) === 1 ? ", le dernier redescend" : crDnN(S) === 2 ? ", les deux derniers descendent" : "";
 function crMkClub(S, name, s, rival){ const [lo, hi] = CR_BAND[S.div], c = lo + (hi - lo) * (CR_ECO.clubLo + CR_ECO.clubUp * s - (2 - crSub(S)) * CR_SUB.k), D = DATA[S.u]; return {name, s, rival: !!rival, pts: 0, team: crNear(S.u, c, 5, S.squad).sort((a, b) => D[a].p - D[b].p)}; }
 function crNewSeason(S){
@@ -13312,7 +13312,7 @@ const crLinksOf = (u, i) => (CR_LINK[u] || []).filter(g => g[1].includes(DATA[u]
 const CR_RULES = {three: ["Duel à trois", "Chaque équipe n'aligne que 3 combattants."], random: ["Ordre tiré au sort", "L'ordre de passage des deux équipes est tiré au sort au coup d'envoi."],
   nostar: ["Vedette suspendue", "Ton meilleur combattant disponible ne peut pas jouer ce match."], bench: ["Place aux remplaçants", "Tu dois aligner au moins deux de tes trois combattants les plus faibles."],
   cap: ["Plafond de niveau", "Le niveau cumulé de ton équipe ne doit pas dépasser la limite."]};
-const crByP = (S, l, desc) => [...l].sort((a, b) => (crCard(S.u, a).p - crCard(S.u, b).p) * (desc ? -1 : 1));
+const crByP = (S, l, desc) => [...l].sort((a, b) => ((crCard(S.u, a).p - crCard(S.u, b).p) || crCard(S.u, a).n.localeCompare(crCard(S.u, b).n)) * (desc ? -1 : 1));   /* à niveau égal, ordre fixe (sinon la vedette suspendue changeait d'un écran à l'autre) */
 // la règle du jour, seulement si elle reste jouable avec les combattants disponibles
 function crRule(S){ const r = S.rule; if (!r) return null; const av = crByP(S, crAvail(S)); if ((r.k === "nostar" || r.k === "bench") && av.length < 6) return null; if (r.k === "cap" && (av.length < 5 || crSum(S.u, av.slice(0, 5)) > r.x)) return null; return r; }
 const crN = S => { const r = crRule(S); return r && r.k === "three" ? 3 : 5; };
