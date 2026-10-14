@@ -10638,7 +10638,11 @@ const tcBestFin = (s, c) => ["Z", "G", "K", "S", "W", "B", "A", "H"].find(k => s
 const tcCard = (c, o = {}) => { const h = tcCard0(c, o); return o.no ? h.replace(/<\/(button|div)>\s*$/, `<span class="qm" aria-hidden="true">?</span></$1>`) : h; };
 // cadrage propre à la carte (c.fr, calculé par tools/frame_cards.py) : seulement pour l'illustration de base, versions Normale et Holo
 const tcFr = (c, src, f) => c.fr && (!f || f === "H") && src === c.i ? ` style="inset:${c.fr[1]}% auto auto ${c.fr[0]}%;width:${c.fr[2]}%;height:${c.fr[3]}%;max-width:none${c.fr[4] ? ";box-shadow:0 -80px 0 0 " + c.fr[4] : ""}"` : "";
-const tcCard0 = (c, o = {}) => c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${tcER(c, o.f)} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.f === "W" && tcWant(c) ? "wreal" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy"${tcFr(c, tcArt(c, o.f), o.f)}>${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>
+// AR façon Pokémon (15 oct. 2026) : scène de l'animé bord à bord, sans cadre, nom et niveau en haut, technique et une ligne en bas (data/ar_text.json → TCARTXT).
+// Seulement pour les versions AR et seconde AR qui ont une capture de scène ; les autres gardent le style AR habituel.
+const tcArTxt = (c, f) => { try { return (f === "A" || f === "B") && window.__MA.TCARTXT[c.u][c.n][TC_ARTK[f]] || null; } catch { return null; } };
+const tcArpCard = (c, o, t) => `<${o.btn ? "button" : "div"} class="tc arp r-${c.r} u-${c.u} f-${o.f} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy"><span class="ap" aria-hidden="true"></span><span class="ag" aria-hidden="true"></span><span class="ah"><b>${o.no ? "???" : esc(c.n)}</b><i>NIV ${o.no ? "??" : c.p}</i></span><span class="ak" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="af"><b>${o.no ? "" : esc(t[0])}</b><small>${o.no ? "" : esc(t[1])}</small><span class="am"><em>AR</em><span>#${String(c.no).padStart(3, "0")} · ${TC_R[c.r][0]}</span><i>★</i></span></span>${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
+const tcCard0 = (c, o = {}) => tcArTxt(c, o.f) ? tcArpCard(c, o, tcArTxt(c, o.f)) : c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${tcER(c, o.f)} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.f === "W" && tcWant(c) ? "wreal" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy"${tcFr(c, tcArt(c, o.f), o.f)}>${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[tcER(c, o.f)][3] || TC_R[tcER(c, o.f)][0]}</b></div>${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
 // sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
@@ -14717,6 +14721,28 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
   .tearw:has(> .pouch.charge)::before{animation:tchalo .8s ease-in both}
   .tearw:has(> .pouch.charge)::after{animation:tchalo .8s ease-in both,tchalospin 4s linear infinite}
 }
+</style>
+<style>
+/* ---- AR façon Pokémon (choix de l'utilisateur du 15 oct. 2026 : contour n°5 sans filet, textes blancs cernés de noir) ---- */
+.tc.arp{container-type:inline-size;border:0;border-radius:9px;padding:0;overflow:hidden;background:#0b0a0e;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 0 18px rgba(255,255,255,.07),0 10px 22px rgba(0,0,0,.55)}
+.tc.arp::after{display:none}
+.tc.arp > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.tc.arp .ap{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(115deg,transparent 38%,rgba(255,200,240,.2) 46%,rgba(190,240,255,.2) 52%,transparent 60%);background-size:250% 250%;background-position:var(--mx,40%) 50%;mix-blend-mode:screen}
+.tc.arp .ag{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.62),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 50%,rgba(0,0,0,.55) 68%,rgba(0,0,0,.9))}
+.tc.arp .ah,.tc.arp .ak,.tc.arp .af{position:absolute;z-index:2;left:6cqw;right:6cqw;color:#fff}
+.tc.arp .ah{top:5cqw;display:flex;justify-content:space-between;align-items:baseline;gap:3cqw}
+.tc.arp .ah b{font:900 8.6cqw/1.05 var(--title);-webkit-text-stroke:1.6cqw #000;paint-order:stroke fill;text-shadow:0 1.4cqw 0 #000,0 2cqw 5cqw rgba(0,0,0,.9);overflow-wrap:anywhere}
+.tc.arp .ah i,.tc.arp .ak,.tc.arp .af small,.tc.arp .am{text-shadow:-.5cqw -.5cqw 0 #000,.5cqw -.5cqw 0 #000,-.5cqw .5cqw 0 #000,.5cqw .5cqw 0 #000,0 1cqw 3cqw #000}
+.tc.arp .ah i{font:600 5.6cqw var(--mono);font-style:normal;white-space:nowrap}
+.tc.arp .ak{left:auto;top:17cqw;font:800 8cqw var(--brand,serif)}
+.tc.arp .af{bottom:5cqw;display:flex;flex-direction:column;gap:2cqw}
+.tc.arp .af b{font:800 7cqw/1.15 var(--title);-webkit-text-stroke:1.4cqw #000;paint-order:stroke fill;text-shadow:0 1.2cqw 0 #000,0 2cqw 5cqw rgba(0,0,0,.9)}
+.tc.arp .af small{font:600 5.2cqw/1.3 var(--body,sans-serif)}
+.tc.arp .am{display:flex;align-items:center;gap:2.5cqw;font:600 4.6cqw var(--mono);border-top:1px solid rgba(255,255,255,.35);padding-top:2cqw}
+.tc.arp .am em{font-style:normal;background:#f4f1ea;color:#000;padding:0 2cqw;border-radius:1.5cqw;text-shadow:none}
+.tc.arp .am i{margin-left:auto;font-style:normal;color:#ffe48a}
+.tc.arp .x{z-index:3}
+.tc.arp.no > img{filter:blur(9px) saturate(.85) brightness(.72);transform:scale(1.18)}
 </style>
 <style>
 /* fin du fichier : tout est chargé, on révèle la page (voir « Anti-flash » en tête de head.part). DOIT RESTER LA DERNIÈRE RÈGLE DU DERNIER FICHIER. */
