@@ -10261,12 +10261,12 @@ const TC_KEY = "mercato-cartes";
 const TC_R = {C: ["Commune", 2, 25], P: ["Peu commune", 4, 50, "Peu com."], R: ["Rare", 10, 120], E: ["Épique", 30, 350], L: ["Légendaire", 100, 1200], M: ["Mythique", 300, 3500], X: ["Éveil", 100, 600]};   // nom, éclats au recyclage, prix à la forge, nom court
 // finitions façon cartes à collectionner : chaque carte peut sortir en version brillante, « art » pleine carte, « art spécial » ou dorée.
 // [nom, sigle, chance en % par carte tirée, multiplicateur de valeur au recyclage, expérience pour une première]
-const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], B: ["Art rare", "AR", 1.4, 10, 80], S: ["Art spécial", "SAR", .5, 20, 150], K: ["Red Blood", "RED BLOOD", .35, 20, 220], W: ["Wanted", "WANTED", .8, 6, 120], G: ["UR", "UR", .15, 22, 300], Z: ["Légende", "LÉGENDE", .04, 30, 500]};
+const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], B: ["Art rare", "AR", 1.4, 10, 80], C: ["Art rare", "AR", 1.2, 10, 80], S: ["Art spécial", "SAR", .5, 20, 150], K: ["Red Blood", "RED BLOOD", .35, 20, 220], W: ["Wanted", "WANTED", .8, 6, 120], G: ["UR", "UR", .15, 22, 300], Z: ["Légende", "LÉGENDE", .04, 30, 500]};
 // la version Légende, la plus rare du jeu : sept personnages emblématiques seulement
 const TC_LEG = ["Monkey D. Luffy", "Shanks", "Son Goku", "Vegeta", "Naruto Uzumaki", "Sasuke Uchiwa", "Itachi Uchiwa", "Satoru Gojo", "Ryomen Sukuna", "Tanjiro Kamado", "Muzan Kibutsuji", "Izuku Midoriya", "All Might"];
 // illustration propre à chaque version (rang dans TCALT) : une version n'existe pour un personnage que s'il a cette illustration
 // K (Red Blood) reprend l'illustration et l'habillage rouge des anciennes SAR. Les SAR attendent leurs nouvelles illustrations de scène (rang 5, aucune pour l'instant).
-const TC_ARTK = {A: 0, K: 1, B: 2, G: 3, Z: 4, S: 5};
+const TC_ARTK = {A: 0, K: 1, B: 2, G: 3, Z: 4, S: 5, C: 6};   // C : 3e AR (rang 6), ajoutée le 15 oct. 2026 (Tanjiro)
 // version « Wanted » : l'avis de recherche des pirates de One Piece, avec leur prime en berrys. Dernières primes parues dans le manga
 // (revérifiées le 11 octobre 2026 : pas de nouvelles primes annoncées depuis l'après-Wano). À mettre à jour quand le manga en révèle.
 const TC_BOUNTY = {"Gol D. Roger": 5564800000, "Edward Newgate": 5046000000, "Kaido": 4611100000, "Charlotte Linlin": 4388000000, "Shanks": 4048900000, "Marshall D. Teach": 3996000000, "Dracule Mihawk": 3590000000, "Buggy": 3189000000,
@@ -10441,11 +10441,11 @@ const tcSecretRoll = s => { let r = ""; for (const sx of TC_SECRET) if (Math.ran
 // Versions rares : avant, la version était tirée pour chaque carte puis annulée si la carte n'y avait pas droit, ce qui rendait une UR précise quasi impossible (1 booster Or sur 150 000).
 // Désormais un tirage par booster : en % de chance (booster Classique, multiplié par TC_FINMUL selon le niveau) que la 4e carte soit une version rare, dont la carte est choisie parmi celles qui existent dans cette version.
 const TC_VHIT = {A: 4.8, W: 1.9, K: 1.6, G: .41, Z: .2}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
-const tcVList = (pool, k) => pool.flatMap(c => (k === "A" ? ["A", "B"] : [k]).filter(v => tcVersOf(c).includes(v)).map(v => [c, v]));
+const tcVList = (pool, k) => pool.flatMap(c => (k === "A" ? ["A", "B", "C"] : [k]).filter(v => tcVersOf(c).includes(v)).map(v => [c, v]));
 // tirage au hasard, doublons compris (choix de l'utilisateur : les doublons font partie du jeu, ils se recyclent en éclats qui servent à forger)
 const tcVPick = l => { let x = Math.random() * l.reduce((a, [c]) => a + TC_VW[c.r], 0); for (const e of l){ x -= TC_VW[e[0].r]; if (x <= 0) return e; } return l[l.length - 1]; };
 // forger une version rare précise avec les éclats du recyclage : prix de la version × coefficient de la rareté de la carte. Il faut déjà posséder le personnage.
-const TC_VFORGE = {H: 150, A: 600, B: 600, W: 500, K: 4000, G: 15000, Z: 25000}, TC_VFR = {C: 1, P: 1, R: 1, E: 1, L: 1.5, M: 2, X: 1.5};
+const TC_VFORGE = {H: 150, A: 600, B: 600, C: 600, W: 500, K: 4000, G: 15000, Z: 25000}, TC_VFR = {C: 1, P: 1, R: 1, E: 1, L: 1.5, M: 2, X: 1.5};
 const tcVPrice = (c, v) => Math.round(TC_VFORGE[v] * TC_VFR[c.r]);
 function tcOpenPack(s, key, sec){
   const P = tcParse(key), u = P.u, t = sec === "divin" ? 3 : sec === "dore" ? 2 : P.t, pool = tcCards().filter(c => u === "mix" || c.u === u), got = [], lv0 = tcLvl(s.xp || 0);
@@ -10475,7 +10475,7 @@ function tcOpenPack(s, key, sec){
     got.push({...c, f, isNew: !s.own[c.id], newFin, ...(hype ? {hype: true} : {})}); s.own[c.id] = (s.own[c.id] || 0) + 1;
     if (f){ s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; }
   }
-  const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
+  const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, C: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0);   // intérêt d'une carte : rareté puis finition
   got.sort((a, b) => wow(a) - wow(b));   // la meilleure carte se retourne en dernier
   const best = Math.max(...got.map(c => TC_ORDER.indexOf(c.r)));
   s.pity.M = best >= 5 ? 0 : s.pity.M + 1; s.pity.L = best >= 4 ? 0 : s.pity.L + 1; s.pity.V = got.some(g => "KGZ".includes(g.f) && g.f) ? 0 : (s.pity.V || 0) + 1; s.pity.U = got.some(g => "GZ".includes(g.f) && g.f) ? 0 : (s.pity.U || 0) + 1;
@@ -10641,8 +10641,8 @@ const TC_NOK = ["Nico Robin", "Nami"];
 // Le tirage, le recyclage et les taux gardent la rareté réelle du personnage (c.r).
 const tcER = (c, v) => v === "W" ? "L" : c.r;
 function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 4 && r <= 5 || (c.pop === "S" && r >= 3), v = ["", "H"];
-  if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (top && a[5]) v.push("S"); if (top && a[1] && !TC_NOK.includes(c.n)) v.push("K"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
-const tcBestFin = (s, c) => ["Z", "G", "K", "S", "W", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
+  if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (a[6]) v.push("C"); if (top && a[5]) v.push("S"); if (top && a[1] && !TC_NOK.includes(c.n)) v.push("K"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
+const tcBestFin = (s, c) => ["Z", "G", "K", "S", "W", "C", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
 // une carte que le joueur n'a pas porte un « ? » (ajouté ici pour les trois gabarits : normal, luxe, objet)
 const tcCard = (c, o = {}) => { const h = tcCard0(c, o); return o.no ? h.replace(/<\/(button|div)>\s*$/, `<span class="qm" aria-hidden="true">?</span></$1>`) : h; };
 // cadrage propre à la carte (c.fr, calculé par tools/frame_cards.py) : seulement pour l'illustration de base, versions Normale et Holo
@@ -10650,12 +10650,12 @@ const tcFr = (c, src, f) => c.fr && (!f || f === "H") && src === c.i ? ` style="
 // AR façon Pokémon (15 oct. 2026) : scène de l'animé bord à bord, sans cadre, nom et niveau en haut, technique et une ligne en bas (data/ar_text.json → TCARTXT).
 // Seulement pour les versions AR et seconde AR qui ont une capture de scène ; les autres gardent le style AR habituel.
 // couleurs de l'illustration (calculées par build.py) : contour des AR et reflet des Holo s'y accordent (demande du 15 oct. 2026)
-const tcPalOf = (c, f) => { try { if (f === "A" || f === "B"){ const p = window.__MA.TCPAL[c.u][c.n][TC_ARTK[f]]; if (p) return p; } } catch {} return c.hc || null; };
+const tcPalOf = (c, f) => { try { if (f === "A" || f === "B" || f === "C"){ const p = window.__MA.TCPAL[c.u][c.n][TC_ARTK[f]]; if (p) return p; } } catch {} return c.hc || null; };
 const tcPalSt = (c, f) => { const p = tcPalOf(c, f); return p ? `--hm:${p[0]};--hl:${p[1]};--hd:${p[2]}` : ""; };
-const tcArTxt = (c, f) => { try { return (f === "A" || f === "B") && window.__MA.TCARTXT[c.u][c.n][TC_ARTK[f]] || null; } catch { return null; } };
+const tcArTxt = (c, f) => { try { return (f === "A" || f === "B" || f === "C") && window.__MA.TCARTXT[c.u][c.n][TC_ARTK[f]] || null; } catch { return null; } };
 // t[5] = cadrage propre à l'illustration [zoom, décalage x %, décalage y %] (data/ar_frame.json, tools/ar_frame.py)
 const tcArpCard = (c, o, t) => `<${o.btn ? "button" : "div"} class="tc arp r-${c.r} u-${c.u} f-${o.f} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" style="--am:${t[2] || "#888"};--al:${t[3] || "#ccc"};--ad:${t[4] || "#222"}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy"${t[5] ? ` style="--fz:${t[5][0]};--fx:${t[5][1]}%;--fy:${t[5][2]}%"${t[5][3] ? ` class="fade"` : ""}` : ""}><span class="ap" aria-hidden="true"></span><span class="ag" aria-hidden="true"></span><span class="ah"><b>${o.no ? "???" : esc(c.n)}</b><i>NIV ${o.no ? "??" : c.p}</i></span><span class="af"><b>${o.no ? "" : esc(t[0])}</b><small>${o.no ? "" : esc(t[1])}</small><span class="am"><em>AR</em><span>#${String(c.no).padStart(3, "0")} · ${TC_R[c.r][0]}</span><i>★</i></span></span>${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}</${o.btn ? "button" : "div"}>`;
-const tcCard0 = (c, o = {}) => tcArTxt(c, o.f) ? tcArpCard(c, o, tcArTxt(c, o.f)) : c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${tcER(c, o.f)} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.f === "W" && tcWant(c) ? "wreal" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" style="${tcPalSt(c, o.f)}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy"${tcFr(c, tcArt(c, o.f), o.f)}>${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>
+const tcCard0 = (c, o = {}) => tcArTxt(c, o.f) ? tcArpCard(c, o, tcArTxt(c, o.f)) : c.obj ? tcObjCard(c, o) : TC_LUX && TC_ORDER.indexOf(c.r) >= 4 && (!o.f || o.f === "H") ? tcLuxCard(c, o) : `<${o.btn ? "button" : "div"} class="tc r-${tcER(c, o.f)} u-${c.u} ${o.f === "B" ? "f-A f-B" : o.f === "C" ? "f-A f-B f-C" : o.f === "K" ? "f-S f-K" : o.f ? "f-" + o.f : ""} ${o.f === "W" && tcWant(c) ? "wreal" : ""} ${o.no ? "no" : ""} ${o.isNew ? "new" : ""} ${o.cls || ""}" style="${tcPalSt(c, o.f)}" ${o.btn ? `data-tc="${esc(c.id)}" data-v="${o.v ?? ""}"` : ""}><img src="${tcArt(c, o.f)}" alt="" loading="lazy"${tcFr(c, tcArt(c, o.f), o.f)}>${o.f === "K" ? `<span class="sc" aria-hidden="true"></span><span class="vk" aria-hidden="true">${TC_PACKS[c.u][1]}</span><span class="vn" aria-hidden="true">${o.no ? "???" : esc(c.n)}</span>` : o.f === "Z" ? `<span class="aur" aria-hidden="true"></span><img class="g" src="${tcArt(c, "Z")}" alt="" loading="lazy"><span class="bolt" aria-hidden="true"></span><span class="bolt two" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>` : o.f === "W" ? `<span class="wt" aria-hidden="true">WANTED</span><span class="wd" aria-hidden="true">DEAD OR ALIVE</span><span class="wn" aria-hidden="true">${o.no ? "???" : esc(c.n.toUpperCase())}</span><span class="wb" aria-hidden="true">฿ ${(TC_BOUNTY[c.n] || 0).toLocaleString("fr-FR")}</span><span class="wm" aria-hidden="true">MARINE</span>` : o.f === "A" || o.f === "B" ? `<span class="sc" aria-hidden="true"></span>` : ""}<span class="fx" aria-hidden="true"></span><span class="tx" aria-hidden="true"></span><span class="sk" aria-hidden="true"></span>
   <div class="tp"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[tcER(c, o.f)][3] || TC_R[tcER(c, o.f)][0]}</b></div>${o.x > 1 ? `<span class="x">×${o.x}</span>` : ""}
   <div class="nm">${o.no ? "???" : esc(c.n)}</div><div class="ft"><span><span class="kj">${TC_PACKS[c.u][1]}</span>${o.f ? `<em class="fn">${TC_FIN[o.f][1]}</em>` : ""}</span><span>${o.no ? "" : "NIV " + c.p}</span></div></${o.btn ? "button" : "div"}>`;
 // sachet en volume : il penche, flotte, et suit le doigt ou la souris sur la page des boosters
@@ -10680,7 +10680,7 @@ function tcDrops(key){
         const low = TC_ORDER.indexOf(r) < 3;   /* sous Épique : pas de taux affiché */
         return head("r-" + r, "", KJ[r], TC_R[r][0], low ? null : rar(r), !low && p > 0 ? "chaque carte : " + sur(p / 100) : "", l.filter(c => s.own[c.id]).length, l.length) + `<div class="dcg">${l.map(c => thumb(c, "", !!s.own[c.id])).join("")}</div>`; };
       const VS = {Z: ["#c9a2ff", "極"], G: ["#f5c84a", "金"], K: ["#ff3b3b", "血"], W: ["#c9a36a", "賞"], A: ["#bfe9ff", "彩"]};
-      const secV = k => { const [col, kj] = VS[k], ks = k === "A" ? ["A", "B"] : [k], l = pool.flatMap(c => ks.filter(v => tcVersOf(c).includes(v)).map(v => [c, v])); if (!l.length) return "";
+      const secV = k => { const [col, kj] = VS[k], ks = k === "A" ? ["A", "B", "C"] : [k], l = pool.flatMap(c => ks.filter(v => tcVersOf(c).includes(v)).map(v => [c, v])); if (!l.length) return "";
         const tw = l.reduce((a, [c]) => a + TC_VW[c.r], 0), odds = ([c]) => TC_VHIT[k] * TC_FINMUL[t] / 100 * TC_VW[c.r] / tw, mn = Math.min(...l.map(odds)), mx = Math.max(...l.map(odds));
         return head("ver", col, kj, (k === "A" ? "AR" : TC_FIN[k][0]) + ` <span class="vtag">version</span>`, TC_VHIT[k] * TC_FINMUL[t], "chaque carte : " + (Math.round(1 / mx) === Math.round(1 / mn) ? sur(mx) : "de " + sur(mx) + " à " + sur(mn)), l.filter(([c, v]) => tcHas(s, c, v)).length, l.length) + `<div class="dcg">${l.map(([c, v]) => thumb(c, v, tcHas(s, c, v), col)).join("")}</div>`; };
       // de la plus rare à la plus courante, d'après la chance par booster, versions rares comprises
@@ -10775,7 +10775,7 @@ function tcRender(){
         <p class="small" style="margin-top:12px">Tu as <b>${s.gems} ◆</b>. Les éclats se gagnent en remportant des parties, avec les missions, les cartes de visite et le recyclage des doublons.</p>`;
     }
   } else if (TC_TAB === "album"){
-    const f = TC_F, ver = f.f ?? "*", vks = ver === "A" ? ["A", "B"] : [ver];
+    const f = TC_F, ver = f.f ?? "*", vks = ver === "A" ? ["A", "B", "C"] : [ver];
     // toutes les cartes de la version et de l'univers choisis ; les raretés se comptent là-dessus, pour qu'aucun filtre ne mène à une page vide
     const inV = all.filter(c => f.u === "all" || c.u === f.u).flatMap(c => ver === "*" ? [[c, "*"]] : vks.filter(x => tcVersOf(c).includes(x)).map(x => [c, x])), hasV = ([c, v]) => v === "*" ? !!s.own[c.id] : tcHas(s, c, v);
     if (f.r !== "all" && !inV.some(([c, v]) => tcER(c, v) === f.r)) f.r = "all";
@@ -10786,7 +10786,7 @@ function tcRender(){
       <div class="tcfb">
         <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}</div>
         <div class="tcfb-s">
-          <label><span>Version</span><select id="tcSelV" class="${(f.f ?? "*") === "*" ? "" : "on"}">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].filter(([k]) => k === "*" || all.some(c => tcVersOf(c).includes(k))).map(([k, n]) => { const ks = k === "A" ? ["A", "B"] : [k]; return `<option value="${k}" ${(f.f ?? "*") === k ? "selected" : ""}>${n}${k === "*" ? "" : " · " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</option>`; }).join("")}</select></label>
+          <label><span>Version</span><select id="tcSelV" class="${(f.f ?? "*") === "*" ? "" : "on"}">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].filter(([k]) => k === "*" || all.some(c => tcVersOf(c).includes(k))).map(([k, n]) => { const ks = k === "A" ? ["A", "B", "C"] : [k]; return `<option value="${k}" ${(f.f ?? "*") === k ? "selected" : ""}>${n}${k === "*" ? "" : " · " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</option>`; }).join("")}</select></label>
           <label><span>Rareté</span><select id="tcSelR" class="${f.r === "all" ? "" : "on"}"><option value="all" ${f.r === "all" ? "selected" : ""}>Toutes · ${inV.filter(hasV).length}/${inV.length}</option>${[...TC_ORDER].reverse().filter(r => inV.some(([c, v]) => tcER(c, v) === r)).map(r => `<option value="${r}" ${f.r === r ? "selected" : ""}>${TC_R[r][0]} · ${inV.filter(e => tcER(e[0], e[1]) === r && hasV(e)).length}/${inV.filter(e => tcER(e[0], e[1]) === r).length}</option>`).join("")}</select></label>
           <label class="tcfb-own ${f.own ? "on" : ""}"><input type="checkbox" id="tcOwn" ${f.own ? "checked" : ""}>Obtenues seulement</label>
           ${f.u !== "all" || (f.f ?? "*") !== "*" || f.r !== "all" || f.own ? `<button class="ghost lk" id="tcFReset">Réinitialiser</button>` : ""}
@@ -10842,7 +10842,7 @@ function tcRender(){
   const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
     let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll(s) : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
-    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
+    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, C: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
   // « Tout ouvrir » : tous les boosters du type choisi d'un coup (TC_ALLMAX au plus par clic, pour que l'écran de bilan reste fluide)
@@ -10899,7 +10899,7 @@ function tcView(c, want){
   const s = tcLoad(), fins = ["", ...Object.keys(TC_FIN).filter(k => s.fin[c.id] && s.fin[c.id][k] && tcVersOf(c).includes(k))]; let f = tcBestFin(s, c), back = false; if (want != null && want !== "*" && tcHas(s, c, want)) f = want;
   document.querySelector(".tcview")?.remove();
   document.body.insertAdjacentHTML("beforeend", `<div class="tcview r-${c.r}" role="dialog" aria-modal="true" aria-label="${esc(c.n)}"><button class="ghost vx" id="tcvX">✕ Fermer</button><div class="v3d"><div class="vcard"><div class="vf"></div><div class="vb">${tcBack(c.r)}<div class="tcfiche-w hidden">${tcSheet(c, s)}</div></div></div></div>
-    <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] + (k === "B" ? " · 2e illustration" : "") : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button class="primary" id="tcvFlip">Retourner la carte</button><button id="tcvSheet">Lire la fiche</button></div><p class="small">Fais glisser pour incliner la carte.</p></div></div>`);
+    <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] + (k === "B" ? " · 2e illustration" : k === "C" ? " · 3e illustration" : "") : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button class="primary" id="tcvFlip">Retourner la carte</button><button id="tcvSheet">Lire la fiche</button></div><p class="small">Fais glisser pour incliner la carte.</p></div></div>`);
   const V = document.querySelector(".tcview"), box = V.querySelector(".v3d"), card = V.querySelector(".vcard");
   const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
   const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); card.style.setProperty("--px", mx + "%"); card.style.setProperty("--py", my + "%"); card.style.setProperty("--ph", Math.min(1, Math.hypot(mx - 50, my - 50) / 50).toFixed(2)); card.style.setProperty("--ex", (-ry * .15).toFixed(2) + "px"); card.style.setProperty("--ey", (rx * .15).toFixed(2) + "px"); };   // --ex/--ey : tranche de la carte, du côté qui s'éloigne
@@ -10955,7 +10955,7 @@ function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) re
   return {stage: k => { stage = Math.max(stage, Math.min(3, k)); kick = 1; }, reveal: () => { if (!rev){ rev = performance.now(); kick = 0; } }, stop}; }
 // chance, en %, qu'un booster de ce niveau contienne au moins une carte de cette rareté (ou cette version rare) : affichée au-dessus de la rareté dans la cinématique
 function tcOddsOf(c, key){ try { const {t} = tcParse(key), R = TC_T[t].rate; let p;
-    if (c.f && c.f !== "H" && TC_VHIT[c.f === "B" ? "A" : c.f] != null) p = TC_VHIT[c.f === "B" ? "A" : c.f] * TC_FINMUL[t];
+    if (c.f && c.f !== "H" && TC_VHIT[c.f === "B" || c.f === "C" ? "A" : c.f] != null) p = TC_VHIT[c.f === "B" || c.f === "C" ? "A" : c.f] * TC_FINMUL[t];
     else if (c.r === "X") p = TC_XRATE[t];
     else { const a = (R[0][c.r] || 0) / 100, b = (R[1][c.r] || 0) / 100; p = (1 - Math.pow(1 - a, 4) * (1 - b)) * 100; }
     if (!(p > 0)) return ""; const txt = p >= 10 ? p.toFixed(0) : p >= 1 ? p.toFixed(1).replace(".", ",") : p.toFixed(2).replace(".", ",");
@@ -11355,7 +11355,7 @@ function tcPouchGL(O, key){ const T = window.THREE, wrap = O.querySelector(".tea
   return {charge: () => { chg = performance.now(); }, tear: () => { tear = performance.now(); }, stop}; }
 function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "K" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
-  const last = got.length - 1, VB0 = {H: .5, A: 3, B: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc0 = c => TC_ORDER.indexOf(c.r) * 2 + (VB0[c.f] || 0) + (c.hype ? 20 : 0), bestK = got.reduce((b, c, k) => sc0(c) > sc0(got[b]) ? k : b, 0);
+  const last = got.length - 1, VB0 = {H: .5, A: 3, B: 3, C: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc0 = c => TC_ORDER.indexOf(c.r) * 2 + (VB0[c.f] || 0) + (c.hype ? 20 : 0), bestK = got.reduce((b, c, k) => sc0(c) > sc0(got[b]) ? k : b, 0);
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
   document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">H</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
@@ -11369,7 +11369,7 @@ function tcOpening(key, got){
   const done = () => { const nw = got.filter(c => c.isNew).length, nf = got.filter(c => c.newFin && !c.isNew).length, dup = got.length - nw - nf, s = tcLoad(), all = tcCards();
     const gain = got.filter(c => !c.isNew && !c.newFin).reduce((a, c) => a + TC_R[c.r][1] * (c.f ? TC_FIN[c.f][3] : 1), 0), have = (s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0), price = tcPrice(u, t);
     // meilleure carte du lot : la rareté d'abord, la version rare ensuite (ce n'est plus forcément la dernière depuis que la version rare prend la 4e place)
-    const VB = {H: .5, A: 3, B: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc = c => TC_ORDER.indexOf(c.r) * 2 + (VB[c.f] || 0), bk = got.reduce((b, c, k) => sc(c) > sc(got[b]) ? k : b, 0);
+    const VB = {H: .5, A: 3, B: 3, C: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc = c => TC_ORDER.indexOf(c.r) * 2 + (VB[c.f] || 0), bk = got.reduce((b, c, k) => sc(c) > sc(got[b]) ? k : b, 0);
     O.classList.add("res"); O.querySelector("h2").textContent = tcName(key);
     const row = mid.querySelector(".tcrow"); if (row && got.length <= 5){ row.classList.add("tcfan"); let j = 0; [...row.children].forEach((el, k) => { el.classList.remove("tcflip", "tcburst"); if (k === bk){ el.style.setProperty("--k", 0); el.style.order = 3; el.classList.add("best"); return; } el.style.setProperty("--k", j < 2 ? j - 2 : j - 1); el.style.order = j < 2 ? j + 1 : j + 2; j++; }); }
     { const rw = mid.querySelector(".tcrow"); if (rw){ [...rw.children].forEach((el, k) => { if (!got[k]) return; el.classList.add("zoom"); el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", "Voir " + got[k].n + " en grand"); const go = () => tcView(got[k], got[k].f || ""); el.onclick = go; el.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }); rw.insertAdjacentHTML("afterend", `<p class="small ozoom">Touche une carte pour la voir en grand, l'incliner, la retourner et lire sa fiche.</p>`); } }
@@ -11672,7 +11672,7 @@ function vtCareer(){ const o = {played: 0, top: 0, cups: 0, stars: 0, best: 0, c
 // tout ce que mesurent les accomplissements
 function vtCtx(s){
   const all = tcCards(), has = c => !!s.own[c.id], st = s.stat || {g: 0, w: 0, modes: []}, base = all.filter(c => c.r !== "X");
-  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, B: 0, S: 0, K: 0, W: 0, G: 0, Z: 0};
+  const full = u => base.filter(c => c.u === u).every(has) ? 1 : 0, fin = {H: 0, A: 0, B: 0, C: 0, S: 0, K: 0, W: 0, G: 0, Z: 0};
   Object.values(s.fin || {}).forEach(f => Object.keys(f).forEach(k => { if (f[k]) fin[k]++; }));
   return {g: st.g, w: st.w, modes: st.modes.length, best: s.best || 0, own: all.filter(has).length, total: all.length, u: {op: full("op"), db: full("db"), na: full("na")},
     vers: (typeof tcVers === "function" ? tcVers(s) : 0), evAll: all.filter(c => c.r === "X").length, mw: k => (st.mw || {})[k] || 0,
