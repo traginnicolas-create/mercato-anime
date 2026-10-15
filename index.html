@@ -10404,7 +10404,7 @@ function tcSig(o){ const t = JSON.stringify({...o, sig: undefined}) + [TC_KEY, "
   return (4294967296 * (2097151 & b) + (a >>> 0)).toString(36); }
 function tcLoad(){
   const raw = lsGet(TC_KEY, null), bad = !!raw && (raw.sig ? raw.sig !== tcSig(raw) : !!raw.signed);
-  const s = raw || {own: {}, packs: {"mix:0": 3}, gems: 0, pity: {M: 0, L: 0}, free: {n: TC_FREE.max, t: Date.now()}, opened: 0};
+  const s = raw || {own: {}, packs: {}, gems: 0, pity: {M: 0, L: 0}, free: {n: 0, t: Date.now()}, opened: 0};   /* nouveau compte : réserve vide, elle se remplit d'un booster toutes les 45 min ; le didacticiel offre le premier (15 oct. 2026) */
   // anciennes sauvegardes : un seul niveau de booster par univers
   for (const k of Object.keys(s.packs)) if (!k.includes(":")){ if (s.packs[k] > 0) s.packs[k + ":0"] = (s.packs[k + ":0"] || 0) + s.packs[k]; delete s.packs[k]; }
   s.xp = s.xp || 0; s.streak = s.streak || 0; s.fin = s.fin || {};
@@ -10730,7 +10730,8 @@ function tcHome(s){
   box.innerHTML = `<div><b>Cartes à collectionner · 札</b><span>${own}/${tcCards().length} cartes · niveau ${tcLvl(s.xp)} · ${n ? n + " booster" + (n > 1 ? "s" : "") + " à ouvrir" : "gagne des parties pour des éclats et des boosters"}${todo ? " · " + todo + " récompense" + (todo > 1 ? "s" : "") + " à réclamer" : ""}</span></div><button class="${n || todo ? "primary" : ""}" id="tcHomeGo">${n ? "Ouvrir" : todo ? "Réclamer" : "Voir ma collection"}</button>`;
   document.querySelector("#tcHomeGo").onclick = () => tcShow(n ? "packs" : todo ? "missions" : "album");
 }
-function tcShow(tab){ if (tab) TC_TAB = tab; show("tcg"); tcRender(); setTimeout(() => { try { tcTourMaybe(); } catch {} }, 350); }
+function tcShow(tab){ if (tab) TC_TAB = tab; show("tcg"); tcRender(); setTimeout(() => { try { tcTourMaybe(); } catch {} try { const s = tcLoad(); if (s.tuto && s.tuto.tour) gtBackOffer("cartes", (s.opened || 0) < 60, () => { TC_TAB = "packs"; tcRender(); tcTourMaybe(true); }); } catch {} }, 350); }
+document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#tcHelpQ")){ TC_TAB = "packs"; tcRender(); setTimeout(() => tcTourMaybe(true), 100); } });
 function tcRender(){
   tcLibs();
   const s = tcLoad(), all = tcCards(), own = Object.keys(s.own).length, dup = all.reduce((a, c) => a + tcDups(s, c).n, 0), mis = tcMissions(s);
@@ -10818,7 +10819,7 @@ function tcRender(){
       <p class="tcsecp">Plus longues, mieux payées. Huit missions tirées chaque semaine dans une réserve ; elles changent chaque lundi. Les parties en solo comptent, comme pour les quotidiennes.</p><div class="tcms">${wks.map(m => row(m, wk.claimed.includes(m.k), "data-tcw")).join("")}${bonusRow("Bonus : toutes les missions de la semaine", "mix:2", dn(wks, wk.claimed), wks.length, wk.bonus, "tcBonusW")}</div>
       ${sec("Mensuelles", "月間", dn(mos, mo.claimed) + "/" + mos.length, inT(tMo))}
       <p class="tcsecp">Les plus dures, pour les joueurs très actifs (plusieurs heures par jour) : boosters Divin et Or, gros lots d'éclats. Huit missions tirées chaque mois dans une réserve ; elles changent le 1er du mois.</p><div class="tcms">${mos.map(m => row(m, mo.claimed.includes(m.k), "data-tcmo")).join("")}${bonusRow("Bonus : toutes les missions du mois", "mix:3", dn(mos, mo.claimed), mos.length, mo.bonus, "tcBonusM")}</div>
-      <details class="tchelp"><summary>Comment gagner des boosters</summary><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. La série ne compte que les parties en ligne contre d'autres joueurs : une défaite en ligne la remet à zéro, le solo n'y touche pas.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster garanti.</li><li><b>Boosters gratuits</b> : un toutes les 45 minutes, jusqu'à ${TC_FREE.max} en réserve.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
+      <details class="tchelp"><summary>Comment gagner des boosters</summary><p style="margin:8px 0 0"><button class="linkq" data-helpon="tc">Revoir le didacticiel des cartes</button></p><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. La série ne compte que les parties en ligne contre d'autres joueurs : une défaite en ligne la remet à zéro, le solo n'y touche pas.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster garanti.</li><li><b>Boosters gratuits</b> : un toutes les 45 minutes, jusqu'à ${TC_FREE.max} en réserve.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou <b>forger</b> une carte précise qui te manque (touche-la dans la collection).</li></ul></details>`;
   }
   $("#tcBoard").innerHTML = html;
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
@@ -11402,7 +11403,7 @@ function tcOpening(key, got){
         bot.innerHTML = `<button id="tcAll">Tout retourner</button>`; $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (const k of [...got.keys()].filter(k => k !== bestK).concat(bestK)){ while (busy) await new Promise(r => setTimeout(r, 120)); await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : got.length > 5 ? 90 : 260)); } }; }, calm ? 0 : 1500); }, calm ? 0 : 800); };
 }
 // écran « Cartes », bandeau d'accueil
-document.querySelector(".wrap").insertAdjacentHTML("beforeend", `<section id="tcg" class="hidden"><div class="topbar"><h1><span class="lbl">CARTES · 札</span></h1><button class="ghost" id="tcQuit">✕<span class="lbl"> Accueil</span></button></div><div id="tcBoard"></div></section>`);
+document.querySelector(".wrap").insertAdjacentHTML("beforeend", `<section id="tcg" class="hidden"><div class="topbar"><h1><span class="lbl">CARTES · 札</span></h1><button class="helpq" id="tcHelpQ" aria-label="Revoir le didacticiel" title="Revoir le didacticiel">?</button><button class="ghost" id="tcQuit">✕<span class="lbl"> Accueil</span></button></div><div id="tcBoard"></div></section>`);
 $("#tcQuit").onclick = () => { show("home"); tcHome(); };
 document.querySelector("#home .feature")?.insertAdjacentHTML("afterend", `<div class="tchome" id="tcHome"></div>`);
 document.querySelector(".sitenav")?.insertAdjacentHTML("beforeend", `<a href="#" id="navTcg">Cartes</a>`);
@@ -11436,12 +11437,12 @@ const TC_TSTEPS = [
   {sel: () => { const b = $("#tcClaimAll"); return b && !b.disabled ? b : null; }, t: "Récupère tout le reste", p: "Pour aller plus vite, « Tout réclamer » ramasse d'un coup toutes les récompenses prêtes.", skipIf: () => { const b = $("#tcClaimAll"); return !b || b.disabled; }, done: () => true, mark: () => !!$(".tccele")},   // validée dès que la célébration s'affiche : le bouton peut rester actif, car réclamer débloque d'autres récompenses
   {t: "C'est tout !", p: "Un booster gratuit arrive chaque heure, et chaque partie gagnée en rapporte d'autres. Voici un booster Argent en cadeau.", next: "Jouer", end: true}];
 const tcTourClaimed = () => { try { const s = tcLoad(); return ((s.tuto && s.tuto.claimed) || []).length + ((s.day && s.day.claimed) || []).length + (s.week && s.week.claimed || []).length + (s.month && s.month.claimed || []).length; } catch { return 0; } };
-function tcTourMaybe(){ if (TC_TOUR || $("#tcg").classList.contains("hidden") || document.querySelector(".tcopen,.tcview,.tccine,.tccele,.cpgate,.welcome,#modal:not(.hidden)")) return; const s = tcLoad(); s.tuto = s.tuto || {claimed: []};
-  if (s.tuto.tour) return; if ((s.opened || 0) >= 5){ s.tuto.tour = 1; tcSave(s); return; }                      // joueur déjà rodé : pas de didacticiel
-  if (!tcStock(s)){ tcGive(s, "mix:0"); tcSave(s); }                                                                // il faut au moins un booster à ouvrir
+function tcTourMaybe(force){ if (TC_TOUR || $("#tcg").classList.contains("hidden") || document.querySelector(".tcopen,.tcview,.tccine,.tccele,.cpgate,.welcome,#modal:not(.hidden)")) return; const s = tcLoad(); s.tuto = s.tuto || {claimed: []};
+  if (!force){ if (s.tuto.tour) return; if ((s.opened || 0) >= 5){ s.tuto.tour = 1; tcSave(s); return; } }                      // joueur déjà rodé : pas de didacticiel
+  if (!tcStock(s) && !force){ tcGive(s, "mix:0"); tcSave(s); }   /* en le revoyant, pas de booster offert */                                                                // il faut au moins un booster à ouvrir
   TC_PICK = s.free.n > 0 ? "free" : (Object.keys(s.packs).find(k => s.packs[k] > 0) || "free"); TC_SUB = "mine";
   document.body.insertAdjacentHTML("beforeend", `<div class="tctour" role="dialog" aria-label="Didacticiel des cartes"><i></i><i></i><i></i><i></i><span class="ring"></span><div class="tip"></div></div>`);
-  TC_TOUR = {k: -1, el: document.querySelector(".tctour"), seen: false, since: 0, timer: 0}; tcTourGo(0); TC_TOUR.timer = setInterval(tcTourTick, 180); }
+  TC_TOUR = {k: -1, el: document.querySelector(".tctour"), seen: false, since: 0, timer: 0, replay: !!force}; tcTourGo(0); TC_TOUR.timer = setInterval(tcTourTick, 180); }
 function tcTourGo(k){ const T = TC_TOUR; while (k < TC_TSTEPS.length && TC_TSTEPS[k].skipIf && TC_TSTEPS[k].skipIf()) k++; if (k >= TC_TSTEPS.length) return tcTourEnd(false);
   T.k = k; T.seen = false; T.since = Date.now(); T.scrolled = false; const st = TC_TSTEPS[k]; try { st.pre && st.pre(); } catch {}
   T.el.querySelector(".tip").innerHTML = `<small>Premiers pas · ${k + 1}/${TC_TSTEPS.length}</small><b>${st.t}</b><p>${st.p}</p><div class="row"><button class="sk hidden" id="tcTourSkip">Passer le didacticiel</button>${st.next ? `<button class="primary" id="tcTourNext">${st.next}</button>` : `<span class="small" style="color:var(--accent)">À toi de jouer ↑</span>`}</div>`;
@@ -11466,7 +11467,7 @@ function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T
   a.style.cssText = `left:0;top:0;width:100%;height:${y0}px`; b.style.cssText = `left:0;top:${y1}px;width:100%;bottom:0`; c.style.cssText = `left:0;top:${y0}px;width:${x0}px;height:${y1 - y0}px`; d.style.cssText = `left:${x1}px;top:${y0}px;right:0;height:${y1 - y0}px`;
   ring.style.cssText = `display:block;left:${x0}px;top:${y0}px;width:${x1 - x0}px;height:${y1 - y0}px`; tip.style.translate = "-50% 0";
   if (y1 + 190 < H){ tip.style.top = (y1 + 14) + "px"; tip.style.bottom = "auto"; } else { tip.style.top = "auto"; tip.style.bottom = (H - y0 + 14) + "px"; } }
-function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; clearInterval(T.timer); T.el.remove(); document.querySelector(".tcfinger")?.remove(); TC_TOUR = null; const s = tcLoad(); s.tuto = s.tuto || {claimed: []}; s.tuto.tour = 1; if (gift) tcGive(s, "mix:1"); tcSave(s); TC_F.own = false; TC_TAB = "packs"; tcRender(); window.scrollTo(0, 0); if (gift){ SFX.play("fanfare"); tcCele("Didacticiel terminé", "1 booster Argent offert", "学", "#dfe5ee"); } }
+function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; if (T.replay) gift = false;   /* revoir le didacticiel ne redonne pas le cadeau */ setTimeout(() => { try { if (!document.querySelector('.gtour')) gtStart([gtKeepStep("en haut de l'écran Cartes")], {title: "Cartes"}); } catch {} }, gift ? 2600 : 300); clearInterval(T.timer); T.el.remove(); document.querySelector(".tcfinger")?.remove(); TC_TOUR = null; const s = tcLoad(); s.tuto = s.tuto || {claimed: []}; s.tuto.tour = 1; if (gift) tcGive(s, "mix:1"); tcSave(s); TC_F.own = false; TC_TAB = "packs"; tcRender(); window.scrollTo(0, 0); if (gift){ SFX.play("fanfare"); tcCele("Didacticiel terminé", "1 booster Argent offert", "学", "#dfe5ee"); } }
 </script>
 
 <style>
@@ -11660,11 +11661,12 @@ const VT = [
   ["k3", "Vainqueur du tournoi", "優勝", 2, "Carrière : remporte une coupe", x => x.cr.cups, 1], ["k4", "Examen réussi", "合格", 2, "Carrière : atteins la division Or", x => x.cr.top, 2], ["k5", "Nouveau compagnon", "仲間", 2, "Carrière : recrute une vedette", x => x.cr.stars, 1],
   ["k6", "Éveil", "覚醒", 3, "Carrière : atteins la division Diamant", x => x.cr.top, 3], ["k7", "Sans une égratignure", "無傷", 3, "Carrière : gagne 10 matchs d'affilée", x => x.cr.best, 10],
   ["k8", "Rang S", "特級", 4, "Carrière : atteins la division Élite", x => x.cr.top, 4], ["k9", "Numéro un", "頂点", 4, "Carrière : deviens champion d'Élite", x => x.cr.champ, 1],
+  ["ka", "Contrebandier", "闇市", 3, "Carrière : achète 5 personnages au marché noir", x => x.cr.bm, 5],   /* 15 oct. 2026 */
   ["l1", "Apprenti", "見習", 1, "Atteins le niveau 3", x => x.lv, 3], ["l2", "Senpai", "先輩", 2, "Atteins le niveau 8", x => x.lv, 8], ["l3", "Sensei", "先生", 3, "Atteins le niveau 15", x => x.lv, 15]];
 // progression en Carrière, tous univers confondus (le meilleur de chaque mesure) ; tout à zéro si le mode n'a jamais été ouvert
-function vtCareer(){ const o = {played: 0, top: 0, cups: 0, stars: 0, best: 0, champ: 0};
+function vtCareer(){ const o = {played: 0, top: 0, cups: 0, stars: 0, best: 0, champ: 0, bm: 0};
   try { const r = typeof crLoad === "function" ? crLoad() : null; Object.values((r && r.saves) || {}).forEach(S => { if (!S) return; const st = S.stat || {};
-    o.played += st.played || 0; o.top = Math.max(o.top, st.top || 0, S.div || 0); o.cups += st.cups || 0; o.stars += st.stars || 0; o.best = Math.max(o.best, st.best || 0); if ((S.reach && S.reach.t) || st.titles) o.champ = 1; }); } catch {}
+    o.played += st.played || 0; o.top = Math.max(o.top, st.top || 0, S.div || 0); o.cups += st.cups || 0; o.stars += st.stars || 0; o.best = Math.max(o.best, st.best || 0); o.bm += st.bm || 0; if ((S.reach && S.reach.t) || st.titles) o.champ = 1; }); } catch {}
   return o; }
 // tout ce que mesurent les accomplissements
 function vtCtx(s){
@@ -13477,7 +13479,7 @@ function crCount(S, res){ const r = crLoad(); if (!r.cap || r.cap.d !== tcDay())
 
 /* ---------- affichage ---------- */
 const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}<span class="tr">${TIER[c.t]}</span><i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(c.n)}" data-crinf="${i}">i</i></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
-function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); }
+function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); const S = CR.S; if (S.tuto >= 5) gtBackOffer("carriere", (S.stat.played || 0) < 40, () => crTourStart(S, true)); }
 const CR_TUTO = [
   ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Bronze, Argent, Or, Diamant, Élite) et deviens champion d'Élite.", "Compris"],
   ["Ton effectif", "Voici tes combattants. Le chiffre est leur note : plus elle est haute, plus ils sont forts. Ils ne progressent pas : pour avancer, il faudra en recruter de meilleurs.", "Suivant", "squad"],
@@ -13489,19 +13491,21 @@ function crRender(){
   let body = "";
   if (CR.view === "compose") body = crComposeHTML(S);
   else if (CR.view === "result") body = crResultHTML(S);
-  else { const tabs = [["match", S.cup.pend ? "Coupe" : "Match"], ["squad", "Effectif", S.squad.length + "/" + CR_MAXSQ], ["shop", "Mercato"], ["table", "Classement"], ["mis", "Missions", S.mis.filter(m => !m.done).length || ""], ["club", "Palmarès"]];
+  else { const tabs = [["match", S.cup.pend ? "Coupe" : "Match"], ["squad", "Effectif", S.squad.length + "/" + CR_MAXSQ], ["shop", bmOpen(S) ? `Mercato<i class="bmw" aria-label="Marché noir ouvert">!</i>` : "Mercato"], ["table", "Classement"], ["mis", "Missions", S.mis.filter(m => !m.done).length || ""], ["club", "Palmarès"]];
     body = `<div class="crtabs" role="tablist">${tabs.map(([k, t, n]) => `<button role="tab" class="${CR.tab === k ? "sel" : ""} ${S.tuto < 5 && CR_TUTO[S.tuto][3] === k && CR.tab !== k ? "crpulse" : ""}" data-crtab="${k}">${t}${n ? `<small>${n}</small>` : ""}</button>`).join("")}</div>${({match: crMatchHTML, squad: crSquadHTML, shop: crShopHTML, table: crTableHTML, mis: crMisHTML, club: crClubHTML})[CR.tab](S)}`; }
-  const tu = S.tuto < 5 && (CR.view === "compose" ? S.tuto === 3 : CR.view === "hub" && S.tuto !== 3) ? CR_TUTO[S.tuto] : null;
+  const tu = false && S.tuto < 5 && (CR.view === "compose" ? S.tuto === 3 : CR.view === "hub" && S.tuto !== 3) ? CR_TUTO[S.tuto] : null;
   el.style.setProperty("--dc", dv[2]);
-  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>
+  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="helpq" id="crHelpQ" aria-label="Revoir le didacticiel" title="Revoir le didacticiel">?</button><button class="ghost" id="crQuit">✕ Accueil</button></div>
     <div class="crhead"><div class="crid">${crBadge(S.div)}<div><div class="eb">${crDivN(S)} · Saison ${S.season} · Match ${Math.min(S.day + 1, CR_DAYS)}/${CR_DAYS}</div><h2>${esc(S.club)}</h2></div></div>
       <div class="crstats"><span><i>Caisse</i>${crMoney(S, S.money)}</span><span><i>Prestige</i>${S.prestige}</span><span><i>Points</i>${S.pts}</span><span title="Matchs de carrière qui rapportent encore des éclats et des boosters aujourd'hui"><i>Cartes · jour</i>${CR_CAP - cap}/${CR_CAP}</span></div></div>
     ${tu ? `<div class="crcoach"><div><i>Didacticiel · ${S.tuto + 3}/7</i><b>${tu[0]}</b><p>${tu[1]}</p></div>${tu[2] ? `<button class="primary" id="crTuNext">${tu[2]}</button>` : ""}</div>` : S.news && CR.view === "hub" ? `<div class="crnews">${esc(S.news)}</div>` : ""}
     ${body}`;
   $("#crQuit").onclick = () => { crSave(); show("home"); };
   el.querySelectorAll("[data-crtab]").forEach(b => b.onclick = () => { CR.tab = b.dataset.crtab; CR.ask = null; crRender(); });
+  $("#bmBan") && ($("#bmBan").onclick = () => { if (!S.bm.seen){ S.bm.seen = true; crSave(); bmCine(S); } else bmShow(S); });
+  if (bmOpen(S)) bmTick();
   $("#crTuNext") && ($("#crTuNext").onclick = () => { const next = CR_TUTO[S.tuto + 1]; S.tuto++; if (S.tuto >= 5){ crSave(); return crRender(); } if (CR_TUTO[S.tuto][3]) CR.tab = CR_TUTO[S.tuto][3]; crSave(); crRender(); window.scrollTo(0, 0); });
-  crWire(S);
+  crWire(S); $("#crHelpQ") && ($("#crHelpQ").onclick = () => crTourStart(S, true)); if (S.tuto < 5) setTimeout(crTourMaybe, 80);
 }
 const crRuleBox = S => { const r = crRule(S); return r ? `<div class="crrule"><i>Règle spéciale · prime +50 %</i><b>${CR_RULES[r.k][0]}</b><p>${CR_RULES[r.k][1]}${r.k === "cap" ? ` Limite : <b>${r.x}</b>.` : ""}</p></div>` : ""; };
 function crMatchHTML(S){ const cup = S.cup.pend, opp = crOpp(S), u = S.u, n = crN(S), three = n === 3, mine = crByP(S, crAvail(S), true).slice(0, n), ev = S.ev, ot = three ? opp.team.slice(-3) : opp.team, rule = crRule(S);
@@ -13601,8 +13605,8 @@ function crShopHTML(S){ const u = S.u, L = S.lot;
     : `<div class="crlot">${crTile(S, L.i)}<div><p class="muted" style="margin:0 0 4px">Mise de départ</p><div class="big">${crMoney(S, L.start)}</div><p class="small" style="margin:6px 0 10px">Valeur estimée ${crMoney(S, crVal(u, L.i))}. Les ${S.clubs.length} clubs de ta division peuvent surenchérir.${crGate(u, L.i) > S.prestige ? ` <b style="color:#ff8f9a">Prestige ${crGate(u, L.i)} requis.</b>` : ""}</p>
         <div class="row"><button class="primary" id="crBid" ${crCanBuy(S, L.i, L.start) ? "disabled" : ""}>Entrer dans l'enchère</button><button id="crNow" ${crCanBuy(S, L.i, L.now) ? "disabled" : ""}>Achat immédiat · ${L.now}M</button></div>
         ${crCanBuy(S, L.i, L.start) ? `<p class="small" style="margin-top:8px">${crCanBuy(S, L.i, L.start)}.</p>` : ""}</div></div>`;
-  return `<div class="crbox"><div class="crrow"><div><h3>Boutique · prix fixe</h3><p>Des personnages du niveau de ta division, renouvelés après chaque match. Caisse : ${crMoney(S, S.money)}.</p></div></div>
-      <div class="crgrid crshop">${S.shop.length ? S.shop.map(i => { const p = crVal(u, i), no = crCanBuy(S, i, p); return crTile(S, i, {sub: p + "M", foot: `<button class="crbuy ${no ? "ghost" : "primary"}" data-crbuy="${i}" ${no ? "disabled" : ""} title="${no}">${no && no !== "Pas assez d'argent" ? no : "Acheter"}</button>`}); }).join("") : `<p class="muted">Plus rien en boutique avant le prochain match.</p>`}</div></div>
+  return bmBanner(S) + (bmOpen(S) ? "" : `<div class="crbox"><div class="crrow"><div><h3>Boutique · prix fixe</h3><p>Des personnages du niveau de ta division, renouvelés après chaque match. Caisse : ${crMoney(S, S.money)}.</p></div></div>
+      <div class="crgrid crshop">${S.shop.length ? S.shop.map(i => { const p = crVal(u, i), no = crCanBuy(S, i, p); return crTile(S, i, {sub: p + "M", foot: `<button class="crbuy ${no ? "ghost" : "primary"}" data-crbuy="${i}" ${no ? "disabled" : ""} title="${no}">${no && no !== "Pas assez d'argent" ? no : "Acheter"}</button>`}); }).join("") : `<p class="muted">Plus rien en boutique avant le prochain match.</p>`}</div></div>`) + `
     ${crScoutHTML(S)}<div class="crbox"><div class="crrow"><div><h3>Vedette du jour · aux enchères</h3><p>Les meilleurs personnages ne se vendent pas à prix fixe : tu enchéris en direct contre les clubs de ta division. L'offre disparaît après le prochain match.</p></div></div>${lot}</div>`; }
 function crScoutHTML(S){ return `<div class="crbox"><div class="crrow"><div><h3>Cellule de recrutement</h3><p>Paie une mission : ton recruteur revient avec un personnage tiré au sort, qui signe gratuitement. Une mission par match, et aucune garantie : c'est un pari.</p></div></div>
     <div class="crsc">${Object.keys(CR_SCOUT).map(k => { const [n, d] = CR_SCOUT[k], I = crScoutInfo(S, k), no = crScoutNo(S, k);
@@ -13620,7 +13624,7 @@ function crTableHTML(S){ const t = [...S.clubs.map(c => ({name: c.name, pts: c.p
     <div class="crbox"><div class="crrow"><div><h3>Coupe</h3><p>Trois tours à élimination directe, joués après tes matchs 2, 4 et 6. La finale t'oppose à un club de la division du dessus ; le vainqueur choisit un personnage parmi trois.</p></div></div>
       <div class="crmis">${CR_CUP.names.map((n, k) => `<div class="crmi ${c.r > k ? "ok" : ""}"><b>${n}</b><span>${c.r > k ? "Passé" : c.pend && c.r === k ? "À jouer maintenant" : c.alive && c.r === k ? `Après ton match ${CR_CUP.after[k]}` : c.alive ? "À venir" : c.won ? "" : "Éliminé"}</span></div>`).join("")}</div></div>`; }
 function crClubHTML(S){ const st = S.stat, row = (a, b) => `<div><span>${a}</span><b>${b}</b></div>`;
-  return `<div class="crbox"><h3>À quoi sert le prestige ?</h3><p>Le prestige mesure la réputation de ton club. Les meilleurs personnages de l'univers refusent de signer dans un club trop peu connu : il faut <b>60 de prestige</b> pour recruter le top 20 %, <b>150</b> pour le top 10 % et <b>300</b> pour le top 4 %. Tu en gagnes à chaque victoire (plus en haute division), en battant ton rival, en finissant une mission, en gagnant la coupe (+8) et en remportant un titre. Ton club en a <b>${S.prestige}</b>.</p></div><div class="crbox"><div class="crrow"><div><h3>Palmarès de ${esc(S.club)}</h3><p>Ce que ton club a accompli depuis le début de la carrière.</p></div></div>
+  return `<p style="margin:0 0 12px;text-align:right"><button class="linkq" data-helpon="cr">Revoir le didacticiel</button></p><div class="crbox"><h3>À quoi sert le prestige ?</h3><p>Le prestige mesure la réputation de ton club. Les meilleurs personnages de l'univers refusent de signer dans un club trop peu connu : il faut <b>60 de prestige</b> pour recruter le top 20 %, <b>150</b> pour le top 10 % et <b>300</b> pour le top 4 %. Tu en gagnes à chaque victoire (plus en haute division), en battant ton rival, en finissant une mission, en gagnant la coupe (+8) et en remportant un titre. Ton club en a <b>${S.prestige}</b>.</p></div><div class="crbox"><div class="crrow"><div><h3>Palmarès de ${esc(S.club)}</h3><p>Ce que ton club a accompli depuis le début de la carrière.</p></div></div>
     <div class="crgain">${row("Titres de champion d'Élite", st.titles)}${row("Coupes remportées", st.cups || 0)}${row("Montées de division", st.ups)}${row("Plus haute division atteinte", CR_DIV[Math.max(st.top, S.div)][0])}${row("Matchs joués · victoires", st.played + " · " + st.wins + (st.played ? " (" + Math.round(st.wins / st.played * 100) + " %)" : ""))}${row("Plus longue série de victoires", st.best || 0)}${row("Plus bel exploit", st.ex ? `${esc(st.exN)}, ${st.ex} de niveau cumulé en plus` : "Aucun pour l'instant")}${row("Achat le plus cher", st.buy ? crMoney(S, st.buy) : "Aucun")}${row("Vente la plus chère", st.sale ? crMoney(S, st.sale) : "Aucune")}${row("Prestige", S.prestige)}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Jalons</h3><p>Chaque première accession à une division offre un booster de cartes à collectionner ; le premier titre d'Élite offre un booster Divin.</p></div></div>
       <div class="crmis">${[1, 2, 3, 4].map(d => `<div class="crmi ${S.reach["d" + d] ? "ok" : ""}"><b class="crwb">${crBadge(d)}Monter en division ${CR_DIV[d][0]}</b><span>${S.reach["d" + d] ? "Booster reçu" : "Booster " + tcName(tcKey(TC_PACKS[S.u] ? S.u : "mix", d - 1))}</span></div>`).join("")}<div class="crmi ${S.reach.t ? "ok" : ""}"><b class="crwb">${crBadge(4)}Devenir champion d'Élite</b><span>${S.reach.t ? "Booster reçu" : "Booster " + tcName(tcKey(TC_PACKS[S.u] ? S.u : "mix", 3))}</span></div></div></div>
@@ -13644,8 +13648,8 @@ function crWire(S){
   el.querySelectorAll("[data-crpk]").forEach(b => b.onclick = () => { const i = +b.dataset.crpk; if (S.squad.length >= CR_MAXSQ || !(S.pick || []).includes(i)) return; S.squad.push(i); S.pick = null; S.news = `${crCard(u, i).n} rejoint ${S.club} : c'est la récompense de la coupe.`; try { SFX.play("fanfare"); } catch {} save(); });
   $("#crClear") && ($("#crClear").onclick = () => { CR.pick = []; CR.boost = null; CR.useBoost = false; crRender(); });
   $("#crBoost") && ($("#crBoost").onclick = () => { if (CR.boost != null){ CR.boost = null; CR.useBoost = false; } else CR.useBoost = !CR.useBoost; crRender(); });
-  $("#crGo") && ($("#crGo").onclick = () => { if (crRuleOk(S, CR.pick) || CR.busy) return; CR.busy = true; const res = crPlay(S, [...CR.pick], CR.boost); if (S.tuto === 3) S.tuto = 4; res.cap = crCount(S, res); crSave(); CR.res = res;
-    const keep = G; G = res.g; const end = () => { G = keep && keep !== res.g ? keep : null; CR.busy = false; CR.view = "result"; show("cr"); crRender(); try { SFX.play(res.won ? "fanfare" : "pop"); } catch {} if (res.season && res.season.promo) setTimeout(() => crPromo(S, res.season), 900); };
+  $("#crGo") && ($("#crGo").onclick = () => { if (crRuleOk(S, CR.pick) || CR.busy) return; CR.busy = true; const res = crPlay(S, [...CR.pick], CR.boost); if (S.tuto === 3) S.tuto = 4; res.cap = crCount(S, res); res.bm = bmRoll(S); crSave(); CR.res = res;
+    const keep = G; G = res.g; const end = () => { G = keep && keep !== res.g ? keep : null; CR.busy = false; CR.view = "result"; show("cr"); crRender(); try { SFX.play(res.won ? "fanfare" : "pop"); } catch {} if (res.season && res.season.promo) setTimeout(() => crPromo(S, res.season), 900); if (res.bm) bmNote(S); };
     try { playFight(end); } catch { end(); } });
   $("#crNext") && ($("#crNext").onclick = () => { CR.view = "hub"; CR.res = null; CR.tab = S.tuto === 4 ? "shop" : "match"; crRender(); window.scrollTo(0, 0); });
   el.querySelectorAll("[data-crsell]").forEach(b => b.onclick = () => { const i = +b.dataset.crsell; if (!b.dataset.ok){ CR.ask = "s" + i; return crRender(); } CR.ask = null; crSell(S, i); save(); });
@@ -13747,6 +13751,393 @@ function crTopRefresh(){ const b = document.querySelector(".crtop"); if (!b) ret
   const hook = () => { const b = document.querySelector('[data-g="cr"]'); if (b && !b.__cr){ b.__cr = 1; b.addEventListener("click", e => { e.stopImmediatePropagation(); e.preventDefault(); crOpen(); }, true); } };
   hook(); setTimeout(hook, 0);
 })();
+</script>
+
+<style>
+/* ---- Carrière : marché noir (validé le 15 oct. 2026 : ambiance « Ruelle », cinématique 3D, triangle « ! » sur l'onglet Mercato) ---- */
+.crtabs button .bmw{display:inline-grid;place-items:end center;width:15px;height:13px;margin-left:5px;vertical-align:1px;font:900 9px/1 Inter,var(--body);color:#1a0500;background:#ff6b2c;clip-path:polygon(50% 0,100% 100%,0 100%);padding-bottom:1px;filter:drop-shadow(0 0 6px #ff6b2c);animation:bmBlink 1s steps(1) infinite}
+@keyframes bmBlink{50%{opacity:.25}}
+.bmban{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;width:100%;padding:12px;margin:0 0 12px;border-radius:14px;background:linear-gradient(120deg,#1d0c07,#0b0605);box-shadow:inset 0 0 0 1.5px #ffb347,0 0 30px rgba(255,150,40,.18);font-family:Inter,var(--body)}
+.bmban .bl{aspect-ratio:3/4;border-radius:8px;overflow:hidden}.bmban .bl img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.bmban em{display:block;font:800 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#ffb347;font-style:normal}.bmban b{display:block;font-size:15px;margin:3px 0}.bmban span{font-size:12.5px;color:var(--muted)}
+.bmban .go{padding:9px 16px;border-radius:99px;font-weight:700;font-size:14px;color:#1a0800;background:linear-gradient(180deg,#ffe7bf,#ffb347)}
+.vtnote.bm{--nc:#ffb347}.vtnote.bm .bmn{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center}.vtnote.bm .bmn .pic{aspect-ratio:3/4;border-radius:8px;overflow:hidden}.vtnote.bm .bmn img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.vtnote.bm .bmn b{display:block;font-size:15px}.vtnote.bm .bmn span{font-size:12.5px;color:var(--muted)}
+/* écran Ruelle */
+.bmov{position:fixed;inset:0;z-index:9985;display:grid;place-items:center;background:rgba(0,0,0,.8);overscroll-behavior:contain}
+.bmsc{position:relative;width:min(100vw,460px,calc(100dvh * .52));height:min(100dvh,900px);container-type:inline-size;overflow:hidden;background:linear-gradient(180deg,#000 0%,#0a0503 35%,#120806 70%,#030202 100%);color:#f4f1ea;font-family:Inter,var(--body)}
+@media (min-width:600px){.bmsc{border-radius:26px;box-shadow:0 0 0 1px rgba(255,179,71,.2),0 30px 80px rgba(0,0,0,.7);height:min(94dvh,900px)}}
+@media (max-width:599px){.bmsc{width:100vw;height:100dvh}}
+.bmsc .bg{position:absolute;inset:0;pointer-events:none}
+.bmsc .brk{position:absolute;inset:0 0 30% 0;background:linear-gradient(90deg,transparent 49.4%,rgba(0,0,0,.85) 49.4% 50.6%,transparent 50.6%) 0 0/16cqw 8cqw,linear-gradient(90deg,transparent 49.4%,rgba(0,0,0,.85) 49.4% 50.6%,transparent 50.6%) 8cqw 4cqw/16cqw 8cqw,repeating-linear-gradient(180deg,#3b1a0f 0 3.6cqw,#000 3.6cqw 4cqw);-webkit-mask:radial-gradient(90% 75% at 80% 8%,#000 0,rgba(0,0,0,.7) 50%,rgba(0,0,0,.25) 85%);mask:radial-gradient(90% 75% at 80% 8%,#000 0,rgba(0,0,0,.7) 50%,rgba(0,0,0,.25) 85%)}
+.bmsc .lamp{position:absolute;right:7cqw;top:-1cqw;width:10cqw;height:15cqw;border-radius:40% 40% 46% 46%;background:radial-gradient(circle at 50% 55%,#ffe0b0,#ff3b25 45%,#3d0603);box-shadow:0 0 10cqw 3cqw rgba(255,60,30,.55),0 0 40cqw 8cqw rgba(255,60,30,.18);animation:bmLamp 4s ease-in-out infinite}
+@keyframes bmLamp{48%{filter:brightness(1)}50%{filter:brightness(.6)}52%{filter:brightness(1.1)}}
+.bmsc .neon{position:absolute;left:4cqw;top:44%;font:800 9cqw/1 "Shippori Mincho B1",serif;font-style:normal;writing-mode:vertical-rl;color:#ff4d6d;text-shadow:0 0 1cqw #fff,0 0 3cqw #ff4d6d,0 0 9cqw #ff1744;opacity:.16;animation:bmNeon 5s steps(1) infinite}
+@keyframes bmNeon{0%,100%{opacity:.16}62%{opacity:.04}64%{opacity:.2}66%{opacity:.06}68%{opacity:.16}}
+.bmsc .rain{position:absolute;inset:0;background-image:linear-gradient(105deg,transparent 46%,rgba(200,210,255,.16) 50%,transparent 54%);background-size:7cqw 22cqw;animation:bmRain .5s linear infinite;opacity:.5}
+@keyframes bmRain{to{background-position:-3cqw 22cqw}}
+.bmsc .wet{position:absolute;left:0;right:0;bottom:0;height:30%;background:linear-gradient(180deg,transparent,rgba(255,80,40,.08) 30%,rgba(255,179,71,.06) 60%,transparent)}
+.bmsc .in{position:absolute;inset:0;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:3.2cqw;padding:calc(6cqw + env(safe-area-inset-top,0px)) 5.5cqw calc(6cqw + env(safe-area-inset-bottom,0px))}
+.bmsc .x{all:unset;cursor:pointer;position:absolute;right:4cqw;top:calc(4cqw + env(safe-area-inset-top,0px));z-index:3;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;font-size:16px;color:#fff;background:rgba(0,0,0,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.bmsc .hd{display:flex;align-items:flex-start;gap:3cqw;padding-right:44px}
+.bmsc .eb{font:800 3cqw var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#ff6b4a;font-style:normal;text-shadow:0 0 3cqw rgba(255,60,30,.7)}
+.bmsc h3{margin:1.4cqw 0 0;font:900 6.4cqw/1.08 var(--title);color:#fff;text-shadow:0 2px 0 #000,0 0 6cqw rgba(255,90,40,.35)}
+.bmsc .tm{position:relative;width:18cqw;max-width:86px;flex:none;aspect-ratio:1;display:grid;place-items:center;align-content:center;margin-left:auto}
+.bmsc .tm svg{position:absolute;inset:0;transform:rotate(-90deg)}.bmsc .tm circle{fill:none;stroke-width:2.6}.bmsc .tm .tr{stroke:rgba(255,255,255,.1)}.bmsc .tm .tv{stroke:#ffb347;stroke-linecap:round;filter:drop-shadow(0 0 3px #ffb347)}
+.bmsc .tm b{font:800 min(4cqw,19px) var(--mono);color:#fff;line-height:1}.bmsc .tm small{font-size:min(2.2cqw,11px);color:var(--muted)}
+.bmsc .rep{align-self:flex-start;font:700 min(2.8cqw,13px) var(--mono);letter-spacing:.08em;padding:1.2cqw 2.6cqw;border-radius:99px;color:#ffe7bf;background:rgba(0,0,0,.55);box-shadow:inset 0 0 0 1px rgba(255,179,71,.45)}
+.bmc{border-radius:3.6cqw;overflow:hidden;background:#0a0605;box-shadow:0 0 0 1px rgba(255,179,71,.25),0 3cqw 6cqw rgba(0,0,0,.8);min-width:0}
+.bmc .pic{position:relative;aspect-ratio:3/4;overflow:hidden}.bmc .pic img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.bmc .lv{position:absolute;left:2cqw;top:2cqw;font:800 min(3.6cqw,17px) var(--mono);padding:.6cqw 1.6cqw;border-radius:2cqw;background:rgba(0,0,0,.7);color:#fff}
+.bmc .hx{position:absolute;left:0;right:0;bottom:0;padding:1.3cqw;font:800 min(2.5cqw,12px) var(--mono);letter-spacing:.14em;text-transform:uppercase;text-align:center;color:#1a0800;background:linear-gradient(90deg,#ffb347,#ffe7bf,#ffb347)}
+.bmc .t{padding:2cqw 2.4cqw}.bmc .t b{display:block;font-size:min(3.2cqw,15px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bmc .t span{font-size:min(2.7cqw,12.5px);color:var(--muted)}
+.bmc.sold{filter:grayscale(1) brightness(.5)}
+.bmsc .ved{display:grid;grid-template-columns:44cqw 1fr;gap:4cqw;align-items:center}
+.bmsc .bmc.big{box-shadow:0 0 0 2px #ffb347,0 0 14cqw rgba(255,150,40,.55),0 4cqw 8cqw #000;transform:rotate(-2deg)}
+.bmsc .vi small{font:800 min(2.6cqw,12px) var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.bmsc .pr{display:block;font:900 min(10cqw,46px)/1 var(--title);color:#fff;text-shadow:0 0 1cqw #ffb347,0 0 6cqw rgba(255,150,40,.8);margin:1cqw 0}
+.bmsc .was{font-size:min(2.8cqw,13px);color:var(--muted)}
+.bmsc .vi ul{list-style:none;margin:2.4cqw 0 0;padding:0;display:grid;gap:1.2cqw;font-size:min(2.9cqw,13.5px);line-height:1.3;color:#f2e6d6}.bmsc .vi li::before{content:"◆ ";color:#ffb347;font-size:.75em}
+.bmsc .buy{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;text-align:center;padding:3.6cqw 0;border-radius:99px;font:700 min(4cqw,18px) Inter,var(--body);color:#1a0800;background:linear-gradient(180deg,#ffe7bf,#ffb347 55%,#e0791f);box-shadow:0 0 0 1px #000,0 0 10cqw rgba(255,150,40,.5)}
+.bmsc .buy:disabled{cursor:default;filter:grayscale(.6) brightness(.6)}
+.bmsc .ms{margin:0;font-size:min(2.9cqw,13.5px);line-height:1.4;color:#d9d4cb;text-align:center}.bmsc .ms b{color:#ff8f9a}
+.bmsc .sub{display:block;font:800 min(2.6cqw,12px) var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:1.6cqw}
+.bmsc .oth{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:2cqw}.bmsc .oth .bmc .pic{aspect-ratio:1}
+.bmsc .sm{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;margin-top:1.4cqw;text-align:center;padding:2cqw 0;border-radius:99px;font:700 min(3.2cqw,14px) Inter,var(--body);color:#ffe7bf;background:rgba(0,0,0,.6);box-shadow:inset 0 0 0 1px rgba(255,179,71,.45)}
+.bmsc .sm:disabled{opacity:.4;cursor:default}
+.bmsc .troc .trl[hidden]{display:none}.bmsc .troc .trl{display:grid;gap:1.4cqw;margin-top:1.4cqw;max-height:46cqw;overflow:auto}.bmsc .troc .trl .sm{margin:0;text-align:left;padding:2.2cqw 3.4cqw}.bmsc .ms .sm.in{display:inline-block;width:auto;margin:0 0 0 1.4cqw;padding:1cqw 3cqw}
+.bmsc .box{display:grid;grid-template-columns:26cqw 1fr;gap:3.4cqw;align-items:center;padding:3cqw;border-radius:3.6cqw;background:rgba(0,0,0,.5);box-shadow:inset 0 0 0 1px rgba(255,179,71,.3)}
+.bmsc .bx{position:relative;aspect-ratio:3/4;perspective:700px}.bmsc .bx .f{position:absolute;inset:0;border-radius:3cqw;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .9s cubic-bezier(.3,.1,.2,1)}
+.bmsc .bx .b{display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,#3a1708,#0b0402 70%);box-shadow:inset 0 0 0 .5cqw #2a1206,inset 0 0 0 .9cqw #c9822e;font:800 11cqw "Shippori Mincho B1",serif;color:#c9822e}
+.bmsc .bx .fr{transform:rotateY(180deg)}.bmsc .bx .fr img{width:100%;height:100%;object-fit:cover;object-position:top}
+.bmsc .bx.open .b{transform:rotateY(-180deg)}.bmsc .bx.open .fr{transform:rotateY(0)}
+.bmsc .box p{margin:0 0 1.6cqw;font-size:min(3cqw,14px);line-height:1.4;color:#d9d4cb}.bmsc .box b{color:#fff}
+.bmsc .cash{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;padding-top:2.4cqw;border-top:1px solid rgba(255,179,71,.25);font-weight:600;font-size:min(3.2cqw,15px);color:var(--muted)}.bmsc .cash b{font:900 min(5.6cqw,26px) var(--title);color:#fff}
+/* cinématique 3D */
+.bmcine{position:fixed;inset:0;z-index:9990;display:grid;place-items:center;background:#000;touch-action:none;-webkit-user-select:none;user-select:none}
+.bmcv{position:relative;width:min(100vw,460px,calc(100dvh * .52));height:min(100dvh,900px);container-type:inline-size;overflow:hidden;background:#000}
+@media (max-width:599px){.bmcv{width:100vw;height:100dvh}}
+.bmcv canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+.bmcv .vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 80% at 50% 45%,transparent 55%,rgba(0,0,0,.75));z-index:2}
+.bmcv .dim{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(70% 55% at 50% 50%,rgba(0,0,0,.35),rgba(0,0,0,.8));opacity:0}
+.bmcv .flash{position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 46%,#fff2cf,rgba(255,179,71,.6) 40%,transparent 75%);opacity:0;pointer-events:none;z-index:3}
+.bmcv .ui{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.6cqw;padding:8cqw;text-align:center;pointer-events:none}
+.bmcv .ui>*{opacity:0}
+.bmcv .eb{font:800 3cqw var(--mono);letter-spacing:.36em;text-transform:uppercase;color:#ffd9a0;text-shadow:0 0 3cqw rgba(255,140,40,.8),0 1px 2px #000}
+.bmcv .stage{perspective:1000px;margin:1cqw 0}
+.bmcv .card{position:relative;width:50cqw;aspect-ratio:3/4;transform-style:preserve-3d}
+.bmcv .face{position:absolute;inset:0;border-radius:4.2cqw;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.bmcv .back{background:radial-gradient(circle at 50% 38%,#3a1708,#0b0402 70%);box-shadow:inset 0 0 0 .6cqw #2a1206,inset 0 0 0 1cqw #c9822e,0 0 14cqw rgba(255,140,40,.45);display:grid;place-items:center}
+.bmcv .back b{font:800 16cqw "Shippori Mincho B1",serif;color:#c9822e;text-shadow:0 0 4cqw rgba(255,150,40,.6)}
+.bmcv .front{transform:rotateY(180deg);background:#0a0605}.bmcv .front img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+@property --bma{syntax:"<angle>";inherits:false;initial-value:0deg}
+.bmcv .front::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1cqw;background:conic-gradient(from var(--bma,0deg),#ffe7bf,#ffb347,#8a4b12,#ffd27a,#fff6e0,#c9822e,#ffe7bf);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;z-index:2;animation:bmSpin 4s linear infinite}
+@keyframes bmSpin{to{--bma:360deg}}
+.bmcv .front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,240,210,.55) 46%,rgba(255,200,120,.25) 52%,transparent 62%);background-size:260% 100%;background-position:150% 0;mix-blend-mode:screen;z-index:1}
+.bmcv .card.shine .front::after{animation:bmShn 1.4s .2s ease-out both}@keyframes bmShn{to{background-position:-60% 0}}
+.bmcv .front .lv{position:absolute;left:2.4cqw;top:2.4cqw;z-index:3;font:800 4.2cqw var(--mono);padding:.6cqw 1.8cqw;border-radius:2cqw;background:rgba(0,0,0,.75);color:#fff}
+.bmcv .front .tag{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:1.6cqw;font:800 2.6cqw var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#1a0800;background:linear-gradient(90deg,#ffb347,#ffe7bf,#ffb347)}
+.bmcv .shadow{width:44cqw;height:5cqw;margin:-1cqw auto 0;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.8),transparent)}
+.bmcv .who{font:900 7cqw/1.05 var(--title);color:#fff;text-shadow:0 2px 0 #000,0 0 6cqw rgba(255,140,40,.45)}
+.bmcv .meta{font-weight:600;font-size:3.3cqw;color:#eadfce;font-family:Inter,var(--body)}.bmcv .meta b{font-family:var(--mono);color:#ffb347}
+.bmcv .ent{all:unset;pointer-events:auto;cursor:pointer;margin-top:2cqw;padding:3.4cqw 12cqw;border-radius:99px;font:700 4.2cqw Inter,var(--body);color:#1a0800;background:linear-gradient(180deg,#fff0d4,#ffb347 55%,#e0791f);box-shadow:0 0 0 1px #000,0 0 10cqw rgba(255,150,40,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+.bmcv .skip{position:absolute;right:4cqw;bottom:calc(4cqw + env(safe-area-inset-bottom,0px));z-index:5;font-size:2.8cqw;color:rgba(255,255,255,.45)}
+/* écran du marché en 3D : la ruelle de l'univers tourne derrière, panneaux de verre par-dessus (15 oct. 2026) */
+.bmsc canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;z-index:0}
+.bmsc.d3 .bg{display:none}
+.bmsc .shade{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.25) 0,rgba(0,0,0,0) 18%,rgba(4,2,2,.35) 34%,rgba(4,2,2,.78) 56%,rgba(3,1,1,.9))}
+.bmsc .in{z-index:2}.bmsc .x{z-index:3}
+.bmsc .sky{flex:none;height:44cqw}.bmsc .hd{align-items:center}.bmsc .ttl{margin:0;font-size:6.6cqw;text-align:center}
+.bmsc .eb{color:var(--un,#ff6b4a);text-shadow:0 0 1cqw rgba(255,255,255,.6),0 0 4cqw var(--un,#ff6b4a)}
+.bmsc h3{font-size:7cqw;text-shadow:0 2px 0 #000,0 0 4cqw rgba(0,0,0,.9),0 0 8cqw rgba(255,90,40,.35)}
+.bmsc .pn{display:flex;flex-direction:column;gap:2.6cqw;padding:3.6cqw;border-radius:4.4cqw;background:linear-gradient(180deg,rgba(22,11,7,.66),rgba(8,4,3,.78));-webkit-backdrop-filter:blur(8px) saturate(1.2);backdrop-filter:blur(8px) saturate(1.2);box-shadow:inset 0 1px 0 rgba(255,231,191,.12),inset 0 0 0 1px rgba(255,179,71,.22),0 3cqw 8cqw rgba(0,0,0,.55)}
+.bmsc .pn.top{background:linear-gradient(180deg,rgba(30,14,8,.62),rgba(10,5,3,.8));box-shadow:inset 0 1px 0 rgba(255,231,191,.18),inset 0 0 0 1px rgba(255,179,71,.4),0 0 10cqw rgba(255,140,40,.18),0 3cqw 8cqw rgba(0,0,0,.6)}
+.bmsc .pn .sub{margin:0}
+.bmsc .rep{background:rgba(0,0,0,.35)}
+.bmsc .pr{font-size:min(11cqw,50px)}
+.bmsc .buy{font-size:min(4.2cqw,19px);letter-spacing:.01em}
+.bmsc .tm{background:radial-gradient(circle,rgba(0,0,0,.55) 58%,transparent 60%);border-radius:50%}
+.bmsc .cash{border-top:0;padding:3cqw 3.6cqw;border-radius:4.4cqw;background:rgba(0,0,0,.55);box-shadow:inset 0 0 0 1px rgba(255,179,71,.22)}
+html:has(.bmov),html:has(.bmov) body,html:has(.bmcine),html:has(.bmcine) body{overflow:hidden;overscroll-behavior:none}
+@media (prefers-reduced-motion:reduce){.bmsc *,.bmcv *{animation:none!important}}
+</style>
+<script>
+/* ---------- Carrière : marché noir (15 oct. 2026) ----------
+   Après un combat de carrière : 4 % de chances, +0,5 point par combat sans marché (plafond 10 %), au plus un par jour.
+   Ouvert 1 heure réelle (le compte continue jeu fermé), contenu fixe : une vedette nettement au-dessus de l'équipe (+15 % sur sa valeur),
+   trois personnages meilleurs que tous les titulaires (quatre au rang « Client »), une caisse mystère. Prestige non exigé.
+   Réputation : Inconnu → Client (2 achats) → Habitué (5 achats : vedette un peu plus forte, 65 min). */
+const BM = {on: false /* activé quand le design de l'écran sera validé */, troc: .7, base: .04, step: .005, max: .10, dur: 36e5, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
+const BM_UNI = {   /* décor de la ruelle selon l'univers : enseignes, lanternes, couleur des néons */
+  op: {s: ["酒場", "海賊", "港", "宿", "質屋", "賭場", "地図", "酒"], l: "海", n: ["#34e1ff", "#ff3d5a", "#ff9a2e", "#7df0c8"]},
+  na: {s: ["一楽", "木ノ葉", "忍", "団子", "宿", "酒", "居酒屋", "質屋"], l: "火", n: ["#ff9a2e", "#ff3d5a", "#34e1ff", "#ffd23d"]},
+  db: {s: ["カプセル", "亀", "天下一", "酒", "宿", "質屋", "飯店", "龍"], l: "龍", n: ["#ff9a2e", "#34e1ff", "#ff3d5a", "#ffd23d"]},
+  jjk: {s: ["呪", "渋谷", "東京", "酒", "宿", "質屋", "麻雀", "居酒屋"], l: "呪", n: ["#c56bff", "#34e1ff", "#ff3d5a", "#7d6bff"]},
+  ds: {s: ["遊郭", "大正", "鬼", "藤", "宿", "酒", "甘味", "質屋"], l: "藤", n: ["#ff5fa2", "#c56bff", "#ff9a2e", "#ff3d5a"]},
+  mha: {s: ["雄英", "英雄", "酒", "宿", "質屋", "麻雀", "銭湯", "占"], l: "英", n: ["#7df07d", "#34e1ff", "#ff3d5a", "#ff9a2e"]}};
+const bmRep = S => { const n = (S.stat && S.stat.bm) || 0; let k = 0; BM.rep.forEach((r, i) => { if (n >= r[0]) k = i; }); return k; };
+const bmOpen = S => !!(S && S.bm && S.bm.end > Date.now());
+const bmLeft = S => Math.max(0, (S.bm ? S.bm.end : 0) - Date.now());
+const bmClock = ms => { const s = Math.ceil(ms / 1000), m = Math.floor(s / 60); return m + ":" + String(s % 60).padStart(2, "0"); };
+const bmSrc = c => (img(c).match(/src="([^"]+)"/) || [])[1] || "";
+/* moyenne et maximum des cinq meilleurs titulaires */
+function bmTeam(S){ const D = DATA[S.u], top = [...S.squad].sort((a, b) => D[b].p - D[a].p).slice(0, 5).map(i => D[i].p); return {avg: top.reduce((a, b) => a + b, 0) / Math.max(1, top.length), max: Math.max(0, ...top)}; }
+function bmNear(S, target, n, not){ const D = DATA[S.u]; const l = D.map((_, i) => i).filter(i => !S.squad.includes(i) && !not.includes(i));
+  return crShuffle(l).sort((a, b) => Math.abs(D[a].p - target) - Math.abs(D[b].p - target)).slice(0, n); }
+function bmMake(S){ const {avg, max} = bmTeam(S), rk = bmRep(S), D = DATA[S.u];
+  const vt = Math.min(100, avg + (100 - avg) * .45 + (rk >= 2 ? 2 : 0)), ved = bmNear(S, vt, 3, [])[Math.floor(Math.random() * 3)];
+  if (ved == null) return null;
+  const ot = Math.max(max + 2, avg + 10), oth = bmNear(S, Math.min(99, ot), rk >= 1 ? 4 : 3, [ved]).filter(i => D[i].p > max);
+  const boxP = Math.max(1, Math.round(crVal(S.u, bmNear(S, ot, 1, [ved])[0] ?? ved) * .8));
+  return {at: Date.now(), end: Date.now() + BM.dur + (rk >= 2 ? 5 * 6e4 : 0), ved, vp: Math.round(crVal(S.u, ved) * 1.15), oth, box: {p: boxP, got: null}, sold: [], seen: false, avg: Math.round(avg)}; }
+/* tirage après chaque combat de carrière (pas pendant le tutoriel) */
+function bmRoll(S){ if (!BM.on || S.bot || S.tuto < 5 || bmOpen(S)) return false; const day = tcDay();
+  if (S.bmDay === day){ return false; }
+  const p = S.bmc == null ? BM.base : S.bmc;
+  if (Math.random() < p){ const m = bmMake(S); if (!m) return false; S.bm = m; S.bmc = BM.base; S.bmDay = day; return true; }
+  S.bmc = Math.min(BM.max, p + BM.step); return false; }
+/* bandeau après le match, au même endroit que la notification de carte de visite */
+function bmNote(S){ let tries = 0; const go = () => { if (document.querySelector("#arena,.crpov,.vtnote,.bmov,.bmcine") && ++tries < 40) return setTimeout(go, 700);
+    const D = DATA[S.u], c = D[S.bm.ved];
+    document.body.insertAdjacentHTML("beforeend", `<div class="vtnote bm" role="status" aria-live="polite"><div class="vn-in"><div class="vn-h"><span class="vn-e">Marché noir ouvert · 1 h</span><button class="vn-x" aria-label="Fermer">✕</button></div>
+      <div class="bmn"><div class="pic"><img src="${bmSrc(c)}" alt=""></div><div><b>${esc(c.n)} est en vente</b><span>Bien au-dessus de ton équipe. Fermeture dans ${bmClock(bmLeft(S))}.</span></div></div>
+      <div class="vn-f"><button class="vn-go">Voir</button></div><i class="vn-bar"></i></div></div>`);
+    const el = document.querySelector(".vtnote.bm"), bye = () => { if (!el.isConnected) return; el.classList.add("out"); setTimeout(() => el.remove(), 380); };
+    el.querySelector(".vn-x").onclick = e => { e.stopPropagation(); bye(); }; el.querySelector(".vn-go").onclick = e => { e.stopPropagation(); el.remove(); bmCine(S); };
+    try { vtNoteDock(el); } catch {} setTimeout(bye, 3000); try { SFX.play("pop"); } catch {} };
+  setTimeout(go, 1200); }
+/* bannière dans l'onglet Mercato */
+function bmBanner(S){ if (!bmOpen(S)) return ""; const c = DATA[S.u][S.bm.ved];
+  return `<button class="bmban" id="bmBan"><div class="bl"><img src="${bmSrc(c)}" alt=""></div><div><em>Marché noir · <span data-bmt>${bmClock(bmLeft(S))}</span></em><b>${esc(c.n)} · ${S.bm.vp}M</b><span>${S.bm.sold.includes(S.bm.ved) ? "Vedette achetée · le reste est encore en vente" : "Ouvert encore " + Math.ceil(bmLeft(S) / 6e4) + " min"}</span></div><span class="go">Entrer</span></button>`; }
+/* --- son : pluie, néon, portes, gong (synthétisés, aucun fichier) --- */
+const BMS = {
+  ok(){ return typeof SFX !== "undefined" && SFX.on && SFX.ac(); },
+  rain(){ const a = this.ok(); if (!a) return () => {}; const n = a.sampleRate * 2, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const s = a.createBufferSource(); s.buffer = b; s.loop = true; const f = a.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 2400; f.Q.value = .6; const g = a.createGain(); g.gain.value = 0; g.gain.linearRampToValueAtTime(.11, a.currentTime + 1);
+    const h = a.createOscillator(); h.type = "sawtooth"; h.frequency.value = 118; const hg = a.createGain(); hg.gain.value = .012; const hf = a.createBiquadFilter(); hf.type = "lowpass"; hf.frequency.value = 400;
+    s.connect(f).connect(g).connect(a.destination); h.connect(hf).connect(hg).connect(a.destination); s.start(); h.start();
+    return () => { const t = a.currentTime; g.gain.linearRampToValueAtTime(0, t + .8); hg.gain.linearRampToValueAtTime(0, t + .8); setTimeout(() => { try { s.stop(); h.stop(); } catch {} }, 1000); }; },
+  door(){ const a = this.ok(); if (!a) return; const t = a.currentTime, o = a.createOscillator(), g = a.createGain(), f = a.createBiquadFilter(); o.type = "sawtooth"; o.frequency.setValueAtTime(70, t); o.frequency.linearRampToValueAtTime(140, t + .5); o.frequency.linearRampToValueAtTime(55, t + 1.1);
+    f.type = "bandpass"; f.frequency.value = 600; f.Q.value = 8; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.06, t + .1); g.gain.linearRampToValueAtTime(0, t + 1.2); o.connect(f).connect(g).connect(a.destination); o.start(t); o.stop(t + 1.3); },
+  gong(){ const a = this.ok(); if (!a) return; const t = a.currentTime; [[110, .22], [221, .12], [332, .08], [497, .05]].forEach(([fq, v]) => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = fq; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + 3.2); o.connect(g).connect(a.destination); o.start(t); o.stop(t + 3.3); }); }};
+/* --- cinématique 3D : ruelle japonaise sous la pluie, décor selon l'univers --- */
+function bmCine(S){ const D = DATA[S.u], c = D[S.bm.ved], U = BM_UNI[S.u] || BM_UNI.op; document.querySelector(".bmcine")?.remove(); S.bm.seen = true; try { crSave(); } catch {}
+  document.body.insertAdjacentHTML("beforeend", `<div class="bmcine" role="dialog" aria-modal="true" aria-label="Marché noir"><div class="bmcv"><div class="vig"></div><div class="dim"></div><div class="flash"></div>
+    <div class="ui"><div class="eb">Marché noir · ouvert 1 h</div><div class="stage"><div class="card"><div class="face back"><b>闇</b></div><div class="face front"><img src="${bmSrc(c)}" alt=""><span class="lv">${c.p}</span><span class="tag">Vedette · +15 %</span></div></div><div class="shadow"></div></div>
+    <div class="who">${esc(c.n)}</div><div class="meta">${S.bm.vp}M · fermeture dans <b data-bmt>${bmClock(bmLeft(S))}</b></div><button class="ent">Entrer</button></div><span class="skip">Toucher pour passer</span></div></div>`);
+  const wrap = document.querySelector(".bmcine"), ph = wrap.querySelector(".bmcv"), ui = wrap.querySelector(".ui"), card = wrap.querySelector(".card"), flash = wrap.querySelector(".flash"), dim = wrap.querySelector(".dim");
+  let stopRain = () => {}, R = null, done = false, alive = true;
+  const close = () => { if (!alive) return; alive = false; stopRain(); try { scn && scn.stop(); } catch {} wrap.remove(); bmShow(S); };
+  wrap.querySelector(".ent").onclick = e => { e.stopPropagation(); close(); };
+  const G = () => window.gsap;
+  const reveal = () => { if (done) return; done = true; const g = G(); BMS.gong(); try { navigator.vibrate?.([40, 30, 90]); } catch {}
+    const items = [...ui.children]; if (!g){ items.forEach(x => x.style.opacity = 1); card.style.transform = "rotateY(180deg)"; card.classList.add("shine"); dim.style.opacity = 1; return; }
+    g.to(flash, {opacity: .7, duration: .25, yoyo: true, repeat: 1}); g.to(dim, {opacity: 1, duration: .8, delay: .3});
+    g.set(items, {opacity: 0, y: 18}); g.to(items[0], {opacity: 1, y: 0, duration: .5, delay: .2}); g.set(items[1], {opacity: 1, y: 0});
+    g.fromTo(card, {z: -600, rotationY: -20, rotationX: 25, opacity: 0}, {z: 0, rotationY: 0, rotationX: 0, opacity: 1, duration: .9, delay: .4, ease: "expo.out"});
+    g.to(card, {rotationY: 180, duration: 1.1, delay: 1.3, ease: "power3.inOut", onComplete: () => { card.classList.add("shine"); ph.onpointermove = e => { const r = card.getBoundingClientRect(); g.to(card, {rotationY: 180 + ((e.clientX - r.left) / r.width - .5) * 30, rotationX: -((e.clientY - r.top) / r.height - .5) * 22, duration: .3, overwrite: "auto"}); }; }});
+    g.to(items.slice(2), {opacity: 1, y: 0, duration: .5, stagger: .14, delay: 2.2}); wrap.querySelector(".skip").style.opacity = 0; };
+  ph.addEventListener("click", () => { if (!done){ tl && tl.progress(1); reveal(); } });
+  let tl = null;
+  const calm = (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
+  let scn = null;
+  const build = () => { if (!alive) return; if (!window.THREE || !G() || calm){ reveal(); return; }
+    scn = bmScene(ph, U, {z: 7, y: 1.55, door: 0}); if (!scn){ reveal(); return; } R = scn.R; const st = scn.st, goldL = scn.goldL, glowM = scn.glowM, g = G();
+    tl = g.timeline(); tl.to(st, {z: -18.5, duration: 4.6, ease: "power1.inOut"}, 0).to(st, {y: 1.35, duration: 4.6, ease: "sine.inOut"}, 0)
+      .add(() => BMS.door(), 3.9).to(st, {door: 1, duration: 1.1, ease: "power2.inOut"}, 3.9).to(goldL, {intensity: 6, duration: 1, ease: "power2.out"}, 4.1).to(glowM.color, {r: 1, g: 1, b: 1, duration: 1}, 4.1)
+      .to(st, {z: -22, duration: 1.2, ease: "power2.inOut"}, 4.6).add(reveal, 5.4); };
+  stopRain = BMS.rain();
+  /* les bibliothèques 3D et la police japonaise peuvent arriver après coup : on attend au plus 2,5 s, sinon on montre directement la carte */
+  try { tcLibs(); } catch {}
+  const t0 = Date.now(), wait = () => { if (!alive) return; if ((window.THREE && window.gsap) || Date.now() - t0 > 2500) build(); else setTimeout(wait, 120); };
+  (document.fonts ? Promise.race([document.fonts.load("800 92px 'Shippori Mincho B1'"), new Promise(r => setTimeout(r, 1500))]) : Promise.resolve()).then(wait); }
+/* décor 3D partagé par la cinématique et l'écran du marché : ruelle de l'univers, échoppe au fond. st = position de caméra et ouverture des portes */
+function bmScene(ph, U, st){ const T = window.THREE; if (!T) return null;
+    let R; try { R = new T.WebGLRenderer({antialias: true, powerPreference: "high-performance"}); } catch { return null; }
+    R.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); R.outputEncoding = T.sRGBEncoding; R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.15; ph.prepend(R.domElement);
+    const Sc = new T.Scene(); Sc.background = new T.Color(0x05030a); Sc.fog = new T.FogExp2(0x0a0610, .055);
+    const cam = new T.PerspectiveCamera(58, 9 / 18.5, .1, 120); const size = () => { const w = ph.clientWidth, h = ph.clientHeight; R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }; size();
+    const tex = (w, h, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; draw(cv.getContext("2d"), w, h); const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 4; return t; };
+    const FONT = "'Shippori Mincho B1', serif";
+    const sign = (txt, col) => tex(128, 512, (g, w, h) => { g.fillStyle = "#07040a"; g.fillRect(0, 0, w, h); g.strokeStyle = col; g.lineWidth = 6; g.strokeRect(8, 8, w - 16, h - 16); const ch = [...txt], fs = Math.min(92, (h - 60) / ch.length * .9);
+      g.font = `800 ${fs}px ${FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.shadowColor = col; g.shadowBlur = 24; g.fillStyle = "#fff"; const st = (h - 60) / ch.length; ch.forEach((k, i) => g.fillText(k, w / 2, 30 + st * (i + .5))); g.shadowBlur = 0; g.fillStyle = col; g.globalAlpha = .35; ch.forEach((k, i) => g.fillText(k, w / 2, 30 + st * (i + .5))); });
+    const wood = tex(256, 256, (g, w, h) => { g.fillStyle = "#1a0f0a"; g.fillRect(0, 0, w, h); for (let x = 0; x < w; x += 32){ g.fillStyle = x % 64 ? "#20130c" : "#170c07"; g.fillRect(x, 0, 30, h); g.fillStyle = "#0a0503"; g.fillRect(x + 30, 0, 2, h); } for (let i = 0; i < 300; i++){ g.fillStyle = `rgba(0,0,0,${Math.random() * .25})`; g.fillRect(Math.random() * w, Math.random() * h, 1, 8 + Math.random() * 30); } });
+    const paper = tex(256, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, "#5a0a06"); gr.addColorStop(.5, "#ff3b25"); gr.addColorStop(1, "#5a0a06"); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = "rgba(0,0,0,.35)"; for (let y = 10; y < h; y += 22) g.fillRect(0, y, w, 2); g.font = `800 110px ${FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = "#1a0200"; g.fillText(U.l, w / 2, h / 2 + 6); });
+    const noren = tex(512, 256, (g, w, h) => { g.fillStyle = "#101a33"; g.fillRect(0, 0, w, h); g.fillStyle = "#0a1022"; for (let x = w / 3; x < w; x += w / 3) g.fillRect(x - 3, 40, 6, h); g.font = `800 150px ${FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = "#e9e2d0"; g.fillText("闇", w / 2, h / 2 + 10); });
+    const ground = new T.Mesh(new T.PlaneGeometry(7, 70), new T.MeshStandardMaterial({color: 0x0b0a0f, roughness: .18, metalness: .7})); ground.rotation.x = -Math.PI / 2; ground.position.z = -20; Sc.add(ground);
+    Sc.add(new T.HemisphereLight(0x3a2a55, 0x080408, .35));
+    const facade = new T.MeshStandardMaterial({map: wood, roughness: .85, metalness: .05}), winOn = [0xd88a3a, 0xc9a06a, 0xb8642a], flick = [], lans = [];
+    for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 9; i++){ const z = 4 - i * 3.6, h = 5 + Math.random() * 4, b = new T.Mesh(new T.BoxGeometry(1.6, h, 3.4), facade); b.position.set(side * 3.1, h / 2, z); Sc.add(b);
+      for (let fy = 1.8; fy < h - .6; fy += 1.4) for (const fz of [-.8, .8]){ if (Math.random() < .35) continue; const m = new T.Mesh(new T.PlaneGeometry(.55, .7), new T.MeshBasicMaterial({color: Math.random() < .75 ? winOn[(Math.random() * 3) | 0] : 0x120a08})); m.position.set(side * 2.29, fy, z + fz); m.rotation.y = -side * Math.PI / 2; Sc.add(m); }
+      const aw = new T.Mesh(new T.BoxGeometry(.9, .06, 3.06), new T.MeshStandardMaterial({color: 0x1d1410, roughness: .6})); aw.position.set(side * 1.9, 2.4, z); aw.rotation.z = side * .25; Sc.add(aw);
+      if (i % 2 === 0 && i < 8){ const col = U.n[(i / 2 + (side > 0 ? 2 : 0)) % U.n.length], sm = new T.MeshBasicMaterial({map: sign(U.s[(i + (side > 0 ? 4 : 0)) % U.s.length], col), toneMapped: false}), s = new T.Mesh(new T.BoxGeometry(.08, 2.2, .55), sm);
+        s.position.set(side * 2.05, 3.6, z + .9); s.rotation.y = Math.PI / 2; Sc.add(s); const L = new T.PointLight(new T.Color(col), 1.6, 6, 2); L.position.set(side * 1.7, 3.4, z + .9); Sc.add(L); flick.push({L, m: sm, t: Math.random() * 10}); }
+      if (i % 2 === 1){ const g = new T.Group(), lan = new T.Mesh(new T.SphereGeometry(.28, 20, 16), new T.MeshBasicMaterial({map: paper, toneMapped: false})); lan.scale.y = 1.35; g.add(lan); const capM = new T.MeshStandardMaterial({color: 0x111111}), c1 = new T.Mesh(new T.CylinderGeometry(.14, .14, .06, 12), capM); c1.position.y = .4; g.add(c1); const c2 = c1.clone(); c2.position.y = -.4; g.add(c2);
+        g.position.set(side * 1.85, 2.6, z); Sc.add(g); const L = new T.PointLight(0xff4a2a, 2.2, 7, 2); L.position.set(side * 1.7, 2.5, z); Sc.add(L); lans.push({g, ph: Math.random() * 6}); } }
+    const wireM = new T.LineBasicMaterial({color: 0x050505}); for (let k = 0; k < 7; k++){ const z = 2 - k * 4.6, pts = []; for (let t = 0; t <= 20; t++) pts.push(new T.Vector3(-2.3 + 4.6 * t / 20, 7.2 - .6 * Math.sin(Math.PI * t / 20) + k % 2 * .3, z + (t / 20 - .5) * 1.5)); Sc.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), wireM)); }
+    const shopZ = -28, back = new T.Mesh(new T.BoxGeometry(5, 6, .4), facade); back.position.set(0, 3, shopZ - .4); Sc.add(back);
+    const glowM = new T.MeshBasicMaterial({map: tex(256, 256, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h * .55, 8, w / 2, h * .55, w * .6); gr.addColorStop(0, "#fff3d6"); gr.addColorStop(.35, "#ffb347"); gr.addColorStop(1, "rgba(120,40,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); }), transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false, color: 0x2a1505});
+    const glow = new T.Mesh(new T.PlaneGeometry(2.2, 2.6), glowM); glow.position.set(0, 1.3, shopZ - .15); Sc.add(glow);
+    const goldL = new T.PointLight(0xffb347, 0, 18, 2); goldL.position.set(0, 1.6, shopZ + .6); Sc.add(goldL);
+    const doorM = new T.MeshStandardMaterial({map: wood, color: 0x8a5a3a, roughness: .7}), mkDoor = s => { const p = new T.Group(), d = new T.Mesh(new T.BoxGeometry(1.1, 2.6, .08), doorM); d.position.x = s * .55; p.add(d); p.position.set(-s * 1.1, 1.3, shopZ); Sc.add(p); return p; }, dL = mkDoor(1), dR = mkDoor(-1);
+    const nor = new T.Mesh(new T.PlaneGeometry(2.4, .9), new T.MeshBasicMaterial({map: noren, side: T.DoubleSide})); nor.position.set(0, 2.85, shopZ + .25); Sc.add(nor);
+    const big = new T.Mesh(new T.PlaneGeometry(2.6, .8), new T.MeshBasicMaterial({map: tex(512, 160, (g, w, h) => { g.fillStyle = "#07030a"; g.fillRect(0, 0, w, h); g.font = `800 120px ${FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.shadowColor = "#ff1744"; g.shadowBlur = 30; g.fillStyle = "#fff"; g.fillText("闇 市", w / 2, h / 2 + 6); g.fillStyle = "#ff3d5a"; g.globalAlpha = .5; g.fillText("闇 市", w / 2, h / 2 + 6); }), toneMapped: false}));
+    big.position.set(0, 3.8, shopZ + .22); Sc.add(big); const redL = new T.PointLight(0xff2a4a, 2.4, 8, 2); redL.position.set(0, 3.6, shopZ + 1.2); Sc.add(redL);
+    const N = 1200, rp = new Float32Array(N * 6), sp = new Float32Array(N); for (let i = 0; i < N; i++){ const x = (Math.random() - .5) * 6, y = Math.random() * 9, z = 6 - Math.random() * 38; rp.set([x, y, z, x - .02, y - .35, z], i * 6); sp[i] = 9 + Math.random() * 5; }
+    const rg = new T.BufferGeometry(); rg.setAttribute("position", new T.BufferAttribute(rp, 3)); Sc.add(new T.LineSegments(rg, new T.LineBasicMaterial({color: 0x9fb4ff, transparent: true, opacity: .35})));
+    const mistT = tex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2 - 1); gr.addColorStop(0, "rgba(255,210,190,.22)"); gr.addColorStop(.6, "rgba(255,210,190,.08)"); gr.addColorStop(1, "rgba(255,210,190,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+    const mists = []; for (let i = 0; i < 14; i++){ const m = new T.Sprite(new T.SpriteMaterial({map: mistT, transparent: true, depthWrite: false, opacity: .35, fog: false})); m.scale.set(5, 1.6, 1); m.position.set((Math.random() - .5) * 4, .5, 4 - i * 2.4); Sc.add(m); mists.push(m); }
+    const clock = new T.Clock();
+    let on = true; R.setAnimationLoop(() => { if (!on) return; const t = clock.getElapsedTime(); cam.position.set(Math.sin(t * .7) * .12, st.y + Math.sin(t * 1.6) * .03, st.z); cam.lookAt(Math.sin(t * .5) * .2, st.y + .25, st.z - 8);
+      dL.rotation.y = -st.door * 1.9; dR.rotation.y = st.door * 1.9;
+      for (const f of flick){ const n = Math.sin(t * 13 + f.t) + Math.sin(t * 37 + f.t * 2), off = n > 1.75; f.L.intensity = off ? .2 : 1.6; f.m.color.setScalar(off ? .35 : 1); }
+      for (const l of lans) l.g.rotation.z = Math.sin(t * 1.3 + l.ph) * .08;
+      const p = rg.attributes.position.array; for (let i = 0; i < N; i++){ const k = i * 6, d = sp[i] * .016; p[k + 1] -= d; p[k + 4] -= d; if (p[k + 4] < 0){ p[k + 1] += 9; p[k + 4] += 9; } } rg.attributes.position.needsUpdate = true;
+      for (const m of mists) m.position.x += Math.sin(t * .3 + m.position.z) * .002;
+      R.render(Sc, cam); });
+    const onR = () => size(); addEventListener("resize", onR);
+    return {R, st, goldL, glowM, stop(){ on = false; removeEventListener("resize", onR); try { R.setAnimationLoop(null); R.dispose(); R.domElement.remove(); } catch {} }}; }
+/* --- écran du marché (ambiance Ruelle) --- */
+function bmShow(S){ if (!bmOpen(S)) { try { tcToast("Le contrebandier est parti."); } catch {} return crRender(); }
+  const D = DATA[S.u], B = S.bm, c = D[B.ved], rk = bmRep(S), n = (S.stat && S.stat.bm) || 0, nxt = BM.rep[rk + 1];
+  const tr = B.troc != null && S.squad.includes(B.troc) ? B.troc : null, cred = tr != null ? Math.round(crVal(S.u, tr) * BM.troc) : 0, net = p => Math.max(0, p - cred);
+  const full = S.squad.length >= CR_MAXSQ && tr == null, why = p0 => { const p = net(p0); return full ? "Effectif complet : vends un joueur dans l'onglet Effectif" : S.money < p ? `Il te manque <b>${p - S.money}M</b>. Vends un joueur ou enchaîne les matchs : le marché reste ouvert jusqu'à ${new Date(B.end).toLocaleTimeString("fr-FR", {hour: "2-digit", minute: "2-digit"})}, même si tu fermes le jeu.` : ""; };
+  const card = (i, cls = "", tag = "") => `<div class="bmc ${cls} ${B.sold.includes(i) ? "sold" : ""}"><div class="pic"><img src="${bmSrc(D[i])}" alt=""><span class="lv">${D[i].p}</span>${tag}<i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(D[i].n)}" data-crinf="${i}">i</i></div><div class="t"><b>${esc(D[i].n)}</b><span>Valeur ${crVal(S.u, i)}M</span></div></div>`;
+  const vSold = B.sold.includes(B.ved), vw = why(B.vp), gb = B.box.got;
+  document.querySelector(".bmov")?.remove();
+  const U = BM_UNI[S.u] || BM_UNI.op;
+  document.body.insertAdjacentHTML("beforeend", `<div class="bmov" role="dialog" aria-modal="true" aria-label="Marché noir"><div class="bmsc" style="--un:${U.n[0]}"><div class="shade"></div><div class="bg"><i class="brk"></i><i class="rain"></i><i class="neon">闇市</i><i class="lamp"></i><i class="wet"></i></div>
+    <button class="x" aria-label="Fermer">✕</button><div class="in">
+    <div class="hd"><div><em class="eb">Marché noir · 闇市</em></div><div class="tm"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="tr"/><circle cx="22" cy="22" r="19" class="tv" data-bmring style="stroke-dasharray:119.4"/></svg><b data-bmt>${bmClock(bmLeft(S))}</b><small>restant</small></div></div>
+    <div class="sky" aria-hidden="true"></div><h3 class="ttl">Un contrebandier est en ville</h3><div class="pn top"><span class="rep">Réputation : ${BM.rep[rk][1]} · ${n} achat${n > 1 ? "s" : ""}${nxt ? ` · ${BM.rep[rk + 1][1]} à ${nxt[0]}` : ""}</span>
+    <div class="ved">${card(B.ved, "big", `<span class="hx">${vSold ? "Achetée" : "Vedette"}</span>`)}<div class="vi"><small>Prix contrebande</small><b class="pr">${B.vp}M</b><span class="was">Valeur ${crVal(S.u, B.ved)}M · +15 %</span>
+      <ul><li>+${Math.max(0, c.p - B.avg)} niveaux sur ta moyenne</li><li>Prestige non exigé</li><li>Contenu fixe jusqu'à la fermeture</li></ul></div></div>
+    ${vSold ? `<p class="ms">${esc(c.n)} a rejoint ton club.</p>` : `<button class="buy" data-bmb="${B.ved}" ${vw ? "disabled" : ""}>Acheter · ${net(B.vp)}M${tr != null ? " + " + esc(D[tr].n) : ""}</button>${vw ? `<p class="ms">${vw}</p>` : ""}`}
+    </div><div class="pn troc"><span class="sub">Troc · le contrebandier reprend un joueur à ${Math.round(BM.troc * 100)} % de sa valeur</span>${tr != null ? `<p class="ms">Tu donnes <b style="color:#ffe7bf">${esc(D[tr].n)}</b> : ${cred}M déduits de ton prochain achat. <button class="sm in" data-bmtr="-1">Annuler</button></p>` : `${S.squad.length > 5 || true ? `<button class="sm" data-bmtrl>Proposer un joueur en échange</button>` : ""}`}
+      <div class="trl" hidden>${crByP(S, S.squad).map(i => `<button class="sm" data-bmtr="${i}">${esc(D[i].n)} · niv. ${D[i].p} · ${Math.round(crVal(S.u, i) * BM.troc)}M</button>`).join("")}</div></div>
+    <div class="pn"><span class="sub">Aussi sous le manteau · mieux que tes titulaires · prix normal</span><div class="oth" style="--n:${B.oth.length}">${B.oth.map(i => `<div>${card(i, "sm")}<button class="sm" data-bmb="${i}" ${B.sold.includes(i) || why(crVal(S.u, i)) ? "disabled" : ""}>${B.sold.includes(i) ? "Acheté" : net(crVal(S.u, i)) + "M"}</button></div>`).join("")}</div></div>
+    <div class="pn"><span class="sub">Caisse mystère</span><div class="box"><div class="bx ${gb != null ? "open" : ""}"><div class="f b">闇</div><div class="f fr">${gb != null ? `<img src="${bmSrc(D[gb])}" alt="">` : ""}</div></div>
+      <div>${gb != null ? `<p>Dans la caisse : <b>${esc(D[gb].n)}</b> (niveau ${D[gb].p}).</p>` : `<p>Une carte face cachée, moins chère. Parfois un personnage digne d'une vedette, souvent un bon renfort, parfois plus modeste.</p><button class="sm" data-bmx ${why(B.box.p) ? "disabled" : ""}>Ouvrir · ${net(B.box.p)}M</button>`}</div></div></div>
+    <div class="cash"><span>Caisse</span><b>${crMoney(S, S.money)}</b></div></div></div></div>`);
+  const ov = document.querySelector(".bmov"), sc = ov.querySelector(".bmsc"), bye = () => { try { bmShow.scn && bmShow.scn.stop(); } catch {} bmShow.scn = null; ov.remove(); crRender(); };
+  const calm = (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
+  const put3d = () => { if (!ov.isConnected) return; if (!bmShow.scn && window.THREE && !calm){ bmShow.scn = bmScene(sc, U, {z: -19.6, y: 1.75, door: 1}); if (bmShow.scn){ bmShow.scn.goldL.intensity = 6; bmShow.scn.glowM.color.setRGB(1, 1, 1); } }
+    if (bmShow.scn){ sc.prepend(bmShow.scn.R.domElement); sc.classList.add("d3"); } };
+  try { tcLibs(); } catch {} if (window.THREE) put3d(); else { const t0 = Date.now(), w = () => { if (window.THREE || Date.now() - t0 > 3000) put3d(); else setTimeout(w, 150); }; w(); }
+  ov.querySelector(".x").onclick = bye; ov.onclick = e => { if (e.target === ov) bye(); };
+  const pay = p0 => { const p = net(p0); if (!bmOpen(S) || S.money < p || (S.squad.length >= CR_MAXSQ && tr == null)) return false; S.money -= p; if (tr != null){ S.squad = S.squad.filter(x => x !== tr); delete S.out[tr]; B.troc = null; } return true; };
+  ov.querySelector("[data-bmtrl]") && (ov.querySelector("[data-bmtrl]").onclick = e => { e.currentTarget.nextElementSibling ? 0 : 0; ov.querySelector(".trl").hidden = false; e.currentTarget.hidden = true; });
+  ov.querySelectorAll("[data-bmtr]").forEach(b => b.onclick = () => { const i = +b.dataset.bmtr; B.troc = i < 0 ? null : i; crSave(); bmShow(S); });
+  const buy = (i, price) => { if (B.sold.includes(i) || !pay(price)) return false; S.squad.push(i); B.sold.push(i); S.stat.bm = (S.stat.bm || 0) + 1; S.stat.buy = Math.max(S.stat.buy || 0, price); crSave(); try { tcSave(tcLoad()); } catch {} return true; };
+  ov.querySelectorAll("[data-bmb]").forEach(b => b.onclick = () => { const i = +b.dataset.bmb, p = i === B.ved ? B.vp : crVal(S.u, i); if (buy(i, p)){ try { SFX.play(i === B.ved ? "fanfare" : "win"); } catch {} if (i === B.ved) S.news = `${D[i].n} rejoint ${S.club} par la porte de derrière du marché noir.`; bmShow(S); } });
+  const bx = ov.querySelector("[data-bmx]"); if (bx) bx.onclick = () => { if (!bmOpen(S) || (S.squad.length >= CR_MAXSQ && tr == null) || S.money < net(B.box.p)) return;
+    const {avg} = bmTeam(S), r = Math.random(), tg = r < .25 ? avg + (100 - avg) * .45 : r < .75 ? avg + 10 : avg + 3, pick = bmNear(S, Math.min(99, tg), 3, [B.ved, ...B.oth])[0]; if (pick == null) return;
+    if (!pay(B.box.p)) return; S.squad.push(pick); B.box.got = pick; S.stat.bm = (S.stat.bm || 0) + 1; crSave(); try { tcSave(tcLoad()); } catch {}
+    const box = ov.querySelector(".bx"); box.querySelector(".fr").innerHTML = `<img src="${bmSrc(D[pick])}" alt="">`; requestAnimationFrame(() => box.classList.add("open")); try { BMS.gong(); } catch {} setTimeout(() => bmShow(S), 1300); };
+  bmTick(); bmTourMaybe(S); }
+/* compte à rebours partout où il est affiché ; fermeture automatique à la fin de l'heure */
+function bmTick(){ clearInterval(bmTick.h); bmTick.h = setInterval(() => { const S = CR.S; if (!S || !S.bm){ clearInterval(bmTick.h); return; } const ms = bmLeft(S);
+  document.querySelectorAll("[data-bmt]").forEach(e => e.textContent = bmClock(ms)); document.querySelectorAll("[data-bmring]").forEach(e => e.style.strokeDashoffset = (119.4 * (1 - ms / (S.bm.end - S.bm.at))).toFixed(1));
+  if (ms <= 0){ clearInterval(bmTick.h); document.querySelector(".bmov")?.remove(); if (document.querySelector("#cr:not(.hidden)")) crRender(); } }, 1000); }
+</script>
+
+<style>
+/* ---- Didacticiels imposés (carrière, premier marché noir) et bouton « ? » pour les revoir (15 oct. 2026) ---- */
+.gtour i{position:fixed;z-index:9996;background:rgba(4,6,8,.82);pointer-events:auto}
+.gtour .ring{position:fixed;z-index:9997;border-radius:16px;box-shadow:0 0 0 2px var(--accent),0 0 0 6px color-mix(in srgb,var(--accent) 30%,transparent),0 0 34px color-mix(in srgb,var(--accent) 55%,transparent);pointer-events:none;transition:left .25s,top .25s,width .25s,height .25s}
+.gtour .tip{position:fixed;z-index:9998;left:50%;translate:-50% 0;width:min(calc(100vw - 24px),400px);border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));border-radius:18px;background:var(--panel);padding:14px 16px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:grid;gap:6px}
+.gtour .tip small{font-family:var(--mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent)}
+.gtour .tip b{font-family:var(--title);font-weight:900;font-size:17px;letter-spacing:-.01em}
+.gtour .tip p{color:#d9d5df;font-size:14.5px;margin:0;line-height:1.45}
+.gtour .tip .row{display:flex;margin-top:6px;justify-content:space-between;align-items:center;gap:10px}
+.gtour .tip .sk{all:unset;cursor:pointer;color:var(--muted);font-size:12.5px;text-decoration:underline}
+.gtour.bm{--accent:#ffb347}
+.gtour.wait{display:none}
+@media (prefers-reduced-motion:no-preference){.gtour .ring{animation:gtring 1.6s ease-in-out infinite}}
+@keyframes gtring{50%{box-shadow:0 0 0 2px var(--accent),0 0 0 10px color-mix(in srgb,var(--accent) 18%,transparent),0 0 44px color-mix(in srgb,var(--accent) 65%,transparent)}}
+.nohelpq .helpq{display:none!important}
+.linkq{all:unset;cursor:pointer;font-size:13px;color:var(--muted);text-decoration:underline}.linkq:hover{color:var(--text)}
+.helpq{all:unset;cursor:pointer;box-sizing:border-box;width:36px;height:36px;display:inline-grid;place-items:center;border-radius:50%;font:800 16px var(--title);color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line);background:color-mix(in srgb,var(--panel) 80%,transparent);flex:none}
+.helpq:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}.helpq:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.topbar .helpq{margin-left:auto;margin-right:8px}
+.backtip{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:9000;width:min(calc(100vw - 24px),420px);display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:14px 16px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 50%,var(--line)),0 18px 50px rgba(0,0,0,.6)}
+.backtip b{font-size:14.5px}.backtip span{font-size:13px;color:var(--muted)}.backtip .row{display:flex;gap:8px;grid-column:1/-1;justify-content:flex-end}
+</style>
+<script>
+/* moteur commun : les étapes désignent un élément à toucher (sel), ou se valident par un bouton (next).
+   Tout le reste de l'écran est masqué et ne réagit pas : on ne peut pas sauter une étape ni toucher autre chose (vendre un joueur, etc.). */
+let GTR = null;
+function gtStart(steps, o = {}){ gtStop(); document.body.insertAdjacentHTML("beforeend", `<div class="gtour ${o.cls || ""}" role="dialog" aria-label="${esc(o.label || "Didacticiel")}"><i></i><i></i><i></i><i></i><i class="blk"></i><span class="ring"></span><div class="tip" aria-live="polite"></div></div>`);
+  GTR = {steps, o, k: -1, el: document.querySelector(".gtour"), since: 0, timer: 0, sc: false}; gtGo(0); GTR.timer = setInterval(gtTick, 180); }
+function gtStop(){ if (!GTR) return; clearInterval(GTR.timer); GTR.el.remove(); GTR = null; }
+function gtGo(k){ const T = GTR; if (!T) return; while (k < T.steps.length && T.steps[k].skipIf && T.steps[k].skipIf()) k++; if (k >= T.steps.length) return gtEnd();
+  T.k = k; T.since = Date.now(); T.sc = false; const st = T.steps[k]; try { st.pre && st.pre(); } catch {}
+  T.el.querySelector(".tip").innerHTML = `<small>${esc(T.o.title || "Didacticiel")}${T.steps.length > 1 ? ` · ${k + 1}/${T.steps.length}` : ""}</small><b>${st.t}</b><p>${st.p}</p><div class="row">${st.choice ? `<button class="ghost" data-gtk="0">Masquer le bouton ?</button><button class="primary" data-gtk="1">Garder le bouton ?</button>` : `${T.o.replay ? `<button class="sk" data-gtq>Quitter</button>` : "<span></span>"}${st.next ? `<button class="primary" data-gtn>${st.next}</button>` : `<span class="small" style="color:var(--accent)">À toi : touche la zone éclairée</span>`}`}</div>`;
+  T.el.querySelectorAll("[data-gtk]").forEach(b => b.onclick = () => { helpQ(b.dataset.gtk === "1"); gtGo(k + 1); });
+  const nx = T.el.querySelector("[data-gtn]"); if (nx) nx.onclick = () => gtGo(k + 1); const q = T.el.querySelector("[data-gtq]"); if (q) q.onclick = () => gtEnd(true); gtTick(); }
+function gtEnd(quit){ const T = GTR; if (!T) return; gtStop(); try { T.o.end && T.o.end(!!quit); } catch {} }
+function gtTick(){ const T = GTR; if (!T) return; const st = T.steps[T.k], busy = !!(st.busy && st.busy()); T.el.classList.toggle("wait", busy); if (busy) return;
+  if (st.done && st.done()) return gtGo(T.k + 1);
+  const tg = st.sel ? st.sel() : null, [a, b, c, d, blk] = T.el.querySelectorAll("i"), ring = T.el.querySelector(".ring"), tip = T.el.querySelector(".tip"), W = innerWidth, H = innerHeight;
+  /* élément introuvable (écran pas encore prêt) : au bout de 3 s on propose de continuer, pour ne jamais bloquer le joueur */
+  if (st.sel && !tg && !st.next && Date.now() - T.since > 3000 && !tip.querySelector("[data-gtn]")){ const r = tip.querySelector(".row"); r.insertAdjacentHTML("beforeend", `<button class="primary" data-gtn>Continuer</button>`); r.querySelector("[data-gtn]").onclick = () => gtGo(T.k + 1); }
+  if (!tg){ a.style.cssText = "left:0;top:0;right:0;bottom:0"; [b, c, d, blk].forEach(x => x.style.cssText = "display:none"); ring.style.display = "none"; tip.style.top = "50%"; tip.style.bottom = "auto"; tip.style.translate = "-50% -50%"; return; }
+  let r = tg.getBoundingClientRect(); if (!T.sc || r.top < 60 || r.bottom > H - 170){ T.sc = true; tg.scrollIntoView({block: "center"}); r = tg.getBoundingClientRect(); }
+  const m = 6, x0 = Math.max(0, r.left - m), y0 = Math.max(0, r.top - m), x1 = Math.min(W, r.right + m), y1 = Math.min(H, r.bottom + m);
+  a.style.cssText = `left:0;top:0;width:100%;height:${y0}px`; b.style.cssText = `left:0;top:${y1}px;width:100%;bottom:0`; c.style.cssText = `left:0;top:${y0}px;width:${x0}px;height:${y1 - y0}px`; d.style.cssText = `left:${x1}px;top:${y0}px;right:0;height:${y1 - y0}px`;
+  /* une étape à valider par un bouton : la zone éclairée est visible mais ne réagit pas */
+  blk.style.cssText = st.next ? `left:${x0}px;top:${y0}px;width:${x1 - x0}px;height:${y1 - y0}px;background:transparent` : "display:none";
+  ring.style.cssText = `display:block;left:${x0}px;top:${y0}px;width:${x1 - x0}px;height:${y1 - y0}px`; tip.style.translate = "-50% 0";
+  if (y1 + 200 < H){ tip.style.top = (y1 + 14) + "px"; tip.style.bottom = "auto"; } else if (y0 > 220){ tip.style.top = "auto"; tip.style.bottom = (H - y0 + 14) + "px"; } else { tip.style.top = "auto"; tip.style.bottom = "12px"; } }
+
+/* bouton « ? » : le joueur choisit de le garder ou de le masquer à la fin d'un didacticiel ; un lien discret le fait revenir */
+function helpQ(on){ try { localStorage.setItem("hanko-helpq", on ? "on" : "off"); } catch {} document.documentElement.classList.toggle("nohelpq", !on); }
+try { if (localStorage.getItem("hanko-helpq") === "off") document.documentElement.classList.add("nohelpq"); } catch {}
+/* dernière étape commune : où revoir le didacticiel, et le choix de garder le bouton */
+const gtKeepStep = where => ({choice: true, t: "Tu pourras le revoir", p: `Besoin d'un rappel plus tard ? Touche le bouton « ? » ${where}. Tu préfères ne plus le voir ? Masque-le : un lien « Revoir le didacticiel » restera ${where.includes("Carrière") ? "dans l'onglet Palmarès" : "dans l'aide des boosters"}.`});
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-helpon]"); if (!b) return; helpQ(true); if (b.dataset.helpon === "cr") crTourStart(CR.S, true); else { TC_TAB = "packs"; tcRender(); setTimeout(() => tcTourMaybe(true), 100); } });
+
+/* ---------- Carrière : didacticiel imposé ---------- */
+const crSel = s => document.querySelector(s);
+const CR_TSTEPS = [
+  {t: "Bienvenue dans ta carrière", p: "Tu diriges un club tout en bas de l'échelle : Bronze, Argent, Or, Diamant, puis Élite. Chaque division a trois niveaux. Gagne, recrute, monte, et deviens champion d'Élite.", next: "Compris"},
+  {sel: () => crSel('[data-crtab="squad"]'), t: "Ton effectif", p: "Touche l'onglet « Effectif » pour voir tes combattants.", done: () => CR.tab === "squad" && CR.view === "hub"},
+  {sel: () => crSel("#cr .crgrid .crc"), t: "Tes combattants", p: "Le chiffre en haut à gauche est la note : plus elle est haute, plus le combattant est fort. Les notes ne progressent pas : pour avancer, il faudra recruter mieux.", next: "Suivant"},
+  {sel: () => crSel("#cr .crgrid .crinf"), t: "La fiche d'un combattant", p: "Touche le petit « i » pour ouvrir sa fiche : pouvoirs, atouts et points faibles.", done: () => !!crSel(".crfiche")},
+  {sel: () => crSel(".crfiche .crfin"), t: "Ses atouts en combat", p: "Ici, tout ce qui le rend plus fort qu'il n'y paraît (fruit du démon, haki, techniques…) et ses plus gros points faibles.", next: "Suivant"},
+  {sel: () => crSel(".crfiche .crfx"), t: "Ferme la fiche", p: "Touche la croix pour revenir à ton effectif.", done: () => !crSel(".crfiche")},
+  {sel: () => crSel('[data-crtab="match"]'), t: "Le prochain match", p: "Touche l'onglet « Match ».", done: () => CR.tab === "match" && CR.view === "hub"},
+  {sel: () => crSel("#crPrep"), t: "Ton adversaire", p: "Voici les cinq combattants du club d'en face. Touche « Préparer le match ».", done: () => CR.view === "compose"},
+  {sel: () => crSel("#cr .crgrid"), t: "Compose ton équipe", p: "Touche cinq combattants dans l'ordre où ils entreront. Le vainqueur d'un duel reste en jeu, fatigué : l'ordre compte autant que les notes.", done: () => CR.pick.length >= crN(CR.S)},
+  {sel: () => crSel("#crGo"), t: "Lance le combat", p: "Ton équipe est prête. Touche « Lancer le combat ».", done: () => CR.view === "result", busy: () => !!crSel("#arena")},
+  {sel: () => crSel("#cr .crmed .tot"), t: "Le récapitulatif", p: "Survivants, gains et caisse : chaque match rapporte de l'argent, même en cas de défaite.", next: "Suivant", busy: () => !!crSel("#arena,.vtnote,.crpov")},
+  {sel: () => crSel("#crNext"), t: "Continue", p: "Touche « Continuer ».", done: () => CR.view === "hub"},
+  {sel: () => crSel('[data-crtab="shop"]'), t: "Le Mercato", p: "C'est ici que tu recrutes. Touche l'onglet « Mercato ».", done: () => CR.tab === "shop" && CR.view === "hub"},
+  {sel: () => crSel("#cr .crshop") || crSel("#bmBan"), t: "La boutique", p: "Un renfort un peu meilleur que ton cinquième titulaire, et des compléments, à prix fixe. Renouvelée après chaque match.", next: "Suivant"},
+  {sel: () => crSel("#cr .crsc"), t: "La cellule de recrutement", p: "Un pari : tu paies une mission, ton recruteur ramène un personnage tiré au sort. Les chances sont affichées.", next: "Suivant"},
+  {sel: () => crSel("#cr .crlot") || crSel("#crBid"), t: "La vedette du jour", p: "Les meilleurs personnages partent aux enchères contre les autres clubs, ou en achat immédiat. Et parfois, un contrebandier s'installe en ville…", next: "Suivant"}, gtKeepStep("en haut de l'écran Carrière")];
+function crTourStart(S, replay){ if (GTR || !S) return; if (replay){ CR.view = "hub"; CR.tab = "match"; crRender(); }
+  gtStart(CR_TSTEPS, {title: "Carrière", label: "Didacticiel de la carrière", replay, end: quit => { if (!replay){ S.tuto = 5; crSave(); } crRender(); } }); }
+/* lancé automatiquement tant que le didacticiel n'est pas fini (après chaque affichage de la carrière) */
+function crTourMaybe(){ const S = CR.S; if (!S || S.bot || S.tuto >= 5 || GTR || document.querySelector("#cr.hidden")) return; crTourStart(S, false); }
+
+/* ---------- Premier marché noir : didacticiel de découverte ---------- */
+const bmQ = s => document.querySelector(".bmov " + s);
+const BM_TSTEPS = [
+  {sel: () => bmQ(".tm"), t: "Le marché noir", p: "Un contrebandier ne reste qu'une heure, montre en main. Le compte à rebours continue même si tu fermes le jeu.", next: "Suivant"},
+  {sel: () => bmQ(".ved"), t: "La vedette", p: "Un personnage bien au-dessus de ton équipe, sans condition de prestige. Elle coûte 15 % de plus que sa valeur.", next: "Suivant"},
+  {sel: () => bmQ(".troc"), t: "Le troc", p: "Pas assez d'argent ? Le contrebandier reprend un de tes joueurs à 70 % de sa valeur, déduits de ton achat.", next: "Suivant"},
+  {sel: () => bmQ(".oth"), t: "Sous le manteau", p: "Trois personnages meilleurs que tous tes titulaires, au prix normal.", next: "Suivant"},
+  {sel: () => bmQ(".box"), t: "La caisse mystère", p: "Une carte face cachée, moins chère. Parfois digne d'une vedette, parfois plus modeste : c'est un pari.", next: "Suivant"},
+  {sel: () => bmQ(".rep"), t: "Ta réputation", p: "Chaque achat te fait connaître du contrebandier. Client : un personnage de plus en vente. Habitué : une vedette plus forte et 5 minutes de plus.", next: "Suivant"}, gtKeepStep("en haut de l'écran Carrière")];
+function bmTourMaybe(S, replay){ if (GTR || !S || (!replay && S.bmTut)) return; setTimeout(() => { if (!document.querySelector(".bmov")) return;
+  gtStart(BM_TSTEPS, {title: "Marché noir", label: "Didacticiel du marché noir", cls: "bm", replay, end: () => { S.bmTut = 1; try { crSave(); } catch {} } }); }, 450); }
+
+/* ---------- Retour après une longue absence : on propose de revoir le didacticiel ---------- */
+function gtBackOffer(key, low, run){ let last = 0; try { last = +localStorage.getItem("hanko-seen-" + key) || 0; localStorage.setItem("hanko-seen-" + key, Date.now()); } catch { return; }
+  if (!last || Date.now() - last < 14 * 864e5 || !low || document.querySelector(".backtip")) return;
+  document.body.insertAdjacentHTML("beforeend", `<div class="backtip" role="status"><div><b>Content de te revoir !</b><br><span>Ça fait un moment : veux-tu revoir comment ça marche ?</span></div><div class="row"><button class="ghost" data-bt="0">Non merci</button><button class="primary" data-bt="1">Revoir le didacticiel</button></div></div>`);
+  const el = document.querySelector(".backtip"); el.querySelectorAll("[data-bt]").forEach(b => b.onclick = () => { el.remove(); if (b.dataset.bt === "1") run(); }); setTimeout(() => el.remove(), 15000); }
 </script>
 
 <style>
@@ -14114,6 +14505,15 @@ section:not(#home):not(#game) > .topbar{border-bottom-color:transparent;backgrou
 .sitefoot a{color:var(--accent);text-decoration:underline}
 </style>
 <script>
+/* Jeux affichés sur l'accueil (15 oct. 2026). Pour réactiver un jeu ou une famille, il suffit de l'ajouter ici :
+   jeux : mercato, gt, uc, liar, rl, wh, jg, pc (Duel) · guess, sil, top, fx (Connaissance) · vs, tier, nt, el (Complicité, rose) · mm, bt (Voix, violet).
+   Les jeux masqués restent dans le code ; on retire seulement leur carte avant de construire l'accueil, donc la barre des familles,
+   les compteurs, « À la une » et les couleurs dynamiques ne voient que ce qui est affiché. */
+const HOME_ON = {games: ["mercato", "uc", "guess", "sil"], fams: ["cat1", "cat2"]};
+(function(){ document.querySelectorAll("#home section.cat").forEach(sec => { if (!HOME_ON.fams.includes(sec.id)){ sec.remove(); return; }
+  sec.querySelectorAll(".gcards .mode").forEach(m => { if (!HOME_ON.games.includes(m.dataset.g)) m.remove(); });
+  if (!sec.querySelector(".gcards .mode")) sec.remove(); });
+  const sel = document.querySelector(".gcards .mode.sel"); if (!sel){ const f = document.querySelector(".gcards .mode"); f && f.classList.add("sel"); } })();
 /* Accueil : bloc « À la une », fiche du jeu choisi, onglets du bas. */
 (function(){
   const cards = [...document.querySelectorAll(".gcards .mode")]; if (!cards.length) return;
