@@ -10651,6 +10651,19 @@ const tcFr = (c, src, f) => c.fr && (!f || f === "H") && src === c.i ? ` style="
 // Seulement pour les versions AR et seconde AR qui ont une capture de scène ; les autres gardent le style AR habituel.
 // couleurs de l'illustration (calculées par build.py) : contour des AR et reflet des Holo s'y accordent (demande du 15 oct. 2026)
 const tcPalOf = (c, f) => { try { if (f === "A" || f === "B" || f === "C"){ const p = window.__MA.TCPAL[c.u][c.n][TC_ARTK[f]]; if (p) return p; } } catch {} return c.hc || null; };
+// Holo (16 oct. 2026) : les cartes sans couleurs calculées à la construction (objets, formes Éveil) les reçoivent au chargement de leur image :
+// teinte dominante pondérée par la saturation (même calcul que build.py), mise en cache par image.
+const TC_PALC = new Map();
+const tcImgPal = im => { const key = im.currentSrc || im.src; if (!key) return null; const k = key.length + ":" + key.slice(-64); if (TC_PALC.has(k)) return TC_PALC.get(k);
+  try { const cv = document.createElement("canvas"); cv.width = 40; cv.height = 60; const x = cv.getContext("2d", {willReadFrequently: true}); x.drawImage(im, 0, 0, 40, 60); const d = x.getImageData(0, 0, 40, 60).data, H = new Float32Array(36);
+    const hsv = (r, g, b) => { const M = Math.max(r, g, b), m = Math.min(r, g, b), c = M - m; let h = 0; if (c){ h = M === r ? ((g - b) / c) % 6 : M === g ? (b - r) / c + 2 : (r - g) / c + 4; h /= 6; if (h < 0) h += 1; } return [h, M ? c / M : 0, M]; };
+    const px = []; for (let i = 0; i < d.length; i += 4){ const v = hsv(d[i] / 255, d[i + 1] / 255, d[i + 2] / 255); px.push(v); H[Math.floor(v[0] * 36) % 36] += v[1] * Math.pow(v[2], 1.5); }
+    const S = H.map((_, i) => [-2, -1, 0, 1, 2].reduce((a, o, j) => a + H[(i + o + 36) % 36] * [1, 2, 3, 2, 1][j], 0)); let bi = 0; S.forEach((v, i) => { if (v > S[bi]) bi = i; }); const hb = (bi + .5) / 36;
+    const sats = px.filter(v => Math.abs(((v[0] - hb + 1.5) % 1) - .5) < .06 && v[1] > .25).map(v => v[1]).sort((a, b) => a - b); const sat = sats.length ? sats[sats.length >> 1] : .6;
+    const col = (h, s_, v) => { const f = n => { const k = (n + h * 6) % 6; return v - v * Math.min(1, s_) * Math.max(0, Math.min(k, 4 - k, 1)); }; return "#" + [f(5), f(3), f(1)].map(t => Math.round(Math.min(1, t) * 255).toString(16).padStart(2, "0")).join(""); };
+    const p = [col(hb, Math.max(.55, sat), .95), col(hb, .25, 1), col(hb, Math.min(1, sat + .1), .28)]; TC_PALC.set(k, p); return p; } catch { return null; } };
+document.addEventListener("load", e => { const im = e.target; if (!im || im.tagName !== "IMG") return; const t = im.closest && im.closest(".tc.f-H"); if (!t || t.style.getPropertyValue("--hm") || im.classList.contains("g")) return;
+  const p = tcImgPal(im); if (p){ t.style.setProperty("--hm", p[0]); t.style.setProperty("--hl", p[1]); t.style.setProperty("--hd", p[2]); t.classList.add("palc"); } }, true);
 const tcPalSt = (c, f) => { const p = tcPalOf(c, f); return p ? `--hm:${p[0]};--hl:${p[1]};--hd:${p[2]}` : ""; };
 const tcArTxt = (c, f) => { try { return (f === "A" || f === "B" || f === "C") && window.__MA.TCARTXT[c.u][c.n][TC_ARTK[f]] || null; } catch { return null; } };
 // t[5] = cadrage propre à l'illustration [zoom, décalage x %, décalage y %] (data/ar_frame.json, tools/ar_frame.py)
@@ -15428,6 +15441,17 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tc.tc.f-A[style*="--hm"]:not(.arp),.tc.tc.f-B[style*="--hm"]:not(.arp){border-color:var(--hm)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--hl) 60%,transparent) inset,0 0 14px color-mix(in srgb,var(--hm) 55%,transparent)!important}
 /* les AR façon Pokémon reprennent ces mêmes variables si leur texte n'en fournit pas */
 .tc.arp{--am:var(--hm,#888);--al:var(--hl,#ccc);--ad:var(--hd,#222)}
+/* ---- Holo (16 oct. 2026) : mêmes règles que les AR — contour, lueur et reflet aux couleurs de l'illustration (--hm/--hl/--hd) ;
+   la brillance se voit AU REPOS (demande de l'utilisateur) et s'intensifie en inclinant ; Épiques : feuille façon Kyara, mais aux couleurs de la carte.
+   :is([style*="--hm"],.palc) : couleurs calculées à la construction, ou au chargement de l'image (objets, formes Éveil). */
+.tc.tc.tc.f-H:is([style*="--hm"],.palc):not(.lx){border-color:var(--hm)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hl) 55%,transparent),0 0 14px color-mix(in srgb,var(--hm) 50%,transparent),0 8px 16px rgba(0,0,0,.45)!important}
+.tc.tc.lx.f-H:is([style*="--hm"],.palc){--m1:var(--hl);--m2:var(--hm);--m3:var(--hd);--gl:color-mix(in srgb,var(--hm) 55%,transparent)}
+.tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx,.tc.tc.tc.lx.f-H:is([style*="--hm"],.palc) .fx{display:block!important;opacity:.62!important;filter:saturate(1.2)!important;mix-blend-mode:soft-light!important;
+  background:linear-gradient(118deg,transparent 38%,color-mix(in srgb,var(--hl) 85%,transparent) 50%,transparent 62%),repeating-linear-gradient(112deg,var(--hl) 0,var(--hm) 6%,var(--hd) 12%,var(--hm) 18%,var(--hl) 24%)!important;background-size:250% 250%,260% 260%!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.78 + var(--ph,0) * .22)!important;animation:none!important;background-position:var(--px,50%) var(--py,50%),var(--px,50%) var(--py,50%)!important}
+/* Épiques en Holo : la feuille Kyara reste (crêtes fines, masque --foil), teintée aux couleurs de la carte et visible au repos */
+.tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{display:block!important;opacity:.24!important;background:repeating-linear-gradient(110deg,var(--hl) 0,var(--hm) 7%,var(--hd) 14%,var(--hm) 21%,var(--hl) 28%)!important;background-size:400% 400%!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{opacity:.4!important}
 </style>
 <style>
 /* ---- AR : la brillance n'apparaît qu'en inclinant la carte (validé le 15 oct. 2026) : rien au repos, plus forte à mesure qu'on incline (--ph, 0 au centre → 1 dans un coin) ---- */
