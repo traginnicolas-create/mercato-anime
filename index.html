@@ -15431,6 +15431,14 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 /* ---- AR : la brillance n'apparaît qu'en inclinant la carte (validé le 15 oct. 2026) : rien au repos, plus forte à mesure qu'on incline (--ph, 0 au centre → 1 dans un coin) ---- */
 .tc.arp .ap,.tc.tc.tc.f-A:not(.arp) .fx{opacity:0!important;transition:opacity .35s ease!important}
 :is(.tc.hl,.vcard.live .tc).arp .ap,:is(.tc.hl,.vcard.live .tc).tc.tc.f-A:not(.arp) .fx{opacity:calc(.2 + var(--ph,0) * .9)!important}
+/* AR : rendu identique aux 41 validées (artifact 1NZbvi5c…, 15 oct. 2026). Les règles .tc.tc.f-A du jeu ajoutaient un anneau sombre + liseré blanc
+   (le « petit rectangle noir »), un halo bleu fixe et un voile blanc : on les retire. Cadre, halo et reflet prennent les couleurs de l'illustration (--am/--al/--ad). */
+.tc.tc.tc.arp{border:0!important;background:linear-gradient(150deg,var(--al),var(--am) 30%,var(--ad) 62%,var(--am) 85%,var(--al))!important;box-shadow:0 0 14px color-mix(in srgb,var(--am) 55%,transparent),0 10px 22px rgba(0,0,0,.55)!important;outline:0!important}
+.tc.tc.tc.arp::before,.tc.tc.tc.arp::after{display:none!important}
+.tc.tc.tc.arp{border-radius:12px!important;box-shadow:0 0 16px color-mix(in srgb,var(--am) 55%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
+.tc.tc.tc.arp > img,.tc.tc.tc.arp .ap,.tc.tc.tc.arp .ag{border-radius:7px!important}
+/* reflet comme sur les 41 : bande aux couleurs de la carte, visible au repos, qui glisse avec le doigt ou la souris */
+.tc.tc.tc.arp .ap{opacity:1!important;mix-blend-mode:normal!important;background-position:var(--px,var(--mx,40%)) 50%!important}
 </style>
 <style>
 /* enchère façon FUT : champ de saisie du montant entre deux boutons −/+ */
