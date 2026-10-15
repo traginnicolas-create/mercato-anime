@@ -15437,8 +15437,9 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tc.tc.tc.arp::before,.tc.tc.tc.arp::after{display:none!important}
 .tc.tc.tc.arp{border-radius:12px!important;box-shadow:0 0 16px color-mix(in srgb,var(--am) 55%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
 .tc.tc.tc.arp > img,.tc.tc.tc.arp .ap,.tc.tc.tc.arp .ag{border-radius:7px!important}
-/* reflet comme sur les 41 : bande aux couleurs de la carte, visible au repos, qui glisse avec le doigt ou la souris */
-.tc.tc.tc.arp .ap{opacity:1!important;mix-blend-mode:normal!important;background-position:var(--px,var(--mx,40%)) 50%!important}
+/* reflet : bande aux couleurs de la carte, invisible au repos, n'apparaît qu'en inclinant et glisse avec le doigt ou la souris (redemandé le 15 oct. 2026) */
+.tc.tc.tc.arp .ap{opacity:0!important;mix-blend-mode:normal!important;background-position:var(--px,var(--mx,40%)) 50%!important;transition:opacity .35s ease!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.arp .ap{opacity:calc(.55 + var(--ph,0) * .45)!important}
 </style>
 <style>
 /* enchère façon FUT : champ de saisie du montant entre deux boutons −/+ */
