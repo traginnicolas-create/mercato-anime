@@ -13858,6 +13858,46 @@ function crTopRefresh(){ const b = document.querySelector(".crtop"); if (!b) ret
 .bmsc .buy{font-size:min(4.2cqw,19px);letter-spacing:.01em}
 .bmsc .tm{background:radial-gradient(circle,rgba(0,0,0,.55) 58%,transparent 60%);border-radius:50%}
 .bmsc .cash{border-top:0;padding:3cqw 3.6cqw;border-radius:4.4cqw;background:rgba(0,0,0,.55);box-shadow:inset 0 0 0 1px rgba(255,179,71,.22)}
+/* écran « Fil de soie » (15 oct. 2026) */
+.bmsc.silk{background:#050304}
+.bmsc.silk canvas{filter:blur(2.5px) brightness(.5) saturate(1.1);transform:scale(1.04)}
+.bmsc.silk .veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(90% 50% at 50% 40%,transparent,rgba(0,0,0,.55)),linear-gradient(180deg,rgba(0,0,0,.35),transparent 25%,transparent 60%,rgba(0,0,0,.85))}
+.bmsc.silk .stop{position:absolute;left:0;right:56px;top:calc(4.6cqw + env(safe-area-inset-top,0px));z-index:5;display:flex;align-items:center;gap:3cqw;padding:0 0 0 5.5cqw}
+.bmsc.silk .stop em{font:800 min(6cqw,28px)/1 "Shippori Mincho B1",serif;font-style:normal;color:#fff2dc;letter-spacing:.1em;text-shadow:0 0 4cqw rgba(255,140,40,.55)}
+.bmsc.silk .rep{flex:1;min-width:0;padding:0;background:none;box-shadow:none;font:600 min(2.6cqw,12px) var(--mono);letter-spacing:.06em;color:#cdbfa8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bmsc.silk .tm{width:min(12cqw,56px);background:none;margin:0}.bmsc.silk .tm .tv{stroke:#ffe7bf;filter:none}.bmsc.silk .tm circle{stroke-width:1.6}.bmsc.silk .tm b{font:600 min(2.6cqw,12px) var(--mono)}
+.bmsc.silk .cord{position:absolute;left:0;right:0;top:16%;width:100%;height:9%;z-index:2;pointer-events:none}.bmsc.silk .cord path{fill:none;stroke:#d9b06a;stroke-width:.35;filter:drop-shadow(0 0 1px rgba(255,200,120,.6))}
+.bmsc.silk .line{position:absolute;left:4cqw;right:4cqw;top:18%;z-index:3;display:flex;justify-content:space-between;align-items:flex-start}
+.bmsc.silk .line.l2{top:51%;justify-content:center;gap:10cqw}
+.bmsc.silk .hg{all:unset;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;transform:rotate(var(--r,0deg));animation:bmSw 3.6s ease-in-out infinite alternate;-webkit-tap-highlight-color:transparent}
+@keyframes bmSw{to{transform:rotate(calc(var(--r,0deg) * -1))}}
+.bmsc.silk .hg.s{width:24cqw;margin-top:3cqw}.bmsc.silk .hg.v{width:36cqw;margin-top:7cqw}
+.bmsc.silk .clip{width:2cqw;height:3.6cqw;margin-bottom:-1.2cqw;z-index:1;border-radius:.6cqw;background:linear-gradient(90deg,#8a6420,#f3d48a,#8a6420)}
+.bmsc.silk .mc{position:relative;width:100%;aspect-ratio:3/4;border-radius:2.4cqw;overflow:hidden;background:#0a0605;box-shadow:0 2.4cqw 6cqw rgba(0,0,0,.75);transition:box-shadow .25s,transform .25s}
+.bmsc.silk .mc img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.bmsc.silk .mc .lv{position:absolute;left:1.3cqw;top:1.3cqw;font:700 min(2.5cqw,12px) var(--mono);padding:.2cqw 1cqw;border-radius:1cqw;background:rgba(0,0,0,.7);color:#fff}
+.bmsc.silk .mc .crinf{width:22px;height:22px;font-size:11px;right:4px;bottom:4px}
+.bmsc.silk .mc.v{box-shadow:0 0 0 1.5px #ffe7bf,0 0 12cqw rgba(255,160,60,.45),0 3cqw 8cqw #000}
+.bmsc.silk .mc.mys{display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#2a1208,#0b0402 70%);box-shadow:inset 0 0 0 1px rgba(255,214,150,.45),0 2.4cqw 6cqw rgba(0,0,0,.75)}
+.bmsc.silk .mc.mys b{font:800 8cqw "Shippori Mincho B1",serif;color:#d9a35a}
+.bmsc.silk .mc.sold{filter:grayscale(1) brightness(.45)}
+.bmsc.silk .hg.on .mc{box-shadow:0 0 0 2px #ffe7bf,0 0 10cqw rgba(255,180,90,.6),0 3cqw 8cqw #000;transform:translateY(-1cqw)}
+.bmsc.silk .hg:focus-visible .mc{outline:2px solid #fff;outline-offset:3px}
+.bmsc.silk .pt{margin-top:1.6cqw;font:600 min(3cqw,14px) var(--mono);color:#ffe7bf;letter-spacing:.06em}
+.bmsc.silk .hg.v .pt{font:900 min(5.4cqw,25px) var(--title);color:#fff;text-shadow:0 0 4cqw rgba(255,160,60,.6)}
+.bmsc.silk .tnote,.bmsc.silk .why{position:absolute;left:6cqw;right:6cqw;z-index:6;margin:0;text-align:center;font-size:min(2.9cqw,13px);line-height:1.4;color:#e9dcc6;text-shadow:0 1px 2px #000}
+.bmsc.silk .why{bottom:calc(29cqw + env(safe-area-inset-bottom,0px))}.bmsc.silk .why b{display:inline;font:inherit;font-weight:700;color:#ff9aa6}
+.bmsc.silk .tnote{bottom:calc(37cqw + env(safe-area-inset-bottom,0px))}.bmsc.silk .tnote button{all:unset;cursor:pointer;margin-left:6px;text-decoration:underline;color:#cdbfa8}
+.bmsc.silk .bar{height:auto;overflow:visible;background-image:none;position:absolute;left:5cqw;right:5cqw;bottom:calc(15cqw + env(safe-area-inset-bottom,0px));z-index:6;display:flex;align-items:center;gap:3cqw;padding:2.6cqw 2.6cqw 2.6cqw 5cqw;border-radius:99px;background:rgba(12,8,6,.6);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,240,215,.14),inset 0 0 0 1px rgba(255,214,150,.22)}
+.bmsc.silk .bi{flex:1;min-width:0}.bmsc.silk .bi small{display:block;font-size:min(2.5cqw,12px);color:#b8ab96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bmsc.silk .bi b{font:900 min(5.6cqw,26px) var(--title);color:#fff}
+.bmsc.silk .bar .buy{width:auto;display:inline-block;padding:3cqw 7cqw;font-size:min(3.6cqw,16px);background:linear-gradient(180deg,#fff3dc,#f2b25c);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 0 6cqw rgba(255,160,60,.35)}
+.bmsc.silk .sub{position:absolute;left:7cqw;right:7cqw;bottom:calc(5.5cqw + env(safe-area-inset-bottom,0px));z-index:6;display:flex;justify-content:space-between;align-items:center}
+.bmsc.silk .sub .troc{all:unset;cursor:pointer;padding:2cqw 4.6cqw;border-radius:99px;font-weight:600;font-size:min(3cqw,14px);color:#ffe7bf;box-shadow:inset 0 0 0 1px rgba(255,214,150,.35)}
+.bmsc.silk .sub span{font-weight:600;font-size:min(3cqw,14px);color:#b8ab96}.bmsc.silk .sub span b{font:900 min(4.2cqw,20px) var(--title);color:#fff;margin-left:1cqw}
+.bmsc.silk .trl{position:absolute;left:5cqw;right:5cqw;bottom:calc(30cqw + env(safe-area-inset-bottom,0px));z-index:7;max-height:46%;overflow:auto;display:grid;gap:1.6cqw;padding:3.4cqw;border-radius:4cqw;background:rgba(12,8,6,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px rgba(255,214,150,.3),0 4cqw 10cqw rgba(0,0,0,.7)}
+.bmsc.silk .trl[hidden]{display:none}
+.bmsc.silk .trl p{margin:0 0 1cqw;font-size:min(2.9cqw,13px);color:#cdbfa8}
+.bmsc.silk .trl button{all:unset;cursor:pointer;display:flex;justify-content:space-between;padding:2.4cqw 3.4cqw;border-radius:99px;font-size:min(3.1cqw,14px);color:#f4ead8;box-shadow:inset 0 0 0 1px rgba(255,214,150,.25)}.bmsc.silk .trl button b{font-family:var(--mono);color:#ffe7bf}
 html:has(.bmov),html:has(.bmov) body,html:has(.bmcine),html:has(.bmcine) body{overflow:hidden;overscroll-behavior:none}
 @media (prefers-reduced-motion:reduce){.bmsc *,.bmcv *{animation:none!important}}
 </style>
@@ -13867,7 +13907,7 @@ html:has(.bmov),html:has(.bmov) body,html:has(.bmcine),html:has(.bmcine) body{ov
    Ouvert 1 heure réelle (le compte continue jeu fermé), contenu fixe : une vedette nettement au-dessus de l'équipe (+15 % sur sa valeur),
    trois personnages meilleurs que tous les titulaires (quatre au rang « Client »), une caisse mystère. Prestige non exigé.
    Réputation : Inconnu → Client (2 achats) → Habitué (5 achats : vedette un peu plus forte, 65 min). */
-const BM = {on: false /* activé quand le design de l'écran sera validé */, troc: .7, base: .04, step: .005, max: .10, dur: 36e5, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
+const BM = {on: true, troc: .7, base: .04, step: .005, max: .10, dur: 36e5, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
 const BM_UNI = {   /* décor de la ruelle selon l'univers : enseignes, lanternes, couleur des néons */
   op: {s: ["酒場", "海賊", "港", "宿", "質屋", "賭場", "地図", "酒"], l: "海", n: ["#34e1ff", "#ff3d5a", "#ff9a2e", "#7df0c8"]},
   na: {s: ["一楽", "木ノ葉", "忍", "団子", "宿", "酒", "居酒屋", "質屋"], l: "火", n: ["#ff9a2e", "#ff3d5a", "#34e1ff", "#ffd23d"]},
@@ -13997,43 +14037,47 @@ function bmScene(ph, U, st){ const T = window.THREE; if (!T) return null;
       R.render(Sc, cam); });
     const onR = () => size(); addEventListener("resize", onR);
     return {R, st, goldL, glowM, stop(){ on = false; removeEventListener("resize", onR); try { R.setAnimationLoop(null); R.dispose(); R.domElement.remove(); } catch {} }}; }
-/* --- écran du marché (ambiance Ruelle) --- */
-function bmShow(S){ if (!bmOpen(S)) { try { tcToast("Le contrebandier est parti."); } catch {} return crRender(); }
-  const D = DATA[S.u], B = S.bm, c = D[B.ved], rk = bmRep(S), n = (S.stat && S.stat.bm) || 0, nxt = BM.rep[rk + 1];
+/* --- écran du marché : « Fil de soie » (choisi le 15 oct. 2026). Les cartes pendent à un fil doré au-dessus de la ruelle 3D floutée ;
+   on touche une carte pour la choisir, la barre du bas résume le choix et l'achète. --- */
+function bmShow(S, pick){ if (!bmOpen(S)) { try { tcToast("Le contrebandier est parti."); } catch {} return crRender(); }
+  const D = DATA[S.u], B = S.bm, rk = bmRep(S), n = (S.stat && S.stat.bm) || 0, nxt = BM.rep[rk + 1], U = BM_UNI[S.u] || BM_UNI.op;
   const tr = B.troc != null && S.squad.includes(B.troc) ? B.troc : null, cred = tr != null ? Math.round(crVal(S.u, tr) * BM.troc) : 0, net = p => Math.max(0, p - cred);
-  const full = S.squad.length >= CR_MAXSQ && tr == null, why = p0 => { const p = net(p0); return full ? "Effectif complet : vends un joueur dans l'onglet Effectif" : S.money < p ? `Il te manque <b>${p - S.money}M</b>. Vends un joueur ou enchaîne les matchs : le marché reste ouvert jusqu'à ${new Date(B.end).toLocaleTimeString("fr-FR", {hour: "2-digit", minute: "2-digit"})}, même si tu fermes le jeu.` : ""; };
-  const card = (i, cls = "", tag = "") => `<div class="bmc ${cls} ${B.sold.includes(i) ? "sold" : ""}"><div class="pic"><img src="${bmSrc(D[i])}" alt=""><span class="lv">${D[i].p}</span>${tag}<i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(D[i].n)}" data-crinf="${i}">i</i></div><div class="t"><b>${esc(D[i].n)}</b><span>Valeur ${crVal(S.u, i)}M</span></div></div>`;
-  const vSold = B.sold.includes(B.ved), vw = why(B.vp), gb = B.box.got;
+  const full = S.squad.length >= CR_MAXSQ && tr == null, why = p0 => { const p = net(p0); return full ? "Effectif complet : vends un joueur ou propose-le en troc." : S.money < p ? `Il te manque <b>${p - S.money}M</b> : vends un joueur, propose un troc ou enchaîne les matchs. Ouvert jusqu'à ${new Date(B.end).toLocaleTimeString("fr-FR", {hour: "2-digit", minute: "2-digit"})}, même jeu fermé.` : ""; };
+  const sel = pick ?? bmShow.sel ?? B.ved; bmShow.sel = sel;
+  const price = k => k === "box" ? B.box.p : k === B.ved ? B.vp : crVal(S.u, k), sold = k => k === "box" ? B.box.got != null : B.sold.includes(k);
+  const mc = (i, v) => `<div class="mc ${v ? "v" : ""} ${B.sold.includes(i) ? "sold" : ""}"><img src="${bmSrc(D[i])}" alt=""><span class="lv">${D[i].p}</span><i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(D[i].n)}" data-crinf="${i}">i</i></div>`;
+  const hang = (i, cls, r) => `<button class="hg ${cls} ${sel === i ? "on" : ""}" style="--r:${r}deg" data-bmsel="${i}" aria-label="${esc(D[i].n)}"><i class="clip"></i>${mc(i, cls.includes("v"))}<span class="pt">${B.sold.includes(i) ? "Acheté" : price(i) + "M"}</span></button>`;
+  const gb = B.box.got, boxH = `<button class="hg s box ${sel === "box" ? "on" : ""}" style="--r:3deg" data-bmsel="box" aria-label="Caisse mystère"><i class="clip"></i>${gb != null ? mc(gb) : `<div class="mc mys"><b>闇</b></div>`}<span class="pt">${gb != null ? "Ouverte" : B.box.p + "M"}</span></button>`;
+  const o = B.oth, l1 = `${o[0] != null ? hang(o[0], "s", -5) : ""}${hang(B.ved, "v ved", 0)}${o[1] != null ? hang(o[1], "s", 4) : ""}`, l2 = `${o[2] != null ? hang(o[2], "s oth", -3) : ""}${boxH}${o[3] != null ? hang(o[3], "s", -2) : ""}`;
+  const sn = sel === "box" ? (gb != null ? D[gb].n : "Caisse mystère") : D[sel].n, sp = price(sel), w = sold(sel) ? "" : why(sp);
+  const lab = sel === "box" ? "Caisse mystère · une carte au hasard" : sel === B.ved ? `Vedette · +15 % · ${esc(sn)}` : `Sous le manteau · ${esc(sn)}`;
   document.querySelector(".bmov")?.remove();
-  const U = BM_UNI[S.u] || BM_UNI.op;
-  document.body.insertAdjacentHTML("beforeend", `<div class="bmov" role="dialog" aria-modal="true" aria-label="Marché noir"><div class="bmsc" style="--un:${U.n[0]}"><div class="shade"></div><div class="bg"><i class="brk"></i><i class="rain"></i><i class="neon">闇市</i><i class="lamp"></i><i class="wet"></i></div>
-    <button class="x" aria-label="Fermer">✕</button><div class="in">
-    <div class="hd"><div><em class="eb">Marché noir · 闇市</em></div><div class="tm"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="tr"/><circle cx="22" cy="22" r="19" class="tv" data-bmring style="stroke-dasharray:119.4"/></svg><b data-bmt>${bmClock(bmLeft(S))}</b><small>restant</small></div></div>
-    <div class="sky" aria-hidden="true"></div><h3 class="ttl">Un contrebandier est en ville</h3><div class="pn top"><span class="rep">Réputation : ${BM.rep[rk][1]} · ${n} achat${n > 1 ? "s" : ""}${nxt ? ` · ${BM.rep[rk + 1][1]} à ${nxt[0]}` : ""}</span>
-    <div class="ved">${card(B.ved, "big", `<span class="hx">${vSold ? "Achetée" : "Vedette"}</span>`)}<div class="vi"><small>Prix contrebande</small><b class="pr">${B.vp}M</b><span class="was">Valeur ${crVal(S.u, B.ved)}M · +15 %</span>
-      <ul><li>+${Math.max(0, c.p - B.avg)} niveaux sur ta moyenne</li><li>Prestige non exigé</li><li>Contenu fixe jusqu'à la fermeture</li></ul></div></div>
-    ${vSold ? `<p class="ms">${esc(c.n)} a rejoint ton club.</p>` : `<button class="buy" data-bmb="${B.ved}" ${vw ? "disabled" : ""}>Acheter · ${net(B.vp)}M${tr != null ? " + " + esc(D[tr].n) : ""}</button>${vw ? `<p class="ms">${vw}</p>` : ""}`}
-    </div><div class="pn troc"><span class="sub">Troc · le contrebandier reprend un joueur à ${Math.round(BM.troc * 100)} % de sa valeur</span>${tr != null ? `<p class="ms">Tu donnes <b style="color:#ffe7bf">${esc(D[tr].n)}</b> : ${cred}M déduits de ton prochain achat. <button class="sm in" data-bmtr="-1">Annuler</button></p>` : `${S.squad.length > 5 || true ? `<button class="sm" data-bmtrl>Proposer un joueur en échange</button>` : ""}`}
-      <div class="trl" hidden>${crByP(S, S.squad).map(i => `<button class="sm" data-bmtr="${i}">${esc(D[i].n)} · niv. ${D[i].p} · ${Math.round(crVal(S.u, i) * BM.troc)}M</button>`).join("")}</div></div>
-    <div class="pn"><span class="sub">Aussi sous le manteau · mieux que tes titulaires · prix normal</span><div class="oth" style="--n:${B.oth.length}">${B.oth.map(i => `<div>${card(i, "sm")}<button class="sm" data-bmb="${i}" ${B.sold.includes(i) || why(crVal(S.u, i)) ? "disabled" : ""}>${B.sold.includes(i) ? "Acheté" : net(crVal(S.u, i)) + "M"}</button></div>`).join("")}</div></div>
-    <div class="pn"><span class="sub">Caisse mystère</span><div class="box"><div class="bx ${gb != null ? "open" : ""}"><div class="f b">闇</div><div class="f fr">${gb != null ? `<img src="${bmSrc(D[gb])}" alt="">` : ""}</div></div>
-      <div>${gb != null ? `<p>Dans la caisse : <b>${esc(D[gb].n)}</b> (niveau ${D[gb].p}).</p>` : `<p>Une carte face cachée, moins chère. Parfois un personnage digne d'une vedette, souvent un bon renfort, parfois plus modeste.</p><button class="sm" data-bmx ${why(B.box.p) ? "disabled" : ""}>Ouvrir · ${net(B.box.p)}M</button>`}</div></div></div>
-    <div class="cash"><span>Caisse</span><b>${crMoney(S, S.money)}</b></div></div></div></div>`);
-  const ov = document.querySelector(".bmov"), sc = ov.querySelector(".bmsc"), bye = () => { try { bmShow.scn && bmShow.scn.stop(); } catch {} bmShow.scn = null; ov.remove(); crRender(); };
+  document.body.insertAdjacentHTML("beforeend", `<div class="bmov" role="dialog" aria-modal="true" aria-label="Marché noir"><div class="bmsc silk" style="--un:${U.n[0]}"><div class="veil"></div>
+    <button class="x" aria-label="Fermer">✕</button>
+    <div class="stop"><em>闇市</em><span class="rep">${BM.rep[rk][1]} · ${n} achat${n > 1 ? "s" : ""}${nxt ? ` · ${BM.rep[rk + 1][1]} à ${nxt[0]}` : ""}</span><div class="tm"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="tr"/><circle cx="22" cy="22" r="19" class="tv" data-bmring style="stroke-dasharray:119.4"/></svg><b data-bmt>${bmClock(bmLeft(S))}</b></div></div>
+    <svg class="cord" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M-2 3 Q50 22 102 3"/></svg>
+    <div class="line">${l1}</div><div class="line l2">${l2}</div>
+    ${tr != null ? `<p class="tnote">Troc : <b>${esc(D[tr].n)}</b> · ${cred}M déduits <button data-bmtr="-1">Annuler</button></p>` : ""}
+    ${w ? `<p class="why">${w}</p>` : ""}
+    <div class="bar"><div class="bi"><small>${lab}</small><b>${sold(sel) ? "—" : net(sp) + "M"}</b></div><button class="buy" data-bmgo ${sold(sel) || w ? "disabled" : ""}>${sold(sel) ? (sel === "box" ? "Ouverte" : "Acheté") : sel === "box" ? "Ouvrir" : "Acheter"}</button></div>
+    <div class="sub"><button class="troc" data-bmtrl>⇄ Troc</button><span>Caisse <b>${crMoney(S, S.money)}</b></span></div>
+    <div class="trl" hidden><p>Le contrebandier reprend un joueur à ${Math.round(BM.troc * 100)} % de sa valeur, déduit de ton achat.</p>${crByP(S, S.squad).map(i => `<button data-bmtr="${i}">${esc(D[i].n)} · niv. ${D[i].p}<b>${Math.round(crVal(S.u, i) * BM.troc)}M</b></button>`).join("")}</div>
+  </div></div>`);
+  const ov = document.querySelector(".bmov"), sc = ov.querySelector(".bmsc"), bye = () => { try { bmShow.scn && bmShow.scn.stop(); } catch {} bmShow.scn = null; bmShow.sel = null; ov.remove(); crRender(); };
   const calm = (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
-  const put3d = () => { if (!ov.isConnected) return; if (!bmShow.scn && window.THREE && !calm){ bmShow.scn = bmScene(sc, U, {z: -19.6, y: 1.75, door: 1}); if (bmShow.scn){ bmShow.scn.goldL.intensity = 6; bmShow.scn.glowM.color.setRGB(1, 1, 1); } }
+  const put3d = () => { if (!ov.isConnected) return; if (!bmShow.scn && window.THREE && !calm){ bmShow.scn = bmScene(sc, U, {z: -8, y: 1.7, door: 1}); if (bmShow.scn){ bmShow.scn.goldL.intensity = 6; bmShow.scn.glowM.color.setRGB(1, 1, 1); } }
     if (bmShow.scn){ sc.prepend(bmShow.scn.R.domElement); sc.classList.add("d3"); } };
-  try { tcLibs(); } catch {} if (window.THREE) put3d(); else { const t0 = Date.now(), w = () => { if (window.THREE || Date.now() - t0 > 3000) put3d(); else setTimeout(w, 150); }; w(); }
+  try { tcLibs(); } catch {} if (window.THREE) put3d(); else { const t0 = Date.now(), wt = () => { if (window.THREE || Date.now() - t0 > 3000) put3d(); else setTimeout(wt, 150); }; wt(); }
   ov.querySelector(".x").onclick = bye; ov.onclick = e => { if (e.target === ov) bye(); };
-  const pay = p0 => { const p = net(p0); if (!bmOpen(S) || S.money < p || (S.squad.length >= CR_MAXSQ && tr == null)) return false; S.money -= p; if (tr != null){ S.squad = S.squad.filter(x => x !== tr); delete S.out[tr]; B.troc = null; } return true; };
-  ov.querySelector("[data-bmtrl]") && (ov.querySelector("[data-bmtrl]").onclick = e => { e.currentTarget.nextElementSibling ? 0 : 0; ov.querySelector(".trl").hidden = false; e.currentTarget.hidden = true; });
+  ov.querySelectorAll("[data-bmsel]").forEach(b => b.onclick = e => { if (e.target.closest("[data-crinf]")) return; const k = b.dataset.bmsel; bmShow(S, k === "box" ? "box" : +k); });
+  ov.querySelector("[data-bmtrl]").onclick = () => { const l = ov.querySelector(".trl"); l.hidden = !l.hidden; };
   ov.querySelectorAll("[data-bmtr]").forEach(b => b.onclick = () => { const i = +b.dataset.bmtr; B.troc = i < 0 ? null : i; crSave(); bmShow(S); });
-  const buy = (i, price) => { if (B.sold.includes(i) || !pay(price)) return false; S.squad.push(i); B.sold.push(i); S.stat.bm = (S.stat.bm || 0) + 1; S.stat.buy = Math.max(S.stat.buy || 0, price); crSave(); try { tcSave(tcLoad()); } catch {} return true; };
-  ov.querySelectorAll("[data-bmb]").forEach(b => b.onclick = () => { const i = +b.dataset.bmb, p = i === B.ved ? B.vp : crVal(S.u, i); if (buy(i, p)){ try { SFX.play(i === B.ved ? "fanfare" : "win"); } catch {} if (i === B.ved) S.news = `${D[i].n} rejoint ${S.club} par la porte de derrière du marché noir.`; bmShow(S); } });
-  const bx = ov.querySelector("[data-bmx]"); if (bx) bx.onclick = () => { if (!bmOpen(S) || (S.squad.length >= CR_MAXSQ && tr == null) || S.money < net(B.box.p)) return;
-    const {avg} = bmTeam(S), r = Math.random(), tg = r < .25 ? avg + (100 - avg) * .45 : r < .75 ? avg + 10 : avg + 3, pick = bmNear(S, Math.min(99, tg), 3, [B.ved, ...B.oth])[0]; if (pick == null) return;
-    if (!pay(B.box.p)) return; S.squad.push(pick); B.box.got = pick; S.stat.bm = (S.stat.bm || 0) + 1; crSave(); try { tcSave(tcLoad()); } catch {}
-    const box = ov.querySelector(".bx"); box.querySelector(".fr").innerHTML = `<img src="${bmSrc(D[pick])}" alt="">`; requestAnimationFrame(() => box.classList.add("open")); try { BMS.gong(); } catch {} setTimeout(() => bmShow(S), 1300); };
+  const pay = p0 => { const p = net(p0); if (!bmOpen(S) || S.money < p || (S.squad.length >= CR_MAXSQ && tr == null)) return false; S.money -= p; if (tr != null){ S.squad = S.squad.filter(x => x !== tr); delete S.out[tr]; B.troc = null; } return true; };
+  ov.querySelector("[data-bmgo]").onclick = () => { if (sold(sel)) return;
+    if (sel === "box"){ const {avg} = bmTeam(S), r = Math.random(), tg = r < .25 ? avg + (100 - avg) * .45 : r < .75 ? avg + 10 : avg + 3, pk = bmNear(S, Math.min(99, tg), 3, [B.ved, ...B.oth])[0]; if (pk == null || !pay(B.box.p)) return;
+      S.squad.push(pk); B.box.got = pk; S.stat.bm = (S.stat.bm || 0) + 1; crSave(); try { tcSave(tcLoad()); BMS.gong(); } catch {} return bmShow(S, "box"); }
+    if (!pay(price(sel))) return; S.squad.push(sel); B.sold.push(sel); S.stat.bm = (S.stat.bm || 0) + 1; S.stat.buy = Math.max(S.stat.buy || 0, price(sel)); if (sel === B.ved) S.news = `${D[sel].n} rejoint ${S.club} par la porte de derrière du marché noir.`;
+    crSave(); try { tcSave(tcLoad()); SFX.play(sel === B.ved ? "fanfare" : "win"); } catch {} bmShow(S, sel); };
   bmTick(); bmTourMaybe(S); }
 /* compte à rebours partout où il est affiché ; fermeture automatique à la fin de l'heure */
 function bmTick(){ clearInterval(bmTick.h); bmTick.h = setInterval(() => { const S = CR.S; if (!S || !S.bm){ clearInterval(bmTick.h); return; } const ms = bmLeft(S);
@@ -14125,10 +14169,10 @@ function crTourMaybe(){ const S = CR.S; if (!S || S.bot || S.tuto >= 5 || GTR ||
 const bmQ = s => document.querySelector(".bmov " + s);
 const BM_TSTEPS = [
   {sel: () => bmQ(".tm"), t: "Le marché noir", p: "Un contrebandier ne reste qu'une heure, montre en main. Le compte à rebours continue même si tu fermes le jeu.", next: "Suivant"},
-  {sel: () => bmQ(".ved"), t: "La vedette", p: "Un personnage bien au-dessus de ton équipe, sans condition de prestige. Elle coûte 15 % de plus que sa valeur.", next: "Suivant"},
-  {sel: () => bmQ(".troc"), t: "Le troc", p: "Pas assez d'argent ? Le contrebandier reprend un de tes joueurs à 70 % de sa valeur, déduits de ton achat.", next: "Suivant"},
-  {sel: () => bmQ(".oth"), t: "Sous le manteau", p: "Trois personnages meilleurs que tous tes titulaires, au prix normal.", next: "Suivant"},
-  {sel: () => bmQ(".box"), t: "La caisse mystère", p: "Une carte face cachée, moins chère. Parfois digne d'une vedette, parfois plus modeste : c'est un pari.", next: "Suivant"},
+  {sel: () => bmQ(".hg.ved"), t: "La vedette", p: "Un personnage bien au-dessus de ton équipe, sans condition de prestige. Elle coûte 15 % de plus que sa valeur.", next: "Suivant"},
+  {sel: () => bmQ(".sub .troc"), t: "Le troc", p: "Pas assez d'argent ? Le contrebandier reprend un de tes joueurs à 70 % de sa valeur, déduits de ton achat.", next: "Suivant"},
+  {sel: () => bmQ(".hg.oth") || bmQ(".hg.s:not(.box)"), t: "Sous le manteau", p: "Trois personnages meilleurs que tous tes titulaires, au prix normal.", next: "Suivant"},
+  {sel: () => bmQ(".hg.box"), t: "La caisse mystère", p: "Une carte face cachée, moins chère. Parfois digne d'une vedette, parfois plus modeste : c'est un pari.", next: "Suivant"},
   {sel: () => bmQ(".rep"), t: "Ta réputation", p: "Chaque achat te fait connaître du contrebandier. Client : un personnage de plus en vente. Habitué : une vedette plus forte et 5 minutes de plus.", next: "Suivant"}, gtKeepStep("en haut de l'écran Carrière")];
 function bmTourMaybe(S, replay){ if (GTR || !S || (!replay && S.bmTut)) return; setTimeout(() => { if (!document.querySelector(".bmov")) return;
   gtStart(BM_TSTEPS, {title: "Marché noir", label: "Didacticiel du marché noir", cls: "bm", replay, end: () => { S.bmTut = 1; try { crSave(); } catch {} } }); }, 450); }
