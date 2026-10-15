@@ -14558,7 +14558,8 @@ const HOME_ON = {games: ["mercato", "uc", "guess", "sil"], fams: ["cat1", "cat2"
 (function(){ document.querySelectorAll("#home section.cat").forEach(sec => { if (!HOME_ON.fams.includes(sec.id)){ sec.remove(); return; }
   sec.querySelectorAll(".gcards .mode").forEach(m => { if (!HOME_ON.games.includes(m.dataset.g)) m.remove(); });
   if (!sec.querySelector(".gcards .mode")) sec.remove(); });
-  const sel = document.querySelector(".gcards .mode.sel"); if (!sel){ const f = document.querySelector(".gcards .mode"); f && f.classList.add("sel"); } })();
+  const sel = document.querySelector(".gcards .mode.sel"); if (!sel){ const f = document.querySelector(".gcards .mode"); f && f.classList.add("sel"); }
+  })();
 /* Accueil : bloc « À la une », fiche du jeu choisi, onglets du bas. */
 (function(){
   const cards = [...document.querySelectorAll(".gcards .mode")]; if (!cards.length) return;
@@ -14746,7 +14747,7 @@ body:has(#home:not(.hidden)),body:has(#launch:not(.hidden)){--bg:#050505;backgro
 #home .sitebar .mnbtn{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hc) 60%,var(--line))}
 #home .sitebar .mnbtn .av{background:var(--hc);transition:background .35s}
 #home .sitebar .mnbtn .dot{background:var(--hc);box-shadow:0 0 8px var(--hc)}
-#home .sitefoot{--hc:#b14dff;border-top-color:color-mix(in srgb,var(--hc) 50%,transparent)}
+#home .sitefoot{border-top-color:color-mix(in srgb,var(--hc) 50%,transparent)}
 #home .sitefoot span:first-child{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--hc);text-shadow:0 0 10px color-mix(in srgb,var(--hc) 55%,transparent)}
 #home .sitefoot a{color:var(--hc)}
 .tabbar{border-top-color:color-mix(in srgb,var(--hc) 45%,var(--line))!important}
@@ -14784,7 +14785,7 @@ body:has(#home:not(.hidden)),body:has(#launch:not(.hidden)){--bg:#050505;backgro
     const w = WHO[g], src = w && find(w[0], w[1]); if (src) art.innerHTML = `<img src="${src}" alt="" loading="lazy">${g === "sil" ? `<i class="tint"></i>` : ""}`; });
   // la couleur du haut du site suit la famille qui occupe le haut de l'écran
   try { const secs = [...document.querySelectorAll("#home section.cat")], home = document.querySelector("#home"); let last = "", tick = 0;
-    const upd = () => { tick = 0; if (!home || home.classList.contains("hidden")) return; let cur = secs[0]; for (const s of secs){ if (s.getBoundingClientRect().top <= innerHeight * .4) cur = s; }
+    const upd = () => { tick = 0; if (!home || home.classList.contains("hidden")) return; const live = secs.filter(s => s.isConnected); if (!live.length) return; let cur = live[0]; for (const s of live){ if (s.getBoundingClientRect().top <= innerHeight * .4) cur = s; } if (scrollY + innerHeight >= document.documentElement.scrollHeight - 8) cur = live[live.length - 1];   // tout en bas : la dernière famille affichée   // familles masquées (HOME_ON) ignorées : sinon la violette, retirée de la page, l'emportait
       const c = getComputedStyle(cur).getPropertyValue("--fb").trim() || getComputedStyle(cur).getPropertyValue("--f1").trim(); if (c && c !== last){ last = c; document.body.style.setProperty("--hc", c); } };
     addEventListener("scroll", () => { if (!tick) tick = requestAnimationFrame(upd); }, {passive: true}); upd(); setTimeout(upd, 600); window.hcUpd = upd; } catch {}
   // les pastilles de familles ont été créées avec les anciennes couleurs : on leur donne celles de la nouvelle direction
