@@ -15455,6 +15455,8 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tc.tc.tc.arp:has(> img.fade){background:linear-gradient(color-mix(in srgb,var(--ad) 70%,#000),var(--ad)) padding-box,linear-gradient(150deg,color-mix(in srgb,var(--al) 82%,transparent),color-mix(in srgb,var(--am) 82%,transparent) 30%,color-mix(in srgb,var(--ad) 82%,transparent) 62%,color-mix(in srgb,var(--am) 82%,transparent) 85%,color-mix(in srgb,var(--al) 82%,transparent)) border-box!important}
 .tcgrid > .tc.tc.tc.arp{--bw:4px}
 @media (max-width:520px){.tcgrid > .tc.tc.tc.arp{--bw:3px}}
+/* voile noir haut/bas allégé (demandé le 15 oct. 2026) : la teinte reste, plus transparente ; le texte garde son contour noir */
+.tc.tc.tc.arp .ag{background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,0) 20%,rgba(0,0,0,0) 54%,rgba(0,0,0,.36) 70%,rgba(0,0,0,.7))!important}
 .tc.tc.tc.arp::after{content:""!important;display:block!important;position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--al) 85%,transparent),inset 0 0 10px color-mix(in srgb,var(--al) 35%,transparent);background:none!important}
 </style>
 <style>
