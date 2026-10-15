@@ -15440,6 +15440,15 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 /* reflet : bande aux couleurs de la carte, invisible au repos, n'apparaît qu'en inclinant et glisse avec le doigt ou la souris (redemandé le 15 oct. 2026) */
 .tc.tc.tc.arp .ap{opacity:0!important;mix-blend-mode:normal!important;background-position:var(--px,var(--mx,40%)) 50%!important;transition:opacity .35s ease!important}
 :is(.tc.hl,.vcard.live .tc).tc.tc.arp .ap{opacity:calc(.55 + var(--ph,0) * .45)!important}
+/* AR : contour adaptatif posé AUTOUR de la carte (simulation 2 validée le 15 oct. 2026, artifact HUqLK588…). L'image (agrandie, pleine) et le voile restent
+   identiques : la zone intérieure garde exactement sa taille (box-sizing content-box), la bordure s'ajoute dehors et la marge négative évite de décaler la grille.
+   Dégradé aux couleurs de l'illustration, légèrement translucide, liseré lumineux côté image, lueur colorée à l'extérieur. */
+.tc.tc.tc.arp{--bw:clamp(3px,.9vw,7px);box-sizing:content-box!important;border:var(--bw) solid transparent!important;margin:calc(-1 * var(--bw))!important;border-radius:calc(12px + var(--bw))!important;
+  background:linear-gradient(var(--ad),var(--ad)) padding-box,linear-gradient(150deg,color-mix(in srgb,var(--al) 82%,transparent),color-mix(in srgb,var(--am) 82%,transparent) 30%,color-mix(in srgb,var(--ad) 82%,transparent) 62%,color-mix(in srgb,var(--am) 82%,transparent) 85%,color-mix(in srgb,var(--al) 82%,transparent)) border-box!important;
+  box-shadow:0 0 18px color-mix(in srgb,var(--am) 55%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
+.tcgrid > .tc.tc.tc.arp{--bw:4px}
+@media (max-width:520px){.tcgrid > .tc.tc.tc.arp{--bw:3px}}
+.tc.tc.tc.arp::after{content:""!important;display:block!important;position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--al) 85%,transparent),inset 0 0 10px color-mix(in srgb,var(--al) 35%,transparent);background:none!important}
 </style>
 <style>
 /* enchère façon FUT : champ de saisie du montant entre deux boutons −/+ */
