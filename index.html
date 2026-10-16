@@ -10650,7 +10650,7 @@ const tcFr = (c, src, f) => c.fr && (!f || f === "H") && src === c.i ? ` style="
 // AR façon Pokémon (15 oct. 2026) : scène de l'animé bord à bord, sans cadre, nom et niveau en haut, technique et une ligne en bas (data/ar_text.json → TCARTXT).
 // Seulement pour les versions AR et seconde AR qui ont une capture de scène ; les autres gardent le style AR habituel.
 // couleurs de l'illustration (calculées par build.py) : contour des AR et reflet des Holo s'y accordent (demande du 15 oct. 2026)
-const tcPalOf = (c, f) => { try { if (f === "A" || f === "B" || f === "C"){ const p = window.__MA.TCPAL[c.u][c.n][TC_ARTK[f]]; if (p) return p; } } catch {} return c.hc || null; };
+const tcPalOf = (c, f) => { try { if (f === "A" || f === "B" || f === "C"){ const p = window.__MA.TCPAL[c.u][c.n][TC_ARTK[f]]; if (p) return p; } } catch {} try { const b = window.__MA.TCBPAL[c.n]; if (b) return b; } catch {} return c.hc || null; };   // TCBPAL : couleurs de l'image de base propre à la carte, ou corrigées à la main (16 oct. 2026)
 // Holo (16 oct. 2026) : les cartes sans couleurs calculées à la construction (objets, formes Éveil) les reçoivent au chargement de leur image :
 // teinte dominante pondérée par la saturation (même calcul que build.py), mise en cache par image.
 const TC_PALC = new Map();
