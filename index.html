@@ -15448,10 +15448,13 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tc.tc.lx.f-H:is([style*="--hm"],.palc){--m1:var(--hl);--m2:var(--hm);--m3:var(--hd);--gl:color-mix(in srgb,var(--hm) 55%,transparent)}
 .tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx,.tc.tc.tc.lx.f-H:is([style*="--hm"],.palc) .fx{display:block!important;opacity:.62!important;filter:saturate(1.2)!important;mix-blend-mode:soft-light!important;
   background:linear-gradient(118deg,transparent 38%,color-mix(in srgb,var(--hl) 85%,transparent) 50%,transparent 62%),repeating-linear-gradient(112deg,var(--hl) 0,var(--hm) 6%,var(--hd) 12%,var(--hm) 18%,var(--hl) 24%)!important;background-size:250% 250%,260% 260%!important}
-:is(.tc.hl,.vcard.live .tc).tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.78 + var(--ph,0) * .22)!important;animation:none!important;background-position:var(--px,50%) var(--py,50%),var(--px,50%) var(--py,50%)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.62 + var(--ph,0) * .1)!important;animation:none!important;background-position:var(--px,50%) var(--py,50%),var(--px,50%) var(--py,50%)!important}
 /* Épiques en Holo : la feuille Kyara reste (crêtes fines, masque --foil), teintée aux couleurs de la carte et visible au repos */
+/* paillettes des cartes rares en Holo : plafonnées (16 oct. 2026, l'image disparaissait sur téléphone en inclinant) */
+:is(.tc.hl,.vcard.live .tc).tc.tc.f-H:is(.r-L,.r-M,.r-X) .sk{opacity:calc(.2 + var(--ph,0) * .3)!important}
+.tcview .vf:has(.tc.f-H)::after,.tcview .vf:has(.tc.arp)::after{background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.2),transparent 46%)!important}
 .tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{display:block!important;opacity:.24!important;background:repeating-linear-gradient(110deg,var(--hl) 0,var(--hm) 7%,var(--hd) 14%,var(--hm) 21%,var(--hl) 28%)!important;background-size:400% 400%!important}
-:is(.tc.hl,.vcard.live .tc).tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{opacity:.4!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{opacity:.28!important}
 </style>
 <style>
 /* ---- AR : la brillance n'apparaît qu'en inclinant la carte (validé le 15 oct. 2026) : rien au repos, plus forte à mesure qu'on incline (--ph, 0 au centre → 1 dans un coin) ---- */
@@ -15465,7 +15468,7 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tc.tc.tc.arp > img,.tc.tc.tc.arp .ap,.tc.tc.tc.arp .ag{border-radius:7px!important}
 /* reflet : bande aux couleurs de la carte, invisible au repos, n'apparaît qu'en inclinant et glisse avec le doigt ou la souris (redemandé le 15 oct. 2026) */
 .tc.tc.tc.arp .ap{opacity:0!important;mix-blend-mode:normal!important;background-position:var(--px,var(--mx,40%)) 50%!important;transition:opacity .35s ease!important}
-:is(.tc.hl,.vcard.live .tc).tc.tc.arp .ap{opacity:calc(.55 + var(--ph,0) * .45)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.arp .ap{opacity:calc(.3 + var(--ph,0) * .25)!important}   /* réduit le 16 oct. 2026 : sur téléphone l'image disparaissait en inclinant */
 /* AR : contour adaptatif posé AUTOUR de la carte (simulation 2 validée le 15 oct. 2026, artifact HUqLK588…). L'image (agrandie, pleine) et le voile restent
    identiques : la zone intérieure garde exactement sa taille (box-sizing content-box), la bordure s'ajoute dehors et la marge négative évite de décaler la grille.
    Dégradé aux couleurs de l'illustration, légèrement translucide, liseré lumineux côté image, lueur colorée à l'extérieur. */
