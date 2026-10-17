@@ -10715,12 +10715,12 @@ const TC_BURN = (() => {
     field(){ const f = new Float32Array(GW * GH), ox = this.ox * GW, oy = this.oy * GH, md = Math.hypot(GW, GH);
       for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++){ const e = Math.min(x, y, GW - 1 - x, GH - 1 - y) / (GW * .5); f[y * GW + x] = Math.hypot(x - ox, y - oy) / md * 1.25 + e * .25 + this.n[y * GW + x] * .32; } return f; }
     follow(px, py, ph){ const m = Math.min(px, 1 - px, py, 1 - py); let ox = px, oy = py; if (m === px) ox = -.05; else if (m === 1 - px) ox = 1.05; else if (m === py) oy = -.05; else oy = 1.05;
-      this.ox += (ox - this.ox) * .15; this.oy += (oy - this.oy) * .15; this.tgt = Math.max(0, ph - .15) * .5; }
-    frame(){ this.t += this.tgt > this.t ? (this.tgt - this.t) * .018 : (this.tgt - this.t) * .03; this.idle = this.tgt > 0 ? 0 : this.idle + 1;
+      this.ox += (ox - this.ox) * .15; this.oy += (oy - this.oy) * .15; this.tgt = Math.max(0, ph - .04) * .72; }   // le feu prend dès une petite inclinaison (17 oct. 2026)
+    frame(){ this.t += this.tgt > this.t ? (this.tgt - this.t) * .04 : (this.tgt - this.t) * .03;   // propagation environ deux fois plus rapide this.idle = this.tgt > 0 ? 0 : this.idle + 1;
       const key = this.ox.toFixed(2) + this.oy.toFixed(2); if (!this.f || this.fk !== key){ this.f = this.field(); this.fk = key; }
       const d = this.img.data, md = this.mimg.data, f = this.f, B = this.B, P = this.P, heal = this.idle > 70, front = []; let any = false;
       for (let i = 0, k = 0; i < GW * GH; i++, k += 4){ const b = Math.max(0, Math.min(1, (this.t - f[i] + .03) / .09)); P[i] = B[i];
-        if (b > B[i]) B[i] += (b - B[i]) * .06; else if (heal) B[i] *= .985;
+        if (b > B[i]) B[i] += (b - B[i]) * .12; else if (heal) B[i] *= .985;
         const q = B[i]; let R = 0, G = 0, Bc = 0, A = 0; if (q > .01) any = true;
         if (q > .74 && q <= .86){ R = 45; G = 14; Bc = 4; A = 255; }
         else if (q > .62 && q <= .74){ const z = (q - .62) / .12; R = 255; G = 110 + z * 130; Bc = 30 + z * 80; A = 255; if (B[i] > P[i] + .002 && Math.random() < .03) front.push(i); }
