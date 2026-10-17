@@ -15500,6 +15500,23 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
   box-shadow:0 0 18px color-mix(in srgb,var(--hm) 55%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
 .tcgrid > .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:4px}
 @media (max-width:520px){.tcgrid > .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:3px}}
+/* ---- Contour « Prisme » (V3, choisi le 17 oct. 2026) pour les AR seulement ; les Holos gardent le contour « verre », même épaisseur : bord irisé (arc-en-ciel mêlé aux couleurs
+   de la carte) qui tourne doucement. Épaisseur visible aussi sur téléphone. Rotation seulement en grand (vue, ouverture, survol) pour ménager le téléphone. */
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes tcprism{to{--ang:360deg}}
+.tc.tc.tc.arp,.tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:6px}
+.tcgrid > .tc.tc.tc.arp,.tcgrid > .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:4px}
+.tcview .vf .tc.tc.tc.arp,.tcview .vf .tc.tc.tc.f-H:is([style*="--hm"],.palc),.tccine .tc.tc.tc.arp,.tccine .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:8px}
+.tc.tc.tc.arp,.tc.tc.tc.arp:has(> img.fade){background:linear-gradient(var(--ad),var(--ad)) padding-box,conic-gradient(from var(--ang),var(--am),#ff7ad9,var(--al),#7af0ff,var(--am),#ffe27a,var(--al),#b48cff,var(--am)) border-box!important}
+.tc.tc.tc.f-H:is([style*="--hm"],.palc){box-shadow:0 0 18px color-mix(in srgb,var(--hm) 50%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
+@media (prefers-reduced-motion:no-preference){:is(.tcview .vf,.tccine) .tc.tc.tc.arp,.tc.tc.tc.hl.arp{animation:tcprism 7s linear infinite}}
+/* ---- Brillance des Holos (17 oct. 2026, 3e baisse) : sur téléphone l'image paraissait délavée. Le reflet coloré est plus léger,
+   et la tache blanche qui suit le doigt (.fx::after) et le reflet de la vue agrandie sont presque effacés sur les Holos. */
+.tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx,.tc.tc.tc.lx.f-H:is([style*="--hm"],.palc) .fx{opacity:.36!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.36 + var(--ph,0) * .04)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.f-H .fx::after{opacity:.12!important}
+.tcview .vf:has(.tc.f-H)::after{opacity:.4!important}
+
 </style>
 <style>
 /* enchère façon FUT : champ de saisie du montant entre deux boutons −/+ */
