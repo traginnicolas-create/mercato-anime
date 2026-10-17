@@ -15455,6 +15455,13 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tcview .vf:has(.tc.f-H)::after,.tcview .vf:has(.tc.arp)::after{background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.2),transparent 46%)!important}
 .tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{display:block!important;opacity:.24!important;background:repeating-linear-gradient(110deg,var(--hl) 0,var(--hm) 7%,var(--hd) 14%,var(--hm) 21%,var(--hl) 28%)!important;background-size:400% 400%!important}
 :is(.tc.hl,.vcard.live .tc).tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{opacity:.28!important}
+/* brillance des Holos en inclinant, réduite encore (17 oct. 2026, « trop prononcée sur téléphone ») : le reflet ne monte presque plus,
+   et les couches lumineuses des Holos rares (.tx/.sk en color-dodge, qui montaient à .56/.5) restent discrètes */
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.58 + var(--ph,0) * .04)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.lx.f-H .tx{opacity:calc(.1 + var(--ph,0) * .1)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.f-H .sk{opacity:calc(.08 + var(--ph,0) * .12)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{opacity:.24!important}
+.tcview .vf:has(.tc.f-H)::after{background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.1),transparent 46%)!important}
 </style>
 <style>
 /* ---- AR : la brillance n'apparaît qu'en inclinant la carte (validé le 15 oct. 2026) : rien au repos, plus forte à mesure qu'on incline (--ph, 0 au centre → 1 dans un coin) ---- */
