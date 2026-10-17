@@ -15518,6 +15518,15 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tcview .vf:has(.tc.f-H)::after{opacity:.4!important}
 /* rayures diagonales blanches (.tx masqué en lignes à 125°) retirées des Communes, Peu communes et Rares (17 oct. 2026) ; la texture des cartes plus rares reste */
 .tc.tc.tc:is(.r-C,.r-P,.r-R) .tx{display:none!important}
+/* Brillance des Holos, 4e baisse (17 oct. 2026, « encore trop forte ») : toutes les couches lumineuses réduites, l'image domine */
+.tc.tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx,.tc.tc.tc.tc.lx.f-H:is([style*="--hm"],.palc) .fx{opacity:.2!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.2 + var(--ph,0) * .04)!important}
+.tc.tc.tc.tc.f-H .fx::before{opacity:.16!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.f-H .fx::after{opacity:.06!important}
+.tc.tc.tc.tc.lx.f-H .tx,:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.lx.f-H .tx{opacity:calc(.06 + var(--ph,0) * .06)!important}
+.tc.tc.tc.tc.f-H .sk,:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.f-H .sk{opacity:calc(.05 + var(--ph,0) * .07)!important}
+.tc.tc.tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx,:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.tc.r-E.f-H:is([style*="--hm"],.palc):not(.lx):not(.no) .tx{opacity:.12!important}
+.tcview .vf:has(.tc.f-H)::after{opacity:.25!important}
 
 </style>
 <style>
