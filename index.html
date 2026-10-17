@@ -15577,6 +15577,11 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tc .hz i:nth-child(4n+2){--sc:var(--q2,#fff)}.tc .hz i:nth-child(4n+3){--sc:var(--q3,#fff);width:9%}.tc .hz i:nth-child(4n){--sc:var(--q4,#fff);width:15%}
 @keyframes tchtw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}40%{opacity:1;transform:scale(1) rotate(30deg)}60%{opacity:.85;transform:scale(.85) rotate(40deg)}}
 @media (prefers-reduced-motion:reduce){.tc .hz i{animation:none;opacity:.6}}
+/* ---- AR : brillance « Prisme d'illustration » (A2, validée le 17 oct. 2026, exclusive aux AR) — seulement en inclinant : feuille métallique
+   × bandes holographiques aux 4 couleurs de l'illustration (--q1..--q4) en color-dodge, + fines lignes diagonales qui glissent en sens inverse */
+.tc.tc.tc.tc.arp .ap{mix-blend-mode:color-dodge!important;background-image:var(--kfoil),repeating-linear-gradient(125deg,var(--q1,#f3d) 0%,var(--q2,#3df) 6%,var(--q3,#fd3) 12%,var(--q4,#a5f) 18%,var(--q1,#f3d) 24%)!important;background-size:256px 256px,450% 450%!important;background-position:calc(var(--px,50%) * .3) calc(var(--py,50%) * .3),var(--px,50%) var(--py,50%)!important;background-blend-mode:multiply!important;filter:brightness(.6) contrast(1.7) saturate(1.5)!important;opacity:0!important;transition:opacity .3s!important}
+.tc.tc.tc.tc.arp .ap::after{content:"";position:absolute;inset:0;border-radius:inherit;background-image:repeating-linear-gradient(55deg,transparent 0%,rgba(255,255,255,.3) 3%,transparent 6%,transparent 14%);background-size:300% 300%;background-position:calc(100% - var(--px,50%)) calc(100% - var(--py,50%));mix-blend-mode:overlay}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.arp .ap{opacity:.62!important}
 /* la règle « border-color:var(--hm) » des Holos classiques repeignait le contour en couleur unie par-dessus le dégradé : bordure transparente */
 .tc.tc.tc.tc.tc.tc.tc.f-H:is([style*="--hm"],.palc,.h3){border-color:transparent!important}
 /* ---- AR : Prisme V3 aux couleurs de l'illustration (validé le 17 oct. 2026) — le bord tournant reprend les 4 couleurs dominantes
