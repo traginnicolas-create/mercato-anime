@@ -10687,11 +10687,11 @@ const tcImgQuad = im => { const key = im.currentSrc || im.src; if (!key || !im.n
     const st = ang.map((a, i) => [((a % 360) + 360) % 360, zones[i]]).sort((a, b) => a[0] - b[0]);
     r.edge = "conic-gradient(from 0deg," + st.map(z => z[1] + "d9 " + z[0] + "deg").join(",") + "," + st[0][1] + "d9 360deg)";
     TC_QC.set(k, r); return r; } catch { return null; } };
-document.addEventListener("load", e => { const im = e.target; if (!im || im.tagName !== "IMG" || im.classList.contains("g")) return; const t = im.closest && im.closest(".tc.f-H, .tc.arp"); if (!t) return;   // recalculé à chaque chargement : si l'illustration change, contour, cosmos et étoiles suivent la nouvelle image   // AR aussi (Prisme V3 aux couleurs de l'illustration, validé le 17 oct. 2026)
+document.addEventListener("load", e => { const im = e.target; if (!im || im.tagName !== "IMG" || im.classList.contains("g")) return; const t = im.closest && im.closest(".tc.f-H, .tc.arp, .tc.f-G"); if (!t) return;   // recalculé à chaque chargement : si l'illustration change, contour, cosmos et étoiles suivent la nouvelle image   // AR aussi (Prisme V3 aux couleurs de l'illustration, validé le 17 oct. 2026)
   const q = tcImgQuad(im); if (q){ q.forEach((c, i) => t.style.setProperty("--q" + (i + 1), c)); if (q.edge) t.style.setProperty("--qe", q.edge); t.classList.add("h3"); } }, true);
 // cartes construites hors de la page puis insérées : l'image est déjà chargée, l'événement « load » ne remonte pas → on calcule à l'insertion
 const tcQuadApply = t => { const im = t.querySelector(":scope > img:not(.g)") || t.querySelector("img:not(.g)"); if (!im) return; const go = () => { const q = tcImgQuad(im); if (q){ q.forEach((c, i) => t.style.setProperty("--q" + (i + 1), c)); if (q.edge) t.style.setProperty("--qe", q.edge); t.classList.add("h3"); } }; if (im.complete && im.naturalWidth) go(); };
-try { new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes){ if (n.nodeType !== 1) continue; if (n.matches && n.matches(".tc.f-H, .tc.arp")) tcQuadApply(n); n.querySelectorAll && n.querySelectorAll(".tc.f-H, .tc.arp").forEach(tcQuadApply); } }).observe(document.documentElement, {childList: true, subtree: true}); } catch {}
+try { new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes){ if (n.nodeType !== 1) continue; if (n.matches && n.matches(".tc.f-H, .tc.arp, .tc.f-G")) tcQuadApply(n); n.querySelectorAll && n.querySelectorAll(".tc.f-H, .tc.arp, .tc.f-G").forEach(tcQuadApply); } }).observe(document.documentElement, {childList: true, subtree: true}); } catch {}
 const tcPalSt = (c, f) => { const p = tcPalOf(c, f); return p ? `--hm:${p[0]};--hl:${p[1]};--hd:${p[2]}` : ""; };
 const tcArTxt = (c, f) => { try { return (f === "A" || f === "B" || f === "C") && window.__MA.TCARTXT[c.u][c.n][TC_ARTK[f]] || null; } catch { return null; } };
 // t[5] = cadrage propre à l'illustration [zoom, décalage x %, décalage y %] (data/ar_frame.json, tools/ar_frame.py)
@@ -15546,6 +15546,16 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tcview .vf:has(.tc.f-H)::after{opacity:.4!important}
 /* rayures diagonales blanches (.tx masqué en lignes à 125°) retirées des Communes, Peu communes et Rares (17 oct. 2026) ; la texture des cartes plus rares reste */
 .tc.tc.tc:is(.r-C,.r-P,.r-R) .tx{display:none!important}
+/* UR : bandes blanches diagonales (même texture rayée .tx) retirées aussi (17 oct. 2026) */
+.tc.tc.tc.tc.f-G .tx{display:none!important}
+.tc.tc.tc.tc.tc.f-G .fx{background-image:linear-gradient(115deg,transparent 30%,rgba(255,244,200,.75) 48%,transparent 62%)!important;background-size:260% 100%!important}   /* UR : trames de lignes blanches croisées retirées, reflet doré gardé */
+/* ---- UR : brillance unique « Feuille d'or » (17 oct. 2026) — seulement en inclinant ; l'ancien reflet doré, la couche de rareté, l'éclat et les paillettes sont retirés */
+.tc.tc.tc.tc.tc.tc.f-G:not(.no) :is(.fx,.kg,.sk,.tx){display:none!important}
+.tc.tc.tc.tc.tc.tc.f-G:not(.no) .ky{display:block!important;position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;opacity:0!important;transition:opacity .3s;mix-blend-mode:color-dodge!important;
+  background-image:var(--kglit),var(--kfoil),repeating-linear-gradient(115deg,#2a1c02 0%,#b8860b 6%,color-mix(in srgb,var(--q1,#ffe08a) 50%,#ffe08a) 10%,#fff6d6 12%,color-mix(in srgb,var(--q2,#d9a521) 50%,#d9a521) 16%,#2a1c02 24%)!important;background-size:160px 160px,256px 256px,400% 400%!important;
+  background-position:calc(var(--px,50%) * -.4) calc(var(--py,50%) * -.4),calc(var(--px,50%) * .3) calc(var(--py,50%) * .3),var(--px,50%) var(--py,50%)!important;background-blend-mode:screen,multiply!important;filter:brightness(.7) contrast(1.5) saturate(1.2)!important}
+.tc.tc.tc.tc.tc.tc.f-G:not(.no) .ky::after{display:none!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.tc.tc.f-G:not(.no) .ky{opacity:.7!important}
 /* Brillance des Holos, 4e baisse (17 oct. 2026, « encore trop forte ») : toutes les couches lumineuses réduites, l'image domine */
 .tc.tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx,.tc.tc.tc.tc.lx.f-H:is([style*="--hm"],.palc) .fx{opacity:.2!important}
 :is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.2 + var(--ph,0) * .04)!important}
