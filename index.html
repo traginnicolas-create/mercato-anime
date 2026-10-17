@@ -1031,7 +1031,9 @@ $("#quit").onclick = () => {
 
 // combat animé toujours actif ; jokers et événements aléatoires retirés (demande de l'utilisateur, 14 oct. 2026)
 const readOpts = () => ({order: $("#optOrder").checked, anim: true, events: false, jokers: false});
-function show(id){ if (id !== "gs" && typeof gsStop === "function") gsStop(); ["home","lobby","game","end","uc","gs","tp","pm","jg","nt","fx","el","rl","wh","bt","mm","pc","tcg"].forEach(s => $("#"+s).classList.toggle("hidden", s !== id)); window.scrollTo(0,0); if (typeof renderEmojiBar === "function") renderEmojiBar(); }
+function show(id){ if (id !== "gs" && typeof gsStop === "function") gsStop();
+  // fin de partie en ligne (17 oct. 2026) : dès que le joueur va ailleurs, la partie est vraiment quittée (plus de retour forcé sur l'écran de fin)
+  try { if (NET.role && typeof G !== "undefined" && G && G.over && !["end", "game", "lobby"].includes(id)) leaveOnline(); } catch {} ["home","lobby","game","end","uc","gs","tp","pm","jg","nt","fx","el","rl","wh","bt","mm","pc","tcg"].forEach(s => $("#"+s).classList.toggle("hidden", s !== id)); window.scrollTo(0,0); if (typeof renderEmojiBar === "function") renderEmojiBar(); }
 
 /* ---------- Moteur (tourne en local, ou chez l'hôte en ligne) ---------- */
 function newGame(u, mode, n1, n2, opts){
@@ -1316,11 +1318,15 @@ function cardHTML(c){
     <div class="cap"><div class="n">${esc(c.n)}</div><div class="small">Puissance ${c.p}/100</div>${infoHTML(G.u, c)}</div></div>`;
 }
 
+// montant tapé à la main (17 oct. 2026) : conservé quand l'écran se redessine (mise de l'adversaire, minuterie en ligne…), au lieu de revenir au minimum
+let BID_DRAFT = null;
+const bidKey = () => G.round + ":" + (G.phase && G.phase.k) + ":" + (G.phase && G.phase.bidder != null ? G.phase.bidder : "");
 function bidControls(min, max, label, passLabel, lock){
+  const dv = BID_DRAFT && BID_DRAFT.k === bidKey() && +BID_DRAFT.v >= min && +BID_DRAFT.v <= max ? BID_DRAFT.v : min;
   return `
     <div class="row" style="margin-top:12px">
       <div style="flex:1;min-width:160px"><label class="f" for="bid">Ta mise (en M, par tranches de 10) · entre ${min} et ${max}</label>
-      <input id="bid" type="${G.mode==="blind"?"password":"number"}" inputmode="numeric" min="${min}" max="${max}" step="${STEP}" value="${min}" autocomplete="off"></div>
+      <input id="bid" type="${G.mode==="blind"?"password":"number"}" inputmode="numeric" min="${min}" max="${max}" step="${STEP}" value="${dv}" autocomplete="off"></div>
     </div>
     <div class="quick">
       ${[10,20,50,100].map(v => `<button data-add="${v}">+${v}</button>`).join("")}
@@ -1336,10 +1342,13 @@ function bidControls(min, max, label, passLabel, lock){
 function wireBid(min, max){
   const inp = $("#bid");
   const val = () => parseInt(inp.value, 10);
+  const keep = () => { BID_DRAFT = {k: bidKey(), v: inp.value, f: document.activeElement === inp}; };
+  inp.addEventListener("input", keep); inp.addEventListener("focus", keep); inp.addEventListener("blur", () => { if (BID_DRAFT) BID_DRAFT.f = false; });
+  if (BID_DRAFT && BID_DRAFT.f && BID_DRAFT.k === bidKey()){ inp.focus({preventScroll: true}); try { const n = inp.value.length; inp.setSelectionRange && inp.type !== "number" && inp.setSelectionRange(n, n); } catch {} }
   document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => {
-    const v = (isNaN(val()) ? min : val()) + +b.dataset.add; inp.value = Math.min(max, v);
+    const v = (isNaN(val()) ? min : val()) + +b.dataset.add; inp.value = Math.min(max, v); keep();
   });
-  document.querySelectorAll("[data-set]").forEach(b => b.onclick = () => inp.value = b.dataset.set);
+  document.querySelectorAll("[data-set]").forEach(b => b.onclick = () => { inp.value = b.dataset.set; keep(); });
   const submit = (kind = "bid") => {
     const v = val();
     if (isNaN(v) || String(v) !== inp.value.trim()) return $("#err").textContent = "Entre un nombre entier.";
@@ -1411,7 +1420,7 @@ function renderBoard(){
     const me = P[ph.bidder];
     if (canAct(ph.bidder)){
       act_ = `<h2>${ME === null ? esc(me.name) + " a" : "Tu as"} tiré ${esc(c.n)} !</h2>
-        <p class="muted">${me.budget >= MIN ? `Impossible de laisser filer : ouvre l'enchère (minimum ${money(MIN)}).` : `Il te reste moins de 10M : tu ouvres avec ce que tu as (${money(me.budget)}).`}</p>
+        <p class="muted opn">${me.budget >= MIN ? `Impossible de laisser filer : ouvre l'enchère (minimum ${money(MIN)}).` : `Il te reste moins de 10M : tu ouvres avec ce que tu as (${money(me.budget)}).`}</p>
         ${bidControls(minBid(me), maxBid(me), "Ouvrir l'enchère", null, G.mode !== "blind" && hasJoker(ph.bidder, "lock"))}
         ${hasJoker(ph.bidder, "reroll") ? `<div class="jrow"><button id="rerollBtn">Relance : tirer un autre ${u.unit}</button></div>` : ""}`;
       wire = () => wireBid(minBid(me), maxBid(me));
@@ -1528,7 +1537,7 @@ function renderEnd(){
       ${ME === 1 ? waitHTML(`${esc(P[0].name)} peut lancer une revanche`) : `<button class="primary" id="again">Revanche</button>`}
       <button id="home2">${NET.role ? "Quitter la partie" : "Changer d'univers / de mode"}</button>
     </div>`;
-  if ($("#end").classList.contains("hidden")) show("end");
+  if ($("#end").classList.contains("hidden") && !["game", "lobby"].every(v => $("#" + v).classList.contains("hidden"))) show("end");   // ne ramène pas sur la fin si le joueur est parti ailleurs
   $("#debrief").innerHTML = localDebrief();
   wireClaude();
   $("#again") && ($("#again").onclick = () => act("again"));
@@ -9586,6 +9595,7 @@ setInterval(voxRender, 2000);
 
 .tccine{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;position:fixed;inset:0;z-index:99;display:grid;place-items:center;align-content:center;gap:10px;overflow:hidden;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--rc) 30%,#0b0a0e) 0,#050407 72%);padding:20px;cursor:pointer}
 .tccine > *{grid-column:1}
+.tccine > .cgl,.tccine > .fl,.tccine > .tun,.tccine > .rays,.tccine > .ring,.tccine > .sp,.tccine > .seal,.tccine > .clue,.tccine > .hero{grid-column:auto}   /* 17 oct. 2026 : calques plein écran (plus de bande sombre à gauche) */
 html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,html:has(.crcine),html:has(.crcine) body,html:has(.tcopen),html:has(.tcopen) body{overflow:hidden;overscroll-behavior:none}
 .tccine .fl{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .tccine .rays{position:absolute;left:50%;top:50%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc) 46%,transparent) 0 5deg,transparent 5deg 16deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 58%);mask-image:radial-gradient(circle,#000 0,transparent 58%);opacity:.55;pointer-events:none}
@@ -9597,6 +9607,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tccine .seal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--brand);font-weight:900;font-size:min(46vw,300px);line-height:1;white-space:nowrap;color:color-mix(in srgb,var(--rc) 22%,transparent);pointer-events:none}
 .tccine .lab{position:relative;font-family:var(--mono);font-weight:500;font-size:clamp(13px,3.6vw,18px);letter-spacing:.5em;text-indent:.5em;text-transform:uppercase;color:var(--rc);text-shadow:0 0 22px var(--rc)}
 .tccine .cardw{position:relative;width:min(58vw,270px);perspective:900px}
+.tccine .cardw{margin-block:clamp(22px,4.5vh,40px)}.tccine .lab,.tccine .who{z-index:3}   /* 17 oct. 2026 : la carte inclinée ne passe plus par-dessus « Épique · Art rare » ni le nom */
 .tccine .cardw .tc{width:100%;border-width:2px;box-shadow:0 0 0 1px var(--rc),0 0 70px color-mix(in srgb,var(--rc) 70%,transparent),0 30px 60px rgba(0,0,0,.7)}
 .tccine .cardw .tc .nm{font-size:clamp(15px,4.4vw,20px);padding:0 12px}
 .tccine .cardw .tc .tp{font-size:11px;padding:9px 11px}.tccine .cardw .tc .ft{font-size:11px;padding:6px 12px 11px}
@@ -9957,6 +9968,9 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 /* ---- ouverture : barre du haut, fond aux couleurs de Hanko (braise vermillon, sceau en filigrane, hachures), écran de résultat ---- */
 .tcopen{grid-template-rows:auto auto 1fr auto;background:radial-gradient(ellipse 70% 52% at 50% 46%,color-mix(in srgb,var(--accent) 22%,#0b0a0e),transparent 72%),radial-gradient(ellipse 60% 40% at 50% 100%,color-mix(in srgb,var(--pc) 16%,transparent),transparent 70%),repeating-linear-gradient(135deg,transparent 0 26px,rgba(255,255,255,.014) 26px 27px),#08070b}
 .tcopen .otop{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;position:relative;z-index:2}
+/* barre du haut toujours accessible pendant l'ouverture (17 oct. 2026) : le bouton retour ne défile plus hors de l'écran */
+.tcopen{overflow-y:auto;overscroll-behavior:contain}
+.tcopen .otop{position:sticky;top:calc(-16px - env(safe-area-inset-top,0px));margin:calc(-16px - env(safe-area-inset-top,0px)) -16px 0;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;z-index:20;background:linear-gradient(180deg,rgba(11,10,14,.92),rgba(11,10,14,.72));-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .tcopen .otop button{justify-self:start;border-radius:999px;padding:8px 14px;font-size:13.5px}
 .tcopen .otop b{font-family:var(--title);font-weight:900;font-size:clamp(13px,3.4vw,17px);white-space:nowrap}
 .tcopen .otop b i{font-style:normal;font-family:var(--brand);color:var(--accent);margin-right:8px}
@@ -10196,6 +10210,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tccele .cseal{display:grid;place-items:center;width:clamp(96px,26vw,140px);aspect-ratio:1;border-radius:22%;background:var(--cc);color:#0e0d12;font-family:var(--brand);font-weight:900;font-size:clamp(54px,15vw,80px);line-height:1;rotate:0deg;box-shadow:inset 0 0 0 4px rgba(14,13,18,.85),inset 0 0 0 7px var(--cc),0 0 60px color-mix(in srgb,var(--cc) 70%,transparent),0 18px 40px rgba(0,0,0,.6)}
 .tccele b{font-family:var(--title);font-weight:900;font-size:clamp(30px,9vw,58px);letter-spacing:-.02em;line-height:1;perspective:400px}
 .tccele b u{display:inline-block;text-decoration:none}
+.tccele b{max-width:92vw;font-size:min(clamp(30px,9vw,58px),calc(150vw / var(--len,8)))}.tccele b .w{white-space:nowrap;display:inline-block}   /* 17 oct. 2026 : un mot ne se coupe plus entre deux lignes */
 .tccele small{font-family:var(--mono);font-size:clamp(12px,3.4vw,15px);letter-spacing:.14em;text-transform:uppercase;color:var(--cc)}
 @media (prefers-reduced-motion:no-preference){.tccele{animation:pop .25s ease-out both}}
 /* ---- sachet nouvelle génération (.px) : tout le design vient de l'image dessinée par tcPouchTex ; ici seulement le cadrage et le relief ---- */
@@ -10469,7 +10484,7 @@ function tcOpenPack(s, key, sec){
     if (slot === 3 && vhit && !got.some(g => g.id === vhit[0].id)){ c = vhit[0]; f = vhit[1]; }
     if (force) f = force;
     // premier booster : la dernière carte est une Épique très connue (ni Légendaire ni Mythique), mise en scène avec la grande cinématique, pour donner envie de continuer
-    if (slot === 4 && first){ s.firstDone = 1; const TOP = ["Nami", "Nico Robin", "Freezer", "Trunks", "Piccolo", "Son Gohan", "Tsunade", "Orochimaru", "Rock Lee", "Sakura Haruno", "Deidara", "Killer B"], fam = pool.filter(x => x.r === "E" && !x.obj && (x.pop === "S" || TOP.includes(x.n)) && !got.some(g => g.id === x.id)), l2 = fam.length ? fam : pool.filter(x => x.r === "E" && !x.obj); if (l2.length){ c = l2[Math.floor(Math.random() * l2.length)]; f = ""; hype = true; } }
+    if (slot === 4 && first){ s.firstDone = 1; const TOP = ["Nami", "Nico Robin", "Freezer", "Trunks", "Piccolo", "Son Gohan", "Tsunade", "Orochimaru", "Rock Lee", "Sakura Haruno", "Deidara", "Killer B"], fam = pool.filter(x => x.r === "E" && !x.obj && (x.pop === "S" || TOP.includes(x.n)) && !got.some(g => g.id === x.id)), hasA = x => tcVersOf(x).includes("A") && tcAlt(x)[TC_ARTK.A], famA = fam.filter(hasA), anyA = pool.filter(x => x.r === "E" && !x.obj && hasA(x) && !got.some(g => g.id === x.id)), l2 = famA.length ? famA : anyA.length ? anyA : fam.length ? fam : pool.filter(x => x.r === "E" && !x.obj); if (l2.length){ c = l2[Math.floor(Math.random() * l2.length)]; f = hasA(c) ? "A" : ""; hype = true; } }   /* 17 oct. 2026 : la grande cinématique du premier booster montre une AR (Épique connue, version Art rare) */
     const newFin = !!f && !(s.fin[c.id] && s.fin[c.id][f]);
     if (hype) s.firstHit = c.id;   /* la carte garantie du tout premier booster : c'est elle que le didacticiel fait regarder en 3D */
     got.push({...c, f, isNew: !s.own[c.id], newFin, ...(hype ? {hype: true} : {})}); s.own[c.id] = (s.own[c.id] || 0) + 1;
@@ -10892,7 +10907,7 @@ function tcRender(){
     html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}<div class="tcbars">${TC_UNIS.map(u => { const t = all.filter(c => c.u === u), o = t.filter(c => s.own[c.id]).length; return `<div><span>${TC_PACKS[u][1]} ${TC_PACKS[u][0]}</span><i><u style="width:${o / t.length * 100}%"></u></i><b>${o}/${t.length}</b></div>`; }).join("")}</div>
       <p class="small" style="margin:-4px 0 12px">Chaque personnage existe en plusieurs versions, chacune avec sa propre illustration, qui comptent chacune comme une carte : normale et Holo pour tous ; AR à partir d'Épique (parfois deux illustrations différentes), Red Blood à partir de Légendaire, UR or pour les Mythiques, l'avis de recherche « Wanted » des pirates de One Piece, et Légende pour sept personnages. Chaque booster a une chance de contenir une de ces versions rares. Tu en as <b>${vers}</b> sur ${versAll}. Touche une carte pour la regarder en 3D.</p><div class="row" style="margin-bottom:12px"><button id="tcRecycle" ${dup ? "" : "disabled"}>♻ Recycler ${dup} doublon${dup > 1 ? "s" : ""}${dup ? " · +" + gain + " ◆" : ""}</button></div>
       <div class="tcfb">
-        <div class="tcchips">${[["all", "Tous"], ["op", "One Piece"], ["db", "Dragon Ball"], ["na", "Naruto"]].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}</div>
+        <div class="tcchips">${[["all", "Tous"], ...Object.keys(TC_PACKS).filter(k => k !== "mix").map(k => [k, TC_PACKS[k][0]])].map(([k, n]) => `<button class="${f.u === k ? "sel" : ""}" data-tcu="${k}">${n}</button>`).join("")}</div>
         <div class="tcfb-s">
           <label><span>Version</span><select id="tcSelV" class="${(f.f ?? "*") === "*" ? "" : "on"}">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].filter(([k]) => k === "*" || all.some(c => tcVersOf(c).includes(k))).map(([k, n]) => { const ks = k === "A" ? ["A", "B", "C"] : [k]; return `<option value="${k}" ${(f.f ?? "*") === k ? "selected" : ""}>${n}${k === "*" ? "" : " · " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</option>`; }).join("")}</select></label>
           <label><span>Rareté</span><select id="tcSelR" class="${f.r === "all" ? "" : "on"}"><option value="all" ${f.r === "all" ? "selected" : ""}>Toutes · ${inV.filter(hasV).length}/${inV.length}</option>${[...TC_ORDER].reverse().filter(r => inV.some(([c, v]) => tcER(c, v) === r)).map(r => `<option value="${r}" ${f.r === r ? "selected" : ""}>${TC_R[r][0]} · ${inV.filter(e => tcER(e[0], e[1]) === r && hasV(e)).length}/${inV.filter(e => tcER(e[0], e[1]) === r).length}</option>`).join("")}</select></label>
@@ -11014,7 +11029,11 @@ function tcView(c, want){
   face(); tilt(0, 0);
   box.onpointermove = e => { const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; card.classList.add("live"); tilt((.5 - y) * 44, (x - .5) * 56, x * 100, y * 100); };   // inclinaison plus ample (17 oct. 2026) : ±22° / ±28°
   box.onpointerleave = () => { card.classList.remove("live"); tilt(0, 0); };
-  const flip = () => { back = !back; card.classList.remove("live"); tilt(0, 0); SFX.play("pop"); };
+  // la fiche (dos) reprend le contour de la face : prisme aux couleurs de l'illustration pour une AR, « verre » pour une Holo (17 oct. 2026)
+  const ficheEdge = () => { const t = V.querySelector(".vf .tc"), F = V.querySelector(".tcfiche"); if (!t || !F) return; const cs = getComputedStyle(t), q = k => (t.style.getPropertyValue(k) || cs.getPropertyValue(k)).trim();
+    F.classList.toggle("fa", t.classList.contains("arp")); F.classList.toggle("fq", t.classList.contains("arp") && t.classList.contains("h3") && !!q("--q1")); F.classList.toggle("fgl", t.classList.contains("f-H") && t.classList.contains("h3") && !!q("--qe"));
+    ["--q1", "--q2", "--q3", "--q4", "--qe", "--al", "--am", "--ad"].forEach(k => { const v = q(k); v ? F.style.setProperty(k, v) : F.style.removeProperty(k); }); };
+  const flip = () => { ficheEdge(); back = !back; card.classList.remove("live"); tilt(0, 0); SFX.play("pop"); };
   box.onclick = flip; $("#tcvFlip").onclick = flip;
   $("#tcvSheet").onclick = () => { const w = V.querySelector(".tcfiche-w"), on = w.classList.toggle("hidden") === false; if (on !== back) flip(); $("#tcvSheet").textContent = on ? "Voir le dos" : "Lire la fiche"; };
   V.querySelectorAll("[data-tcf]").forEach(b => b.onclick = () => { f = b.dataset.tcf; if (back) flip(); face(); });
@@ -11143,7 +11162,7 @@ function tcSnd(n){ if (!SFX.on) return; try { const a = SFX.ac(); if (!a) return
   } catch {} }
 // Célébration plein écran (montée de niveau, récompenses réclamées) : un sceau qui se pose, des rayons, le texte lettre à lettre. Animée par GSAP, repli en simple fondu.
 function tcCele(title, sub, kj = "祝", col = "var(--accent)"){ document.querySelector(".tccele")?.remove();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tccele" style="--cc:${col}" role="status"><i class="ray"></i><div class="in"><span class="cseal">${kj}</span><b>${[...title].map(ch => `<u>${ch === " " ? "&nbsp;" : esc(ch)}</u>`).join("")}</b><small>${esc(sub || "")}</small></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tccele" style="--cc:${col}" role="status"><i class="ray"></i><div class="in"><span class="cseal">${kj}</span><b style="--len:${Math.max(...title.split(" ").map(w => w.length))}">${title.split(" ").map(w => `<span class="w">${[...w].map(ch => `<u>${esc(ch)}</u>`).join("")}</span>`).join(" ")}</b><small>${esc(sub || "")}</small></div></div>`);
   const E = document.querySelector(".tccele"), bye = () => { if (!E.isConnected) return; if (window.gsap && !tcCalm()) gsap.to(E, {opacity: 0, duration: .3, onComplete: () => E.remove()}); else E.remove(); }; E.onclick = bye; setTimeout(bye, 2500); tcSnd("cele");
   if (window.gsap && !tcCalm()){ const G = gsap; G.from(E, {opacity: 0, duration: .2}); G.fromTo(E.querySelector(".cseal"), {scale: 3.4, rotation: -38, opacity: 0}, {scale: 1, rotation: -6, opacity: 1, duration: .42, ease: "back.out(2.2)"});
     G.fromTo(E.querySelector(".in"), {x: 0}, {keyframes: [{x: -7}, {x: 6}, {x: -3}, {x: 0}], duration: .28, delay: .36}); G.fromTo(E.querySelector(".ray"), {scale: .2, opacity: 0}, {scale: 1, opacity: 1, duration: .6, delay: .3, ease: "power2.out"}); G.to(E.querySelector(".ray"), {rotation: 60, duration: 2.6, ease: "none"});
@@ -11465,7 +11484,7 @@ function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "K" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1, VB0 = {H: .5, A: 3, B: 3, C: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc0 = c => TC_ORDER.indexOf(c.r) * 2 + (VB0[c.f] || 0) + (c.hype ? 20 : 0), bestK = got.reduce((b, c, k) => sc0(c) > sc0(got[b]) ? k : b, 0);
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Boosters</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">H</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Retour</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">H</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i>${got.secs.length > 1 ? got.secs.length + " boosters secrets dans le lot" : "Un booster " + sx[1] + " dans le lot"}</p>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}</div><p class="muted">Touche le sachet pour le déchirer</p></div><div class="bot"></div></div>`);
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const G = !calm && window.gsap, lvlOf = c => c.r === "M" || c.r === "X" || c.f === "G" || c.f === "Z" ? 3 : c.r === "L" || c.f === "K" || c.f === "S" || c.f === "W" ? 2 : TC_ORDER.indexOf(c.r) === 3 || c.f ? 1 : 0;
   const GL = tcPouchGL(O, key); if (!calm) setTimeout(() => tcSnd("rustle"), 420);
@@ -11534,28 +11553,30 @@ try { tcHome(); } catch {}
 let TC_TOUR = null;
 // Huit étapes courtes, une phrase chacune : le joueur doit pouvoir finir en moins d'une minute, sinon il part avant d'avoir joué.
 const TC_TSTEPS = [
-  {t: "Bienvenue !", p: "Collectionne les personnages de tes animés. Je te montre comment en 30 secondes.", next: "C'est parti"},
-  {sel: () => $('[data-tct="packs"]'), t: "Voici tes boosters", p: "Touche « Boosters » pour voir ceux que tu as.", done: () => TC_TAB === "packs"},
-  {sel: () => TC_SUB !== "mine" ? $('[data-tcsub="mine"]') : $("#tcOpen"), t: "Ouvre ton premier booster", p: "Touche le bouton « Ouvrir ce booster ». Tu déchireras ensuite le sachet pour découvrir tes 5 cartes.", pre: () => { if (TC_TAB !== "packs"){ TC_TAB = "packs"; tcRender(); } }, done: () => !!$(".tcopen") || TC_TOUR.seen, mark: () => !!$(".tcopen")},
-  {sel: () => $('[data-tct="album"]'), t: "Va voir ta collection", p: "Tes cartes sont rangées ici. Touche « Collection ».", done: () => TC_TAB === "album"},
-  {sel: () => { const id = tcLoad().firstHit, hit = id && [...document.querySelectorAll(".tcgrid .tc:not(.no)")].find(e => e.dataset.tc === id); return hit || $(".tcgrid .tc:not(.no)"); }, t: "Regarde ta meilleure carte de près", p: "Touche-la pour la voir en 3D, puis ferme-la.", pre: () => { if (TC_F.own !== true){ TC_F.own = true; TC_F.f = "*"; TC_F.r = "all"; TC_F.u = "all"; tcRender(); } }, done: () => !!$(".tcview") || TC_TOUR.seen, mark: () => !!$(".tcview")},
-  {sel: () => $('[data-tct="missions"]'), t: "Découvre tes missions", p: "Elles donnent des boosters et des éclats. Touche « Missions ».", done: () => TC_TAB === "missions"},
+  {t: "Bienvenue !", p: "Ici, tu gagnes des cartes de tes héros préférés. Je vais te montrer, c'est très facile !", next: "On y va !"},
+  {sel: () => $('[data-tct="packs"]'), t: "Tes boosters", p: "Un booster, c'est un petit paquet avec 5 cartes surprises dedans. Ils sont rangés ici, dans « Boosters ».", next: "J'ai compris"},   // corrigé le 17 oct. 2026 : l'étape était sautée (onglet déjà ouvert)
+  {sel: () => TC_SUB !== "mine" ? $('[data-tcsub="mine"]') : $("#tcOpen"), t: "Ouvre ton booster", p: "Appuie sur le bouton qui brille : « Ouvrir ce booster ». Ensuite, touche le paquet pour le déchirer !", pre: () => { const m = $('[data-tcsub="mine"]'); if (TC_TAB !== "packs" || !$("#tcOpen") && TC_SUB === "mine" && !(m && m.classList.contains("sel"))){ TC_TAB = "packs"; TC_SUB = "mine"; tcRender(); } }, done: () => !!$(".tcopen") || TC_TOUR.seen, mark: () => !!$(".tcopen")},
+  {sel: () => $('[data-tct="album"]'), t: "Ta collection", p: "Toutes tes cartes vont ici, comme dans un album. Appuie sur « Collection ».", done: () => TC_TAB === "album"},
+  {sel: () => { const id = tcLoad().firstHit, hit = id && [...document.querySelectorAll(".tcgrid .tc:not(.no)")].find(e => e.dataset.tc === id); return hit || $(".tcgrid .tc:not(.no)"); }, t: "Ta plus belle carte", p: "Appuie dessus pour la voir en grand. Bouge ton doigt dessus pour la faire briller, puis ferme-la avec la croix.", pre: () => { if (TC_F.own !== true){ TC_F.own = true; TC_F.f = "*"; TC_F.r = "all"; TC_F.u = "all"; tcRender(); } }, done: () => !!$(".tcview") || TC_TOUR.seen, mark: () => !!$(".tcview")},
+  {sel: () => $('[data-tct="missions"]'), t: "Tes missions", p: "Les missions, ce sont des petits défis. Quand tu en réussis un, tu gagnes un cadeau. Appuie sur « Missions ».", done: () => TC_TAB === "missions"},
   // d'abord une seule mission, réclamée à la main, pour comprendre le geste ; ensuite seulement le bouton qui ramasse tout
-  {sel: () => $(".tcms button.primary:not([disabled])"), t: "Réclame ta première mission", p: "Une mission est terminée : touche son bouton « Réclamer » pour prendre la récompense.", skipIf: () => !$(".tcms button.primary:not([disabled])"),
+  {sel: () => $(".tcms button.primary:not([disabled])"), t: "Prends ton cadeau", p: "Tu as réussi un défi ! Appuie sur « Réclamer » pour prendre ton cadeau.", skipIf: () => !$(".tcms button.primary:not([disabled])"),
     pre: () => { TC_TOUR.c0 = tcTourClaimed(); }, done: () => tcTourClaimed() > TC_TOUR.c0},
-  {sel: () => { const b = $("#tcClaimAll"); return b && !b.disabled ? b : null; }, t: "Récupère tout le reste", p: "Pour aller plus vite, « Tout réclamer » ramasse d'un coup toutes les récompenses prêtes.", skipIf: () => { const b = $("#tcClaimAll"); return !b || b.disabled; }, done: () => true, mark: () => !!$(".tccele")},   // validée dès que la célébration s'affiche : le bouton peut rester actif, car réclamer débloque d'autres récompenses
-  {t: "C'est tout !", p: "Un booster gratuit arrive chaque heure, et chaque partie gagnée en rapporte d'autres. Voici un booster Argent en cadeau.", next: "Jouer", end: true}];
+  {sel: () => { const b = $("#tcClaimAll"); return b && !b.disabled ? b : null; }, t: "Prends tout d'un coup", p: "Appuie sur « Tout réclamer » pour prendre tous tes cadeaux en même temps.", skipIf: () => { const b = $("#tcClaimAll"); return !b || b.disabled; }, done: () => true, mark: () => !!$(".tccele")},   // validée dès que la célébration s'affiche : le bouton peut rester actif, car réclamer débloque d'autres récompenses
+  {t: "Bravo, tu sais tout !", p: "Tu reçois un booster gratuit chaque heure, et d'autres quand tu gagnes une partie. Voici un booster Argent en cadeau !", next: "Jouer", end: true}];
 const tcTourClaimed = () => { try { const s = tcLoad(); return ((s.tuto && s.tuto.claimed) || []).length + ((s.day && s.day.claimed) || []).length + (s.week && s.week.claimed || []).length + (s.month && s.month.claimed || []).length; } catch { return 0; } };
 function tcTourMaybe(force){ if (TC_TOUR || $("#tcg").classList.contains("hidden") || document.querySelector(".tcopen,.tcview,.tccine,.tccele,.cpgate,.welcome,#modal:not(.hidden)")) return; const s = tcLoad(); s.tuto = s.tuto || {claimed: []};
   if (!force){ if (s.tuto.tour) return; if ((s.opened || 0) >= 5){ s.tuto.tour = 1; tcSave(s); return; } }                      // joueur déjà rodé : pas de didacticiel
   if (!tcStock(s) && !force){ tcGive(s, "mix:0"); tcSave(s); }   /* en le revoyant, pas de booster offert */                                                                // il faut au moins un booster à ouvrir
-  TC_PICK = s.free.n > 0 ? "free" : (Object.keys(s.packs).find(k => s.packs[k] > 0) || "free"); TC_SUB = "mine";
+  TC_PICK = s.free.n > 0 ? "free" : (Object.keys(s.packs).find(k => s.packs[k] > 0) || "free"); TC_SUB = "mine"; TC_TAB = "packs"; tcRender();   /* l'écran montre tout de suite « Gratuits et gagnés » */
   document.body.insertAdjacentHTML("beforeend", `<div class="tctour" role="dialog" aria-label="Didacticiel des cartes"><i></i><i></i><i></i><i></i><span class="ring"></span><div class="tip"></div></div>`);
   TC_TOUR = {k: -1, el: document.querySelector(".tctour"), seen: false, since: 0, timer: 0, replay: !!force}; tcTourGo(0); TC_TOUR.timer = setInterval(tcTourTick, 180); }
 function tcTourGo(k){ const T = TC_TOUR; while (k < TC_TSTEPS.length && TC_TSTEPS[k].skipIf && TC_TSTEPS[k].skipIf()) k++; if (k >= TC_TSTEPS.length) return tcTourEnd(false);
   T.k = k; T.seen = false; T.since = Date.now(); T.scrolled = false; const st = TC_TSTEPS[k]; try { st.pre && st.pre(); } catch {}
-  T.el.querySelector(".tip").innerHTML = `<small>Premiers pas · ${k + 1}/${TC_TSTEPS.length}</small><b>${st.t}</b><p>${st.p}</p><div class="row"><button class="sk hidden" id="tcTourSkip">Passer le didacticiel</button>${st.next ? `<button class="primary" id="tcTourNext">${st.next}</button>` : `<span class="small" style="color:var(--accent)">À toi de jouer ↑</span>`}</div>`;
+  T.n = (T.n || 0) + 1;   /* numéros sans trou, même quand une étape est sautée (pas de total : il change selon les missions) */
+  T.el.querySelector(".tip").innerHTML = `<small>Étape ${T.n}</small><b>${st.t}</b><p>${st.p}</p><div class="row"><button class="sk hidden" id="tcTourSkip">Passer le didacticiel</button>${st.next ? `<button class="primary" id="tcTourNext">${st.next}</button>` : `<span class="small" style="color:var(--accent)">À toi de jouer ↑</span>`}</div>`;
   const nx = T.el.querySelector("#tcTourNext"); if (nx) nx.onclick = () => st.end ? tcTourEnd(true) : tcTourGo(k + 1); T.el.querySelector("#tcTourSkip").onclick = () => tcTourEnd(false); tcTourTick(); }
+document.addEventListener("click", e => { const T = TC_TOUR; if (T && T.k === 1 && e.target.closest && e.target.closest('[data-tct="packs"]')) setTimeout(() => TC_TOUR && TC_TOUR.k === 1 && tcTourGo(2), 50); }, true);
 function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T.k];
   if ($("#tcg").classList.contains("hidden")){ show("tcg"); tcRender(); }                                          // on ne quitte pas la rubrique pendant le didacticiel
   const busy = !!document.querySelector(".tcopen,.tcview,.tccine,.tccele"); T.el.classList.toggle("wait", busy);
@@ -11567,7 +11588,7 @@ function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T
   if (st.mark && st.mark()) T.seen = true;
   if (busy) return;
   if (st.done && !st.next && st.done() && !(st.mark && !T.seen)) return tcTourGo(T.k + 1);
-  if (Date.now() - T.since > 10000) T.el.querySelector("#tcTourSkip")?.classList.remove("hidden");
+  if (T.replay) T.el.querySelector("#tcTourSkip")?.classList.remove("hidden");   /* 17 oct. 2026 : « Passer » seulement quand on revoit le didacticiel ; la première fois il est obligatoire */
   const tg = st.sel ? st.sel() : null, [a, b, c, d] = T.el.querySelectorAll("i"), ring = T.el.querySelector(".ring"), tip = T.el.querySelector(".tip"), W = innerWidth, H = innerHeight;
   if (st.sel && !tg){ if (st.pre) try { st.pre(); } catch {} }
   if (!tg){ a.style.cssText = "left:0;top:0;right:0;bottom:0"; [b, c, d].forEach(x => x.style.cssText = "display:none"); ring.style.display = "none"; tip.style.top = "50%"; tip.style.bottom = "auto"; tip.style.translate = "-50% -50%"; return; }
@@ -12163,6 +12184,10 @@ try { const m = location.hash.match(/^#ami=(.+)$/), pd = m && frParse(decodeURIC
 .cpgate .gst{min-height:20px;font-size:13.5px;color:var(--muted)}.cpgate .gst.ko{color:var(--danger)}.cpgate .gst.ok{color:var(--ok)}
 .cpgate small{color:var(--muted);font-size:12px;max-width:40ch}
 body.cplock{overflow:hidden}
+/* 17 oct. 2026 : la page derrière le menu ☰ et les bulles de didacticiel ne défile plus */
+html:has(.mnveil),html:has(.mnveil) body,html:has(.tctour:not(.wait)),html:has(.tctour:not(.wait)) body,html:has(.gtour:not(.wait)),html:has(.gtour:not(.wait)) body{overflow:hidden;overscroll-behavior:none}
+.tctour i,.gtour i{touch-action:none}
+.mnsheet{overscroll-behavior:contain}
 /* bandeau du mode invité : une simple bande en haut de page, dans le flux (elle pousse le contenu au lieu de le recouvrir, sur téléphone comme sur ordinateur) */
 .cpguest{position:static;display:flex;width:100%;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:7px 12px;border:0;border-bottom:1px solid color-mix(in srgb,var(--amber,#ffc45a) 40%,var(--line));border-radius:0;background:color-mix(in srgb,var(--amber,#ffc45a) 9%,var(--bg));font-size:12.5px;font-weight:500;color:var(--amber,#ffc45a);text-align:center}
 .cpguest b{flex:none;background:var(--amber,#ffc45a);color:#1a1205;border-radius:999px;padding:5px 11px;font-size:12px}
@@ -13787,7 +13812,7 @@ function crAuction(S){
   const minBid = () => A.lead === null && A.first ? A.price : A.price + crLotInc(A.price);
   const fit = () => { const m = minBid(); let v = Math.round(+inp.value || 0); if (v < m) v = m; inp.value = v; return v; };
   let shown = "";
-  const draw = () => { const m = minBid(), mine = A.lead === "me"; if (+inp.value < m || document.activeElement !== inp && !inp.value) inp.value = m;
+  const draw = () => { const m = minBid(), mine = A.lead === "me"; if (document.activeElement !== inp && (+inp.value < m || !inp.value)) inp.value = m;   /* 17 oct. 2026 : ne réécrit plus le montant pendant que le joueur le tape (taper « 3 » pour 30 le remettait au minimum) */
     q(".price").textContent = crMoney(S, A.price);
     const ld = mine ? "Tu mènes l'enchère" : A.lead === null ? "Aucune offre pour l'instant" : S.clubs[A.lead].name + " mène"; if (q(".lead").textContent !== ld){ q(".lead").textContent = ld; q(".lead").classList.toggle("me", mine); }
     q(".bar").classList.toggle("hot", A.t < 5000); q(".bar u").style.width = Math.max(0, Math.min(100, A.t / 16000 * 100)) + "%";
@@ -15742,6 +15767,122 @@ body{opacity:1}
 :is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.tc.tc.tc.tc.tc.tc.tc:not(.arp):not(.no) .kg{opacity:.45!important}
 :is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.tc.tc.tc.tc.tc.tc.tc.f-H .hf{opacity:.3!important}
 .tcview .vf::after{opacity:.35!important}
+</style><style>
+/* Menu du jeu Mercato sur téléphone (17 oct. 2026) : la barre du haut passait sur trois lignes et recouvrait le titre.
+   Une seule ligne : logo · pastille réduite · menu · retour, sur fond opaque. */
+#launch .topbar.topbar{flex-wrap:nowrap!important;align-items:center;gap:8px;background:color-mix(in srgb,var(--bg,#0b0a0e) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding-block:8px;margin-inline:-16px;padding-inline:16px}
+#launch .topbar.topbar h1{flex:1 1 auto;min-width:0;margin-right:0}
+@media (max-width:560px){
+  #launch .topbar.topbar h1{flex:none;display:flex;align-items:center;font-size:0;min-width:34px;min-height:38px}   /* sur téléphone : seulement le logo (retour à l'accueil), le grand titre « Mercato » est juste en dessous */
+  #launch .topbar.topbar h1::before{width:30px;height:30px;margin-right:0;flex:none;vertical-align:0}
+  #launch .topbar.topbar .hpill{margin-right:auto}
+  #launch .topbar.topbar .hpill .l{display:none}
+  #launch .topbar.topbar .hpill{padding-inline:8px;min-width:0}
+  #launch .topbar.topbar > button.ghost{padding:8px 10px;min-height:38px}
+}
 </style>
+<style>
+/* Lot 1 · enchère Mercato sur téléphone : budget, personnage et mise visibles sur un seul écran */
+@media (max-width:560px){
+  #game:has(#bid) .topbar{margin:8px 0 8px;gap:6px}
+  #game:has(#bid) .topbar h1{font-size:15px}
+  #game:has(#bid) .topbar button{min-height:34px;padding:6px 12px;font-size:13px}
+  #game:has(#bid) .hud{gap:8px;margin-bottom:10px}
+  #game:has(#bid) .hud .mid{padding:0}
+  #game:has(#bid) .hud .mid .bang{font-size:18px}
+  #game:has(#bid) .hud .mid .small{display:none}
+  #game:has(#bid) .hud .pl{padding:8px 10px;gap:4px}
+  #game:has(#bid) .hud .pl .nm{font-size:13px}
+  #game:has(#bid) .hud .pl .money{font-size:20px;line-height:1.1}
+  #game:has(#bid) .hud .pl .slots .slot{height:14px}
+  #game:has(#bid) .hud .pl > .small{font-size:11px}
+  #game:has(#bid) #board .stage{gap:10px}
+  #game:has(#bid) #board .stage > div:first-child{max-width:none}
+  #game:has(#bid) #board .stage .card{display:grid;grid-template-columns:96px 1fr;align-items:center;max-width:none;width:100%}
+  #game:has(#bid) #board .stage .card .pic{height:128px;aspect-ratio:auto}
+  #game:has(#bid) #board .stage .card .pic img{height:100%;width:100%;object-fit:cover}
+  #game:has(#bid) #board .stage .card .pic .tier{font-size:9px;padding:2px 6px;top:6px;left:6px}
+  #game:has(#bid) #board .stage .card .pic .pw{display:none}   /* « Puissance 80/100 » est écrit à côté */
+  #game:has(#bid) #board .stage .card .cap{padding:10px 12px}
+  #game:has(#bid) #board .stage .card .cap .n{font-size:19px;line-height:1.1}
+  #game:has(#bid) #board .stage .card .cap .info{display:none}
+  #game:has(#bid) #board .act{padding:12px 14px}
+  #game:has(#bid) #board .act h2{font-size:17px}
+  #game:has(#bid) #board .act > p.muted{font-size:13px;margin-top:2px}
+  #game:has(#bid) #board .act .bigbid{font-size:26px}
+  #game:has(#bid) #board .act .row[style*="margin-top:12px"]{margin-top:8px!important}
+  #game:has(#bid) #board .act label.f{font-size:12px;margin-bottom:4px}
+  #game:has(#bid) #board .act #bid{min-height:44px;font-size:18px}
+  #game:has(#bid) #board .act .quick{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:8px 0}
+  #game:has(#bid) #board .act .quick button{padding:8px 0;min-height:36px;font-size:13px}
+  #game:has(#bid) #board .act .row:has(#bidBtn) button{min-height:46px;padding-block:10px}
+  #game:has(#bid) #board .act .err:empty{display:none}
+  #game:has(#bid) #log{display:none}
+  div:has(> #game:not(.hidden) #bid){padding-bottom:12px!important}
+  #game:has(#bid) #board .stage .card{max-width:340px;margin-inline:auto}
+  #game:has(#bid) #board .act .row:has(#bidBtn){flex-wrap:nowrap;gap:8px}
+  #game:has(#bid) #board .act .row:has(#bidBtn) button{flex:1 1 0;min-width:0;white-space:nowrap}
+  #game:has(#bid) #board .act .row:has(#lockBtn){flex-wrap:wrap}
+  #game:has(#bid) #board .act .row:has(#lockBtn) #lockBtn{flex:1 1 100%}
+  #game:has(#bid) #board .act > p.muted:has(+ .bigbid){display:inline;margin-right:6px}
+  #game:has(#bid) #board .act .bigbid{display:inline-block;line-height:1.1}
+  #game:has(#bid) #board .act .bigbid + p.small{display:inline;margin-left:6px}
+  #game:has(#bid) #board .act label.f{letter-spacing:.02em}
+  #game:has(#bid) #board .act > p.small:last-child{margin-top:6px!important;font-size:11.5px}
+}
+</style>
+<style>
+/* Lot 1 · enchère Mercato sur petit téléphone (écran bas, type iPhone SE) : rien à faire défiler */
+@media (max-width:560px) and (max-height:760px){
+  #game:has(#bid) .topbar{flex-wrap:nowrap!important;margin:6px 0}
+  #game:has(#bid) .topbar h1{flex:none!important;font-size:0!important;min-width:30px}
+  #game:has(#bid) .topbar h1::before{margin-right:0}
+  #game:has(#bid) .topbar button{min-height:32px;padding:5px 10px}
+  #game:has(#bid) .hud{margin-bottom:8px}
+  #game:has(#bid) .hud .mid .bang{font-size:15px}
+  #game:has(#bid) .hud .pl{padding:6px 10px}
+  #game:has(#bid) .hud .pl > .small{display:none}
+  #game:has(#bid) .hud .pl .slots .slot{height:10px}
+  #game:has(#bid) #board .stage{gap:8px}
+  #game:has(#bid) #board .stage .card{grid-template-columns:76px 1fr}
+  #game:has(#bid) #board .stage .card .pic{height:100px}
+  #game:has(#bid) #board .stage .card .cap{padding:8px 12px}
+  #game:has(#bid) #board .stage .card .cap .n{font-size:17px}
+  #game:has(#bid) #board .act{padding:10px 12px}
+  #game:has(#bid) #board .act h2{font-size:16px}
+  #game:has(#bid) #board .act > p.muted{font-size:12px;line-height:1.3}
+  #game:has(#bid) #board .act #bid{min-height:40px}
+  #game:has(#bid) #board .act .quick{margin:6px 0}
+  #game:has(#bid) #board .act .quick button{min-height:34px;padding:6px 0}
+  #game:has(#bid) #board .act .row:has(#bidBtn) button{min-height:42px;padding-block:8px}
+}
+</style>
+<style>
+/* Fiche (dos de la carte agrandie) : même contour que la face (17 oct. 2026) — AR : prisme tournant ; Holo : « verre » aux couleurs placées par bord */
+.tcview .tcfiche.fa{border:8px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--am,var(--rc)) 14%,#0b0a0e),#0b0a0e 40%) padding-box,conic-gradient(from var(--ang),var(--am),#ff7ad9,var(--al),#7af0ff,var(--am),#ffe27a,var(--al),#b48cff,var(--am)) border-box;box-shadow:0 0 18px color-mix(in srgb,var(--am) 50%,transparent)}
+.tcview .tcfiche.fa.fq{background:linear-gradient(180deg,color-mix(in srgb,var(--q2) 14%,#0b0a0e),#0b0a0e 40%) padding-box,conic-gradient(from var(--ang),var(--q1),var(--q2),var(--q3),var(--q4),var(--q1),var(--q2),var(--q3),var(--q4),var(--q1)) border-box;box-shadow:0 0 18px color-mix(in srgb,var(--q2) 55%,transparent)}
+.tcview .tcfiche.fgl{border:8px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--q3) 18%,#0b0a0e),#0b0a0e 40%) padding-box,var(--qe) border-box}
+.tcview .tcfiche.fq > .fh b{color:var(--q1)}.tcview .tcfiche.fgl > .fh b{color:var(--q2)}
+@media (prefers-reduced-motion:no-preference){.tcview .tcfiche.fa{animation:tcprism 7s linear infinite}}
+</style>
+<style>
+/* Lot 1 · enchère Mercato sur téléphone : l'écran est rempli (17 oct. 2026) — la carte grandit dans l'espace libre au lieu de laisser un trou en bas */
+@media (max-width:560px){
+  #game:has(#bid){display:flex;flex-direction:column;min-height:calc(100dvh - 12px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+  #game:has(#bid) > #board{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+  #game:has(#bid) #board .stage{flex:1 1 auto;display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}
+  #game:has(#bid) #board .stage > div:first-child{height:100%;width:100%;min-height:96px;max-height:46vh;container:bidcard / size}
+  #game:has(#bid) #board .stage .card{grid-template-rows:100%;grid-template-columns:min(64.3cqh,44cqw) 1fr;align-items:stretch;height:100%;max-width:none;width:100%;margin:0}
+  #game:has(#bid) #board .stage .card .pic{height:100%;width:100%;aspect-ratio:auto;max-width:none}
+  #game:has(#bid) #board .stage .card .pic img{object-fit:cover;object-position:50% 15%}   /* même format que les images (225×350) : la photo apparaît en entier */
+  #game:has(#bid) #board .stage .card .cap{align-self:stretch;display:flex;flex-direction:column;justify-content:flex-start;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 12px 14px}
+  #game:has(#bid) #board .stage .card .cap .n{font-size:clamp(15px,4.6vw,20px);line-height:1.1}
+  #game:has(#bid) #board .stage .card .cap > .small{font-size:12px}
+  #game:has(#bid) #board .stage .card .cap .info{display:block;margin-top:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent);font-size:11.5px;line-height:1.38}
+  #game:has(#bid) #board .stage .card .cap .info p{margin:0 0 6px}
+  #game:has(#bid) #board .act > p.muted.opn{display:none}   /* « Impossible de laisser filer… (minimum 10M) » : le minimum est déjà écrit au-dessus du montant */
+}
+</style>
+
 </body>
 </html>
