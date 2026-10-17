@@ -10631,7 +10631,8 @@ const tcWant = c => { try { return (window.__MA.TCWANT || {})[c.n] || ""; } catc
   for (let k = 0; k < 520; k++){ const r = Math.random() < .08 ? 1.1 : Math.random() * .6 + .25; g.fillStyle = `hsla(${Math.random() * 360},90%,${75 + Math.random() * 25}%,${Math.random() * .8 + .2})`; g.beginPath(); g.arc(Math.random() * 170, Math.random() * 170, r, 0, 7); g.fill(); }
   document.documentElement.style.setProperty("--glit", `url(${cv.toDataURL()})`); } catch {} })();
 const tcBase = c => ((window.__MA || {}).TCBASE || {})[c.n] || c.i;   // image de base propre à la carte, si elle existe (data/cardbase)
-const tcArt = (c, f) => f === "W" ? tcWant(c) || [...tcAlt(c)].reverse()[0] || tcBase(c) : (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || tcBase(c);
+const tcArt = (c, f) => f === "W" ? tcBase(c) || tcWant(c) :   // Wanted : photo en couleur (illustration de la carte), validé le 17 oct. 2026 — la mise en page « wreal » reste
+   (f in TC_ARTK && tcAlt(c)[TC_ARTK[f]]) || tcBase(c);
 // versions qui existent pour une carte : normale et Holo toujours, les autres seulement avec leur propre illustration
 // Les versions illustrées sont réservées aux personnages forts et populaires, pour rester rares : AR à partir d'Épique,
 // seconde AR (autre illustration, même nom « AR ») et SAR à partir de Légendaire (ou tête d'affiche), UR pour les Mythiques.
@@ -10692,6 +10693,66 @@ document.addEventListener("load", e => { const im = e.target; if (!im || im.tagN
 // cartes construites hors de la page puis insérées : l'image est déjà chargée, l'événement « load » ne remonte pas → on calcule à l'insertion
 const tcQuadApply = t => { const im = t.querySelector(":scope > img:not(.g)") || t.querySelector("img:not(.g)"); if (!im) return; const go = () => { const q = tcImgQuad(im); if (q){ q.forEach((c, i) => t.style.setProperty("--q" + (i + 1), c)); if (q.edge) t.style.setProperty("--qe", q.edge); t.classList.add("h3"); } }; if (im.complete && im.naturalWidth) go(); };
 try { new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes){ if (n.nodeType !== 1) continue; if (n.matches && n.matches(".tc.f-H, .tc.arp, .tc.f-G")) tcQuadApply(n); n.querySelectorAll && n.querySelectorAll(".tc.f-H, .tc.arp, .tc.f-G").forEach(tcQuadApply); } }).observe(document.documentElement, {childList: true, subtree: true}); } catch {}
+
+// ---- Wanted : le papier brûle du côté du doigt quand on incline (validé le 17 oct. 2026, page wanted-feu.html).
+// Front de flamme irrégulier (bruit fractal), mémoire de la brûlure (ce qui a brûlé reste brûlé pendant qu'on joue),
+// propagation lente, flammes / braises / fumée ; au repos les braises s'éteignent et le papier se reforme lentement.
+const TC_BURN = (() => {
+  const GW = 150, GH = 234;
+  const noise = seed => { let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647; const out = new Float32Array(GW * GH);
+    for (const [n, a] of [[6, 1], [12, .5], [24, .25], [48, .13]]){ const g = []; for (let j = 0; j <= n; j++){ g.push([]); for (let i = 0; i <= n; i++) g[j].push(rnd()); }
+      for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++){ const fx = x / GW * n, fy = y / GH * n, ix = fx | 0, iy = fy | 0, tx = fx - ix, ty = fy - iy, sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
+        out[y * GW + x] += (g[iy][ix] * (1 - sx) * (1 - sy) + g[iy][ix + 1] * sx * (1 - sy) + g[iy + 1][ix] * (1 - sx) * sy + g[iy + 1][ix + 1] * sx * sy) * a; } }
+    let mn = 1e9, mx = -1e9; for (const v of out){ mn = Math.min(mn, v); mx = Math.max(mx, v); } for (let i = 0; i < out.length; i++) out[i] = (out[i] - mn) / (mx - mn); return out; };
+  const all = new Set();
+  class Burn {
+    constructor(card, seed){ this.card = card; this.cv = document.createElement("canvas"); this.cv.className = "burn"; this.cv.setAttribute("aria-hidden", "true"); card.appendChild(this.cv);
+      this.n = noise(seed); this.g = document.createElement("canvas"); this.g.width = GW; this.g.height = GH; this.gx = this.g.getContext("2d"); this.img = this.gx.createImageData(GW, GH);
+      this.B = new Float32Array(GW * GH); this.P = new Float32Array(GW * GH); this.t = 0; this.tgt = 0; this.ox = .5; this.oy = -.05; this.parts = []; this.idle = 0; this.f = null; }
+    field(){ const f = new Float32Array(GW * GH), ox = this.ox * GW, oy = this.oy * GH, md = Math.hypot(GW, GH);
+      for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++){ const e = Math.min(x, y, GW - 1 - x, GH - 1 - y) / (GW * .5); f[y * GW + x] = Math.hypot(x - ox, y - oy) / md * 1.25 + e * .25 + this.n[y * GW + x] * .32; } return f; }
+    follow(px, py, ph){ const m = Math.min(px, 1 - px, py, 1 - py); let ox = px, oy = py; if (m === px) ox = -.05; else if (m === 1 - px) ox = 1.05; else if (m === py) oy = -.05; else oy = 1.05;
+      this.ox += (ox - this.ox) * .15; this.oy += (oy - this.oy) * .15; this.tgt = Math.max(0, ph - .15) * .5; }
+    frame(now){ const dpr = Math.min(2, devicePixelRatio || 1), cw = Math.round(this.cv.offsetWidth * dpr), ch = Math.round(this.cv.offsetHeight * dpr); if (!cw || !ch) return true;
+      if (this.cv.width !== cw || this.cv.height !== ch){ this.cv.width = cw; this.cv.height = ch; }
+      const x = this.cv.getContext("2d"); x.clearRect(0, 0, cw, ch);
+      this.t += this.tgt > this.t ? (this.tgt - this.t) * .018 : (this.tgt - this.t) * .03; this.idle = this.tgt > 0 ? 0 : this.idle + 1;
+      const key = this.ox.toFixed(2) + this.oy.toFixed(2); if (!this.f || this.fk !== key){ this.f = this.field(); this.fk = key; }
+      const cx0 = cw * (10 / 120), cy0 = ch * (30 / 130), cww = cw * (100 / 120), chh = ch * (100 / 130), d = this.img.data, f = this.f, B = this.B, P = this.P, heal = this.idle > 70, front = []; let any = false;
+      for (let i = 0, k = 0; i < GW * GH; i++, k += 4){ const b = Math.max(0, Math.min(1, (this.t - f[i] + .03) / .09)); P[i] = B[i];
+        if (b > B[i]) B[i] += (b - B[i]) * .06; else if (heal) B[i] *= .985;
+        const q = B[i]; let R = 0, G = 0, Bc = 0, A = 0; if (q > .01) any = true;
+        if (q > .86){ R = 11; G = 10; Bc = 14; A = 255; }
+        else if (q > .74){ R = 45; G = 14; Bc = 4; A = 255; }
+        else if (q > .62){ const z = (q - .62) / .12; R = 255; G = 110 + z * 130; Bc = 30 + z * 80; A = 255; if (B[i] > P[i] + .002 && Math.random() < .03) front.push(i); }
+        else if (q > .3){ R = 60; G = 28; Bc = 8; A = (q - .3) / .32 * 215; }
+        else if (q > .08){ R = 120; G = 70; Bc = 20; A = (q - .08) / .22 * 70; }
+        d[k] = R; d[k + 1] = G; d[k + 2] = Bc; d[k + 3] = A; }
+      this.gx.putImageData(this.img, 0, 0); x.drawImage(this.g, cx0, cy0, cww, chh); x.globalCompositeOperation = "lighter";
+      for (const i of front){ if (this.parts.length > 300) break; const px = cx0 + (i % GW) / GW * cww, py = cy0 + ((i / GW) | 0) / GH * chh, r = Math.random();
+        this.parts.push(r < .6 ? {x: px, y: py, vx: (Math.random() - .5) * .4 * dpr, vy: -(1 + Math.random() * 1.6) * dpr, l: 0, L: 22 + Math.random() * 26, s: (5 + Math.random() * 9) * dpr, ty: 0}
+          : r < .9 ? {x: px, y: py, vx: (Math.random() - .5) * 1.2 * dpr, vy: -(1.5 + Math.random() * 2.5) * dpr, l: 0, L: 50 + Math.random() * 60, s: (1 + Math.random() * 1.5) * dpr, ty: 1}
+          : {x: px, y: py, vx: (Math.random() - .5) * .5 * dpr, vy: -(.5 + Math.random()) * dpr, l: 0, L: 80 + Math.random() * 60, s: (8 + Math.random() * 10) * dpr, ty: 2}); }
+      const keep = []; for (const q of this.parts){ q.l++; q.x += q.vx + Math.sin((q.l + q.x) / 9) * .3 * dpr; q.y += q.vy; const a = 1 - q.l / q.L; if (a <= 0) continue; keep.push(q);
+        if (q.ty === 0){ const s = q.s * (.6 + a * .6), g = x.createRadialGradient(q.x, q.y, 0, q.x, q.y, s); g.addColorStop(0, `rgba(255,240,180,${.55 * a})`); g.addColorStop(.35, `rgba(255,150,40,${.45 * a})`); g.addColorStop(1, "rgba(255,60,0,0)"); x.fillStyle = g; x.beginPath(); x.ellipse(q.x, q.y, s * .6, s, 0, 0, 7); x.fill(); }
+        else if (q.ty === 1){ x.fillStyle = `rgba(255,${180 + Math.random() * 60 | 0},90,${a})`; x.fillRect(q.x, q.y, q.s, q.s); } }
+      x.globalCompositeOperation = "source-over";
+      for (const q of keep) if (q.ty === 2){ const a = (1 - q.l / q.L) * .18, s = q.s * (1 + q.l / q.L * 2), g = x.createRadialGradient(q.x, q.y, 0, q.x, q.y, s); g.addColorStop(0, `rgba(90,85,80,${a})`); g.addColorStop(1, "rgba(90,85,80,0)"); x.fillStyle = g; x.beginPath(); x.arc(q.x, q.y, s, 0, 7); x.fill(); }
+      this.parts = keep; return any || this.tgt > 0 || keep.length > 0; }
+  }
+  let running = false;
+  const tick = now => { let alive = false;
+    for (const t of document.querySelectorAll(".tc.f-W:not(.no)")){ if (!t.isConnected) continue;
+      const on = t.classList.contains("hl") || !!t.closest(".vcard.live"), cs = on ? getComputedStyle(t) : null;
+      if (on && !t._burn){ t._burn = new Burn(t, 1234 + ((t.dataset.tc || t.textContent || "").length * 977)); all.add(t); }
+      const b = t._burn; if (!b) continue;
+      if (on){ const px = parseFloat(cs.getPropertyValue("--px")) / 100, py = parseFloat(cs.getPropertyValue("--py")) / 100; if (isFinite(px) && isFinite(py)) b.follow(px, py, Math.min(1, Math.hypot(px - .5, py - .5) / .5)); } else b.tgt = 0;
+      if (b.frame(now)) alive = true; }
+    if (alive) requestAnimationFrame(tick); else running = false; };
+  const wake = () => { if (!running){ running = true; requestAnimationFrame(tick); } };
+  ["pointermove", "pointerdown", "touchmove", "deviceorientation"].forEach(ev => addEventListener(ev, e => { if (ev === "deviceorientation" || (e.target && e.target.closest && e.target.closest(".tc.f-W, .tcview"))) wake(); }, {passive: true, capture: true}));
+  return {wake};
+})();
 const tcPalSt = (c, f) => { const p = tcPalOf(c, f); return p ? `--hm:${p[0]};--hl:${p[1]};--hd:${p[2]}` : ""; };
 const tcArTxt = (c, f) => { try { return (f === "A" || f === "B" || f === "C") && window.__MA.TCARTXT[c.u][c.n][TC_ARTK[f]] || null; } catch { return null; } };
 // t[5] = cadrage propre à l'illustration [zoom, décalage x %, décalage y %] (data/ar_frame.json, tools/ar_frame.py)
@@ -15549,6 +15610,11 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 /* UR : bandes blanches diagonales (même texture rayée .tx) retirées aussi (17 oct. 2026) */
 .tc.tc.tc.tc.f-G .tx{display:none!important}
 .tc.tc.tc.tc.tc.f-G .fx{background-image:linear-gradient(115deg,transparent 30%,rgba(255,244,200,.75) 48%,transparent 62%)!important;background-size:260% 100%!important}   /* UR : trames de lignes blanches croisées retirées, reflet doré gardé */
+/* ---- Wanted (17 oct. 2026) : photo en couleur, brillance d'origine gardée (texte qui surbrille) ; le papier brûle en inclinant (canvas .burn, TC_BURN) */
+.tc.tc.tc.tc.tc.tc.f-W :is(.ky,.kg,.sk,.tx){display:none!important}   /* l'effet de rareté délavait l'affiche ; on garde le reflet propre aux Wanted (.fx, texte qui surbrille) */
+.tc.tc.tc.f-W > img{filter:saturate(1.05) contrast(1.05)!important;mix-blend-mode:normal!important}
+.tc.tc.tc.tc.f-W{overflow:visible!important}
+.tc.tc.tc.tc.f-W > canvas.burn{position:absolute!important;left:-10%!important;top:-30%!important;width:120%!important;height:130%!important;pointer-events:none;z-index:10!important;margin:0!important;border:0!important;transform:translateZ(1px)}
 /* ---- UR : brillance unique « Feuille d'or » (17 oct. 2026) — seulement en inclinant ; l'ancien reflet doré, la couche de rareté, l'éclat et les paillettes sont retirés */
 .tc.tc.tc.tc.tc.tc.f-G:not(.no) :is(.fx,.kg,.sk,.tx){display:none!important}
 .tc.tc.tc.tc.tc.tc.f-G:not(.no) .ky{display:block!important;position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;opacity:0!important;transition:opacity .3s;mix-blend-mode:color-dodge!important;
