@@ -15485,6 +15485,14 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 /* voile noir haut/bas allégé (demandé le 15 oct. 2026) : la teinte reste, plus transparente ; le texte garde son contour noir */
 .tc.tc.tc.arp .ag{background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,0) 20%,rgba(0,0,0,0) 54%,rgba(0,0,0,.36) 70%,rgba(0,0,0,.7))!important}
 .tc.tc.tc.arp::after{content:""!important;display:block!important;position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--al) 85%,transparent),inset 0 0 10px color-mix(in srgb,var(--al) 35%,transparent);background:none!important}
+
+/* Holo : même contour « verre » que les AR, même épaisseur (demande du 17 oct. 2026) — dégradé translucide aux couleurs de l'illustration (--hm/--hl/--hd),
+   posé AUTOUR de la carte (content-box + marge négative), liseré lumineux côté image, lueur colorée. Distingue Holo et AR des cartes classiques. */
+.tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:clamp(3px,.9vw,7px);box-sizing:content-box!important;border:var(--bw) solid transparent!important;margin:calc(-1 * var(--bw))!important;border-radius:calc(12px + var(--bw))!important;outline:0!important;
+  background:linear-gradient(var(--hd),var(--hd)) padding-box,linear-gradient(150deg,color-mix(in srgb,var(--hl) 82%,transparent),color-mix(in srgb,var(--hm) 82%,transparent) 30%,color-mix(in srgb,var(--hd) 82%,transparent) 62%,color-mix(in srgb,var(--hm) 82%,transparent) 85%,color-mix(in srgb,var(--hl) 82%,transparent)) border-box!important;
+  box-shadow:0 0 18px color-mix(in srgb,var(--hm) 55%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
+.tcgrid > .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:4px}
+@media (max-width:520px){.tcgrid > .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:3px}}
 </style>
 <style>
 /* enchère façon FUT : champ de saisie du montant entre deux boutons −/+ */
