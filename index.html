@@ -15659,6 +15659,11 @@ canvas.burnfx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:non
 .tc .hz i:nth-child(4n+2){--sc:var(--q2,#fff)}.tc .hz i:nth-child(4n+3){--sc:var(--q3,#fff);width:9%}.tc .hz i:nth-child(4n){--sc:var(--q4,#fff);width:15%}
 @keyframes tchtw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}40%{opacity:1;transform:scale(1) rotate(30deg)}60%{opacity:.85;transform:scale(.85) rotate(40deg)}}
 @media (prefers-reduced-motion:reduce){.tc .hz i{animation:none;opacity:.6}}
+/* ---- Légendaires Holo (17 oct. 2026) : même « feuille d'or » mais teintée avec la palette de l'illustration (--q1..--q4), plus douce (.55) */
+.tc.tc.tc.tc.tc.tc.tc.r-L.f-H:not(.arp):not(.no) .ky{background-image:var(--kglit),var(--kfoil),repeating-linear-gradient(115deg,color-mix(in srgb,var(--q3,#2a1c02) 45%,#000) 0%,var(--q2,#b8860b) 6%,color-mix(in srgb,var(--q1,#ffe08a) 70%,#fff) 10%,#fff6ec 12%,var(--q4,#d9a521) 16%,color-mix(in srgb,var(--q3,#2a1c02) 45%,#000) 24%)!important;filter:brightness(.72) contrast(1.45) saturate(1.35)!important}
+:is(.tc.hl,.vcard.live .tc).tc.tc.tc.tc.tc.tc.tc.r-L.f-H:not(.arp):not(.no) .ky{opacity:.55!important}
+/* Holos Légendaire et au-delà (Mythique, Éveil) : pas de cosmos, la brillance de rareté suffit (17 oct. 2026) */
+.tc.tc.tc.tc.tc:is(.r-L,.r-M,.r-X).f-H .hf{display:none!important}
 /* ---- AR : brillance « Prisme d'illustration » (A2, validée le 17 oct. 2026, exclusive aux AR) — seulement en inclinant : feuille métallique
    × bandes holographiques aux 4 couleurs de l'illustration (--q1..--q4) en color-dodge, + fines lignes diagonales qui glissent en sens inverse */
 .tc.tc.tc.tc.arp .ap{mix-blend-mode:color-dodge!important;background-image:var(--kfoil),repeating-linear-gradient(125deg,var(--q1,#f3d) 0%,var(--q2,#3df) 6%,var(--q3,#fd3) 12%,var(--q4,#a5f) 18%,var(--q1,#f3d) 24%)!important;background-size:512px 512px,450% 450%!important;background-position:calc(var(--px,50%) * .3) calc(var(--py,50%) * .3),var(--px,50%) var(--py,50%)!important;background-blend-mode:multiply!important;filter:brightness(.6) contrast(1.7) saturate(1.5)!important;opacity:0!important;transition:opacity .3s!important}
