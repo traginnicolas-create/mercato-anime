@@ -15516,6 +15516,8 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 :is(.tc.hl,.vcard.live .tc).tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx{opacity:calc(.36 + var(--ph,0) * .04)!important}
 :is(.tc.hl,.vcard.live .tc).tc.tc.tc.f-H .fx::after{opacity:.12!important}
 .tcview .vf:has(.tc.f-H)::after{opacity:.4!important}
+/* rayures diagonales blanches (.tx masqué en lignes à 125°) retirées des Communes, Peu communes et Rares (17 oct. 2026) ; la texture des cartes plus rares reste */
+.tc.tc.tc:is(.r-C,.r-P,.r-R) .tx{display:none!important}
 
 </style>
 <style>
