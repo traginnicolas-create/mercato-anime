@@ -9686,6 +9686,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 /* styles : orage (Mythique, Éveil), cases de manga (SAR), pluie d'or (UR) */
 .tccine .bolts,.tccine .pans,.tccine .rain{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .tccine .bolts i{position:absolute;top:0;height:min(64%,560px);width:min(30vw,170px);background:linear-gradient(180deg,#fff,var(--yc));clip-path:polygon(46% 0,62% 0,40% 38%,70% 38%,22% 100%,44% 52%,18% 52%);opacity:0;filter:drop-shadow(0 0 14px var(--yc))}
+.tccine.lite .bolts i{filter:none}.tccine.lite .rays.two,.tccine.lite .ring.two{display:none}
 .tccine .bolts i:nth-child(1){left:-4%}.tccine .bolts i:nth-child(2){right:-4%;transform:scaleX(-1)}.tccine .bolts i:nth-child(3){left:50%;margin-left:min(-15vw,-85px);height:min(36%,300px)}@media (max-width:700px){.tccine .bolts i:nth-child(3){display:none}}
 .tccine .pans i{position:absolute;left:-10%;right:-10%;height:20%;background:#fff;opacity:.92;transform:skewY(-7deg) translateX(-120%);box-shadow:0 0 0 4px #0b0a0e;background-image:repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,0,0,.5) 14px 15px)}
 .tccine .pans i:nth-child(1){top:4%}.tccine .pans i:nth-child(2){top:70%}.tccine .pans i:nth-child(3){top:86%;height:9%}
@@ -11142,10 +11143,20 @@ const tcCalm = () => matchMedia("(prefers-reduced-motion:reduce)").matches;
 // o.mini : version courte (un indice, pas de silhouette) pour une Épique ou une AR.
 // Tunnel en vraie 3D (three.js) derrière la cinématique d'un gros tirage : sol et plafond quadrillés qui défilent dans le brouillard, portiques qui passent,
 // traits de vitesse, lumière au bout qui grossit à chaque étape, puis éclair et ralenti à la révélation. Sans WebGL, ou si l'appareil ne suit pas, le tunnel CSS reste.
+// téléphone (écran tactile, petit écran) : cinématiques allégées automatiquement (19 oct. 2026)
+const TC_LITE = (() => { try { return matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) < 820; } catch { return false; } })();
 const TC_YC = {L: "#f7c64a", M: "#ff4a2e", X: "#7de3ff", S: "#ff7ab8", G: "#ffd23f", E: "#b07cff", Z: "#d5b3ff"};
-function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) return null; let rd; try { rd = new T.WebGLRenderer({alpha: true, antialias: true, powerPreference: "high-performance"}); } catch { return null; }
+// moteur 3D des cinématiques : créé une seule fois et préparé pendant la déchirure du sachet (tcCineWarm), puis réutilisé.
+// Le créer au début de chaque cinématique figeait l'écran 0,2 à 0,5 s (plus sur téléphone) — 19 oct. 2026
+let TC_CRD = null;
+function tcCineRD(T){ if (!TC_CRD) TC_CRD = new T.WebGLRenderer({alpha: true, antialias: !TC_LITE, powerPreference: "high-performance"}); return TC_CRD; }
+function tcCineWarm(){ const T = window.THREE; if (!T || tcCalm() || (TC_CRD && TC_CRD._warm)) return; try { const rd = tcCineRD(T); rd.setSize(8, 8, false);
+    const sc = new T.Scene(), cam = new T.PerspectiveCamera(70, 1, .1, 120), g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute([0, 0, -1, 1, 1, -2], 3)); sc.fog = new T.Fog(0x050407, 5, 58);
+    const ms = [new T.LineBasicMaterial({transparent: true, opacity: .5}), new T.LineBasicMaterial({color: 0xffffff, transparent: true, opacity: .7, blending: T.AdditiveBlending, depthWrite: false}), new T.SpriteMaterial({transparent: true, blending: T.AdditiveBlending, depthWrite: false, opacity: 0, fog: false})];
+    sc.add(new T.LineSegments(g, ms[0]), new T.LineSegments(g, ms[1]), new T.Sprite(ms[2])); rd.compile(sc, cam); rd.render(sc, cam); g.dispose(); ms.forEach(m => m.dispose()); rd._warm = 1; } catch {} }
+function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) return null; let rd; try { rd = tcCineRD(T); } catch { return null; }
   const cv = rd.domElement; cv.className = "cgl"; cv.setAttribute("aria-hidden", "true"); el.insertBefore(cv, el.firstChild); el.classList.add("gl");
-  const sc = new T.Scene(), cam = new T.PerspectiveCamera(70, 1, .1, 120), C = new T.Color(col), size = () => { const w = el.clientWidth || innerWidth, h = el.clientHeight || innerHeight; rd.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); rd.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }; size();
+  const sc = new T.Scene(), cam = new T.PerspectiveCamera(70, 1, .1, 120), C = new T.Color(col), size = () => { const w = el.clientWidth || innerWidth, h = el.clientHeight || innerHeight; rd.setPixelRatio(TC_LITE ? 1 : Math.min(devicePixelRatio || 1, 2)); rd.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }; size();
   sc.fog = new T.Fog(0x050407, 5, 58); const disp = [];
   const lines = (pts, op, color = C) => { const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(pts, 3)); const m = new T.LineBasicMaterial({color, transparent: true, opacity: op}); disp.push(g, m); return new T.LineSegments(g, m); };
   // sol et plafond : lignes de fuite et traverses tous les 2 mètres
@@ -11154,7 +11165,7 @@ function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) re
   // portiques
   const gates = []; for (let k = 0; k < 14; k++){ const w = 3.3, h = 2.35, l = lines([-w, -h, 0, w, -h, 0, w, -h, 0, w, h, 0, w, h, 0, -w, h, 0, -w, h, 0, -w, -h, 0, -w * .82, -h * .82, 0, w * .82, -h * .82, 0, w * .82, h * .82, 0, -w * .82, h * .82, 0], .85); l.position.z = -k * 4.5; l.rotation.z = k * .09; sc.add(l); gates.push(l); }
   // traits de vitesse
-  const N = 240, sp = new Float32Array(N * 6), sd = []; for (let k = 0; k < N; k++){ const a = Math.random() * Math.PI * 2, r = 1.2 + Math.random() * 3.6; sd.push([Math.cos(a) * r * 1.35, Math.sin(a) * r * .8, -Math.random() * 60, .6 + Math.random() * 1.2]); }
+  const N = TC_LITE ? 110 : 240, sp = new Float32Array(N * 6), sd = []; for (let k = 0; k < N; k++){ const a = Math.random() * Math.PI * 2, r = 1.2 + Math.random() * 3.6; sd.push([Math.cos(a) * r * 1.35, Math.sin(a) * r * .8, -Math.random() * 60, .6 + Math.random() * 1.2]); }
   const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.BufferAttribute(sp, 3)); const sm = new T.LineBasicMaterial({color: 0xffffff, transparent: true, opacity: .7, blending: T.AdditiveBlending, depthWrite: false}); const streaks = new T.LineSegments(sg, sm); sc.add(streaks); disp.push(sg, sm);
   // lumière au bout du tunnel et éclair
   const gcv = document.createElement("canvas"); gcv.width = gcv.height = 128; { const g2 = gcv.getContext("2d"), gr = g2.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.2, "rgba(255,255,255,.6)"); gr.addColorStop(.55, "rgba(255,255,255,.13)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g2.fillStyle = gr; g2.fillRect(0, 0, 128, 128); }
@@ -11162,9 +11173,9 @@ function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) re
   const sun = spr(C, false), core = spr(0xffffff, false), flash = spr(0xffffff, false); sun.position.z = core.position.z = -50; flash.position.z = -6; sc.add(sun, core, flash); disp.push(gtx);
   let raf = 0, dead = false, last = performance.now(), t0 = last, stage = 0, rev = 0, speed = 12, kick = 0, slow = 0, n = 0, prev = 0;
   addEventListener("resize", size);
-  const stop = () => { if (dead) return; dead = true; cancelAnimationFrame(raf); removeEventListener("resize", size); el.classList.remove("gl"); cv.remove(); disp.forEach(d => d.dispose()); rd.dispose(); try { rd.forceContextLoss(); } catch {} };
-  const loop = now => { if (dead) return; if (!el.isConnected){ stop(); return; } const dt = Math.min(.05, (now - last) / 1000), el2 = (now - t0) / 1000; last = now;
-    if (n < 45){ n++; if (prev) slow += now - prev; prev = now; if (n === 45 && slow / 44 > 40){ stop(); return; } }
+  const stop = () => { if (dead) return; dead = true; cancelAnimationFrame(raf); removeEventListener("resize", size); el.classList.remove("gl"); cv.remove(); disp.forEach(d => d.dispose()); };   /* le moteur est gardé pour la prochaine cinématique */
+  const loop = now => { if (dead) return; if (!el.isConnected){ stop(); return; } try { const dt = Math.min(.05, (now - last) / 1000), el2 = (now - t0) / 1000; last = now;
+    { const NN = TC_LITE ? 36 : 51, lim = TC_LITE ? 26 : 40; if (n < NN){ n++; if (n > 6){ if (prev) slow += now - prev; prev = now; } if (n === NN && slow / (NN - 8) > lim){ stop(); return; } } }   /* les premières images (mise en route) ne comptent pas */   /* l'appareil ne suit pas : retour au tunnel simple */
     const rt = rev ? (now - rev) / 1000 : -1, target = rev ? 2.2 : [12, 20, 30, 46][stage]; speed += (target - speed) * Math.min(1, dt * (rev ? 2.4 : 3)); kick *= Math.pow(.02, dt);
     const mv = speed * dt, off = (floor.userData.o = ((floor.userData.o || 0) + mv) % 2); floor.position.z = ceil.position.z = off;
     gates.forEach((g, k) => { g.position.z += mv; if (g.position.z > 1.5) g.position.z -= 14 * 4.5; g.rotation.z += dt * (myth ? .5 : .16) * (k % 2 ? 1 : -1); const sc2 = rev ? 1 + Math.min(1, rt * 1.4) * .7 : 1; g.scale.set(sc2, sc2, 1); g.material.opacity = (rev ? Math.max(.25, .85 - rt * .5) : .85); });
@@ -11173,7 +11184,7 @@ function tcCineGL(el, col, myth){ const T = window.THREE; if (!T || tcCalm()) re
     if (rev){ flash.scale.set(40 + rt * 60, 40 + rt * 60, 1); flash.material.opacity = Math.max(0, 1 - rt * 2.2); }
     cam.fov = 70 + kick * 22 + (rev ? Math.max(0, 1 - rt * 1.6) * 26 : stage * 3); cam.updateProjectionMatrix(); cam.rotation.z = Math.sin(el2 * .7) * .05 * (rev ? .3 : 1);
     const shake = rev && myth ? Math.max(0, 1 - rt * 1.3) * .12 : 0; cam.position.set((Math.random() - .5) * shake + Math.sin(el2 * 1.3) * .08, (Math.random() - .5) * shake + Math.cos(el2 * 1.1) * .05, 0);
-    rd.render(sc, cam); raf = requestAnimationFrame(loop); };
+    rd.render(sc, cam); } catch (e){ stop(); return; } raf = requestAnimationFrame(loop); };   /* une erreur du tunnel 3D ne doit jamais bloquer la cinématique */
   raf = requestAnimationFrame(loop);
   return {stage: k => { stage = Math.max(stage, Math.min(3, k)); kick = 1; }, reveal: () => { if (!rev){ rev = performance.now(); kick = 0; } }, stop}; }
 // chance, en %, qu'un booster de ce niveau contienne au moins une carte de cette rareté (ou cette version rare) : affichée au-dessus de la rareté dans la cinématique
@@ -11186,15 +11197,16 @@ function tcOddsOf(c, key){ try { const {t} = tcParse(key), R = TC_T[t].rate; let
 function tcCine(c, o = {}){
   return new Promise(res => {
     const sty = c.f === "Z" ? "Z" : c.f === "G" ? "G" : c.f === "K" ? "M" : c.f === "S" ? "S" : c.f === "W" ? "L" : c.r === "X" ? "X" : c.r === "M" ? "M" : c.r === "L" ? "L" : "E", myth = sty !== "L" && sty !== "E", calm = tcCalm(), mini = !!o.mini || (sty === "E" && !o.full);
+    try {   /* 19 oct. 2026 : si la cinématique échoue, on la retire et on continue (avant, l'écran restait bloqué) */
     const img = tcArt(c, c.f);
-    document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${tcER(c, c.f)} y${sty} ${mini ? "mini" : ""}" role="dialog" aria-modal="true" aria-label="${TC_R[tcER(c, c.f)][0]} : ${esc(c.n)}">
+    document.body.insertAdjacentHTML("beforeend", `<div class="tccine r-${tcER(c, c.f)} y${sty} ${mini ? "mini" : ""} ${TC_LITE ? "lite" : ""}" role="dialog" aria-modal="true" aria-label="${TC_R[tcER(c, c.f)][0]} : ${esc(c.n)}">
       <div class="tun" aria-hidden="true"><i class="floor"></i><i class="ceil"></i><i class="beam b1"></i><i class="beam b2"></i></div>
       ${sty === "M" || sty === "X" || sty === "Z" ? `<div class="bolts" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "S" ? `<div class="pans" aria-hidden="true"><i></i><i></i><i></i></div>` : ""}${sty === "G" ? `<div class="rain" aria-hidden="true"></div>` : ""}
       <div class="clue c1"><span class="kj">${TC_PACKS[c.u][1]}</span><b>${TC_PACKS[c.u][0]}</b></div>
       <div class="clue c2"><b>${TC_R[tcER(c, c.f)][0]}${c.f ? " · " + TC_FIN[c.f][1] : ""}</b><span>${c.obj ? esc(c.obj.t) : "Niveau " + c.p}</span></div>
       <div class="hero" aria-hidden="true"><img src="${img}" alt=""></div>
       <div class="fl"></div><div class="rays"></div>${myth ? `<div class="rays two"></div>` : ""}<div class="ring"></div>${myth ? `<div class="ring two"></div>` : ""}
-      <div class="sp">${Array.from({length: myth ? 46 : 28}, (_, k) => `<i style="--a:${Math.round(Math.random() * 360)}deg;--d:${30 + Math.round(Math.random() * 46)}vmin;--t:${(.7 + Math.random() * 1.1).toFixed(2)}s;--w:${(Math.random() * .5).toFixed(2)}s"></i>`).join("")}</div>
+      <div class="sp">${Array.from({length: TC_LITE ? (myth ? 18 : 12) : myth ? 46 : 28}, (_, k) => `<i style="--a:${Math.round(Math.random() * 360)}deg;--d:${30 + Math.round(Math.random() * 46)}vmin;--t:${(.7 + Math.random() * 1.1).toFixed(2)}s;--w:${(Math.random() * .5).toFixed(2)}s"></i>`).join("")}</div>
       <div class="seal">${c.f === "Z" ? "伝説" : c.r === "X" ? "覚醒" : c.f === "G" ? "黄金" : c.f === "K" ? "鮮血" : c.f === "S" ? "特別" : c.f === "W" ? "手配" : c.r === "M" ? "神話" : c.r === "L" ? "伝説" : "叙事"}</div>${o.key ? tcOddsOf(c, o.key) : ""}<div class="lab">${TC_R[tcER(c, c.f)][0]}${c.f ? " · " + TC_FIN[c.f][0] : ""}</div><div class="cardw">${tcCard(c, {isNew: c.isNew, f: c.f})}</div><div class="who"><b>${esc(c.n)}</b><span>${c.isNew ? "Nouvelle carte" : c.newFin ? "Nouvelle version" : "Doublon"} · ${TC_PACKS[c.u][0]}</span></div><div class="tap">Touche pour continuer</div></div>`);
     const el = document.querySelector(".tccine"), timers = []; let final = 0;
     const GLc = tcCineGL(el, TC_YC[sty] || "#b07cff", myth), G = !calm && window.gsap;
@@ -11207,7 +11219,7 @@ function tcCine(c, o = {}){
         cd.classList.add("hl"); cd.style.setProperty("--px", (Math.min(1, Math.max(0, x)) * 100).toFixed(1) + "%"); cd.style.setProperty("--py", (Math.min(1, Math.max(0, y)) * 100).toFixed(1) + "%"); cd.style.setProperty("--ph", Math.min(1, Math.hypot(x - .5, y - .5) / .5).toFixed(2)); }; };
     let riseOff = () => {};
     const end = () => { if (final) return; final = Date.now(); timers.forEach(clearTimeout); riseOff(); el.classList.add("s1", "s2", "s3", "s4"); GLc && GLc.reveal(); card3d(); tcSnd(myth ? "impact3" : "impact2"); try { navigator.vibrate?.(myth ? [60, 40, 60, 40, 180] : [50, 30, 120]); } catch {}
-      if (myth && !calm){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); } };
+      if (myth && !calm && !TC_LITE){ document.body.classList.add("tcquake"); setTimeout(() => document.body.classList.remove("tcquake"), 900); } };
     const at = (ms, fn) => timers.push(setTimeout(fn, ms));
     if (calm) end();
     else if (mini){ riseOff = tcRiser(1, .9); at(250, () => { el.classList.add("s2"); GLc && GLc.stage(2); tcSnd("st2"); }); at(1000, end); }
@@ -11216,7 +11228,8 @@ function tcCine(c, o = {}){
     el.addEventListener("pointermove", e => { if (el._p0 && Math.hypot(e.clientX - el._p0[0], e.clientY - el._p0[1]) > 10) el._drag = 1; });
     el.addEventListener("pointerup", () => { el._p0 = null; });   /* au doigt : glisser incline la carte sans la fermer */
     el.addEventListener("touchmove", e => e.preventDefault(), {passive: false});
-    el.onclick = () => { if (el._drag){ el._drag = 0; return; } if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; GLc && GLc.stop(); if (G) G.killTweensOf(el.querySelector(".cardw .tc")); el.remove(); res(); };
+    el.onclick = () => { if (el._drag){ el._drag = 0; return; } if (!final) return end(); if (Date.now() - final < (calm ? 300 : 1100)) return; try { GLc && GLc.stop(); if (G) G.killTweensOf(el.querySelector(".cardw .tc")); } catch {} el.remove(); res(); };
+    } catch (e){ try { document.querySelectorAll(".tccine").forEach(x => x.remove()); document.body.classList.remove("tcquake"); } catch {} res(); }
   });
 }
 // ouverture : le sachet se charge et se déchire (la couleur de l'éclair annonce le meilleur tirage), puis on retourne les cinq cartes
@@ -11618,6 +11631,7 @@ function tcOpening(key, got){
   const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
   const G = !calm && window.gsap, lvlOf = c => c.r === "M" || c.r === "X" || c.f === "G" || c.f === "Z" ? 3 : c.r === "L" || c.f === "K" || c.f === "S" || c.f === "W" ? 2 : TC_ORDER.indexOf(c.r) === 3 || c.f ? 1 : 0;
   const GL = tcPouchGL(O, key); if (!calm) setTimeout(() => tcSnd("rustle"), 420);
+  setTimeout(() => { try { tcCineWarm(); } catch {} }, 900);   /* prépare le moteur des cinématiques pendant que le joueur ouvre le sachet */
   if (G){ O.classList.add("gs"); const p0 = O.querySelector(".pouch"); G.fromTo(p0, {y: -110, rotation: -16, scale: .45, opacity: 0}, {y: 0, rotation: -2, scale: 1, opacity: 1, duration: .75, ease: "back.out(1.5)", onComplete: () => G.to(p0, {y: -9, rotation: 2, duration: 1.3, yoyo: true, repeat: -1, ease: "sine.inOut"})});
     G.from(O.querySelectorAll(".mid > p"), {y: 12, opacity: 0, duration: .4, delay: .45, stagger: .1}); }
   const end = () => { GL && GL.stop(); O.remove(); tcRender(); };
@@ -11627,7 +11641,8 @@ function tcOpening(key, got){
     O.dataset.torn = 1; GL && GL.stop(); O.querySelector(".burst")?.remove(); O.classList.add("skip"); seen.fill(true);
     mid.innerHTML = `<div class="tcrow ${got.length > 5 ? "many" : ""}">${got.map(c => tcCard(c, {isNew: c.isNew, f: c.f})).join("")}</div>`; bot.innerHTML = ""; done(); };
   // écran de résultat : titre du booster, bilan, les cartes en éventail avec la meilleure au centre, puis les actions
-  const done = () => { const nw = got.filter(c => c.isNew).length, nf = got.filter(c => c.newFin && !c.isNew).length, dup = got.length - nw - nf, s = tcLoad(), all = tcCards();
+  const done = () => { try { done0(); } catch (e){ try { bot.innerHTML = `<button class="primary" id="tcColl2">Voir la collection</button>`; $("#tcColl2").onclick = () => { TC_TAB = "album"; end(); }; } catch {} } };   /* 19 oct. 2026 : l'écran de fin ne doit jamais rester vide */
+  const done0 = () => { const nw = got.filter(c => c.isNew).length, nf = got.filter(c => c.newFin && !c.isNew).length, dup = got.length - nw - nf, s = tcLoad(), all = tcCards();
     const gain = got.filter(c => !c.isNew && !c.newFin).reduce((a, c) => a + TC_R[c.r][1] * (c.f ? TC_FIN[c.f][3] : 1), 0), have = (s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0), price = tcPrice(u, t);
     // meilleure carte du lot : la rareté d'abord, la version rare ensuite (ce n'est plus forcément la dernière depuis que la version rare prend la 4e place)
     const VB = {H: .5, A: 3, B: 3, C: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc = c => TC_ORDER.indexOf(c.r) * 2 + (VB[c.f] || 0), bk = got.reduce((b, c, k) => sc(c) > sc(got[b]) ? k : b, 0);
@@ -11646,11 +11661,11 @@ function tcOpening(key, got){
     if (got.ups.length){ SFX.play("fanfare"); const [l, tt] = got.ups[got.ups.length - 1]; setTimeout(() => tcCele("Niveau " + l, "Booster " + TC_T[tt].n + " offert", "昇", ["#c9a36a", "#dfe5ee", "#f2c230", "#c9a2ff"][tt]), 900); } };
   const flip = async k => { if (seen[k] || busy) return; seen[k] = true; const c = got[k], ri = TC_ORDER.indexOf(c.r), el = mid.querySelector(`[data-k="${k}"]`);
     const show = k === bestK && (big(c) || c.hype);   // une seule cinématique par ouverture : celle de la meilleure carte
-    if (show){ busy = true; await tcCine(c, {key, full: !!c.hype}); busy = false; }
-    else if (k === bestK && c.f && c.f !== "H"){   /* plus de cinématique pour une simple Épique (demande du 12 oct. 2026) : seulement les versions rares */ busy = true; await tcCine(c, {mini: true, key}); busy = false; }
-    const par = el.parentElement, ix = [...par.children].indexOf(el);
-    el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); tcSnd("flip" + lvlOf(c));
-    if (G){ const ne = par.children[ix]; G.fromTo(ne, {rotationY: -100, scale: .82, y: -14, transformPerspective: 700}, {rotationY: 0, scale: 1, y: 0, duration: .55, ease: "back.out(1.9)", clearProps: "transform"}); if (lvlOf(c)) tcBoom(Math.min(lvlOf(c), got.length > 5 ? 1 : 3), ne); }
+    try { if (show){ busy = true; await tcCine(c, {key, full: !!c.hype}); }
+      else if (k === bestK && c.f && c.f !== "H"){   /* plus de cinématique pour une simple Épique (demande du 12 oct. 2026) : seulement les versions rares */ busy = true; await tcCine(c, {mini: true, key}); } } catch {} finally { busy = false; }   /* 19 oct. 2026 : quoi qu'il arrive, les autres cartes restent retournables */
+    try { const par = el.parentElement, ix = [...par.children].indexOf(el);
+      el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); tcSnd("flip" + lvlOf(c));
+      if (G){ const ne = par.children[ix]; G.fromTo(ne, {rotationY: -100, scale: .82, y: -14, transformPerspective: 700}, {rotationY: 0, scale: 1, y: 0, duration: .55, ease: "back.out(1.9)", clearProps: "transform"}); if (lvlOf(c)) tcBoom(Math.min(lvlOf(c), got.length > 5 ? 1 : 3), ne); } } catch {}
     if (seen.every(Boolean)) done(); };
   const openP = (fast, dir = 1) => { if (O.dataset.torn) return; O.dataset.torn = 1; const p = O.querySelector(".pouch"); p.onclick = null; O.querySelector(".cutband")?.classList.add("gone"); if (!fast){ p.classList.add("charge"); GL && GL.charge(); tcSnd("charge"); } if (!fast) tcRiser(.78, bi >= 5 ? 1.25 : bi >= 4 ? 1.1 : .9);
     if (G && !fast){ G.killTweensOf(p); G.to(p, {keyframes: [{x: -5, rotation: -3, scale: .95}, {x: 6, rotation: 3, scale: 1.02}, {x: -8, rotation: -5, scale: .96}, {x: 10, rotation: 5, scale: 1.07}, {x: -6, rotation: -3, scale: 1.1}, {x: 0, rotation: 0, scale: 1.15}], duration: .78, ease: "power2.in"}); G.to(p, {filter: "brightness(2.3)", duration: .78, ease: "power3.in"}); } mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
