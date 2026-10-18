@@ -11990,19 +11990,39 @@ function vtShowcase(sh, name){
     <div class="tro">${t.map(k => vtCardHTML(k, {empty: "Trophée"})).join("")}</div>
     <div class="best">${c.map(e => { const x = e && all.find(y => y.no === e[0]); return x ? tcCard(x, {f: e[1]}) : `<div class="slot">Carte</div>`; }).join("")}</div></div>`;
 }
-const vtMine = s => { const sh = s.show || {b: "", t: [], c: []}, all = tcCards(); return {b: sh.b, t: sh.t || [], c: (sh.c || []).map(id => all.find(x => x.id === id)).filter(x => x && s.own[x.id]).map(x => [x.no, tcBestFin(s, x)])}; };
-// onglet « Vitrine » des Cartes : la vitrine en haut, puis un seul des deux choix à la fois (cartes de visite ou cartes à épingler), pour ne plus avoir
-// à descendre tout en bas des cartes de visite avant d'épingler une carte
+const vtMine = s => { const sh = s.show || {b: "", t: [], c: []}, all = tcCards(); return {b: sh.b, t: sh.t || [], c: [0, 1, 2].map(i => { const id = (sh.c || [])[i], x = id && all.find(y => y.id === id); return x && s.own[x.id] ? [x.no, tcBestFin(s, x)] : null; })}; };
+// onglet « Vitrine » des Cartes (lot 3, 18 oct. 2026) : la vitrine se modifie sur place — ✕ pour retirer, numéros 1/2/3, appui long puis glisser
+// une carte sur une autre case pour échanger leurs places ; en dessous, un seul des deux choix à la fois, avec des filtres
 let VT_SUB = "vt";
+const VTF = {st: "all", r: 0, th: "all"}, VTC = {u: "all", r: "top", f: "*", n: 60};
+const VT_TH = [["all", "Tous les thèmes"], ["jeu", "Parties", "gwsp"], ["col", "Collection", "cumxfo"], ["car", "Carrière", "k"], ["soc", "Amis & régularité", "atdl"]];
+const vtSlots = sh => ({t: [0, 1, 2].map(i => (sh.t || [])[i] || null), c: [0, 1, 2].map(i => (sh.c || [])[i] || null)});
+function vtShowEdit(s){ const sh = s.show || {b: "", t: [], c: []}, L = vtSlots(sh), all = tcCards();
+  const cell = (k, inner, full, n) => `<div class="vslot ${full ? "full" : ""}" data-vs="${k}">${inner}${full ? `<button class="vx" data-vx="${k}" aria-label="Retirer">✕</button>` : ""}${n && full ? `<i class="vn">${n}</i>` : ""}</div>`;
+  return `<div class="vtshow edit">${cell("b", sh.b ? vtCardHTML(sh.b, {cls: "main"}) : `<div class="slot" style="min-height:112px">Bannière : choisis une carte de visite ci-dessous</div>`, !!sh.b, "")}
+    <div class="tro">${L.t.map((k, i) => cell("t" + i, k ? vtCardHTML(k) : `<div class="slot">Trophée ${i + 1}</div>`, !!k, i + 1)).join("")}</div>
+    <div class="best">${L.c.map((id, i) => { const x = id && all.find(y => y.id === id); return cell("c" + i, x && s.own[x.id] ? tcCard(x, {f: tcBestFin(s, x)}) : `<div class="slot">Carte ${i + 1}</div>`, !!(x && s.own[x.id]), i + 1); }).join("")}</div></div>
+    <p class="small vthint">✕ pour retirer · appuie longtemps sur une carte puis glisse-la sur une autre case pour échanger leurs places.</p>`; }
 function vtHTML(s){
-  const x = vtCtx(s), unl = s.unl || [], sh = s.show || {b: "", t: [], c: []}, all = tcCards();
-  const owned = all.filter(c => s.own[c.id]).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p).slice(0, 36);
-  return `<h2 class="tch">Ma vitrine</h2><p class="small" style="margin:-4px 0 10px">C'est ce que tes amis voient sur ton profil : une carte de visite en bannière, trois trophées, tes trois plus belles cartes.</p>${vtShowcase(vtMine(s))}
-    <div class="vtseg" role="group" aria-label="Que veux-tu choisir ?"><button class="${VT_SUB === "vt" ? "on" : ""}" data-vtsub="vt">Cartes de visite<small>${unl.length}/${VT.length}</small></button><button class="${VT_SUB === "tc" ? "on" : ""}" data-vtsub="tc">Cartes à épingler<small>${(sh.c || []).length}/3</small></button></div>
-    ${VT_SUB === "tc" ? "" : `<p class="small" style="margin:0 0 10px">Choisis ta bannière et jusqu'à trois trophées parmi les cartes de visite débloquées.</p>
-    <div class="vtgrid">${[...VT].sort((a, b) => (unl.includes(b[0]) ? 1 : 0) - (unl.includes(a[0]) ? 1 : 0) || (unl.includes(a[0]) ? b[3] - a[3] : a[3] - b[3])).map(v => { const ok = unl.includes(v[0]), g = vtGoal(v, x), cur = Math.min(g, v[5](x));
-      return `<div class="vtitem">${vtCardHTML(v[0], ok ? {} : {lock: true, pg: cur + "/" + g, bar: g ? cur / g * 100 : 0})}${ok ? "" : `<div class="vtrwb"><div class="pk" aria-hidden="true">${tcPouch(VT_RW[v[3]].p)}</div><div><small>Récompense</small><div class="vtrw">${vtRwChips(v[3])}</div></div></div>`}${ok ? `<div class="row"><button class="${sh.b === v[0] ? "on" : ""}" data-vtb="${v[0]}">${sh.b === v[0] ? "✔ Bannière" : "En bannière"}</button><button class="${(sh.t || []).includes(v[0]) ? "on" : ""}" data-vtt="${v[0]}">${(sh.t || []).includes(v[0]) ? "✔ Épinglée" : "Épingler"}</button></div>` : ""}</div>`; }).join("")}</div>`}
-    ${VT_SUB !== "tc" ? "" : `<p class="small" style="margin:0 0 10px">Touche jusqu'à trois cartes de ta collection pour les épingler dans ta vitrine.</p>` + (owned.length ? `<div class="vtpick">${owned.map(c => tcCard(c, {btn: true, f: tcBestFin(s, c), cls: (sh.c || []).includes(c.id) ? "pick" : ""})).join("")}</div>` : `<p class="muted">Ouvre des boosters pour avoir des cartes à épingler.</p>`)}`;
+  const x = vtCtx(s), unl = s.unl || [], sh = s.show || {b: "", t: [], c: []}, L = vtSlots(sh), all = tcCards(), nC = L.c.filter(Boolean).length;
+  // cartes de visite : filtres état / rang / thème
+  const th = VT_TH.find(t => t[0] === VTF.th), vts = [...VT].filter(v => (VTF.st === "all" || (VTF.st === "ok") === unl.includes(v[0])) && (!VTF.r || v[3] === VTF.r) && (!th[2] || th[2].includes(v[0][0])))
+    .sort((a, b) => (unl.includes(b[0]) ? 1 : 0) - (unl.includes(a[0]) ? 1 : 0) || (unl.includes(a[0]) ? b[3] - a[3] : a[3] - b[3]));
+  const chips = (key, cur, opts) => `<div class="tcchips vtf">${opts.map(([v, n]) => `<button class="${String(cur) === String(v) ? "sel" : ""}" data-${key}="${v}">${n}</button>`).join("")}</div>`;
+  // cartes à épingler : toutes les cartes possédées, filtrées par univers, rareté, version (la plus rare d'abord)
+  const topR = c => TC_ORDER.indexOf(c.r) >= TC_ORDER.indexOf("L") || (c.r === "E" && ["A", "B", "C"].some(v => tcHas(s, c, v)));   // par défaut : Légendaire et plus, et les Épiques en AR
+  const owned = all.filter(c => s.own[c.id] && (VTC.u === "all" || c.u === VTC.u) && (VTC.r === "all" || (VTC.r === "top" ? topR(c) : c.r === VTC.r)) && (VTC.f === "*" || tcHas(s, c, VTC.f))).sort((a, b) => TC_ORDER.indexOf(b.r) - TC_ORDER.indexOf(a.r) || b.p - a.p);
+  return `<h2 class="tch">Ma vitrine</h2><p class="small" style="margin:-4px 0 10px">C'est ce que tes amis voient sur ton profil : une carte de visite en bannière, trois trophées, tes trois plus belles cartes.</p>${vtShowEdit(s)}
+    <div class="vtseg" role="group" aria-label="Que veux-tu choisir ?"><button class="${VT_SUB === "vt" ? "on" : ""}" data-vtsub="vt">Cartes de visite<small>${unl.length}/${VT.length}</small></button><button class="${VT_SUB === "tc" ? "on" : ""}" data-vtsub="tc">Cartes à épingler<small>${nC}/3</small></button></div>
+    ${VT_SUB === "tc" ? "" : `<p class="small" style="margin:0 0 8px">Choisis ta bannière et jusqu'à trois trophées parmi les cartes de visite débloquées.</p>
+    <div class="tcfb-s vtfs">${[["vfSt", "État", VTF.st, [["all", "Toutes"], ["ok", "Débloquées"], ["lock", "À débloquer"]]], ["vfR", "Rang", VTF.r, [[0, "Tous"], [1, "Bronze"], [2, "Argent"], [3, "Or"], [4, "Légende"]]], ["vfTh", "Thème", VTF.th, VT_TH.map(t => [t[0], t[0] === "all" ? "Tous" : t[1]])]].map(([id, lb, cur, o]) => `<label><span>${lb}</span><select id="${id}">${o.map(([k, n]) => `<option value="${k}" ${String(cur) === String(k) ? "selected" : ""}>${n}</option>`).join("")}</select></label>`).join("")}</div>
+    <div class="vtgrid">${vts.map(v => { const ok = unl.includes(v[0]), g = vtGoal(v, x), cur = Math.min(g, v[5](x)), ti = L.t.indexOf(v[0]), bn = sh.b === v[0];
+      return `<div class="vtitem ${ti >= 0 || bn ? "sel" : ""}">${ti >= 0 ? `<i class="vtnum">${ti + 1}</i>` : bn ? `<i class="vtnum b">Bannière</i>` : ""}${vtCardHTML(v[0], ok ? {} : {lock: true, pg: cur + "/" + g, bar: g ? cur / g * 100 : 0})}${ok ? "" : `<div class="vtrwb"><div class="pk" aria-hidden="true">${tcPouch(VT_RW[v[3]].p)}</div><div><small>Récompense</small><div class="vtrw">${vtRwChips(v[3])}</div></div></div>`}${ok ? `<div class="row"><button class="${bn ? "on" : ""}" data-vtb="${v[0]}">${bn ? "✔ Bannière" : "En bannière"}</button><button class="${ti >= 0 ? "on" : ""}" data-vtt="${v[0]}">${ti >= 0 ? "✔ Trophée " + (ti + 1) : "Épingler"}</button></div>` : ""}</div>`; }).join("") || `<p class="muted">Aucune carte de visite avec ces filtres.</p>`}</div>`}
+    ${VT_SUB !== "tc" ? "" : `<p class="small" style="margin:0 0 8px">Touche jusqu'à trois cartes de ta collection pour les épingler dans ta vitrine.</p>
+    <div class="tcfb-s vtfs"><label><span>Univers</span><select id="vcU">${[["all", "Tous"], ...TC_UNIS.map(u => [u, TC_PACKS[u][1] + " " + TC_PACKS[u][0]])].map(([k, n]) => `<option value="${k}" ${VTC.u === k ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      <label><span>Rareté</span><select id="vcR">${[["top", "Légendaire+ et AR"], ["all", "Toutes"], ...[...TC_ORDER].reverse().map(r => [r, TC_R[r][0]])].map(([k, n]) => `<option value="${k}" ${VTC.r === k ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      <label><span>Version</span><select id="vcF">${[["*", "Toutes"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].map(([k, n]) => `<option value="${k}" ${VTC.f === k ? "selected" : ""}>${n}</option>`).join("")}</select></label></div>
+    ${owned.length ? `<p class="small" style="margin:0 0 8px">${owned.length} carte${owned.length > 1 ? "s" : ""}</p><div class="vtpick">${owned.slice(0, VTC.n).map(c => { const i = L.c.indexOf(c.id); return `<div class="vtpw ${i >= 0 ? "sel" : ""}">${i >= 0 ? `<i class="vtnum">${i + 1}</i>` : ""}${tcCard(c, {btn: true, f: tcBestFin(s, c), cls: i >= 0 ? "pick" : ""})}</div>`; }).join("")}</div>${owned.length > VTC.n ? `<div class="row" style="justify-content:center;margin-top:12px"><button id="vcMore">Afficher plus (${owned.length - VTC.n})</button></div>` : ""}` : `<p class="muted">${all.some(c => s.own[c.id]) ? "Aucune carte avec ces filtres." : "Ouvre des boosters pour avoir des cartes à épingler."}</p>`}`}`;
 }
 // cartes de visite à l'écran : calcul direct à chaque défilement (une fois par image), au plus dix fois par seconde, sans dépendre d'IntersectionObserver ni de requestAnimationFrame
 let VT_RAF = 0;
@@ -12013,11 +12033,40 @@ function vtWatch(){ const L = document.querySelectorAll(".vtgrid .vtitem"); if (
 function vtBind(){
   vtWatch();
   document.querySelectorAll("[data-vtsub]").forEach(b => b.onclick = () => { VT_SUB = b.dataset.vtsub; tcRender(); });
-  const upd = fn => { const s = tcLoad(); s.show = s.show || {b: "", t: [], c: []}; s.show.t = s.show.t || []; s.show.c = s.show.c || []; fn(s.show); tcSave(s); tcRender(); SFX.play("pop"); };
-  const tog = (l, k) => { const i = l.indexOf(k); if (i >= 0) l.splice(i, 1); else { if (l.length >= 3) l.shift(); l.push(k); } };
-  document.querySelectorAll("[data-vtb]").forEach(b => b.onclick = () => upd(sh => { sh.b = b.dataset.vtb; }));
+  const keep = () => { const y = scrollY; tcRender(); scrollTo(0, y); };
+  const upd = fn => { const s = tcLoad(); s.show = s.show || {b: "", t: [], c: []}; const L = vtSlots(s.show); s.show.t = L.t; s.show.c = L.c; fn(s.show); tcSave(s); keep(); SFX.play("pop"); };
+  // ajout : première case libre ; vitrine pleine : la carte la plus ancienne (case 1) laisse sa place ; retrait : la case se vide, les autres gardent leur numéro
+  const tog = (l, k) => { const i = l.indexOf(k); if (i >= 0){ l[i] = null; return; } const f = l.indexOf(null); if (f >= 0) l[f] = k; else { l.shift(); l.push(k); } };
+  document.querySelectorAll("[data-vtb]").forEach(b => b.onclick = () => upd(sh => { sh.b = sh.b === b.dataset.vtb ? "" : b.dataset.vtb; }));
   document.querySelectorAll("[data-vtt]").forEach(b => b.onclick = () => upd(sh => tog(sh.t, b.dataset.vtt)));
   document.querySelectorAll(".vtpick [data-tc]").forEach(b => b.onclick = e => { e.stopPropagation(); upd(sh => tog(sh.c, b.dataset.tc)); });
+  document.querySelectorAll("[data-vx]").forEach(b => b.onclick = e => { e.stopPropagation(); const k = b.dataset.vx; upd(sh => { if (k === "b") sh.b = ""; else sh[k[0]][+k[1]] = null; }); });
+  // filtres
+  $("#vfSt") && ($("#vfSt").onchange = e => { VTF.st = e.target.value; keep(); }); $("#vfR") && ($("#vfR").onchange = e => { VTF.r = +e.target.value; keep(); }); $("#vfTh") && ($("#vfTh").onchange = e => { VTF.th = e.target.value; keep(); });
+  $("#vcU") && ($("#vcU").onchange = e => { VTC.u = e.target.value; VTC.n = 60; keep(); });
+  $("#vcR") && ($("#vcR").onchange = e => { VTC.r = e.target.value; VTC.n = 60; keep(); }); $("#vcF") && ($("#vcF").onchange = e => { VTC.f = e.target.value; VTC.n = 60; keep(); });
+  $("#vcMore") && ($("#vcMore").onclick = () => { VTC.n += 60; keep(); });
+  vtDrag(upd);
+}
+// glisser-échanger dans la vitrine : appui long (doigt) ou clic maintenu (souris), la carte suit le doigt ; lâchée sur une case du même groupe
+// (cartes de visite : bannière + trophées ; cartes : les trois cartes), les deux échangent leurs places et leurs numéros
+let VT_DRAG = null;
+function vtDrag(upd){ const box = document.querySelector(".vtshow.edit"); if (!box) return;
+  const grp = k => k[0] === "c" ? "c" : "v", val = (sh, k) => k === "b" ? sh.b : vtSlots(sh)[k[0]][+k[1]];
+  box.querySelectorAll(".vslot.full").forEach(el => el.addEventListener("pointerdown", e => { if (e.button > 0 || e.target.closest(".vx")) return;
+    const d = VT_DRAG = {el, k: el.dataset.vs, x: e.clientX, y: e.clientY, on: false}; el.classList.add("press");
+    d.t = setTimeout(() => { if (VT_DRAG !== d) return; d.on = true; el.classList.remove("press"); el.classList.add("drag"); try { navigator.vibrate?.(15); } catch {}
+      const r = el.getBoundingClientRect(); d.dx = d.x - r.left; d.dy = d.y - r.top; d.g = el.cloneNode(true); d.g.className = "vslot vghost"; d.g.style.width = r.width + "px"; d.g.style.height = r.height + "px"; document.body.appendChild(d.g); mv(d.x, d.y); }, e.pointerType === "mouse" ? 150 : 300); }));
+  const mv = (x, y) => { const d = VT_DRAG; if (!d || !d.on) return; d.g.style.left = (x - d.dx) + "px"; d.g.style.top = (y - d.dy) + "px";
+    box.querySelectorAll(".vslot.over").forEach(e => e.classList.remove("over")); const t = document.elementFromPoint(x, y)?.closest?.(".vtshow.edit .vslot");
+    d.over = t && t !== d.el && grp(t.dataset.vs) === grp(d.k) ? t : null; d.over && d.over.classList.add("over"); };
+  if (!vtDrag.once){ vtDrag.once = true;
+    document.addEventListener("pointermove", e => { const d = VT_DRAG; if (!d) return; if (!d.on){ if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10){ clearTimeout(d.t); d.el.classList.remove("press"); VT_DRAG = null; } return; } mv(e.clientX, e.clientY); }, {passive: true});
+    document.addEventListener("touchmove", e => { if (VT_DRAG && VT_DRAG.on) e.preventDefault(); }, {passive: false});   // pendant le glisser, l'écran ne défile pas
+    const end = () => { const d = VT_DRAG; if (!d) return; VT_DRAG = null; clearTimeout(d.t); d.el.classList.remove("press", "drag"); d.g && d.g.remove(); document.querySelectorAll(".vslot.over").forEach(e => e.classList.remove("over"));
+      if (d.on && d.over){ const a = d.k, b = d.over.dataset.vs; d.up(sh => { const va = val(sh, a), vb = val(sh, b), set = (k, v) => { if (k === "b") sh.b = v || ""; else sh[k[0]][+k[1]] = v || null; }; set(a, vb); set(b, va); }); } };
+    document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end); }
+  box.querySelectorAll(".vslot.full").forEach(el => el.addEventListener("pointerdown", () => { if (VT_DRAG) VT_DRAG.up = upd; }));
 }
 // cartes de visite Légende : elles s'inclinent et leur personnage glisse en parallaxe sous le doigt ou la souris
 document.addEventListener("pointermove", e => { const v = e.target.closest && e.target.closest(".vt4:not(.lock),.tc.f-Z:not(.no)"); document.querySelectorAll(".vt4.live,.tc.f-Z.live").forEach(x => { if (x !== v){ x.classList.remove("live"); ["--vx", "--vy", "--mx", "--my"].forEach(k => x.style.removeProperty(k)); } });
@@ -16224,6 +16273,33 @@ body #game #board .act #passBtn:hover:not(:disabled){background:#f0364a!importan
   #game.bph .hud .pl > .small{display:none}
 }
 </style>
+<style>
+/* Lot 3 · vitrine (18 oct. 2026) */
+.vtshow.edit{margin-bottom:6px}
+.vtshow.edit .best{grid-template-columns:repeat(3,minmax(0,150px))}
+.vslot{position:relative;min-width:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .15s,opacity .15s}
+.vslot.full{cursor:grab}
+.vslot.press{transform:scale(.97)}
+.vslot.drag{opacity:.3}
+.vslot.over > *:first-child{outline:3px solid var(--accent);outline-offset:3px;border-radius:12px}
+.vslot.vghost{position:fixed;z-index:99990;pointer-events:none;transform:rotate(-3deg) scale(1.06);filter:drop-shadow(0 18px 24px rgba(0,0,0,.6));opacity:.95}
+.vslot .vx{all:unset;position:absolute;top:-7px;right:-7px;z-index:6;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;line-height:1;background:#0b0a0e;color:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.65),0 3px 8px rgba(0,0,0,.6);cursor:pointer}
+.vslot .vx:hover{background:var(--accent)}
+.vslot .vn{position:absolute;top:-7px;left:-7px;z-index:6;min-width:22px;height:22px;padding:0 5px;border-radius:999px;display:grid;place-items:center;font:800 11.5px var(--mono);font-style:normal;background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.vslot.vghost .vx,.vslot.vghost .vn{display:none}
+.vthint{margin:2px 0 14px;text-align:center}
+.vtf{margin:0 0 8px}
+.vtfs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+/* cartes disponibles : en couleur, plus de gris ; choisies : contour et numéro 1/2/3 en haut à droite */
+.vtpick .tc,.vtpick .tc.pick{opacity:1!important}
+.vtpw,.vtitem{position:relative}
+.vtpw.sel .tc{outline:2.5px solid var(--accent);outline-offset:2px}
+.vtitem.sel > .vt{outline:2.5px solid var(--accent);outline-offset:2px}
+.vtnum{position:absolute;top:-8px;right:-8px;z-index:6;min-width:24px;height:24px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font:800 12px var(--mono);font-style:normal;background:var(--accent);color:#fff;box-shadow:0 0 0 2px #0b0a0e,0 3px 8px rgba(0,0,0,.5)}
+.vtnum.b{font:800 10px var(--body);letter-spacing:.02em}
+</style>
+<style>.vtpick > .vtpw{display:grid;min-width:0}.vtpick > .vtpw > .tc{width:100%;max-width:none;margin:0}</style>
+<style>.vtfs{grid-template-columns:repeat(3,minmax(0,1fr))}@media (max-width:420px){.vtfs{grid-template-columns:1fr 1fr}.vtfs label:first-child{grid-column:1/-1}}</style>
 
 </body>
 </html>
