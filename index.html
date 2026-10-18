@@ -9683,6 +9683,8 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tccine .rays{background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--yc) 46%,transparent) 0 5deg,transparent 5deg 16deg)}
 .tccine .ring{border-color:var(--yc)}.tccine .sp i{background:var(--yc);box-shadow:0 0 10px var(--yc)}.tccine .lab{color:var(--yc);text-shadow:0 0 22px var(--yc)}
 .tccine .seal{color:color-mix(in srgb,var(--yc) 22%,transparent)}
+/* 19 oct. 2026 : en 3D (vue en grand, cinématique) la carte isole ses calques, sinon les fusions (color-dodge…) ne s'appliquent plus et les reflets assombrissent l'image */
+.tcview .vf .tc,.tccine .cardw .tc{isolation:isolate}
 /* styles : orage (Mythique, Éveil), cases de manga (SAR), pluie d'or (UR) */
 .tccine .bolts,.tccine .pans,.tccine .rain{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .tccine .bolts i{position:absolute;top:0;height:min(64%,560px);width:min(30vw,170px);background:linear-gradient(180deg,#fff,var(--yc));clip-path:polygon(46% 0,62% 0,40% 38%,70% 38%,22% 100%,44% 52%,18% 52%);opacity:0;filter:drop-shadow(0 0 14px var(--yc))}
