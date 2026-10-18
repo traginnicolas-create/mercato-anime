@@ -13080,6 +13080,17 @@ function hccHook(room){ if (!room || room.__hcc || typeof room.on !== "function"
 .hvm .pickg button.sel{outline:3px solid #1fae5b;outline-offset:2px}
 .hvm .steps{display:flex;gap:6px;justify-content:center}.hvm .steps i{width:8px;height:8px;border-radius:50%;background:var(--line)}.hvm .steps i.on{background:var(--accent)}
 .hvm .chosen{display:flex;gap:6px;flex-wrap:wrap}.hvm .chosen span{font:600 12px var(--body);border:1px solid var(--line);border-radius:999px;padding:4px 8px}
+/* lot 5 : historique des prix, pastille de l'accueil */
+.hv-hist{border:1px solid var(--line);border-radius:14px;background:#111015;padding:12px;display:grid;gap:8px}
+.hv-hist h4{margin:0;font:800 14px var(--title)}
+.hv-hist .st{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.hv-hist .st div{background:rgba(255,255,255,.04);border-radius:8px;padding:6px 8px;min-width:0}
+.hv-hist .st small{display:block;font:600 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hv-hist .st b{font:700 13.5px var(--mono);white-space:nowrap}
+.hv-hist svg{width:100%;height:70px;display:block}
+.hv-hist .ls{display:grid;gap:3px;font-size:12.5px;color:var(--muted)}.hv-hist .ls div{display:flex;justify-content:space-between;gap:8px}.hv-hist .ls b{color:var(--text);font-family:var(--mono)}
+@media (max-width:420px){.hv-hist .st{grid-template-columns:1fr 1fr}}
+#tabTcg i{position:relative}#tabTcg .mdot{position:absolute;top:-6px;left:-12px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#4d9dff;color:#06121f;font:800 10px/16px var(--body);text-align:center;font-style:normal}
 /* didacticiel */
 .hvt .ill{font-size:44px;text-align:center;line-height:1}
 .hvt h2{text-align:center}
@@ -13108,6 +13119,17 @@ const hvMe = () => CP.user && CP.user.id;
 function hvLeft(end){ const ms = Date.parse(end) - Date.now(); if (ms <= 0) return "terminée"; const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
   return h >= 1 ? `${h} h ${String(m).padStart(2, "0")}` : m >= 1 ? `${m} min ${String(s % 60).padStart(2, "0")}` : `${s} s`; }
 function hvAgo(t){ const m = Math.round((Date.now() - Date.parse(t)) / 6e4); return m < 1 ? "à l'instant" : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} j`; }
+// historique des prix d'une carte (ventes conclues de cette version) : chiffres, petite courbe, dernières ventes
+async function hvHistory(id, v){ const sb = await hvSb(); if (!sb) return null; const {data} = await sb.from("market_listings").select("final_price,settled_at,mode").eq("card_id", id).eq("ver", v || "").eq("status", "sold").order("settled_at", {ascending: false}).limit(20); return data || []; }
+function hvHistHTML(h){ if (h == null) return `<div class="hv-hist"><h4>Historique des prix</h4><p class="hv-note">Chargement…</p></div>`;
+  if (!h.length) return `<div class="hv-hist"><h4>Historique des prix</h4><p class="hv-note">Aucune vente de cette carte dans cette version pour l'instant.</p></div>`;
+  const P = h.map(x => x.final_price), srt = [...P].sort((a, b) => a - b), med = srt[Math.floor((srt.length - 1) / 2)], mn = srt[0], mx = srt[srt.length - 1];
+  const pts = [...P].reverse(), W = 300, H = 70, pad = 6, X = i => pts.length > 1 ? pad + i * (W - 2 * pad) / (pts.length - 1) : W / 2, Y = p => mx === mn ? H / 2 : H - pad - (p - mn) / (mx - mn) * (H - 2 * pad);
+  const line = pts.map((p, i) => `${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(" ");
+  return `<div class="hv-hist"><h4>Historique des prix</h4><div class="st"><div><small>Dernière vente</small><b>${hvN(P[0])} ◆</b></div><div><small>Prix médian</small><b>${hvN(med)} ◆</b></div><div><small>Moins cher</small><b>${hvN(mn)} ◆</b></div><div><small>Plus cher</small><b>${hvN(mx)} ◆</b></div></div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Évolution des ${pts.length} derniers prix de vente"><line x1="0" x2="${W}" y1="${Y(med).toFixed(1)}" y2="${Y(med).toFixed(1)}" stroke="currentColor" stroke-opacity=".18" stroke-dasharray="4 4"/>${pts.length > 1 ? `<polyline points="${line}" fill="none" stroke="#4d9dff" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>` : ""}${pts.map((p, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(p).toFixed(1)}" r="3" fill="#4d9dff"/>`).join("")}</svg>
+    <div class="ls">${h.slice(0, 5).map(x => `<div><span>${x.mode === "auction" ? "Enchère" : "Prix fixe"} · ${hvAgo(x.settled_at)}</span><b>${hvN(x.final_price)} ◆</b></div>`).join("")}</div>
+    <p class="hv-note">${h.length} vente${h.length > 1 ? "s" : ""} conclue${h.length > 1 ? "s" : ""} prise${h.length > 1 ? "s" : ""} en compte (les 20 dernières au plus).</p></div>`; }
 // exemplaires d'une version ('' = normale : total moins les versions spéciales), comme côté serveur
 function hvCount(s, id, v){ const fin = s.fin[id] || {}; if (v) return fin[v] || 0; return Math.max(0, (s.own[id] || 0) - Object.values(fin).reduce((a, b) => a + b, 0)); }
 function hvTake(s, id, v){ s.own[id] = Math.max(0, (s.own[id] || 0) - 1); if (v && s.fin[id]){ s.fin[id][v] = Math.max(0, (s.fin[id][v] || 0) - 1); if (!s.fin[id][v]) delete s.fin[id][v]; if (!Object.keys(s.fin[id]).length) delete s.fin[id]; }
@@ -13159,15 +13181,30 @@ async function hvAct(fn, args, after){ const sb = await hvSb(); if (!sb) throw n
   return data; }
 
 const hvUnread = () => HV.data ? HV.data.notes.filter(n => !n.read_at).length : 0;
-function hvBadge(){ const n = hvUnread(); document.querySelectorAll('[data-tct="market"]').forEach(b => { let em = b.querySelector("small"); if (n){ if (!em){ em = document.createElement("small"); b.appendChild(em); } em.textContent = n; } else if (em) em.remove(); }); }
+function hvBadge(){ hvHomeMark(); const n = hvUnread(); document.querySelectorAll('[data-tct="market"]').forEach(b => { let em = b.querySelector("small"); if (n){ if (!em){ em = document.createElement("small"); b.appendChild(em); } em.textContent = n; } else if (em) em.remove(); }); }
+// pastille du marché sur l'onglet Cartes de l'accueil (bleue, à gauche ; la rouge à droite reste celle des boosters gratuits)
+function hvHomeMark(){ try { const a = document.querySelector("#tabTcg"), n = hvUnread(); if (!a) return; let d = a.querySelector(".mdot"); if (!n){ d && d.remove(); return; }
+  if (!d){ a.querySelector("i").insertAdjacentHTML("beforeend", `<b class="mdot" title="Nouveautés du marché"></b>`); d = a.querySelector(".mdot"); } d.textContent = n; } catch {} }
+// carte « Cartes à collectionner » de l'accueil : rappel des nouveautés du marché
+{ const _home = tcHome; tcHome = function(s){ _home(s); try { const n = hvUnread(), box = document.querySelector("#tcHome"); if (!n || !box) return; const sp = box.querySelector("span"); if (sp && !sp.querySelector(".hvm-l")) sp.insertAdjacentHTML("beforeend", `<span class="hvm-l"> · ${n} nouveauté${n > 1 ? "s" : ""} au marché</span>`);
+    const b = box.querySelector("#tcHomeGo"); if (b && !b.classList.contains("primary")){ b.textContent = "Voir le marché"; b.classList.add("primary"); b.onclick = () => { HV.tab = "act"; tcShow("market"); }; } } catch {} }; }
 // toutes les minutes : règlement des ventes finies, livraisons, nouvelles notifications (toast)
 async function hvTick(){ try { const sb = await hvSb(); if (!sb) return; await sb.rpc("market_settle"); await hvClaim(sb);
     const {data} = await sb.from("market_notes").select("*").is("read_at", null).order("created_at", {ascending: false}).limit(20); if (!data) return;
     const fresh = data.filter(n => Date.parse(n.created_at) > HV.seenNotes); if (HV.seenNotes && fresh.length){ const n = fresh[0]; frToast(hvNoteTxt(n)[0], "Voir", () => { tcShow("market"); HV.tab = "act"; hvPaint(); }); }
     HV.seenNotes = Math.max(HV.seenNotes, ...data.map(n => Date.parse(n.created_at)), Date.now() - 1000);
+    await hvEnding(sb);
     if (HV.data){ const old = new Set(HV.data.notes.map(n => n.id)); HV.data.notes = [...data.filter(n => !old.has(n.id)), ...HV.data.notes]; } hvBadge(); } catch {} }
 setTimeout(() => { hvTick(); HV.timer = setInterval(hvTick, 60000); }, 8000);
 
+// enchères où j'ai misé qui finissent dans moins de 5 minutes : un rappel par enchère
+const HV_ALERT = new Set(); try { JSON.parse(sessionStorage.getItem("hv-alert") || "[]").forEach(x => HV_ALERT.add(x)); } catch {}
+async function hvEnding(sb){ const me = hvMe(); if (!me) return;
+  const {data: B} = await sb.from("market_bids").select("listing_id").eq("bidder_id", me).order("created_at", {ascending: false}).limit(60); const ids = [...new Set((B || []).map(b => b.listing_id))].filter(i => !HV_ALERT.has(i)); if (!ids.length) return;
+  const soon = new Date(Date.now() + 5 * 6e4).toISOString(), {data: L} = await sb.from("market_listings").select("*").in("id", ids).eq("status", "open").lte("ends_at", soon).gt("ends_at", new Date().toISOString());
+  for (const l of L || []){ HV_ALERT.add(l.id); const top = l.top_bidder === me, m = Math.max(1, Math.round((Date.parse(l.ends_at) - Date.now()) / 6e4));
+    frToast(`Fin dans ${m} min : ${hvLbl(l.card_id, l.ver)}. ${top ? `Tu as la meilleure offre (${hvN(l.top_bid)} ◆).` : `Tu as été dépassé (${hvN(l.top_bid)} ◆) : surenchéris vite !`}`, top ? "Voir" : "Surenchérir", async () => { HV.tab = "auc"; tcShow("market"); if (!HV.data) await hvLoad(); if (!HV.data.list.find(x => x.id === l.id)) HV.data.list.push(l); hvListing(l.id); }); }
+  try { sessionStorage.setItem("hv-alert", JSON.stringify([...HV_ALERT].slice(-100))); } catch {} }
 function hvNoteTxt(n){ const c = hvLbl(n.card_id, n.ver), a = n.amount != null ? hvN(n.amount) + " ◆" : "";
   switch (n.kind){
     case "outbid": return [`Surenchéri sur ${c}`, `Nouvelle offre : ${a}. Tes éclats te sont revenus.`];
@@ -13298,7 +13335,7 @@ function hvConfirm(t, p, ok, fn){ const {M, close} = hvModal(`<div class="head">
 async function hvListing(id){ let l = HV.data.list.find(x => x.id === id) || HV.data.mine.find(x => x.id === id); if (!l) return; const c = hvCard(l.card_id); if (!c) return;
   const me = hvMe(), mine = l.seller_id === me, auc = l.mode === "auction";
   const {M, close} = hvModal(`<div class="head"><h2>${auc ? "Enchère" : "En vente"}</h2><button class="ghost" data-close>✕ Fermer</button></div><div id="hvLB"></div>`, () => clearInterval(tm));
-  let hist = [], amt = null;
+  let hist = [], amt = null, hh = null; hvHistory(l.card_id, l.ver).then(h => { hh = h || []; const e = M.querySelector("#hvHist"); if (e) e.innerHTML = hvHistHTML(hh); });
   const draw = () => { const s = tcLoad(), open = l.status === "open" && Date.parse(l.ends_at) > Date.now(), min = l.top_bid == null ? l.price : l.top_bid + hvStep(l.top_bid), top = l.top_bidder === me;
     if (amt == null || amt < min) amt = min; const w = HV.data.wish.has(l.card_id + "|" + l.ver);
     M.querySelector("#hvLB").innerHTML = `<div class="top">${tcCard(c, {f: l.ver})}<dl><div><dt>Carte</dt><dd>${esc(c.n)}</dd></div><div><dt>Rareté · version</dt><dd>${TC_R[tcER(c, l.ver)][0]} · ${esc(hvVer(l.ver))}</dd></div><div><dt>Univers</dt><dd>${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</dd></div><div><dt>Vendeur</dt><dd>${mine ? "Toi" : esc(hvWho(l.seller_id))}</dd></div><div><dt>Tu en as</dt><dd>${hvCount(s, c.id, l.ver)}</dd></div></dl></div>
@@ -13310,6 +13347,7 @@ async function hvListing(id){ let l = HV.data.list.find(x => x.id === id) || HV.
         <p class="hv-note">Paliers : +1 ◆ sous 50, +5 jusqu'à 200, +10 jusqu'à 1 000, +50 au-delà. Une offre dans les 30 dernières secondes relance le compte à rebours à 30 s.</p>`
       : `<div class="hv-box"><div class="hv-row"><div><dt>Prix</dt><div class="big">${hvN(l.price)} ◆</div></div><div style="text-align:right"><dt>Fin dans</dt><div class="tm" id="hvLeft">${hvLeft(l.ends_at)}</div></div></div></div>${open && !mine ? `<button class="hv-g" id="hvBuy">Acheter pour ${hvN(l.price)} ◆</button>` : ""}`}
       ${mine && open && !l.bids ? `<button class="ghost" id="hvCancel">Retirer ma vente</button>` : ""}${!open ? `<p class="warn">Cette vente est terminée.</p>` : ""}
+      <div id="hvHist">${hvHistHTML(hh)}</div>
       <p class="hv-note">Tu as ${hvN(s.gems)} ◆.</p><p class="err" id="hvErr"></p>`;
     const err = t => M.querySelector("#hvErr").textContent = t;
     M.querySelector("#hv3d").onclick = () => tcView(c, l.ver); M.querySelector("#hvW").onclick = async () => { await hvWish(l.card_id, l.ver); draw(); };
@@ -13327,7 +13365,7 @@ async function hvListing(id){ let l = HV.data.list.find(x => x.id === id) || HV.
 
 // mise en vente : prix fixe ou enchère, durée 1 à 24 h, résumé avec la commission
 async function hvSellForm(id, v){ const c = hvCard(id); if (!c) return; const s = tcLoad(), n = hvCount(s, id, v), er = tcER(c, v);
-  let mode = "fixed", hours = 24, price = TC_R[er][2] || 50, buyout = "", med = null;
+  let mode = "fixed", hours = 24, price = TC_R[er][2] || 50, buyout = "", med = null, hh = null; hvHistory(id, v).then(h => { hh = h || []; const e = M.querySelector("#hvHist"); if (e) e.innerHTML = hvHistHTML(hh); });
   const {M, close} = hvModal(`<div class="head"><h2>Mettre en vente</h2><button class="ghost" data-close>✕ Fermer</button></div><div id="hvSF"></div>`);
   const draw = () => { const p = Math.max(1, Math.floor(+price || 0)), b = Math.floor(+buyout || 0);
     M.querySelector("#hvSF").innerHTML = `<div class="top">${tcCard(c, {f: v})}<dl><div><dt>Carte</dt><dd>${esc(c.n)}</dd></div><div><dt>Rareté · version</dt><dd>${TC_R[er][0]} · ${esc(hvVer(v))}</dd></div><div><dt>Tu en as</dt><dd>${n}</dd></div><div><dt>Prix médian des ventes</dt><dd>${med == null ? "…" : med ? hvN(med) + " ◆" : "pas encore de vente"}</dd></div></dl></div>
@@ -13338,6 +13376,7 @@ async function hvSellForm(id, v){ const c = hvCard(id); if (!c) return; const s 
       <div><div style="font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Durée</div><div class="hv-chips">${HV_H.map(h => `<button data-h="${h}" class="${hours === h ? "sel" : ""}">${h} h</button>`).join("")}</div></div>
       <div class="sum"><span>Commission (5 %)</span><b>−${hvN(hvFee(p))} ◆</b><span>${mode === "fixed" ? "Tu recevras" : "Tu recevras au moins"}</span><b style="color:#1fae5b">${hvN(p - hvFee(p))} ◆</b></div>
       ${n <= 1 ? `<p class="warn">C'est ton seul exemplaire de cette version : il quittera ta collection pendant la vente.</p>` : ""}
+      <div id="hvHist">${hvHistHTML(hh)}</div>
       <p class="hv-note">Pendant la vente, la carte quitte ta collection. Si personne ne l'achète, elle te revient. Une carte reçue au marché ne peut pas être revendue avant 48 h.</p>
       <p class="err" id="hvErr"></p><button class="hv-g" id="hvGo">Mettre en vente</button>`;
     M.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { mode = b.dataset.m; draw(); }); M.querySelectorAll("[data-h]").forEach(b => b.onclick = () => { hours = +b.dataset.h; draw(); });
