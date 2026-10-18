@@ -10456,7 +10456,14 @@ function tcLoad(){
   return s;
 }
 // date de première obtention de chaque carte (17 oct. 2026) : 0 = déjà possédée avant cette mise à jour (date inconnue)
-const tcStamp = s => { if (!s.own) return; const now = Date.now(); if (!s.at){ s.at = {}; for (const id in s.own) if (s.own[id] > 0) s.at[id] = 0; } for (const id in s.own) if (s.own[id] > 0 && !(id in s.at)) s.at[id] = now; };
+// s.how : comment chaque carte (et chaque version, clé « id|V ») a été obtenue la première fois — [mode, prix, date] ;
+// [mode, prix, date, provenance (clé du booster, « univers:niveau », suivie de « !secret »)] ; mode b = booster, a = achetée au marché, n = enchère gagnée, e = échange, r = récompense, f = forge ; 0 = obtenue avant le 18 oct. 2026 (inconnu).
+// Le code qui ajoute une carte autrement qu'en booster pose s._how juste avant tcSave.
+const tcStamp = s => { if (!s.own) return; const now = Date.now(); if (!s.at){ s.at = {}; for (const id in s.own) if (s.own[id] > 0) s.at[id] = 0; } for (const id in s.own) if (s.own[id] > 0 && !(id in s.at)) s.at[id] = now;
+  const H = Array.isArray(s._how) ? s._how : ["b"], fin = s.fin || {}; delete s._how;
+  if (!s.how){ s.how = {}; for (const id in s.own) if (s.own[id] > 0) s.how[id] = 0; for (const id in fin) for (const k in fin[id]) if (fin[id][k] > 0) s.how[id + "|" + k] = 0; }
+  for (const id in s.own) if (s.own[id] > 0 && !(id in s.how)) s.how[id] = [H[0], H[1] || 0, now, H[2] || ""];
+  for (const id in fin) for (const k in fin[id]) if (fin[id][k] > 0 && !((id + "|" + k) in s.how)) s.how[id + "|" + k] = [H[0], H[1] || 0, now, H[2] || ""]; };
 const tcSave = s => { try { vtCheck(s); } catch {} try { tcStamp(s); } catch {} delete s.sig; s.signed = 1; lsSet(TC_KEY, {...s, sig: tcSig(s)}); tcHome(s); };
 // doublons d'une carte : on garde un exemplaire de chaque finition obtenue (et un normal s'il y en a)
 function tcDups(s, c){ const fin = s.fin[c.id] || {}, nf = Object.values(fin).reduce((a, b) => a + b, 0), n0 = Math.max(0, (s.own[c.id] || 0) - nf); let n = Math.max(0, n0 - 1), g = n * TC_R[c.r][1];
@@ -10519,6 +10526,7 @@ function tcOpenPack(s, key, sec){
   // expérience de collectionneur : surtout les nouvelles cartes ; chaque niveau offre un booster (Argent, Or tous les 5, Divin tous les 10)
   const xp = got.reduce((a, c) => a + (c.isNew ? TC_XP[c.r] : 1) + (c.newFin ? TC_FIN[c.f][4] : 0), 0); s.xp = (s.xp || 0) + xp; got.xp = xp; got.ups = [];
   for (let l = lv0 + 1; l <= tcLvl(s.xp); l++){ const tt = l % 10 === 0 ? 3 : l % 5 === 0 ? 2 : 1; tcGive(s, tcKey("mix", tt)); got.ups.push([l, tt]); }
+  s._how = ["b", 0, key + (sec ? "!" + sec : "")];   // fiche : « Obtenue en booster … »
   return got;
 }
 // chance d'avoir au moins une carte de cette rareté (ou mieux) dans un booster de ce niveau, en %
@@ -10765,8 +10773,15 @@ const TC_BURN = (() => {
         d[k] = R; d[k + 1] = G; d[k + 2] = Bc; d[k + 3] = A;
         md[k] = md[k + 1] = md[k + 2] = 255; md[k + 3] = q > .9 ? 0 : q > .84 ? (.9 - q) / .06 * 255 : 255; }   // masque : 0 = papier consumé (transparent)
       this.x.putImageData(this.img, 0, 0);
-      if (any && (++this.fr % 2 === 0)){ this.mx.putImageData(this.mimg, 0, 0); const u = `url(${this.m.toDataURL()})`; this.card.style.webkitMaskImage = u; this.card.style.maskImage = u; this.card.style.webkitMaskSize = this.card.style.maskSize = "100% 100%"; this.masked = true; }
-      else if (!any && this.masked){ this.card.style.webkitMaskImage = this.card.style.maskImage = ""; this.masked = false; }
+      // 18 oct. 2026 : le masque est décodé AVANT d'être posé (l'ancien reste en place pendant ce temps) ; poser directement une nouvelle image
+      // à chaque image rendait la carte invisible le temps du décodage, d'où le clignotement de la Wanted
+      if (any && !this.pend && (++this.fr % 2 === 0)){ this.mx.putImageData(this.mimg, 0, 0); this.pend = true;
+        this.m.toBlob(bl => { if (!bl){ this.pend = false; return; } const u = URL.createObjectURL(bl), im = new Image(); im.src = u;
+          (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { this.pend = false; if (!this.card.isConnected || !this.live){ URL.revokeObjectURL(u); return; }
+            const old = this.mu; this.mu = u; this.card.style.webkitMaskImage = this.card.style.maskImage = `url(${u})`; this.card.style.webkitMaskSize = this.card.style.maskSize = "100% 100%"; this.masked = true;
+            if (old) setTimeout(() => URL.revokeObjectURL(old), 1000); }); }); }
+      this.live = any;
+      if (!any && this.masked){ this.card.style.webkitMaskImage = this.card.style.maskImage = ""; this.masked = false; }
       // particules dans le calque de la page (repère écran)
       if (front.length){ const r = this.card.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
         for (const i of front){ if (this.parts.length > 300) break; const px = (r.left + (i % GW) / GW * r.width) * dpr, py = (r.top + ((i / GW) | 0) / GH * r.height) * dpr, k = Math.random();
@@ -10779,10 +10794,10 @@ const TC_BURN = (() => {
   const tick = () => { let alive = false; const c = fx(), dpr = Math.min(2, devicePixelRatio || 1), W = Math.round(innerWidth * dpr), H = Math.round(innerHeight * dpr); if (c.width !== W || c.height !== H){ c.width = W; c.height = H; }
     const x = c.getContext("2d"); x.clearRect(0, 0, W, H); const parts = [];
     for (const t of document.querySelectorAll(".tc.f-W:not(.no)")){ if (!t.isConnected) continue;
-      const on = t.classList.contains("hl") || !!t.closest(".vcard.live"), cs = on ? getComputedStyle(t) : null;
+      const on = (t.classList.contains("hl") || !!t.closest(".vcard.live")) && !t.closest(".vcard.bk"), cs = on ? getComputedStyle(t) : null;
       if (on && !t._burn) t._burn = new Burn(t, 1234 + ((t.dataset.tc || t.textContent || "").length * 977));
       const b = t._burn; if (!b) continue;
-      if (on){ const px = parseFloat(cs.getPropertyValue("--px")) / 100, py = parseFloat(cs.getPropertyValue("--py")) / 100; if (isFinite(px) && isFinite(py)) b.follow(px, py, Math.min(1, Math.hypot(px - .5, py - .5) / .5)); } else b.tgt = 0;
+      if (on){ const px = parseFloat(cs.getPropertyValue("--px")) / 100, py = parseFloat(cs.getPropertyValue("--py")) / 100; if (isFinite(px) && isFinite(py)) b.follow(px, py, Math.min(1, Math.hypot(px - .5, py - .5) / .5)); } else { b.tgt = 0; if (t.closest(".vcard.bk")) b.parts = []; }
       if (b.frame()) alive = true; const keep = []; for (const q of b.parts){ q.l++; q.x += q.vx + Math.sin((q.l + q.x) / 9) * .3 * dpr; q.y += q.vy; if (q.l < q.L){ keep.push(q); parts.push(q); } } b.parts = keep; }
     x.globalCompositeOperation = "lighter";
     for (const q of parts){ const a = 1 - q.l / q.L;
@@ -11054,31 +11069,44 @@ function tcRender(){
     tcView(c, vsel); });
 }
 // fiche du personnage (dos de la carte)
-function tcSheet(c, s){
+// 18 oct. 2026 : fiche en cases façon Kyara, sans le nom (il est déjà sur la face) ; « Tu l'as depuis » et « Obtenue » suivent la version affichée
+const TC_HOW = {b: "En booster", a: "Achetée au marché", n: "Enchère gagnée", e: "Échange", r: "Récompense de vitrine", f: "Forgée"};
+const tcHowWhere = hw => { const d = new Date(hw[2]), when = `le ${d.toLocaleDateString("fr-FR", {day: "numeric", month: "short", year: "numeric"})} à ${d.getHours()} h ${String(d.getMinutes()).padStart(2, "0")}`;
+  return (hw[1] ? "Pour " + hw[1].toLocaleString("fr-FR") + " ◆<br>" : "") + when; };   // booster : pas de détail (choix du 18 oct. 2026)
+function tcSheet(c, s, f = ""){
   const fin = s.fin[c.id] || {}, src = c.obj ? null : DATA[c.u].find(x => x.n === (c.base || c.n)), bio = c.obj ? `<p>${esc(c.obj.d)}</p>${c.obj.own ? `<p class="small" style="margin-top:6px">Porteur : ${esc(c.obj.own)}</p>` : ""}` : src ? (infoHTML(c.u, src) || "") : "";
-  return `<div class="tcfiche r-${c.r}"><div class="fh"><span>#${String(c.no).padStart(3, "0")}</span><b>${TC_R[c.r][0]}</b></div><h3>${esc(c.n)}</h3>
-    <dl><dt>Univers</dt><dd>${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</dd><dt>${c.obj ? "Type" : "Niveau"}</dt><dd>${c.obj ? esc(c.obj.t) : c.p + "/100"}</dd><dt>Popularité</dt><dd>${c.obj ? "Objet célèbre" : c.pop === "S" ? "Tête d'affiche" : c.pop === "A" ? "Très aimé" : c.base ? "Transformation de " + esc(c.base) : "Classique"}</dd>${(() => { const at = s.own[c.id] && s.at && s.at[c.id], d = at ? new Date(at) : null, days = d ? Math.floor((Date.now() - at) / 864e5) : 0;   /* date et heure de la 1re obtention ; inconnue (carte eue avant le 17 oct. 2026) : ligne masquée */
-      return `<div class="fnew">${d ? `<dt>Obtenue</dt><dd>le ${d.toLocaleDateString("fr-FR", {day: "numeric", month: "short", year: "numeric"})} à ${d.getHours()} h ${String(d.getMinutes()).padStart(2, "0")}<br><span class="fmut">${days < 1 ? "aujourd'hui" : days < 2 ? "hier" : "il y a " + days + " jours"}</span></dd>` : ""}<dt class="fpl hidden">Joueurs</dt><dd class="fpl hidden" data-fpl="${esc(c.id)}"></dd></div>`; })()}<dt>Exemplaires</dt><dd>${s.own[c.id] || 0}</dd>
-    <dt>Versions</dt><dd>${Object.keys(TC_FIN).filter(k => tcVersOf(c).includes(k)).map(k => `<em class="${fin[k] ? "on" : ""}">${TC_FIN[k][1]}</em>`).join("")}</dd></dl>
-    ${c.base ? `<p class="small">Forme de ${esc(c.base)}, évolution ${c.step} sur ${c.steps}. Les cartes Éveil ne sortent qu'à la place de la carte garantie d'un booster.</p>` : ""}<div class="bio">${bio}</div></div>`;
+  const r = tcER(c, f), hw = s.how && s.how[f ? c.id + "|" + f : c.id], at = hw ? hw[2] : f ? 0 : s.own[c.id] && s.at && s.at[c.id], d = at ? new Date(at) : null, days = d ? Math.floor((Date.now() - at) / 864e5) : 0;
+  const n = f ? (fin[f] || 0) : (typeof tcDups === "function" ? Math.max(0, (s.own[c.id] || 0) - Object.values(fin).reduce((a, b) => a + b, 0)) : s.own[c.id] || 0);
+  const tile = (k, v, cls = "") => `<div class="ftl ${cls}"><small>${k}</small><b>${v}</b></div>`;
+  return `<div class="tcfiche r-${r}"><div class="fz"><div class="fh"><b>${TC_R[r][3] || TC_R[r][0]}${f ? ` · ${TC_FIN[f][0]}` : ""}</b><span>#${String(c.no).padStart(3, "0")}/${String(tcCards().length).padStart(3, "0")}</span></div>
+    <div class="fsub">${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</div>
+    <div class="ftiles">${tile(c.obj ? "Type" : "Niveau", c.obj ? esc(c.obj.t) : c.p + `<span class="fmut"> /100</span>`)}${tile("Popularité", c.obj ? "Objet célèbre" : c.pop === "S" ? "Tête d'affiche" : c.pop === "A" ? "Très aimé" : c.base ? "Évolution" : "Classique")}
+      <div class="ftl fpl hidden"><small>Possédée par</small><b data-fpl="${esc(c.id)}"></b></div>
+      ${tile("Exemplaires", "×" + n + (f ? "" : (s.own[c.id] || 0) > n ? `<i>${s.own[c.id]} toutes versions</i>` : ""))}
+      ${d && !hw ? tile("Tu l'as depuis", `${d.toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"})}<i>${days < 1 ? "aujourd'hui" : days < 2 ? "hier" : "il y a " + days + " jours"}</i>`) : ""}
+      ${hw ? tile("Obtenue", `${TC_HOW[hw[0]] || "En booster"}<i>${tcHowWhere(hw)}</i>`, "fw") : ""}
+      ${tile("Versions", Object.keys(TC_FIN).filter(k => tcVersOf(c).includes(k)).map(k => `<em class="${fin[k] ? "on" : ""}">${TC_FIN[k][1]}</em>`).join("") || "<em>Normale</em>", "fw")}</div>
+    ${c.base ? `<p class="small">Forme de ${esc(c.base)}, évolution ${c.step} sur ${c.steps}. Les cartes Éveil ne sortent qu'à la place de la carte garantie d'un booster.</p>` : ""}<div class="bio">${bio}</div></div></div>`;
 }
+// la fiche tient en entier dans la carte : le contenu rapetisse un peu s'il est long (défilement en tout dernier recours)
+function tcFicheFit(F){ const z = F && F.querySelector(".fz"); if (!z) return; let k = 1; z.style.zoom = 1; while (F.scrollHeight > F.clientHeight + 1 && k > .62){ k -= .03; z.style.zoom = k.toFixed(2); } F.classList.toggle("fit", F.scrollHeight <= F.clientHeight + 1); }
 // nombre de joueurs qui possèdent la carte (17 oct. 2026) : fonction Supabase card_owners (cartes-joueurs-supabase.sql), qui ne renvoie que des nombres.
 // Tant qu'elle n'est pas installée (ou hors ligne, ou sans compte configuré), la ligne « Joueurs » reste masquée.
 const TC_PL = {};
 async function tcPlFill(root){ const dd = root && root.querySelector("[data-fpl]"); if (!dd || dd.dataset.done) return; const id = dd.dataset.fpl;
   try { let r = TC_PL[id]; if (!r){ const sb = typeof cpClient === "function" ? await cpClient() : null; if (!sb) return; const {data, error} = await sb.rpc("card_owners", {card_id: id}); if (error || !data) return; r = TC_PL[id] = data; }
     if (!r.players) return; const pc = r.owners / r.players * 100; dd.dataset.done = 1;
-    dd.innerHTML = `<div class="fplb"><span>${r.owners} joueur${r.owners > 1 ? "s" : ""} l'${r.owners > 1 ? "ont" : "a"}</span><i><u style="width:${Math.max(2, pc)}%"></u></i></div><span class="fmut">${r.owners && pc < 1 ? "moins de 1" : Math.round(pc)} % des joueurs</span>`;
-    root.querySelectorAll(".fpl").forEach(e => e.classList.remove("hidden")); } catch {} }
+    dd.innerHTML = `<div class="fplb"><span>${r.owners.toLocaleString("fr-FR")} joueur${r.owners > 1 ? "s" : ""}</span><i><u style="width:${Math.max(2, pc)}%"></u></i></div><span class="fmut">${r.owners && pc < 1 ? "< 1" : Math.round(pc)} % des joueurs</span>`;
+    root.querySelectorAll(".fpl").forEach(e => e.classList.remove("hidden")); tcFicheFit(root); } catch {} }
 // carte en grand, qui s'incline sous le doigt ou la souris ; un toucher la retourne pour lire la fiche
 function tcView(c, want){
   try { const s0 = tcLoad(); if (s0.own[c.id] && !(s0.tuto && s0.tuto.view)){ s0.tuto = s0.tuto || {claimed: []}; s0.tuto.view = 1; tcSave(s0); } } catch {}
   const s = tcLoad(), fins = ["", ...Object.keys(TC_FIN).filter(k => s.fin[c.id] && s.fin[c.id][k] && tcVersOf(c).includes(k))]; let f = tcBestFin(s, c), back = false; if (want != null && want !== "*" && tcHas(s, c, want)) f = want;
   document.querySelector(".tcview")?.remove();
-  document.body.insertAdjacentHTML("beforeend", `<div class="tcview r-${c.r}" role="dialog" aria-modal="true" aria-label="${esc(c.n)}"><button class="ghost vx" id="tcvX">✕ Fermer</button><div class="v3d"><div class="vcard"><div class="vf"></div><div class="vb">${tcBack(c.r)}<div class="tcfiche-w">${tcSheet(c, s)}</div></div></div></div>
+  document.body.insertAdjacentHTML("beforeend", `<div class="tcview r-${c.r}" role="dialog" aria-modal="true" aria-label="${esc(c.n)}"><button class="ghost vx" id="tcvX">✕ Fermer</button><div class="v3d"><div class="vcard"><div class="vf"></div><div class="vb">${tcBack(c.r)}<div class="tcfiche-w">${tcSheet(c, s, f)}</div></div></div></div>
     <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] + (k === "B" ? " · 2e illustration" : k === "C" ? " · 3e illustration" : "") : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button id="tcvSheet">Lire la fiche</button></div><p class="small">Fais glisser pour incliner la carte, touche-la pour lire sa fiche.</p></div></div>`);
   const V = document.querySelector(".tcview"), box = V.querySelector(".v3d"), card = V.querySelector(".vcard");
-  const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
+  const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelector(".tcfiche-w").innerHTML = tcSheet(c, s, f); V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
   const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); card.style.setProperty("--px", mx + "%"); card.style.setProperty("--py", my + "%"); card.style.setProperty("--ph", Math.min(1, Math.hypot(mx - 50, my - 50) / 50).toFixed(2)); card.style.setProperty("--ex", (-ry * .15).toFixed(2) + "px"); card.style.setProperty("--ey", (rx * .15).toFixed(2) + "px"); };   // --ex/--ey : tranche de la carte, du côté qui s'éloigne
   face(); tilt(0, 0);
   box.onpointermove = e => { const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; card.classList.add("live"); tilt((.5 - y) * 44, (x - .5) * 56, x * 100, y * 100); };   // inclinaison plus ample (17 oct. 2026) : ±22° / ±28°
@@ -11086,8 +11114,13 @@ function tcView(c, want){
   // la fiche (dos) reprend le contour de la face : prisme aux couleurs de l'illustration pour une AR, « verre » pour une Holo (17 oct. 2026)
   const ficheEdge = () => { const t = V.querySelector(".vf .tc"), F = V.querySelector(".tcfiche"); if (!t || !F) return; const cs = getComputedStyle(t), q = k => (t.style.getPropertyValue(k) || cs.getPropertyValue(k)).trim();
     F.classList.toggle("fa", t.classList.contains("arp")); F.classList.toggle("fq", t.classList.contains("arp") && t.classList.contains("h3") && !!q("--q1")); F.classList.toggle("fgl", t.classList.contains("f-H") && t.classList.contains("h3") && !!q("--qe"));
-    ["--q1", "--q2", "--q3", "--q4", "--qe", "--al", "--am", "--ad"].forEach(k => { const v = q(k); v ? F.style.setProperty(k, v) : F.style.removeProperty(k); }); tcPlFill(F); };
-  const flip = () => { ficheEdge(); back = !back; card.classList.remove("live"); tilt(0, 0); SFX.play("pop"); };
+    ["--q1", "--q2", "--q3", "--q4", "--qe", "--al", "--am", "--ad"].forEach(k => { const v = q(k); v ? F.style.setProperty(k, v) : F.style.removeProperty(k); });
+    // 18 oct. 2026 : toutes les versions (sauf Wanted, qui garde son dos) prennent les couleurs de leur illustration : palette lue sur l'image de la face
+    const isW = t.classList.contains("f-W"); F.classList.toggle("fw0", isW);
+    if (!isW && !q("--q1")){ const im = t.querySelector(":scope > img:not(.g)") || t.querySelector("img:not(.g)"), Q = im ? tcImgQuad(im) : null; if (Q){ Q.forEach((c, i) => F.style.setProperty("--q" + (i + 1), c)); if (Q.edge && !t.classList.contains("f-H")) F.style.removeProperty("--qe"); } }
+    F.classList.toggle("fp", !isW && !F.classList.contains("fa") && !F.classList.contains("fgl") && !!F.style.getPropertyValue("--q1"));
+    tcFicheFit(F); tcPlFill(F); };
+  const flip = () => { ficheEdge(); back = !back; card.classList.toggle("bk", back); card.classList.remove("live"); tilt(0, 0); SFX.play("pop"); };
   // 17 oct. 2026 : plus de dos de carte ; toucher la carte (ou le bouton) montre directement sa fiche, et inversement
   const flipS = () => { flip(); $("#tcvSheet").textContent = back ? "Voir la carte" : "Lire la fiche"; };
   box.onclick = flipS; $("#tcvSheet").onclick = flipS;
@@ -11929,7 +11962,7 @@ function vtCheck(s){
   if (!neu.length) return;
   const won = {g: 0, xp: 0, packs: {}, cards: [], lv: []}, lv0 = tcLvl(s.xp || 0), allC = tcCards();
   neu.forEach(v => { s.unl.push(v[0]); const r = VT_RW[v[3]]; s.gems += r.g; won.g += r.g; s.xp = (s.xp || 0) + r.xp; won.xp += r.xp; tcGive(s, r.p); won.packs[r.p] = (won.packs[r.p] || 0) + 1;
-    if (r.v){ const l = tcVList(allC, r.v).filter(([c, f]) => !tcHas(s, c, f)); if (l.length){ const [c, f] = l[Math.floor(Math.random() * l.length)]; s.own[c.id] = (s.own[c.id] || 0) + 1; s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; won.cards.push(c.n + " " + VT_VN[r.v]); } else { s.gems += 300; won.g += 300; } } });
+    if (r.v){ const l = tcVList(allC, r.v).filter(([c, f]) => !tcHas(s, c, f)); if (l.length){ const [c, f] = l[Math.floor(Math.random() * l.length)]; s.own[c.id] = (s.own[c.id] || 0) + 1; s.fin[c.id] = s.fin[c.id] || {}; s.fin[c.id][f] = (s.fin[c.id][f] || 0) + 1; won.cards.push(c.n + " " + VT_VN[r.v]); s._how = ["r"]; } else { s.gems += 300; won.g += 300; } } });
   for (let l = lv0 + 1; l <= tcLvl(s.xp); l++){ const tt = l % 10 === 0 ? 3 : l % 5 === 0 ? 2 : 1; tcGive(s, tcKey("mix", tt)); won.lv.push(l); }   // l'expérience gagnée peut faire monter de niveau : même cadeau qu'à l'ouverture d'un booster
   s.show = s.show || {b: "", t: [], c: []}; if (!s.show.b) s.show.b = neu[0][0];
   const top = neu.sort((a, b) => b[3] - a[3])[0];
@@ -12193,7 +12226,7 @@ function frAsk(room, d){
   M.classList.remove("hidden"); SFX.play("pop");
   $("#frNo").onclick = () => { answer(false); close(); };
   $("#frYes").onclick = () => { const s = tcLoad(); if (!frTradeable(s).includes(b.no)){ answer(false); close(); return; }
-    s.own[b.id]--; const nw = !s.own[a.id]; s.own[a.id] = (s.own[a.id] || 0) + 1; if (nw) s.xp += TC_XP[a.r]; s.trades = (s.trades || 0) + 1; tcSave(s); answer(true); close(); frToast("Échange fait : " + a.n + " rejoint ta collection"); };
+    s.own[b.id]--; const nw = !s.own[a.id]; s.own[a.id] = (s.own[a.id] || 0) + 1; if (nw) s.xp += TC_XP[a.r]; s.trades = (s.trades || 0) + 1; s._how = ["e"]; tcSave(s); answer(true); close(); frToast("Échange fait : " + a.n + " rejoint ta collection"); };
 }
 // se connecter au salon d'un ami et lui demander sa fiche
 async function frOpen(id){
@@ -12364,7 +12397,7 @@ async function frView(id){
       $("#frSend").disabled = true; $("#frTErr").textContent = "Proposition envoyée, en attente de sa réponse…"; let done = false;
       room.on("ftres", m => { const d = m.data; if (m.sameTab || done || d?.to !== me.id || d.k !== k) return; done = true;
         if (!d.ok){ $("#frTErr") && ($("#frTErr").textContent = "Échange refusé."); $("#frSend") && ($("#frSend").disabled = false); return; }
-        const s = tcLoad(); s.own[a.id] = Math.max(0, (s.own[a.id] || 0) - 1); const nw = !s.own[b.id]; s.own[b.id] = (s.own[b.id] || 0) + 1; if (nw) s.xp += TC_XP[b.r]; s.trades = (s.trades || 0) + 1; tcSave(s); frToast("Échange fait : " + b.n + " rejoint ta collection"); frView(id); });
+        const s = tcLoad(); s.own[a.id] = Math.max(0, (s.own[a.id] || 0) - 1); const nw = !s.own[b.id]; s.own[b.id] = (s.own[b.id] || 0) + 1; if (nw) s.xp += TC_XP[b.r]; s.trades = (s.trades || 0) + 1; s._how = ["e"]; tcSave(s); frToast("Échange fait : " + b.n + " rejoint ta collection"); frView(id); });
       room.emit("ftrade", {to: id, from: me.id, k, give, want}).catch(() => {}); }); };
   M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${esc(f.name)}<span style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.6em"> #${f.tag}</span></h2><button class="ghost" id="frBack">← Amis</button></div>${waitHTML("Connexion à ton ami…")}</div>`;
   M.classList.remove("hidden"); $("#frBack").onclick = () => frShow();
@@ -16300,6 +16333,47 @@ body #game #board .act #passBtn:hover:not(:disabled){background:#f0364a!importan
 </style>
 <style>.vtpick > .vtpw{display:grid;min-width:0}.vtpick > .vtpw > .tc{width:100%;max-width:none;margin:0}</style>
 <style>.vtfs{grid-template-columns:repeat(3,minmax(0,1fr))}@media (max-width:420px){.vtfs{grid-template-columns:1fr 1fr}.vtfs label:first-child{grid-column:1/-1}}</style>
+<style>/* Fiche au dos façon Kyara (18 oct. 2026) : pas de nom, des cases étiquette / valeur */
+.tcfiche .fh{align-items:baseline}.tcfiche .fh b{font-size:12px;letter-spacing:.8px}.tcfiche .fh span{color:var(--muted)}
+.tcfiche .fsub{color:var(--muted);font-size:12.5px;margin:6px 0 12px}
+.tcfiche .ftiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tcfiche .ftl{min-width:0;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);padding:8px 10px;display:grid;gap:3px;align-content:start}
+.tcfiche .ftl.fw{grid-column:1/-1}.tcfiche .ftl.hidden{display:none}
+.tcfiche .ftl small{font-family:var(--mono);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.tcfiche .ftl b{display:block;font-size:14px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.tcfiche .ftl b i{display:block;font-style:normal;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px}
+.tcfiche .ftl b em{font-style:normal;font-family:var(--mono);font-size:10px;font-weight:500;padding:1px 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);margin:0 4px 4px 0;display:inline-block}
+.tcfiche .ftl b em.on{background:var(--text);color:#0e0d12;border-color:var(--text)}
+.tcfiche .ftl .fplb span{font-size:13px}.tcfiche .ftl .fmut{font-weight:400;font-size:11.5px}
+</style>
+<style>/* fiche : une ligne par case, rien de coupé en bas (18 oct. 2026) */
+.tcfiche{padding-bottom:22px;scroll-padding-bottom:22px}
+.tcfiche .fsub{margin:4px 0 10px}
+.tcfiche .ftiles{gap:7px;margin-bottom:10px}
+.tcfiche .ftl{padding:7px 9px;gap:2px}
+.tcfiche .ftl small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.4px}
+.tcfiche .ftl b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcfiche .ftl b i{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcfiche .ftl.fw b{white-space:normal}.tcfiche .ftl.fw b i{white-space:nowrap}
+.tcfiche .ftl .fplb{display:grid;gap:4px}.tcfiche .ftl .fplb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tcfiche .ftl .fplb i{height:4px;min-width:0}
+.tcfiche .bio{padding-bottom:4px}
+</style>
+<style>.tcfiche::after{content:"";position:sticky;display:block;bottom:-22px;height:30px;margin:-30px -14px -22px;background:linear-gradient(transparent,#0b0a0e 85%);pointer-events:none}
+.tcfiche.fa::after,.tcfiche.fgl::after{margin-inline:-14px}</style>
+<style>/* pastille « 2 jeux » : toujours sur une ligne ; sur téléphone elle monte à côté de « Famille 0X » pour ne pas dépasser du titre (18 oct. 2026) */
+#home .cat .cath .nb{white-space:nowrap}
+@media (max-width:640px){#home .cat .cath .eyebrow{grid-column:1;grid-row:1;align-self:center}#home .cat .cath .nb{grid-column:2;grid-row:1;padding:3px 10px;font-size:11px}#home .cat .cath h2{grid-column:1 / -1;overflow-wrap:anywhere}}
+</style>
+<style>.tcfiche.fit::after{display:none}</style>
+<style>/* Dos de carte aux couleurs de l'illustration, toutes versions sauf Wanted (18 oct. 2026) */
+.tcview .tcfiche.fp{border:6px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--q2) 16%,#0b0a0e),#0b0a0e 42%) padding-box,conic-gradient(from 210deg,var(--q1),var(--q2),var(--q3),var(--q4),var(--q1)) border-box;box-shadow:0 0 16px color-mix(in srgb,var(--q2) 45%,transparent)}
+.tcview .tcfiche.fq .fh b,.tcview .tcfiche.fp .fh b{color:var(--q1)}.tcview .tcfiche.fgl .fh b{color:var(--q2)}
+.tcview .tcfiche:is(.fp,.fq,.fgl) .ftl{background:color-mix(in srgb,var(--q2) 9%,rgba(255,255,255,.035));border-color:color-mix(in srgb,var(--q1) 26%,transparent)}
+.tcview .tcfiche:is(.fp,.fq,.fgl) .ftl b em.on{background:var(--q1);border-color:var(--q1);color:#0e0d12}
+.tcview .tcfiche:is(.fp,.fq,.fgl) .fplb u{background:var(--q1)}
+.tcview .tcfiche:is(.fp,.fq,.fgl) .bio{border-top-color:color-mix(in srgb,var(--q1) 30%,var(--line))}
+.tcview .tcfiche.fp::after{background:linear-gradient(transparent,#0b0a0e 85%)}
+</style>
 
 </body>
 </html>
