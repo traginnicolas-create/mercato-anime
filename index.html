@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Hanko</title>
+<meta name="description" content="Hanko : jeux d'anime entre amis (Mercato, Undercover, Perso pixelisé, Silhouettes), mode Carrière et boosters de cartes One Piece, Naruto, Dragon Ball, Jujutsu Kaisen, Demon Slayer et My Hero Academia.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Hanko"><meta property="og:title" content="Hanko · jeux d'anime et cartes à collectionner">
+<meta property="og:description" content="Joue à 4 jeux d'anime avec tes amis, lance ta Carrière et ouvre des boosters de cartes : One Piece, Naruto, Dragon Ball, Jujutsu Kaisen, Demon Slayer, My Hero Academia.">
+<meta property="og:url" content="https://traginnicolas-create.github.io/mercato-anime/"><meta name="twitter:card" content="summary">
 <script>try { window.__CINE = location.hash === "#cine"; } catch {}</script>
 <script>
 /* Mode invité (« Jouer sans compte » sur l'écran de connexion) : doit s'installer avant tout le reste. Tant que l'onglet est ouvert en invité,
@@ -10471,9 +10475,15 @@ const tcStamp = s => { if (!s.own) return; const now = Date.now(); if (!s.at){ s
   for (const id in fin) for (const k in fin[id]) if (fin[id][k] > 0 && !((id + "|" + k) in s.how)) s.how[id + "|" + k] = [H[0], H[1] || 0, now, H[2] || ""]; };
 const tcSave = s => { try { vtCheck(s); } catch {} try { tcStamp(s); } catch {} delete s.sig; s.signed = 1; lsSet(TC_KEY, {...s, sig: tcSig(s)}); tcHome(s); };
 // doublons d'une carte : on garde un exemplaire de chaque finition obtenue (et un normal s'il y en a)
-function tcDups(s, c){ const fin = s.fin[c.id] || {}, nf = Object.values(fin).reduce((a, b) => a + b, 0), n0 = Math.max(0, (s.own[c.id] || 0) - nf); let n = Math.max(0, n0 - 1), g = n * TC_R[c.r][1];
+function tcDups(s, c){ if ((s.lock || {})[c.id]) return {n: 0, g: 0};   /* cadenas (19 oct. 2026) : ni recyclée ni vendue */
+  const fin = s.fin[c.id] || {}, nf = Object.values(fin).reduce((a, b) => a + b, 0), n0 = Math.max(0, (s.own[c.id] || 0) - nf); let n = Math.max(0, n0 - 1), g = n * TC_R[c.r][1];
   for (const k in fin){ const e = Math.max(0, fin[k] - 1); n += e; g += e * TC_R[c.r][1] * TC_FIN[k][3]; } return {n, g}; }
 function tcRecycle(s){ for (const c of tcCards()){ const d = tcDups(s, c); if (!d.n) continue; s.gems += d.g; const fin = s.fin[c.id] || {}, nf = Object.values(fin).reduce((a, b) => a + b, 0), n0 = (s.own[c.id] || 0) - nf; for (const k in fin) fin[k] = Math.min(1, fin[k]); s.own[c.id] = Math.min(1, Math.max(0, n0)) + Object.values(fin).reduce((a, b) => a + b, 0); } }
+// premier booster payant de la session : on prévient (comme chez Kyara), une seule fois par session
+function tcPaidOk(price, retry){ try { if (sessionStorage.getItem("hanko-paye-ok")) return true; } catch { return true; }
+  const M = document.createElement("div"); M.className = "tcview"; M.style.cssText = "display:grid;place-items:center;align-content:center;background:rgba(5,5,7,.9);z-index:200";
+  M.innerHTML = `<div class="box" style="max-width:400px;width:calc(100% - 32px)"><h2 style="margin:0 0 8px">Booster payant</h2><p class="muted" style="margin:0 0 14px">Ce booster coûte <b>${price} ◆</b> de tes éclats. Tes boosters gratuits et gagnés sont dans « Gratuits et gagnés ».</p><div class="row"><button class="primary" id="pyOk">Acheter · ${price} ◆</button><button class="ghost" id="pyNo">Annuler</button></div><p class="small" style="margin:10px 0 0">On ne te le redemandera plus jusqu'à la fermeture du site.</p></div>`;
+  document.body.appendChild(M); M.querySelector("#pyNo").onclick = () => M.remove(); M.querySelector("#pyOk").onclick = () => { try { sessionStorage.setItem("hanko-paye-ok", "1"); } catch {} M.remove(); retry(); }; return false; }
 const tcStock = s => Object.values(s.packs).reduce((a, b) => a + b, 0) + s.free.n;
 
 // ---- tirage ----
@@ -10962,7 +10972,10 @@ function tcRender(){
     // toutes les cartes de la version et de l'univers choisis ; les raretés se comptent là-dessus, pour qu'aucun filtre ne mène à une page vide
     const inV = all.filter(c => f.u === "all" || c.u === f.u).flatMap(c => ver === "*" ? [[c, "*"]] : vks.filter(x => tcVersOf(c).includes(x)).map(x => [c, x])), hasV = ([c, v]) => v === "*" ? !!s.own[c.id] : tcHas(s, c, v);
     if (f.r !== "all" && !inV.some(([c, v]) => tcER(c, v) === f.r)) f.r = "all";
-    const list = inV.filter(e => (f.r === "all" || tcER(e[0], e[1]) === f.r) && (!f.own || hasV(e)));
+    const nz = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), qq = nz(f.q);
+    const list = inV.filter(e => (f.r === "all" || tcER(e[0], e[1]) === f.r) && (!f.own || hasV(e)) && (!qq || nz(e[0].n).includes(qq) || String(e[0].no) === qq.replace(/^#/, "")));
+    { const RK = "XSMLEPRC", rk = e => RK.indexOf(tcER(e[0], e[1])), S = f.sort || "no";   /* tri (19 oct. 2026) */
+      list.sort(S === "rar" ? (a, b) => rk(a) - rk(b) || a[0].no - b[0].no : S === "nom" ? (a, b) => a[0].n.localeCompare(b[0].n, "fr") : S === "nb" ? (a, b) => (s.own[b[0].id] || 0) - (s.own[a[0].id] || 0) || a[0].no - b[0].no : S === "new" ? (a, b) => (hasV(a) ? 1 : 0) - (hasV(b) ? 1 : 0) || a[0].no - b[0].no : (a, b) => a[0].no - b[0].no); }
     const gain = all.reduce((a, c) => a + tcDups(s, c).g, 0), fins = all.reduce((a, c) => a + Object.keys(s.fin[c.id] || {}).length, 0);
     html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}${(() => { /* en-tête de collection façon Kyara, version Hanko C2 (17 oct. 2026) : set complet = chaque personnage au moins une fois ; master set = toutes les versions */
         const M = TC_SET === "master", cnt = cs => M ? [cs.reduce((a, c) => a + tcVersOf(c).filter(v => tcHas(s, c, v)).length, 0), cs.reduce((a, c) => a + tcVersOf(c).length, 0)] : [cs.filter(c => s.own[c.id]).length, cs.length];
@@ -10978,8 +10991,10 @@ function tcRender(){
         <div class="tcfb-s">
           <label><span>Version</span><select id="tcSelV" class="${(f.f ?? "*") === "*" ? "" : "on"}">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].filter(([k]) => k === "*" || all.some(c => tcVersOf(c).includes(k))).map(([k, n]) => { const ks = k === "A" ? ["A", "B", "C"] : [k]; return `<option value="${k}" ${(f.f ?? "*") === k ? "selected" : ""}>${n}${k === "*" ? "" : " · " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</option>`; }).join("")}</select></label>
           <label><span>Rareté</span><select id="tcSelR" class="${f.r === "all" ? "" : "on"}"><option value="all" ${f.r === "all" ? "selected" : ""}>Toutes · ${inV.filter(hasV).length}/${inV.length}</option>${[...TC_ORDER].reverse().filter(r => inV.some(([c, v]) => tcER(c, v) === r)).map(r => `<option value="${r}" ${f.r === r ? "selected" : ""}>${TC_R[r][0]} · ${inV.filter(e => tcER(e[0], e[1]) === r && hasV(e)).length}/${inV.filter(e => tcER(e[0], e[1]) === r).length}</option>`).join("")}</select></label>
+          <label class="tcfb-q"><span>Rechercher</span><input type="search" id="tcQ" placeholder="Nom ou numéro" value="${esc(f.q || "")}" autocomplete="off"></label>
+          <label><span>Trier</span><select id="tcSort" class="${(f.sort || "no") === "no" ? "" : "on"}">${[["no", "Numéro"], ["rar", "Rareté"], ["nom", "Nom (A → Z)"], ["nb", "Exemplaires"], ["new", "Manquantes d'abord"]].map(([k, n]) => `<option value="${k}" ${(f.sort || "no") === k ? "selected" : ""}>${n}</option>`).join("")}</select></label>
           <label class="tcfb-own ${f.own ? "on" : ""}"><input type="checkbox" id="tcOwn" ${f.own ? "checked" : ""}>Obtenues seulement</label>
-          ${f.u !== "all" || (f.f ?? "*") !== "*" || f.r !== "all" || f.own ? `<button class="ghost lk" id="tcFReset">Réinitialiser</button>` : ""}
+          ${f.u !== "all" || (f.f ?? "*") !== "*" || f.r !== "all" || f.own || f.q || (f.sort || "no") !== "no" ? `<button class="ghost lk" id="tcFReset">Réinitialiser</button>` : ""}
         </div>
       </div>
       <div class="tcgrid">${list.map(([c, v]) => tcCard(c, v === "*" ? {btn: true, v, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)} : {btn: true, v, no: !tcHas(s, c, v), f: v, x: v ? (s.fin[c.id] || {})[v] : 0})).join("") || `<p class="muted">${f.own ? "Tu n'as encore aucune de ces cartes. Désactive « Obtenues » pour voir toutes celles qui existent." : "Aucune carte ici pour l'instant."}</p>`}</div>`;
@@ -11030,7 +11045,9 @@ function tcRender(){
   $("#tcOwn") && ($("#tcOwn").onclick = () => { TC_F.own = !TC_F.own; tcRender(); });
   $("#tcSelV") && ($("#tcSelV").onchange = e => { TC_F.f = e.target.value; tcRender(); });
   $("#tcSelR") && ($("#tcSelR").onchange = e => { TC_F.r = e.target.value; tcRender(); });
-  $("#tcFReset") && ($("#tcFReset").onclick = () => { Object.assign(TC_F, {u: "all", f: "*", r: "all", own: false}); tcRender(); });
+  $("#tcFReset") && ($("#tcFReset").onclick = () => { Object.assign(TC_F, {u: "all", f: "*", r: "all", own: false, q: "", sort: "no"}); tcRender(); });
+  $("#tcSort") && ($("#tcSort").onchange = e => { TC_F.sort = e.target.value; tcRender(); });
+  $("#tcQ") && ($("#tcQ").oninput = e => { clearTimeout(window.__tcQt); const v = e.target.value; window.__tcQt = setTimeout(() => { TC_F.q = v; const y = scrollY; tcRender(); scrollTo(0, y); const i = $("#tcQ"); if (i){ i.focus(); i.setSelectionRange(v.length, v.length); } }, 250); });
   // ouvrir un booster, ou plusieurs du même type d'un coup (même mise en scène, toutes les cartes à la suite)
   const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
@@ -11040,8 +11057,18 @@ function tcRender(){
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
   // « Tout ouvrir » : tous les boosters du type choisi d'un coup (TC_ALLMAX au plus par clic, pour que l'écran de bilan reste fluide)
   document.querySelectorAll("[data-tcopen]").forEach(b => b.onclick = () => { if (b.dataset.tcopen !== "all") return openN(+b.dataset.tcopen); const s = tcLoad(), n = TC_PICK === "free" ? s.free.n : s.packs[TC_PICK] || 0; if (n >= 1) openN(Math.min(TC_ALLMAX, n)); });
-  document.querySelectorAll("[data-tcbuy]").forEach(b => b.onclick = () => { const s = tcLoad(), t = +b.dataset.tcbuy, c = tcPrice(TC_SHOP.u, t); if (s.gems < c) return; s.gems -= c; tcGive(s, tcKey(TC_SHOP.u, t)); TC_PICK = tcKey(TC_SHOP.u, t); TC_SUB = "mine"; tcSave(s); tcRender(); SFX.play("pop"); });
-  $("#tcRecycle") && ($("#tcRecycle").onclick = () => { const s = tcLoad(); tcRecycle(s); tcSave(s); tcRender(); SFX.play("pop"); });
+  document.querySelectorAll("[data-tcbuy]").forEach(b => b.onclick = () => { const s = tcLoad(), t = +b.dataset.tcbuy, c = tcPrice(TC_SHOP.u, t); if (s.gems < c) return;
+    if (!tcPaidOk(c, () => b.click())) return; s.gems -= c; tcGive(s, tcKey(TC_SHOP.u, t)); TC_PICK = tcKey(TC_SHOP.u, t); TC_SUB = "mine"; tcSave(s); tcRender(); SFX.play("pop"); });
+  $("#tcRecycle") && ($("#tcRecycle").onclick = () => { const s0 = tcLoad(), by = {}; let g = 0, n = 0; for (const c of tcCards()){ const d = tcDups(s0, c); if (!d.n) continue; by[c.r] = (by[c.r] || 0) + d.n; g += d.g; n += d.n; }
+    const big = ["X", "M", "L"].filter(r => by[r]), lk = Object.values(s0.lock || {}).filter(Boolean).length, M = $("#modal");   /* 19 oct. 2026 : confirmation, ce qui est recyclé et ce qui est gardé */
+    M.innerHTML = `<div class="box" style="max-width:460px"><div class="head"><h2>Recycler ${n} doublon${n > 1 ? "s" : ""}</h2><button class="ghost" id="rcNo">✕</button></div>
+      <p class="muted" style="margin:0 0 10px">Tu gardes toujours un exemplaire de chaque carte et de chaque version. Seuls les exemplaires en trop sont recyclés, contre <b>${g} ◆</b>.</p>
+      <div class="tcchips" style="margin-bottom:10px">${[...TC_ORDER].reverse().filter(r => by[r]).map(r => `<button class="r-${r}" disabled>${TC_R[r][0]} ×${by[r]}</button>`).join("")}</div>
+      ${big.length ? `<p class="note-off" style="margin:0 0 10px">⚠ Tu vas recycler des doublons ${big.map(r => TC_R[r][0]).join(", ")}. Pour en garder une, mets-la sous cadenas depuis sa fiche (🔒).</p>` : ""}
+      <p class="small" style="margin:0 0 12px">${lk ? `${lk} carte${lk > 1 ? "s" : ""} sous cadenas : jamais recyclée${lk > 1 ? "s" : ""}.` : "Astuce : le cadenas 🔒 de la fiche d'une carte la protège du recyclage et de la vente."}</p>
+      <div class="row"><button class="primary" id="rcYes">Recycler · +${g} ◆</button><button class="ghost" id="rcNo2">Annuler</button></div></div>`;
+    M.classList.remove("hidden"); const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }; $("#rcNo").onclick = close; $("#rcNo2").onclick = close;
+    $("#rcYes").onclick = () => { const s = tcLoad(); tcRecycle(s); tcSave(s); close(); tcRender(); SFX.play("pop"); }; });
   const pay = (s, rw) => { if (rw.g) s.gems += rw.g; else tcGive(s, rw.p); };
   document.querySelectorAll("[data-tcm]").forEach(b => b.onclick = () => { const s = tcLoad(), m = tcMissions(s).find(x => x.k === b.dataset.tcm); if (!m || m.cur < m.g || s.day.claimed.includes(m.k)) return; s.day.claimed.push(m.k); pay(s, m.rw); tcSave(s); tcRender(); SFX.play("win"); });
   document.querySelectorAll("[data-tcms]").forEach(b => b.onclick = () => { TC_MSUB = b.dataset.tcms; tcRender(); });
@@ -11113,11 +11140,14 @@ function tcView(c, want){
   const s = tcLoad(), fins = ["", ...Object.keys(TC_FIN).filter(k => s.fin[c.id] && s.fin[c.id][k] && tcVersOf(c).includes(k))]; let f = tcBestFin(s, c), back = false; if (want != null && want !== "*" && tcHas(s, c, want)) f = want;
   document.querySelector(".tcview")?.remove();
   document.body.insertAdjacentHTML("beforeend", `<div class="tcview r-${c.r}" role="dialog" aria-modal="true" aria-label="${esc(c.n)}"><button class="ghost vx" id="tcvX">✕ Fermer</button><div class="v3d"><div class="vcard"><div class="vf"></div><div class="vb">${tcBack(c.r)}<div class="tcfiche-w">${tcSheet(c, s, f)}</div></div></div></div>
-    <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] + (k === "B" ? " · 2e illustration" : k === "C" ? " · 3e illustration" : "") : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button id="tcvSheet">Lire la fiche</button></div><p class="small">Fais glisser pour incliner la carte, touche-la pour lire sa fiche.</p></div></div>`);
+    <div class="vbar">${fins.length > 1 ? `<div class="tcchips">${fins.map(k => `<button data-tcf="${k}">${k ? TC_FIN[k][0] + (k === "B" ? " · 2e illustration" : k === "C" ? " · 3e illustration" : "") : "Normale"}</button>`).join("")}</div>` : ""}<div class="row" style="justify-content:center"><button id="tcvSheet">Lire la fiche</button>${s.own[c.id] ? `<button class="ghost" id="tcvLock" aria-pressed="${!!(s.lock || {})[c.id]}">${(s.lock || {})[c.id] ? "🔒 Verrouillée" : "🔓 Verrouiller"}</button>` : ""}</div><p class="small">Fais glisser pour incliner la carte, touche-la pour lire sa fiche.</p></div></div>`);
   const V = document.querySelector(".tcview"), box = V.querySelector(".v3d"), card = V.querySelector(".vcard");
   const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelector(".tcfiche-w").innerHTML = tcSheet(c, s, f); queueMicrotask(() => { try { ficheEdge(); } catch {} });   /* contour du dos posé dans la même image que la face : animations (Légende) synchronisées */ V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
   const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); card.style.setProperty("--px", mx + "%"); card.style.setProperty("--py", my + "%"); card.style.setProperty("--ph", Math.min(1, Math.hypot(mx - 50, my - 50) / 50).toFixed(2)); card.style.setProperty("--ex", (-ry * .15).toFixed(2) + "px"); card.style.setProperty("--ey", (rx * .15).toFixed(2) + "px"); };   // --ex/--ey : tranche de la carte, du côté qui s'éloigne
   face(); tilt(0, 0);
+  // cadenas (19 oct. 2026) : une carte verrouillée n'est ni recyclée (même « Recycler tout ») ni proposée à la vente
+  { const lb = V.querySelector("#tcvLock"); if (lb) lb.onclick = () => { const s2 = tcLoad(); s2.lock = s2.lock || {}; if (s2.lock[c.id]) delete s2.lock[c.id]; else s2.lock[c.id] = 1; tcSave(s2);
+      const on = !!s2.lock[c.id]; lb.textContent = on ? "🔒 Verrouillée" : "🔓 Verrouiller"; lb.setAttribute("aria-pressed", on); SFX.play("pop"); try { frToast(on ? c.n + " est sous cadenas : ni recyclée ni vendue." : c.n + " n'est plus sous cadenas."); } catch {} }; }
   box.onpointermove = e => { if (back) return;   /* 19 oct. 2026 : le dos (la fiche) ne s'incline pas */
     const r = card.getBoundingClientRect(), k = e.pointerType === "touch" ? 1.5 : 1, cl = v => Math.max(0, Math.min(1, v)), x = cl(.5 + ((e.clientX - r.left) / r.width - .5) * k), y = cl(.5 + ((e.clientY - r.top) / r.height - .5) * k);   /* au doigt, un petit geste suffit pour incliner autant qu'à la souris */
     card.classList.add("live"); tilt((.5 - y) * 44, (x - .5) * 56, x * 100, y * 100); };   // inclinaison plus ample (17 oct. 2026) : ±22° / ±28°
@@ -11665,7 +11695,7 @@ function tcOpening(key, got){
       <div class="ogrid"><button id="tcColl"><i aria-hidden="true">札</i>Ma collection</button><button id="tcShare2"><i aria-hidden="true">↗</i>Partager</button></div>
       <button class="ghost oexit" id="tcSwap">Terminer · retour aux Cartes</button></div>`;   /* 19 oct. 2026 : fin d'ouverture simplifiée (une action principale, deux raccourcis, une sortie claire) */
     $("#tcSwap").onclick = () => { TC_TAB = "packs"; end(); }; $("#tcColl").onclick = () => { TC_TAB = "album"; end(); };
-    $("#tcAgain").onclick = () => { const s = tcLoad(); if (!((s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0))){ if (s.gems < price) return; s.gems -= price; tcGive(s, key); tcSave(s); } TC_PICK = (tcLoad().packs[key] || 0) > 0 ? key : "free"; TC_TAB = "packs"; TC_SUB = "mine"; O.remove(); tcRender(); $("#tcOpen")?.click(); };
+    $("#tcAgain").onclick = () => { const s = tcLoad(); if (!((s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0))){ if (s.gems < price) return; if (!tcPaidOk(price, () => $("#tcAgain")?.click())) return; s.gems -= price; tcGive(s, key); tcSave(s); } TC_PICK = (tcLoad().packs[key] || 0) > 0 ? key : "free"; TC_TAB = "packs"; TC_SUB = "mine"; O.remove(); tcRender(); $("#tcOpen")?.click(); };
     const st = tcLoad(); O.querySelector(".otop .ost").innerHTML = `<span>${tcStock(st)} booster${tcStock(st) > 1 ? "s" : ""}</span><span>${st.gems} ◆</span>`;
     if (G){ G.from(mid.querySelectorAll(".osum,.obest,.osec,.tcxp,.oxn"), {y: 16, opacity: 0, duration: .45, stagger: .08, clearProps: "transform,opacity"}); G.from(bot.children, {y: 24, opacity: 0, duration: .4, stagger: .07, delay: .25, clearProps: "transform,opacity"});
       const bl = Math.max(...got.map(lvlOf)); if (bl >= 2) setTimeout(() => tcBoom(bl, mid.querySelector(".tcrow .best") || mid.querySelector(".tcrow")), 350); }
@@ -11958,6 +11988,7 @@ const VT = [
   ["x1", "Éveillé", "覚醒", 2, "Obtiens 1 carte Éveil", x => x.ev, 1], ["x2", "Transcendant", "超越", 3, "Obtiens 10 cartes Éveil", x => x.ev, 10],
   ["f1", "Brillant", "輝", 1, "Obtiens 5 cartes Holo", x => x.fin.H, 5], ["f2", "Arc-en-ciel", "虹", 2, "Obtiens 1 carte Red Blood", x => x.fin.K, 1], ["f3", "Chasseur d'or", "黄金", 3, "Obtiens 1 carte UR", x => x.fin.G, 1], ["f4", "Trésor national", "国宝", 4, "Obtiens 5 cartes UR", x => x.fin.G, 5],
   ["o1", "Déballeur", "開", 1, "Ouvre 10 boosters", x => x.opened, 10], ["o2", "Accro aux boosters", "中毒", 2, "Ouvre 100 boosters", x => x.opened, 100], ["o3", "Grossiste", "問屋", 3, "Ouvre 500 boosters", x => x.opened, 500],
+  ["r1", "Recruteur", "招", 2, "Parraine 3 amis", x => x.ref || 0, 3], ["r2", "Ambassadeur", "大使", 3, "Parraine 10 amis", x => x.ref || 0, 10],   /* parrainage, 19 oct. 2026 */
   ["a1", "Nakama", "仲間", 1, "Ajoute 1 ami", x => x.fr, 1], ["a2", "Équipage", "一味", 2, "Ajoute 5 amis", x => x.fr, 5],
   ["t1", "Marchand", "商人", 1, "Fais 1 échange", x => x.tr, 1], ["t2", "Négociant", "豪商", 2, "Fais 10 échanges", x => x.tr, 10],
   ["d1", "Régulier", "日課", 1, "Connecte-toi 3 jours de suite", x => x.login, 3], ["d2", "Assidu", "皆勤", 2, "Connecte-toi 7 jours de suite", x => x.login, 7], ["d3", "Sans faille", "不屈", 3, "Connecte-toi 30 jours de suite", x => x.login, 30],
@@ -11991,7 +12022,7 @@ function vtCtx(s){
   return {g: st.g, w: st.w, modes: st.modes.length, best: s.best || 0, own: all.filter(has).length, total: all.length, u: {op: full("op"), db: full("db"), na: full("na")},
     vers: (typeof tcVers === "function" ? tcVers(s) : 0), evAll: all.filter(c => c.r === "X").length, mw: k => (st.mw || {})[k] || 0,
     myth: all.filter(c => c.r === "M" && has(c)).length, mythAll: all.filter(c => c.r === "M").length, ev: all.filter(c => c.r === "X" && has(c)).length, fin,
-    cr: vtCareer(), opened: s.opened || 0, fr: (typeof frList === "function" ? frList().length : 0), tr: s.trades || 0, login: Math.max(s.login?.n || 0, s.loginBest || 0), lv: tcLvl(s.xp || 0)};
+    cr: vtCareer(), opened: s.opened || 0, ref: s.refN || 0, fr: (typeof frList === "function" ? frList().length : 0), tr: s.trades || 0, login: Math.max(s.login?.n || 0, s.loginBest || 0), lv: tcLvl(s.xp || 0)};
 }
 const vtGoal = (v, x) => v[6] === 0 ? x.total : v[6] === -1 ? x.mythAll : v[6] === -2 ? x.evAll : v[6];
 // nouvelles cartes de visite : on les enregistre, on offre des éclats, et on prévient (appelé à chaque sauvegarde)
@@ -12061,7 +12092,10 @@ function vtShowcase(sh, name){
     <div class="tro">${t.map(k => vtCardHTML(k, {empty: "Trophée"})).join("")}</div>
     <div class="best">${c.map(e => { const x = e && all.find(y => y.no === e[0]); return x ? tcCard(x, {f: e[1]}) : `<div class="slot">Carte</div>`; }).join("")}</div></div>`;
 }
-const vtMine = s => { const sh = s.show || {b: "", t: [], c: []}, all = tcCards(); return {b: sh.b, t: sh.t || [], c: [0, 1, 2].map(i => { const id = (sh.c || [])[i], x = id && all.find(y => y.id === id); return x && s.own[x.id] ? [x.no, tcBestFin(s, x)] : null; })}; };
+const vtMine = s => { const sh = s.show || {b: "", t: [], c: []}, all = tcCards(); let c = [0, 1, 2].map(i => { const id = (sh.c || [])[i], x = id && all.find(y => y.id === id); return x && s.own[x.id] ? [x.no, tcBestFin(s, x)] : null; });
+  // 19 oct. 2026 (comme Kyara) : une vitrine choisie s'affiche telle quelle ; sans aucun choix, tes 3 cartes les plus rares
+  if (!c.some(Boolean)){ const RK = "XSMLEPRC"; c = all.filter(x => s.own[x.id]).sort((a, b) => RK.indexOf(a.r) - RK.indexOf(b.r) || b.p - a.p).slice(0, 3).map(x => [x.no, tcBestFin(s, x)]); while (c.length < 3) c.push(null); }
+  return {b: sh.b, t: sh.t || [], c}; };
 // onglet « Vitrine » des Cartes (lot 3, 18 oct. 2026) : la vitrine se modifie sur place — ✕ pour retirer, numéros 1/2/3, appui long puis glisser
 // une carte sur une autre case pour échanger leurs places ; en dessous, un seul des deux choix à la fois, avec des filtres
 let VT_SUB = "vt";
@@ -12569,7 +12603,9 @@ function cpRender(){ const box = $("#cpBox"); if (!box) return;
   if (!acc) top = `<label class="f">Sauvegarde · 保存</label><p class="muted" style="margin:4px 0 0">${cpReady() ? `Le compte se crée et s'utilise sur le site du jeu : <b style="user-select:all">${esc(FR_SITE)}</b>. Ici, utilise la sauvegarde manuelle ci-dessous.` : "Ta progression est enregistrée dans ce navigateur seulement. Pour ne pas la perdre (navigation privée, nettoyage de Safari, changement de téléphone), fais une sauvegarde manuelle."}</p>`;
   else if (CP.recov && u) top = `<label class="f">Nouveau mot de passe</label><div class="cprow"><input id="cpNew" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères au minimum"><button class="primary" id="cpNewGo">Enregistrer</button></div>`;
   else if (u) top = `<label class="f">Compte · 保存</label><p style="margin:4px 0 0"><b>${esc(u.email || "")}</b></p><p class="small" style="margin-top:4px">Ta progression est sauvegardée sur ton compte, automatiquement. Connecte-toi avec ce compte sur un autre appareil pour la retrouver.</p>
-      <div class="cprow" style="margin-top:10px"><button class="primary" id="cpSaveNow">Sauvegarder maintenant</button><button class="ghost" id="cpOut">Se déconnecter</button></div>`;
+      <div class="cprow" style="margin-top:10px"><button class="primary" id="cpSaveNow">Sauvegarder maintenant</button><button class="ghost" id="cpOut">Se déconnecter</button></div>
+      <details class="cpdel" style="margin-top:12px"><summary class="small" style="cursor:pointer">Supprimer mon compte</summary><p class="small" style="margin:8px 0">Ton compte et sa sauvegarde en ligne seront effacés pour de bon : amis, profil, parrainages, annonces et échanges en cours au marché. La progression reste seulement sur cet appareil. Écris <b>SUPPRIMER</b> pour confirmer.</p>
+        <div class="cprow"><input id="cpDelW" autocomplete="off" placeholder="SUPPRIMER"><button class="ghost" id="cpDel" style="color:var(--danger,#ff5a5a)">Supprimer définitivement</button></div></details>`;
   else top = `<label class="f">Compte · 保存</label><p class="small" style="margin:4px 0 8px">Crée un compte pour garder ta progression, même si tu fermes Safari ou changes de téléphone.</p>
       <div class="cprow"><input id="cpMail" type="email" autocomplete="email" inputmode="email" placeholder="Ton e-mail"><input id="cpPass" type="password" autocomplete="current-password" minlength="8" placeholder="Mot de passe (8 caractères min.)"></div>
       <div class="cprow" style="margin-top:8px"><button class="primary" id="cpIn">Se connecter</button><button id="cpUp">Créer un compte</button><button class="ghost" id="cpForgot">Mot de passe oublié</button></div>`;
@@ -12582,6 +12618,9 @@ function cpRender(){ const box = $("#cpBox"); if (!box) return;
   $("#cpForgot") && ($("#cpForgot").onclick = () => { const mail = $("#cpMail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(mail)) return cpSet("ko", "Écris d'abord ton e-mail ci-dessus."); run(async sb => { const {error} = await sb.auth.resetPasswordForEmail(mail, {redirectTo: FR_SITE}); cpSet(error ? "ko" : "ok", error ? cpErr(error) : "Si un compte existe, un lien de réinitialisation vient d'être envoyé."); }); });
   $("#cpNewGo") && ($("#cpNewGo").onclick = () => { const p = $("#cpNew").value; if (p.length < 8) return cpSet("ko", "Le mot de passe doit faire au moins 8 caractères."); run(async sb => { const {error} = await sb.auth.updateUser({password: p}); if (error) return cpSet("ko", cpErr(error)); CP.recov = false; cpRender(); cpSet("ok", "Mot de passe changé."); }); });
   $("#cpSaveNow") && ($("#cpSaveNow").onclick = () => cpPush());
+  // suppression du compte (19 oct. 2026, comme Kyara) : fonction delete_my_account côté serveur, puis déconnexion
+  $("#cpDel") && ($("#cpDel").onclick = () => { if ($("#cpDelW").value.trim().toUpperCase() !== "SUPPRIMER") return cpSet("ko", "Écris SUPPRIMER dans la case pour confirmer.");
+    run(async sb => { const {error} = await sb.rpc("delete_my_account"); if (error) return cpSet("ko", "Suppression impossible : " + error.message); try { await sb.auth.signOut(); } catch {} cpSet("", "Compte supprimé. Ta progression reste sur cet appareil, sans sauvegarde en ligne."); }); });
   $("#cpOut") && ($("#cpOut").onclick = () => run(async sb => { if (lsGet("mercato-compte-dirty", false)) await cpPush(); await sb.auth.signOut(); cpSet("", "Déconnecté. Ta progression reste sur cet appareil."); }));
   $("#svCopy").onclick = async () => { const code = svEncode(svPack()); try { await navigator.clipboard.writeText(code); $("#svCopy").textContent = "Copié ✔"; } catch { $("#svIn").classList.remove("hidden"); $("#svTxt").value = code; $("#svTxt").select(); $("#svMsg").textContent = "Copie ce texte et garde-le."; } };
   $("#svFile") && ($("#svFile").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([svEncode(svPack())], {type: "text/plain"})); a.download = "hanko-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".txt"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
@@ -12746,7 +12785,7 @@ function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFi
         return `<div class="mnwho ${card ? "cc" : ""}" data-mn="profil" role="button" tabindex="0" aria-label="Ouvrir mon profil">${card ? `<div class="ccbg" aria-hidden="true">${card}</div>` : ""}${av}<span class="who"><b>${esc(d.name || "Choisis un pseudo")}</b>${ti}<small>${esc(acc)}</small></span><em aria-hidden="true">→</em></div>`; })()}
       <div class="mnst"><div><span>V/D en ligne</span><b>${ratio}</b><small>${d.w} V · ${d.l} D</small></div><div><span>Cartes</span><b>${d.own}</b><small>sur ${d.tot}</small></div><div><span>Éclats</span><b>${d.s ? d.s.gems : 0} ◆</b><small>niveau ${d.s ? tcLvl(d.s.xp || 0) : 0}</small></div></div></div>
     <h3>Cartes</h3><div class="mngrid"><button data-mn="packs"><i>札</i>Boosters${d.stock ? `<u>${d.stock}</u>` : ""}</button><button data-mn="album"><i>集</i>Collection</button><button data-mn="missions"><i>務</i>Missions${d.todo ? `<u>${d.todo}</u>` : ""}</button><button data-mn="vitrine"><i>飾</i>Vitrine</button></div>
-    <h3>Profil</h3><div class="mngrid"><button data-mn="profil"><i>名</i>Mon profil</button><button data-mn="amis"><i>友</i>Amis</button></div>
+    <h3>Profil</h3><div class="mngrid"><button data-mn="profil"><i>名</i>Mon profil</button><button data-mn="amis"><i>友</i>Amis</button><button data-mn="parrain"><i>招</i>Parrainage</button></div>
     <h3>Jouer</h3><div class="mngrid"><button data-mn="jeux"><i>遊</i>Tous les jeux</button><button data-mn="join"><i>参</i>Rejoindre</button></div>
     <div class="mnfoot"><button class="a" data-mn="compte">${d.mail ? "Mon compte et ma sauvegarde" : d.guest ? "Créer un compte" : "Se connecter ou créer un compte"} →</button>${d.mail ? `<button class="q" data-mn="out">Se déconnecter</button>` : ""}</div></div></div>`);
   const V = document.querySelector(".mnveil"); V.onclick = e => { if (e.target === V) mnClose(); }; V.querySelector(".mnx").onclick = mnClose; document.addEventListener("keydown", mnKey);
@@ -12756,6 +12795,7 @@ function mnOpen(){ mnClose(); const d = mnData(), ratio = d.l ? (d.w / d.l).toFi
     if (["packs", "album", "missions", "vitrine"].includes(k)) return tcShow(k);
     if (k === "profil") return d.name ? pfShow() : scrollTo("#profBox");
     if (k === "amis") return d.name ? frShow() : scrollTo("#profBox");
+    if (k === "parrain"){ if (!d.name) return scrollTo("#profBox"); FR_TAB = "ref"; return frShow(); }
     if (k === "jeux"){ show("home"); return window.scrollTo({top: 0, behavior: "smooth"}); }
     if (k === "join") return scrollTo("#joinBox");
     if (k === "compte"){ if (d.guest && typeof cpLeaveGuest === "function") return cpLeaveGuest(); return scrollTo("#cpBox"); }
@@ -13290,7 +13330,7 @@ function hvBuyHTML(s, auc){ const L = hvFilterList(s, auc);
 // ---------- Vendre ----------
 function hvMyCards(s){ const out = []; for (const id in s.own){ const c = hvCard(id); if (!c) continue; for (const v of ["", ...Object.keys(s.fin[id] || {})]){ const n = hvCount(s, id, v); if (n > 0) out.push({c, v, n}); } } return out; }
 function hvSellHTML(s){ const me = hvMe(), open = HV.data.mine.filter(l => l.status === "open"), q = HV.sq.trim().toLowerCase();
-  let M = hvMyCards(s); const cnt = r => M.filter(x => tcER(x.c, x.v) === r).length;
+  let M = hvMyCards(s).filter(x => !(s.lock || {})[x.c.id]); const cnt = r => M.filter(x => tcER(x.c, x.v) === r).length;
   const R = [...TC_ORDER].reverse().filter(r => cnt(r));
   M = M.filter(x => (HV.sr === "all" || tcER(x.c, x.v) === HV.sr) && (!q || x.c.n.toLowerCase().includes(q)));
   M.sort(HV.ssort === "rar" ? (a, b) => TC_ORDER.indexOf(tcER(b.c, b.v)) - TC_ORDER.indexOf(tcER(a.c, a.v)) : HV.ssort === "name" ? (a, b) => a.c.n.localeCompare(b.c.n) : (a, b) => b.n - a.n || TC_ORDER.indexOf(tcER(b.c, b.v)) - TC_ORDER.indexOf(tcER(a.c, a.v)));
@@ -13667,6 +13707,150 @@ document.addEventListener("contextmenu", e => { if (e.target.closest && !e.targe
     anchor.insertAdjacentHTML(anchor === row ? "afterend" : "beforebegin", `<div style="display:flex;justify-content:center;margin:14px 0"><button id="tcShare" class="ghost">↗ Partager mon tirage</button></div>`);
     O.querySelector("#tcShare").onclick = e => share(e.currentTarget); };
   let q = 0; new MutationObserver(() => { if (!q) q = requestAnimationFrame(() => { q = 0; add(); }); }).observe(document.body, {childList: true, subtree: true});
+})();
+</script>
+
+<style>
+/* Parrainage (19 oct. 2026, sur le modèle de Kyara) : onglet dans la fenêtre Amis */
+.refhero{display:grid;gap:6px;margin:0 0 14px}.refhero .eb{font:700 12px var(--mono);letter-spacing:.14em;color:var(--accent)}
+.refhero h3{font:900 clamp(19px,5vw,24px)/1.15 var(--title);margin:0;text-wrap:balance}.refhero p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.45}
+.refshare{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}.refshare a,.refshare button{border-radius:999px;padding:9px 14px;font-size:13.5px;font-weight:700;text-decoration:none}
+.refshare a{background:var(--panel2,#1b1a20);color:var(--text);border:1px solid var(--line)}
+.refsteps{display:grid;gap:8px;margin:0 0 14px;padding:0;list-style:none}.refsteps li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.refsteps li > i{font-style:normal;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 13px var(--mono);background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
+.refsteps li b{display:block;font-size:14.5px}.refsteps li span{color:var(--muted);font-size:13px;line-height:1.4}
+.refsteps li.ok > i{background:var(--ok,#3fd68a);color:#0b0a0e}
+.reftiers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 14px}
+.reftiers > div{position:relative;display:grid;gap:2px;justify-items:center;text-align:center;padding:10px 6px;border-radius:12px;background:var(--panel2,#1b1a20);border:1px solid var(--line)}
+.reftiers b{font:900 22px var(--title);color:var(--accent)}.reftiers span{font-size:11.5px;color:var(--muted)}.reftiers small{font-size:11px;line-height:1.3;color:var(--text)}
+.reftiers .done{border-color:var(--ok,#3fd68a)}.reftiers .done b{color:var(--ok,#3fd68a)}.reftiers i{position:absolute;top:5px;right:7px;font-style:normal;color:var(--ok,#3fd68a);font-size:12px}
+.refpick{display:grid;grid-template-columns:1fr 1fr;gap:8px}.refpick button{border-radius:12px;padding:12px 8px;font-weight:700}
+.reflist{display:grid;gap:8px}.reflist div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--panel2,#1b1a20);font-size:14px}
+.reflist small{color:var(--muted);font-family:var(--mono)}.reflist .ok{color:var(--ok,#3fd68a)}
+.refbar{height:6px;border-radius:99px;background:#2a2830;overflow:hidden;min-width:70px;flex:0 0 90px}.refbar i{display:block;height:100%;background:var(--accent)}
+</style>
+<script>
+/* =====================================================================
+   PARRAINAGE (parrainage-supabase.sql) : lien « #parrain=Pseudo#1234 » ouvert AVANT la création du compte ;
+   à la première connexion, le filleul déclare son parrain (referral_join) ; quand il a ouvert 20 boosters
+   (compté par le serveur dans sa sauvegarde), parrain et filleul reçoivent 3 boosters Mélange chacun (referral_claim).
+   ===================================================================== */
+(() => {
+  const PK = "hanko-parrain", DK = "hanko-appareil";   // hors « mercato- » : propre à l'appareil, jamais copié dans la sauvegarde
+  const dev = () => { let d = null; try { d = localStorage.getItem(DK); if (!d){ d = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem(DK, d); } } catch {} return d || "inconnu-" + Date.now(); };
+  const RF = {st: null, busy: false};
+  // paliers (19 oct. 2026) : éclats + booster à 1, 3, 5 et 10 filleuls validés ; les titres Recruteur (3) et Ambassadeur (10) se débloquent dans les cartes de visite
+  // [filleuls, éclats, boosters, libellé, titre, booster Or au choix]
+  const TIERS = [[1, 0, ["mix:1", "mix:1", "mix:1"], "3 boosters Argent"], [3, 0, ["mix:2"], "1 booster Or", "titre Recruteur"], [5, 500, [], "+500 ◆ et 1 booster Or au choix", "", 1], [10, 0, ["mix:3"], "1 booster Divin", "titre Ambassadeur"]];
+  const tiers = ok => { const s = tcLoad(); s.refT = s.refT || []; let got = []; const was = s.refN || 0; s.refN = Math.max(was, ok);
+    TIERS.forEach(([n, g, P, pl, t, ch]) => { if (s.refN >= n && !s.refT.includes(n)){ s.refT.push(n); s.gems += g; P.forEach(k => tcGive(s, k)); if (ch) s.refChoice = (s.refChoice || 0) + 1; got.push(`${n} filleul${n > 1 ? "s" : ""} : ${pl}${t ? " + " + t : ""}`); } });
+    if (got.length || s.refN !== was){ tcSave(s); try { tabDot(); } catch {} }
+    if (got.length){ SFX.play("fanfare"); frToast("Palier de parrainage ! " + got.join(" · "), (tcLoad().refChoice ? "Choisir mon booster" : "Voir"), () => { FR_TAB = "ref"; frShow(); }); } };
+  // booster Or au choix (palier 5) : Mélange ou un univers
+  const pick = () => { const M = document.createElement("div"); M.className = "tcview"; M.style.cssText = "display:grid;place-items:center;align-content:center;background:rgba(5,5,7,.92)";
+    M.innerHTML = `<div class="box" style="max-width:420px;width:calc(100% - 32px)"><div class="head"><h2>Ton booster Or</h2><button class="ghost" id="rfX">Plus tard</button></div><p class="muted" style="margin:0 0 12px">Palier de 5 filleuls : choisis l'univers de ton booster Or.</p><div class="refpick">${Object.keys(TC_PACKS).map(u => `<button data-u="${u}">${esc(TC_PACKS[u][0])}</button>`).join("")}</div></div>`;
+    document.body.appendChild(M); M.querySelector("#rfX").onclick = () => M.remove();
+    M.querySelectorAll("[data-u]").forEach(b => b.onclick = () => { const s = tcLoad(); if (!s.refChoice) return M.remove(); s.refChoice--; tcGive(s, b.dataset.u + ":2"); tcSave(s); M.remove(); try { tabDot(); } catch {} SFX.play("win"); frToast(`Booster Or ${TC_PACKS[b.dataset.u][0]} ajouté à tes boosters !`, "Ouvrir", () => tcShow("packs")); if (document.querySelector("[data-refpanel]")) paint(); }); };
+  window.refPick = pick;
+  // arrivée par un lien de parrainage : retenu seulement si ce joueur n'a encore ouvert aucun booster
+  try { const m = location.hash.match(/^#parrain=(.+)$/), pd = m && frParse(decodeURIComponent(m[1]));
+    if (pd){ history.replaceState(null, "", location.pathname + location.search);
+      const opened = (() => { try { return tcLoad().opened || 0; } catch { return 0; } })();
+      if (!opened && !(window.CP && CP.user)){ localStorage.setItem(PK, pd.id); lsSet(FR_PEND, pd.id);
+        setTimeout(() => frToast(`${pd.id} t'invite sur Hanko : crée ton compte, ouvre 20 boosters et vous recevez chacun 3 boosters.`), 1200); } } } catch {}
+  const link = () => { const me = frMe(); return me ? FR_SITE + "#parrain=" + encodeURIComponent(me.id) : FR_SITE; };
+  async function sync(){ if (RF.busy || !frsOn()) return; RF.busy = true;
+    try {
+      let pend = null; try { pend = localStorage.getItem(PK); } catch {}
+      if (pend){ const {data, error} = await CP.sb.rpc("referral_join", {referrer_handle: pend, dev: dev()});
+        if (!error){ try { localStorage.removeItem(PK); } catch {}
+          const why = {"trop tard": "ton compte a été créé il y a plus de 48 h", deja: "tu as déjà un parrain", inconnu: "ce joueur est introuvable", "soi-meme": "tu ne peux pas te parrainer toi-même", appareil: "cet appareil a déjà servi à un parrainage"}[data];
+          if (data === "ok") frToast(`Parrainage enregistré avec ${pend} : ouvre 20 boosters et vous recevez chacun 3 boosters.`);
+          else if (why) frToast(`Le lien de parrainage de ${pend} n'a pas été pris en compte : ${why}.`); } }   /* comme Kyara : on dit pourquoi */
+      const {data: st} = await CP.sb.rpc("referral_state"); if (st) RF.st = st;
+      if (st && st.todo > 0){ const {data: n} = await CP.sb.rpc("referral_claim");
+        if (n > 0){ const s = tcLoad(); tcGive(s, "mix:0", n); tcSave(s); try { tabDot(); } catch {} SFX.play("win");
+          frToast(`Parrainage validé : +${n} boosters Mélange !`, "Ouvrir", () => tcShow("packs")); const r = await CP.sb.rpc("referral_state"); if (r.data) RF.st = r.data; } }
+      if (RF.st) tiers((RF.st.mine || []).filter(x => x.ok).length);
+      if (document.querySelector("#modal .frbox [data-refpanel]")) paint();
+    } catch {} finally { RF.busy = false; } }
+  setInterval(sync, 9e4); document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") sync(); });
+  { let k = 0; const t = setInterval(() => { if (frsOn()){ clearInterval(t); sync(); } else if (++k > 60) clearInterval(t); }, 2000); }
+
+  const panel = () => { const st = RF.st || {}, mine = st.mine || [], ok = mine.filter(x => x.ok).length, me = frMe(), L = link(), txt = "Viens jouer à Hanko avec moi : jeux d'anime et boosters de cartes à collectionner !";
+    const sh = encodeURIComponent(txt + " " + L);
+    return `<div data-refpanel><div class="refhero"><span class="eb">PARRAINAGE · 紹介</span><h3>Invite tes amis, +3 boosters pour vous deux</h3>
+      <p>Envoie ton lien. Dès que ton ami a créé son compte et ouvert 20 boosters, vous recevez chacun 3 boosters Mélange. Sans limite d'amis.</p></div>
+      <div class="frshare"><span class="frlink">${esc(L.replace(/^https?:\/\//, ""))}</span><button class="primary" id="refCopy">Copier mon lien</button></div>
+      <div class="refshare">${navigator.share ? `<button id="refNative">Partager…</button>` : ""}<a href="https://wa.me/?text=${sh}" target="_blank" rel="noopener">WhatsApp</a><a href="https://t.me/share/url?url=${encodeURIComponent(L)}&text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">Telegram</a><a href="https://twitter.com/intent/tweet?text=${sh}" target="_blank" rel="noopener">X</a></div>
+      <label class="f">Comment ça marche</label>
+      <ol class="refsteps"><li><i>1</i><div><b>Partage ton lien</b><span>WhatsApp, Telegram, X… ou copie-le où tu veux.</span></div></li>
+        <li><i>2</i><div><b>Ton ami crée son compte avec</b><span>Le lien doit être ouvert avant ses premiers boosters. Il est aussi ajouté à tes amis.</span></div></li>
+        <li><i>3</i><div><b>Il ouvre 20 boosters</b><span>Les boosters gratuits comptent.</span></div></li>
+        <li class="ok"><i>✓</i><div><b>+3 boosters chacun</b><span>Crédités tout seuls, avec une notification.</span></div></li></ol>
+      <label class="f">Paliers <small style="font-weight:500;color:var(--muted)">en plus des 3 boosters par filleul</small></label>
+      <div class="reftiers">${TIERS.map(([n, g, P, pl, t]) => `<div class="${ok >= n ? "done" : ""}"><b>${n}</b><span>filleul${n > 1 ? "s" : ""}</span><small>${pl}${t ? "<br>+ " + t : ""}</small>${ok >= n ? "<i>✓</i>" : ""}</div>`).join("")}</div>
+      ${(() => { try { return tcLoad().refChoice ? `<div class="row" style="justify-content:center;margin:-4px 0 14px"><button class="primary" id="refPickGo">Choisir mon booster Or</button></div>` : ""; } catch { return ""; } })()}
+      <p class="small" style="margin:0 0 14px">3 filleuls validés par jour au plus · même appareil refusé · un seul parrain par compte</p>
+      <label class="f">Tes filleuls <small style="font-weight:500;color:var(--muted)">${ok} validé${ok > 1 ? "s" : ""} · ${mine.length - ok} en cours</small></label>
+      ${!frsOn() ? `<p class="muted">Connecte-toi à ton compte (menu ☰) pour suivre tes filleuls et recevoir tes boosters.</p>` : !RF.st ? `<p class="muted">Chargement…</p>` : mine.length ? `<div class="reflist">${mine.map(x => `<div><span>${esc(x.handle || "Nouveau joueur")}</span>${x.ok ? `<b class="ok">Validé ✔</b>` : `<span style="display:flex;align-items:center;gap:8px"><span class="refbar"><i style="width:${Math.round(x.opened / 20 * 100)}%"></i></span><small>${x.opened}/20</small></span>`}</div>`).join("")}</div>` : `<p class="muted">Personne pour l'instant. Ton premier filleul te rapporte 3 boosters.</p>`}
+      ${st.parrain ? `<p class="small" style="margin-top:14px">Tu as été invité par <b>${esc(st.parrain)}</b>${st.myopened != null && st.myopened < 20 ? ` · tes boosters ouverts : ${st.myopened}/20` : ""}.</p>` : ""}</div>`; };
+  function paint(){ const box = document.querySelector("#modal .frbox"); if (!box) return; const tabs = box.querySelector(".frtabs"), foot = box.querySelector(".frfoot"); if (!tabs) return;
+    let n = tabs.nextSibling; while (n && n !== foot){ const nx = n.nextSibling; n.remove(); n = nx; }
+    tabs.insertAdjacentHTML("afterend", panel()); if (foot) foot.style.display = "none";
+    const me = frMe(), L = link();
+    box.querySelector("#refCopy").onclick = async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(L); b.textContent = "Lien copié ✔"; } catch { window.prompt("Copie ce lien :", L); } setTimeout(() => { if (b.isConnected) b.textContent = "Copier mon lien"; }, 2200); };
+    box.querySelector("#refPickGo") && (box.querySelector("#refPickGo").onclick = pick);
+    box.querySelector("#refNative") && (box.querySelector("#refNative").onclick = () => navigator.share({title: "Hanko", text: "Viens jouer à Hanko avec moi !", url: L}).catch(() => {})); }
+  // 5e onglet « Parrainage » dans la fenêtre Amis
+  const show1 = frShow;
+  frShow = function(msg){ const want = FR_TAB === "ref"; if (want) FR_TAB = "list"; const r = show1(msg); if (want) FR_TAB = "ref";
+    try { const tabs = document.querySelector("#modal .frbox .frtabs"); if (tabs && !tabs.querySelector('[data-frtab="ref"]')){
+        tabs.insertAdjacentHTML("beforeend", `<button role="tab" data-frtab="ref" aria-selected="${FR_TAB === "ref"}" class="${FR_TAB === "ref" ? "on" : ""}">Parrainage</button>`);
+        tabs.querySelector('[data-frtab="ref"]').onclick = () => { FR_TAB = "ref"; frShow(); };
+        if (FR_TAB === "ref"){ tabs.querySelectorAll("[data-frtab]").forEach(b => { const on = b.dataset.frtab === "ref"; b.setAttribute("aria-selected", on); b.classList.toggle("on", on); }); paint(); sync(); } } } catch {}
+    return r; };
+})();
+</script>
+
+<style>
+/* 19 oct. 2026 : nouveautés reprises de Kyara (envies, bandeau de mise à jour) */
+.tcopen .tcrow .tc.wishgot{box-shadow:0 0 0 3px #ff4f8b,0 0 26px #ff4f8b!important}
+.tcopen .tcrow .tc.wishgot::before{content:"♥ Envie";position:absolute;z-index:9;top:-9px;left:50%;transform:translateX(-50%);padding:2px 8px;border-radius:99px;background:#ff4f8b;color:#fff;font:800 10px var(--mono,monospace);letter-spacing:.05em;white-space:nowrap}
+#tcWishN{margin:6px 0 0;text-align:center;color:#ff7aa6;font-size:13px}
+.hkupd{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:150;display:flex;gap:10px;align-items:center;padding:10px 12px 10px 16px;border-radius:999px;background:#151419;border:1px solid var(--accent);box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:14px;max-width:calc(100% - 24px)}
+.hkupd button{border-radius:999px;padding:7px 13px;font-size:13px}
+</style>
+<script>
+(() => {
+  // ---- Envies (liste de souhaits du marché) ----
+  const WI = {set: null, t: 0, busy: false};
+  async function wishes(force){ if (!(window.CP && CP.user && CP.sb)) return null; if (!force && WI.set && Date.now() - WI.t < 6e4) return WI.set; if (WI.busy) return WI.set; WI.busy = true;
+    try { const {data, error} = await CP.sb.from("market_wishes").select("card_id,ver"); if (!error){ WI.set = new Set(data.map(w => w.card_id + "|" + (w.ver || ""))); WI.t = Date.now(); } } catch {} finally { WI.busy = false; } return WI.set; }
+  // une envie tirée : la carte s'entoure de rose, un message la célèbre, et elle sort de la liste
+  const seenRes = new WeakSet();
+  async function onResult(O){ if (seenRes.has(O)) return; seenRes.add(O); const W = await wishes(true); if (!W || !W.size) return; const all = tcCards(), hits = [];
+    O.querySelectorAll(".tcrow > .tc").forEach(e => { const no = +((e.textContent.match(/#(\d{3})/) || [])[1] || 0), c = all.find(x => x.no === no); if (!c) return;
+      const fin = ([...e.classList].find(k => /^f-/.test(k)) || "").slice(2) || (e.classList.contains("arp") ? "A" : ""), k1 = c.id + "|" + fin, k0 = c.id + "|";
+      const k = W.has(k1) ? k1 : W.has(k0) && !fin ? k0 : null; if (k){ e.classList.add("wishgot"); hits.push([c, fin, k]); } });
+    if (!hits.length) return; SFX.play("fanfare");
+    frToast(hits.length > 1 ? `${hits.length} cartes de tes envies obtenues ! Retirées de ta liste.` : `Envie obtenue : ${hits[0][0].n} ! Retirée de ta liste.`);
+    for (const [c, fin, k] of hits){ try { await CP.sb.rpc("market_wish", {card: c.id, v: fin, wanted: false}); W.delete(k); if (typeof HV !== "undefined" && HV.data && HV.data.wish) HV.data.wish.delete(k); } catch {} } }
+  // sur le booster choisi : combien de tes envies il peut te donner
+  async function packWish(){ const b = document.querySelector("#tcOpen"); if (!b || document.querySelector("#tcWishN")) return; const W = await wishes(); if (!W || !W.size || document.querySelector("#tcWishN")) return;
+    const k = (typeof TC_PICK !== "undefined" && TC_PICK) || "free", u = k === "free" ? "mix" : String(k).split(":")[0], s = tcLoad(), all = tcCards();
+    const n = [...W].filter(w => { const [id, v] = w.split("|"), c = all.find(x => x.id === id); return c && (u === "mix" || c.u === u) && !(v ? tcHas(s, c, v) : s.own[c.id]); }).length;
+    if (n && b.isConnected) b.closest(".row").insertAdjacentHTML("afterend", `<p id="tcWishN">♥ ${n} de tes envies dans ce booster</p>`); }
+  let q = 0; new MutationObserver(() => { if (q) return; q = requestAnimationFrame(() => { q = 0; const O = document.querySelector(".tcopen.res"); if (O) onResult(O); packWish(); }); }).observe(document.body, {childList: true, subtree: true});
+
+  // ---- Bandeau « nouvelle version » : le site vérifie toutes les 5 minutes s'il a été mis à jour (GitHub Pages) ----
+  if (/github\.io$/.test(location.hostname)){
+    let base = null; const sig = async () => { try { const r = await fetch(location.pathname + "?v=" + Date.now(), {cache: "no-store"}); const t = await r.text(); return t.length + ":" + (t.match(/Jeu reconstruit|v=\d+/) || [""])[0] + t.slice(-400); } catch { return null; } };
+    sig().then(x => base = x);
+    setInterval(async () => { if (!base || document.querySelector(".hkupd") || document.visibilityState !== "visible") return; const now = await sig(); if (!now || now === base) return;
+      document.body.insertAdjacentHTML("beforeend", `<div class="hkupd" role="status"><span>Nouvelle version de Hanko disponible</span><button class="primary" id="hkUpd">Mettre à jour</button><button class="ghost" id="hkUpdX" aria-label="Plus tard">✕</button></div>`);
+      document.querySelector("#hkUpd").onclick = () => location.reload(); document.querySelector("#hkUpdX").onclick = () => { document.querySelector(".hkupd").remove(); base = now; }; }, 3e5);
+  }
 })();
 </script>
 
@@ -15740,10 +15924,11 @@ const HOME_ON = {games: ["mercato", "uc", "guess", "sil"], fams: ["cat1", "cat2"
       <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien : invite tes amis en un geste, ou partage un code à quatre caractères.</span></li>
       <li><i>03</i><span><b>Lance ta Carrière</b>Le mode solo : choisis ton univers, recrute tes combattants avec ton budget, joue les combats de la saison, remplis tes objectifs et monte de division en division jusqu'au sommet.</span></li>
       <li><i>04</i><span><b>Collectionne les cartes</b>Chaque partie rapporte des boosters : ouvre-les dans l'onglet Cartes, complète ta collection, puis échange ou vends au marché.</span></li></ol>
-      <button class="primary" id="welGo">C'est parti</button></div></div>`);
+      <div class="row" style="justify-content:center;gap:8px"><button class="primary" id="welGo">C'est parti</button><button class="ghost" id="welRef" style="border-radius:999px">Inviter des amis · +3 boosters</button></div></div></div>`);
     const close = () => { try { localStorage.setItem("mercato-bienvenue", "1"); } catch {} document.querySelector(".welcome")?.remove(); };
     document.querySelector("#welGo").onclick = close; document.querySelector(".welcome").onclick = e => { if (e.target.classList.contains("welcome")) close(); };
     document.addEventListener("keydown", e => { if (e.key === "Escape") close(); }, {once: true});
+    document.querySelector("#welRef") && (document.querySelector("#welRef").onclick = () => { close(); try { FR_TAB = "ref"; frShow(); } catch {} });   /* bienvenue : partage du lien de parrainage (comme Kyara) */
     document.querySelector("#welGo").focus(); return true; };
   { let k = 0; const t = setInterval(() => { if (++k > 400 || hkWelcome()) clearInterval(t); }, 1500); }
   // règles repliables : un clic sur l'en-tête les ouvre
