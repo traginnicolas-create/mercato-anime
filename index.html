@@ -11720,9 +11720,9 @@ function tcOpening(key, got){
     if (G && !fast){ G.killTweensOf(p); G.to(p, {keyframes: [{x: -5, rotation: -3, scale: .95}, {x: 6, rotation: 3, scale: 1.02}, {x: -8, rotation: -5, scale: .96}, {x: 10, rotation: 5, scale: 1.07}, {x: -6, rotation: -3, scale: 1.1}, {x: 0, rotation: 0, scale: 1.15}], duration: .78, ease: "power2.in"}); G.to(p, {filter: "brightness(2.3)", duration: .78, ease: "power3.in"}); } mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
     setTimeout(() => { GL && GL.tear(dir); O.querySelector(".cutband")?.remove(); if (G){ G.killTweensOf(p); G.set(p, {clearProps: "transform,filter,opacity"}); } p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement; tcBoom(bi >= 5 ? 3 : bi >= 4 ? 2 : 0, w);
       // la bande du haut part sur le côté, la lumière sort par l'ouverture, les cinq cartes montent
-      w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.slice(-5).map((c, k) => tcBack(c.r, {style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
+      w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.slice(-5).map((c, k) => tcBackU(c.r, {u: c.u, style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
       O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); tcSnd("rip"); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
-      setTimeout(() => { if (O.classList.contains("res")) return;   /* « Retour » pendant la déchirure : le résultat est déjà affiché */ O.querySelector(".burst")?.remove(); mid.innerHTML = `<div class="tcrow ${got.length > 5 ? "many" : ""}">${got.map((c, k) => tcBack(c.r, {btn: true, cls: "tcback " + (big(c) ? "hot" : TC_ORDER.indexOf(c.r) === 3 || c.f ? "warm" : ""), attr: `data-k="${k}" aria-label="Retourner la carte ${k + 1}"`, style: `--n:${Math.min(k, 14)};--rc:${TC_BKC[c.r][0]}`})).join("")}</div>`;
+      setTimeout(() => { if (O.classList.contains("res")) return;   /* « Retour » pendant la déchirure : le résultat est déjà affiché */ O.querySelector(".burst")?.remove(); mid.innerHTML = `<div class="tcrow ${got.length > 5 ? "many" : ""}">${got.map((c, k) => tcBackU(c.r, {u: c.u, btn: true, cls: "tcback", attr: `data-k="${k}" aria-label="Retourner la carte ${k + 1}"`, style: `--n:${Math.min(k, 14)}`}))   /* 20 oct. 2026 : dos de l'univers, le halo annonce la rareté avant le retournement */.join("")}</div>`;
         mid.querySelectorAll(".tcback").forEach(b => b.onclick = () => flip(+b.dataset.k));
         tcSnd("deal");
         if (G) G.from(mid.querySelectorAll(".tcback"), {y: 140, opacity: 0, scale: .5, rotation: () => Math.random() * 50 - 25, duration: .6, stagger: got.length > 5 ? .025 : .07, ease: "back.out(1.6)", clearProps: "transform,opacity"});
@@ -17572,6 +17572,124 @@ document.addEventListener("click", e => { const b = e.target.closest(".pfchips b
 @media (max-width:480px){.crlookb{grid-column:1/-1;justify-content:flex-start}}
 .crc.look .pic{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 70%,#fff)}
 </style>
+
+<style>
+/* 20 oct. 2026 : dos des cartes de booster, un par univers (base « sceau doré », centre hexagone, validés sur la page d'aperçus)
+   et halo de rareté : rien pour les Communes, puis argent, bleu, violet, or, rouge, arc-en-ciel. L'intensité monte avec la rareté
+   (fixe, double, pulsation lente, pulsation, pulsation rapide, couleurs qui tournent) pour rester lisible sans les couleurs.
+   Le halo ne dit que la rareté : les versions (Holo, AR…) gardent leur effet de surface, qui s'ajoute. */
+.tcbk2{position:relative;display:block;padding:0;border:0;background:none;aspect-ratio:5/7.4;min-width:0;border-radius:12px;color:inherit;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tcbk2 > .hlx{position:absolute;inset:-3px;border-radius:14px;pointer-events:none;z-index:0}
+.tcbk2 > .kb{position:relative;z-index:1}
+.tearw .rise .tcbk2{position:absolute;left:50%;top:14%;width:52%;transform:translate(-50%,0);opacity:0}
+@media (prefers-reduced-motion:no-preference){.tearw .rise .tcbk2{animation:tcrise .8s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(.25s + var(--n) * 90ms)}}
+.kb{--ink:color-mix(in oklab,var(--t) 8%,#0c0a10);--ink2:color-mix(in oklab,var(--t) 22%,#15111b);--foil:color-mix(in oklab,var(--t) 40%,#e9d7b4);--foil-hi:color-mix(in oklab,var(--t) 14%,#fff4de);--foil-lo:color-mix(in oklab,var(--t) 45%,#5a4630);
+  --px:50%;--py:40%;position:relative;display:block;width:100%;height:100%;border-radius:12px;overflow:hidden;isolation:isolate;container-type:inline-size;
+  background:radial-gradient(90% 70% at 50% 44%,var(--ink2),var(--ink) 70%);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--foil) 40%,transparent),inset 0 0 0 2.4cqi var(--ink),inset 0 0 0 calc(2.4cqi + 1px) color-mix(in oklab,var(--foil) 18%,transparent)}
+.kb i{position:absolute;display:block;pointer-events:none}
+.kb .lg{width:100%;height:100%;display:block}
+.kb .kwv,.kb .khl{inset:6cqi;border-radius:3cqi;-webkit-mask-image:var(--pat),radial-gradient(52% 40% at 50% 50%,transparent 55%,#0008 80%,#000);mask-image:var(--pat),radial-gradient(52% 40% at 50% 50%,transparent 55%,#0008 80%,#000);
+  -webkit-mask-repeat:repeat,no-repeat;mask-repeat:repeat,no-repeat;-webkit-mask-position:center;mask-position:center;-webkit-mask-composite:source-in;mask-composite:intersect}
+.kb .kwv{background:linear-gradient(165deg,var(--foil-hi),var(--foil) 35%,var(--foil-lo) 70%,var(--foil));opacity:.42}
+.kb .khl{background:linear-gradient(115deg,#ff5ac8 20%,#5adcff 40%,#ffe16e 60%,#ff5ac8 80%) var(--px) var(--py)/220% 220%;opacity:0;transition:opacity .35s}
+.kb .ksh{inset:0;mix-blend-mode:soft-light;background:radial-gradient(70% 55% at var(--px) var(--py),#ffffff8c,transparent 70%);opacity:.55;transition:opacity .35s}
+.kb.klit .khl{opacity:.85}.kb.klit .ksh{opacity:1}
+.kb .kfr{inset:6cqi;border-radius:3cqi;border:max(1px,.6cqi) solid color-mix(in oklab,var(--foil) 70%,transparent);box-shadow:inset 0 0 0 1.4cqi color-mix(in oklab,var(--ink) 70%,transparent),inset 0 0 0 calc(1.4cqi + 1px) color-mix(in oklab,var(--foil) 30%,transparent)}
+.kb .kq{width:7cqi;height:7cqi;border:solid var(--foil);border-width:0}.kb .q1{top:-1.4cqi;left:-1.4cqi;border-top-width:.9cqi;border-left-width:.9cqi}.kb .q2{top:-1.4cqi;right:-1.4cqi;border-top-width:.9cqi;border-right-width:.9cqi}.kb .q3{bottom:-1.4cqi;left:-1.4cqi;border-bottom-width:.9cqi;border-left-width:.9cqi}.kb .q4{bottom:-1.4cqi;right:-1.4cqi;border-bottom-width:.9cqi;border-right-width:.9cqi}
+.kb .kj{position:absolute;top:10.5cqi;left:0;right:0;text-align:center;font:900 10cqi var(--title,serif);color:var(--foil);text-shadow:0 0 3cqi color-mix(in oklab,var(--t) 60%,transparent)}
+.kb .kbd{position:absolute;left:6cqi;right:6cqi;top:72%;display:flex;flex-direction:column;align-items:center;gap:2.4cqi;padding:3.4cqi 0 3cqi;
+  --line:linear-gradient(90deg,transparent,color-mix(in oklab,var(--foil) 75%,transparent) 30% 70%,transparent);background:var(--line) top/100% max(1px,.35cqi) no-repeat,var(--line) bottom/100% max(1px,.35cqi) no-repeat,linear-gradient(90deg,transparent,var(--ink) 22% 78%,transparent)}
+.kb .kwd{font:900 8cqi var(--title,system-ui);letter-spacing:.38em;padding-left:.38em;line-height:1;background:linear-gradient(180deg,var(--foil-hi),var(--foil) 55%,var(--foil-lo));-webkit-background-clip:text;background-clip:text;color:transparent}
+.kb .ksb{font:700 4.6cqi Inter,system-ui;letter-spacing:.16em;padding-left:.16em;line-height:1;color:color-mix(in oklab,var(--foil) 85%,#fff);white-space:nowrap}
+.kb .vH{position:absolute;left:50%;top:43%;width:56cqi;aspect-ratio:1;translate:-50% -50%}
+.kb .vH i{inset:0;clip-path:polygon(50% 0,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)}
+.kb .vH1{background:linear-gradient(160deg,var(--foil-hi),var(--foil) 40%,var(--foil-lo) 75%,var(--foil))}.kb .vH .vH2{inset:3.2cqi;background:var(--ink)}
+.kb .vH .vH3{inset:4.6cqi;background:linear-gradient(160deg,var(--foil-hi),var(--foil-lo));opacity:.9;clip-path:polygon(50% 0,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%,50% 0,50% 3%,9.3% 26.5%,9.3% 73.5%,50% 97%,90.7% 73.5%,90.7% 26.5%,50% 3%)}
+.kb .vH::before{content:"";position:absolute;inset:-14cqi;background:repeating-conic-gradient(from 0deg,color-mix(in oklab,var(--foil) 70%,transparent) 0 1deg,transparent 1deg 60deg);-webkit-mask:radial-gradient(circle,#0000 52%,#000 56%,#0000 72%);mask:radial-gradient(circle,#0000 52%,#000 56%,#0000 72%)}
+.kb .vHl{position:absolute;inset:11cqi;filter:drop-shadow(0 0 4cqi color-mix(in oklab,var(--t) 80%,transparent))}
+.kb .vHl .lg{--lga:var(--t);--lgb:var(--ink);--lgc:color-mix(in oklab,var(--t) 40%,#fff)}
+/* halo serré sur les dos : contour net + lueur courte, pour distinguer des cartes collées (20 oct.) */
+.tcbk2.r-P > .hlx{box-shadow:0 0 0 3px #e9edf3,0 0 10px 1px rgba(230,234,240,.55)}
+.tcbk2.r-R > .hlx{box-shadow:0 0 0 3.5px #4da3ff,0 0 12px 2px rgba(77,163,255,.65)}
+.tcbk2.r-E > .hlx{box-shadow:0 0 0 3.5px #b07cff,0 0 12px 2px rgba(176,124,255,.7)}
+.tcbk2.r-L > .hlx{box-shadow:0 0 0 3.5px #ffc93a,0 0 14px 2px rgba(255,201,58,.7)}
+.tcbk2.r-M > .hlx{box-shadow:0 0 0 4px #ff3d5a,0 0 14px 3px rgba(255,61,90,.75)}
+.tcbk2.r-X > .hlx{inset:-4.5px;padding:4.5px;background:conic-gradient(from var(--hx,0deg),#ff5a6a,#ffd84a,#5dff9b,#4da3ff,#c56bff,#ff5a6a);-webkit-mask:linear-gradient(#000,#000) content-box exclude,linear-gradient(#000,#000);-webkit-mask-composite:xor;mask:linear-gradient(#000,#000) content-box exclude,linear-gradient(#000,#000);filter:drop-shadow(0 0 5px rgba(255,255,255,.6))}
+/* pierre de rareté au-dessus du bandeau : couleur ET forme */
+.kb .gem{position:absolute;left:50%;top:calc(72% - 2cqi);width:13cqi;height:13cqi;translate:-50% -100%;z-index:2;filter:drop-shadow(0 0 2.4cqi var(--gc)) drop-shadow(0 .5cqi .6cqi #000a)}
+.kb .gem svg{width:100%;height:100%;display:block;overflow:visible}
+.kb .gem :is(path,circle){stroke:#fff;stroke-opacity:.7;stroke-width:1}
+/* ouverture : cartes plus espacées */
+.tcopen .tcrow{gap:18px}.tcopen .tcrow > *{flex-basis:calc((100% - 72px) / 5)}
+.tcopen .tcrow.many{gap:12px}.tcopen .tcrow.many > *{flex-basis:calc((100% - 48px) / 5)}
+@media (max-width:640px){.tcopen .tcrow > *{flex-basis:calc((100% - 36px) / 3)}.tcopen .tcrow.many{gap:12px}.tcopen .tcrow.many > *{flex:0 0 calc((100% - 24px) / 3)}}
+.tcbk2 .sp{position:absolute;left:calc(8% + var(--i) * 12%);bottom:-4px;width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 6px 2px #ff3d5a;opacity:0}
+.tcbk2.r-X .sp{box-shadow:0 0 6px 2px hsl(calc(var(--i) * 45) 100% 65%)}
+@property --hx{syntax:"<angle>";inherits:false;initial-value:0deg}
+/* halo sur les cartes : seulement dans les boosters (ouverture et grande scène) ; ailleurs les cartes gardent leurs contours (20 oct.) */
+:is(.tcopen,.tccine) .tc:not(.no).r-P{--hc:#e9edf3;--hg:rgba(230,234,240,.5);--hb:5px}
+:is(.tcopen,.tccine) .tc:not(.no).r-R{--hc:#4da3ff;--hg:rgba(77,163,255,.7);--hb:6px}
+:is(.tcopen,.tccine) .tc:not(.no).r-E{--hc:#b07cff;--hg:rgba(176,124,255,.75);--hb:7px;--hb2:12px}
+:is(.tcopen,.tccine) .tc:not(.no).r-L{--hc:#ffc93a;--hg:rgba(255,201,58,.75);--hb:8px;--hb2:13px}
+:is(.tcopen,.tccine) .tc:not(.no).r-M{--hc:#ff3d5a;--hg:rgba(255,61,90,.8);--hb:8px;--hb2:14px}
+:is(.tcopen,.tccine) .tc:not(.no):is(.r-P,.r-R,.r-E,.r-L,.r-M){filter:drop-shadow(0 0 1.2px var(--hc)) drop-shadow(0 0 1.2px var(--hc)) drop-shadow(0 0 var(--hb) var(--hg))}
+:is(.tcopen,.tccine) .tc:not(.no).r-X{filter:drop-shadow(0 0 1.4px #fff) drop-shadow(0 0 1.4px #7de3ff) drop-shadow(0 0 8px #c56bff)}
+:is(.tcopen,.tccine) .tc:is(.r-L,.r-M,.r-X){box-shadow:none}
+@media (prefers-reduced-motion:no-preference){
+  .tcbk2.r-E > .hlx{animation:hlp 2.4s ease-in-out infinite}
+  .tcbk2.r-L > .hlx{animation:hlp 1.8s ease-in-out infinite}
+  .tcbk2.r-M > .hlx{animation:hlp 1.1s ease-in-out infinite}
+  .tcbk2.r-X > .hlx{animation:hlx 3s linear infinite}
+  .tcbk2 .sp{animation:hls 2.2s ease-out infinite;animation-delay:calc(var(--i) * -.27s)}
+  :is(.tcopen,.tccine) .tc.hlon:not(.no).r-E{animation:hlq 2.4s ease-in-out infinite}
+  :is(.tcopen,.tccine) .tc.hlon:not(.no).r-L{animation:hlq 1.8s ease-in-out infinite}
+  :is(.tcopen,.tccine) .tc.hlon:not(.no).r-M{animation:hlq 1.1s ease-in-out infinite}
+  :is(.tcopen,.tccine) .tc.hlon:not(.no).r-X{animation:hlqx 3s linear infinite}
+}
+@keyframes hlp{50%{filter:brightness(1.55);transform:scale(1.015)}}
+@keyframes hlx{to{--hx:360deg}}
+@keyframes hls{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateY(-170px) translateX(6px)}}
+@keyframes hlq{50%{filter:drop-shadow(0 0 1.6px var(--hc)) drop-shadow(0 0 1.6px var(--hc)) drop-shadow(0 0 var(--hb2) var(--hg))}}
+@keyframes hlqx{0%,100%{filter:drop-shadow(0 0 1.4px #fff) drop-shadow(0 0 1.4px #ff5a6a) drop-shadow(0 0 8px #ff5a6a)}25%{filter:drop-shadow(0 0 1.4px #fff) drop-shadow(0 0 1.4px #ffd84a) drop-shadow(0 0 9px #ffd84a)}50%{filter:drop-shadow(0 0 1.4px #fff) drop-shadow(0 0 1.4px #5dff9b) drop-shadow(0 0 8px #5dff9b)}75%{filter:drop-shadow(0 0 1.4px #fff) drop-shadow(0 0 1.4px #4da3ff) drop-shadow(0 0 9px #c56bff)}}
+</style>
+<script>
+// dos d'une carte de booster : teinte, motif doré, kanji et nom de l'univers ; halo selon la rareté
+const TC_BKU = {op: "#ff5a36", db: "#ff9f1c", na: "#ff8a1c", jjk: "#a98bff", ds: "#3fc9a0", mha: "#ffd84a", mix: "#f5c518"};
+const TC_BKP = (() => { const s = {
+  op: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="16"><path d="M0 12q4-8 8 0t8 0 8 0 8 0M0 4q4-8 8 0t8 0 8 0 8 0" fill="none" stroke="#fff" stroke-width="1"/></svg>',
+  db: '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"><path d="M8 2l1.5 3.4 3.7.3-2.8 2.4.9 3.6L8 9.8 4.7 11.7l.9-3.6L2.8 5.7l3.7-.3z" fill="#fff"/><circle cx="23" cy="21" r="5" fill="none" stroke="#fff" stroke-width=".9"/><circle cx="23" cy="21" r="1.4" fill="#fff"/></svg>',
+  na: '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26"><path d="M13 13m0-1.6a1.6 1.6 0 1 1-1.6 1.6 3.2 3.2 0 1 1 3.2 3.2 4.8 4.8 0 1 1-4.8-4.8 6.4 6.4 0 1 1 6.4 6.4" fill="none" stroke="#fff" stroke-width="1"/></svg>',
+  jjk: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="34"><g fill="none" stroke="#fff" stroke-width="1"><rect x="6" y="3" width="10" height="27" rx="1"/><path d="M8.5 8h5M8.5 12h5M11 15v7M8.5 19h5"/></g></svg>',
+  ds: '<svg xmlns="http://www.w3.org/2000/svg" width="20.8" height="24"><path d="M10.4 0v12M0 6l10.4 6 10.4-6M0 18l10.4-6 10.4 6M10.4 12v12M0 6v12M20.8 6v12" fill="none" stroke="#fff" stroke-width=".9"/></svg>',
+  mha: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><circle cx="4" cy="4" r="2" fill="#fff"/><circle cx="12" cy="12" r="2" fill="#fff"/><circle cx="12" cy="4" r=".9" fill="#fff"/><circle cx="4" cy="12" r=".9" fill="#fff"/></svg>',
+  mix: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z" fill="none" stroke="#fff" stroke-width=".9"/></svg>'};
+  const o = {}; for (const k in s) o[k] = `url('data:image/svg+xml,${encodeURIComponent(s[k])}')`; return o; })();
+const TC_BKLOGO = '<svg class="lg" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3l40.7 23.5v47L50 97 9.3 73.5v-47z" fill="var(--lga)"/><path d="M50 12l32.9 19v38L50 88 17.1 69V31z" fill="var(--lgb)"/><rect x="31" y="28" width="11" height="44" rx="2.5" fill="var(--lga)"/><rect x="58" y="28" width="11" height="44" rx="2.5" fill="var(--lga)"/><path d="M27 60l46-21v10L27 70z" fill="var(--lgc)"/></svg>';
+const TC_GEM = {P: ['<circle cx="12" cy="12" r="7.5"/>', "#ffffff", "#b9c0cc", "#e9edf3"], R: ['<path d="M12 3l8 9-8 9-8-9z"/>', "#9fd0ff", "#2f7fe0", "#4da3ff"],
+  E: ['<path d="M12 3l8.5 5v8L12 21l-8.5-5V8z"/>', "#e2ccff", "#8a4fe8", "#b07cff"], L: ['<path d="M12 2.5l2.8 6.1 6.6.7-5 4.5 1.4 6.5L12 17l-5.8 3.3 1.4-6.5-5-4.5 6.6-.7z"/>', "#fff1b3", "#e8a514", "#ffc93a"],
+  M: ['<path d="M3.5 18l-1-10 5 4 4.5-7 4.5 7 5-4-1 10z"/>', "#ffb3be", "#d61f3c", "#ff3d5a"], X: ['<path d="M12 1.5l2.2 6.2 6.3-2.2-3.9 5.5 5.4 3.6-6.6.4.8 6.5L12 17l-4.2 4.5.8-6.5-6.6-.4 5.4-3.6-3.9-5.5 6.3 2.2z"/>', "", "", "#7de3ff"]};
+let TC_GEMN = 0;
+const tcGem = r => { const g = TC_GEM[r]; if (!g) return ""; const id = "tcg" + (++TC_GEMN);
+  const st = r === "X" ? '<stop offset="0" stop-color="#ff5a6a"/><stop offset=".3" stop-color="#ffd84a"/><stop offset=".55" stop-color="#5dff9b"/><stop offset=".8" stop-color="#4da3ff"/><stop offset="1" stop-color="#c56bff"/>' : `<stop offset="0" stop-color="${g[1]}"/><stop offset="1" stop-color="${g[2]}"/>`;
+  return `<span class="gem" style="--gc:${g[3]}"><svg viewBox="0 0 24 24"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${st}</linearGradient></defs><g fill="url(#${id})">${g[0]}</g></svg></span>`; };
+function tcBackU(r, o = {}){
+  const u = TC_BKU[o.u] ? o.u : "mix", P = TC_PACKS[u] || TC_PACKS.mix, tag = o.btn ? "button" : "div";
+  const sp = r === "M" || r === "X" ? Array.from({length: 8}, (_, i) => `<i class="sp" style="--i:${i}"></i>`).join("") : "";
+  return `<${tag} class="tcbk2 r-${r} ${o.cls || ""}" ${o.attr || ""} style="${o.style || ""}"><i class="hlx" aria-hidden="true">${sp}</i>`
+    + `<span class="kb" aria-hidden="true" style="--t:${TC_BKU[u]};--pat:${TC_BKP[u]}"><i class="kwv"></i><i class="khl"></i><i class="kfr"><i class="kq q1"></i><i class="kq q2"></i><i class="kq q3"></i><i class="kq q4"></i></i>`
+    + `<span class="vH"><i class="vH1"></i><i class="vH2"></i><i class="vH3"></i><span class="vHl">${TC_BKLOGO}</span></span><b class="kj">${P[1]}</b>${tcGem(r)}`
+    + `<span class="kbd"><span class="kwd">HANKO</span><span class="ksb">${esc((u === "mix" ? "Hanko" : P[0]).toUpperCase())}</span></span><i class="ksh"></i></span></${tag}>`;
+}
+// reflet holo sous le doigt (dos seulement, très léger)
+document.addEventListener("pointermove", e => { const k = e.target.closest && e.target.closest(".kb"); if (!k) return; const r = k.getBoundingClientRect(); k.style.setProperty("--px", ((e.clientX - r.left) / r.width * 100) + "%"); k.style.setProperty("--py", ((e.clientY - r.top) / r.height * 100) + "%"); k.classList.add("klit"); clearTimeout(k._lt); k._lt = setTimeout(() => k.classList.remove("klit"), 900); }, {passive: true});
+// pulsation des halos seulement pour les cartes Épique ou mieux visibles à l'écran (fluide même avec une grande collection)
+(() => { if (!("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(x => x.target.classList.toggle("hlon", x.isIntersecting)), {rootMargin: "60px"});
+  const SEL = ".tcopen .tc:is(.r-E,.r-L,.r-M,.r-X),.tccine .tc:is(.r-E,.r-L,.r-M,.r-X)", seen = new WeakSet();
+  const scan = n => { if (n.nodeType !== 1) return; if (n.matches(SEL) && !seen.has(n)){ seen.add(n); io.observe(n); } n.querySelectorAll && n.querySelectorAll(SEL).forEach(e => { if (!seen.has(e)){ seen.add(e); io.observe(e); } }); };
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(scan); }).observe(document.body || document.documentElement, {childList: true, subtree: true});
+  scan(document.body || document.documentElement); })();
+</script>
 
 </body>
 </html>
