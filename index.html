@@ -11661,7 +11661,9 @@ function tcOpening(key, got){
     if ((got.secs || []).length) mid.insertAdjacentHTML("afterbegin", `<p class="osec" style="--sc:${TC_SECRET.find(x => x[0] === got.secs[0])[4]}">${got.secs.map(k => { const sx = TC_SECRET.find(x => x[0] === k); return `<i>${sx[2]}</i>Booster ${sx[1]} : ${sx[5]}`; }).join(" · ")}</p>`);
     mid.insertAdjacentHTML("afterbegin", `<p class="osum">${[nw && nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : ""), nf && nf + " nouvelle" + (nf > 1 ? "s" : "") + " version" + (nf > 1 ? "s" : ""), dup && dup + " doublon" + (dup > 1 ? "s" : "") + " (+" + gain + " ◆ si recyclé" + (dup > 1 ? "s" : "") + ")"].filter(Boolean).join(", ")}</p><p class="obest">Meilleure carte : ${esc(got[bk].n)}${got[bk].f && got[bk].f !== "H" ? " · " + TC_FIN[got[bk].f][1] : ""}</p>${(TC_ORDER.indexOf(got[bk].r) >= 3 || (got[bk].f && got[bk].f !== "H")) ? tcOddsOf(got[bk], key).replace('class="odds"', 'class="odds oodds"') : ""}`);
     mid.insertAdjacentHTML("beforeend", `<span class="oxn">×${got.packs || 1}</span><p class="tcxp">+${got.xp} XP${got.ups.map(([l, tt]) => ` · <b>Niveau ${l} : booster ${TC_T[tt].n} offert</b>`).join("")}</p>`);
-    bot.innerHTML = `<button class="primary" id="tcAgain" ${have || s.gems >= price ? "" : "disabled"}>Ouvrir un autre${have ? `<small>${have} en stock</small>` : `<small>${price} ◆</small>`}</button><button id="tcSwap">Changer de booster</button><button id="tcColl">Voir la collection</button>`;
+    bot.innerHTML = `<div class="oend"><button class="primary" id="tcAgain" ${have || s.gems >= price ? "" : "disabled"}>Ouvrir un autre${have ? `<small>${have} en stock</small>` : `<small>${price} ◆</small>`}</button>
+      <div class="ogrid"><button id="tcColl"><i aria-hidden="true">札</i>Ma collection</button><button id="tcShare2"><i aria-hidden="true">↗</i>Partager</button></div>
+      <button class="ghost oexit" id="tcSwap">Terminer · retour aux Cartes</button></div>`;   /* 19 oct. 2026 : fin d'ouverture simplifiée (une action principale, deux raccourcis, une sortie claire) */
     $("#tcSwap").onclick = () => { TC_TAB = "packs"; end(); }; $("#tcColl").onclick = () => { TC_TAB = "album"; end(); };
     $("#tcAgain").onclick = () => { const s = tcLoad(); if (!((s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0))){ if (s.gems < price) return; s.gems -= price; tcGive(s, key); tcSave(s); } TC_PICK = (tcLoad().packs[key] || 0) > 0 ? key : "free"; TC_TAB = "packs"; TC_SUB = "mine"; O.remove(); tcRender(); $("#tcOpen")?.click(); };
     const st = tcLoad(); O.querySelector(".otop .ost").innerHTML = `<span>${tcStock(st)} booster${tcStock(st) > 1 ? "s" : ""}</span><span>${st.gems} ◆</span>`;
@@ -12933,9 +12935,9 @@ function pfBody(name, tag, c, o = {}){ const all = tcCards(), pf = pfClean(c.pf)
     vit: () => c.show ? `<div class="pfvit vs-${pf.vs} sl-${pf.sl}">${vtShowcase(c.show)}</div><p class="small" style="margin:-8px 0 12px">${c.unl || 0}/${VT.length} cartes de visite débloquées</p>` : "",
     stats: () => `<div class="frstats"><div><b>${c.g || 0}</b><span>Parties</span></div><div><b style="color:var(--ok)">${c.w || 0}</b><span>Victoires</span></div><div><b style="color:var(--danger)">${c.l || 0}</b><span>Défaites</span></div><div><b>${ratio}</b><span>Ratio V/D</span></div><div class="frws"><b>${wsIcon(c.run || 0, 26)}${c.run || 0}</b><span>Série en cours · record ${c.best || 0}</span></div></div>
       <p class="small">Victoires, défaites et série : parties en ligne uniquement. ${(c.modes || []).length ? "Jeux les plus joués : " + c.modes.map(([k, n]) => `<b style="color:var(--text)">${esc(k)}</b> (${n})`).join(" · ") : ""}${top ? ` · Carte la plus tirée : <b style="color:var(--text)">${esc(top.n)}</b> (×${c.top[1]})` : ""}</p>`,
-    rec: () => (c.rec || []).length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><div class="frrec">${c.rec.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(String(v))}</span>`).join("")}</div>` : "",
+    rec: () => !(c.rec || []).length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><p class="pfnote">${o.me ? "Tu n'as" : "Pas"} encore de record dans les jeux Connaissance (Perso pixelisé, Silhouettes…)${o.me ? "" : " pour " + esc(name)}.</p>` : (c.rec || []).length ? `<div class="tierh" style="--tc:var(--accent)">Records</div><div class="frrec">${c.rec.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(String(v))}</span>`).join("")}</div>` : "",
     col: () => `<div class="tierh" style="--tc:var(--accent)">Collection <small>${nOwn}/${c.n || all.length} cartes · ${c.v === false ? "modifiée à la main, non vérifiée" : "vérifiée ✔"}</small></div>` + (c.hc ? `<p class="pfnote">Le détail de cette collection est privé.</p>`
-      : `<div class="tcchips">${[...TC_ORDER].reverse().map(r => `<button class="r-${r}" disabled>${TC_R[r][0]} ${by(r)}</button>`).join("")}</div><details><summary class="small" style="cursor:pointer;margin:6px 0 10px">Voir ${o.me ? "mes" : "ses"} ${own.length} cartes</summary><div class="tcgrid">${own.map(([n, fin]) => { const x = all.find(y => y.no === n); return x ? tcCard(x, {f: fin}) : ""; }).join("")}</div></details>`),
+      : `<div class="tcchips pfchips">${[...TC_ORDER].reverse().map(r => `<button type="button" class="r-${r}" data-pff="${r}" aria-pressed="false" ${by(r) ? "" : "disabled"}>${TC_R[r][0]} ${by(r)}</button>`).join("")}</div><details class="pfcol"><summary class="small" style="cursor:pointer;margin:6px 0 10px">Voir ${o.me ? "mes" : "ses"} ${own.length} cartes</summary><div class="tcgrid">${own.map(([n, fin]) => { const x = all.find(y => y.no === n); return x ? tcCard(x, {f: fin}) : ""; }).join("")}</div></details>`),
     uni: () => c.hc ? "" : `<div class="tierh" style="--tc:var(--accent)">Univers</div><div class="pfuni">${Object.keys(TC_PACKS).filter(u => u !== "mix").map(u => { const tot = all.filter(x => x.u === u).length, n = own.filter(([no]) => all.find(x => x.no === no)?.u === u).length; return `<div><b>${TC_PACKS[u][0]}</b><i><u style="width:${tot ? n / tot * 100 : 0}%"></u></i><span>${n}/${tot}</span></div>`; }).join("")}</div>`,
     tr: () => { const l = (c.tr || []).map(n => all.find(x => x.no === n)).filter(Boolean); return l.length ? `<div class="tierh" style="--tc:var(--accent)">Doublons à échanger <small>${l.length}</small></div><div class="pftr">${l.slice(0, 40).map(x => `<span>${esc(x.n)}</span>`).join("")}${l.length > 40 ? `<span>+${l.length - 40}</span>` : ""}</div>` : ""; }};
   return pfHead(name, tag, c, pf, o) + (o.bar || "") + pf.bl.map(k => B[k] ? B[k]() : "").join(""); }
@@ -13589,6 +13591,82 @@ function hvTuto(i){ const n = HV_TUTO.length, [ill, t, p] = HV_TUTO[i];
         at && at.insertAdjacentHTML("afterend", `<div class="frinv" id="frInvS"><span>Inviter un ami :</span>${L.slice(0, 10).map(f => `<button data-frs="${esc(f.id)}">${frsOnline(f) ? "● " : ""}${esc(f.name)}</button>`).join("")}</div>`);
         document.querySelectorAll("[data-frs]").forEach(b => b.onclick = () => invSend(L.find(f => f.id === b.dataset.frs), b)); };
       if (FRS.data) go(); else frsLoad().then(go); } catch {} };
+})();
+</script>
+
+<style>
+/* 19 oct. 2026 : les images ne se « sortent » plus (glisser à la souris, appui long sur téléphone) ; seule l'image de partage reste enregistrable */
+img{-webkit-user-drag:none;-webkit-touch-callout:none}
+.tc,.tc *,.tcview,.tccine,.vcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+img.shareimg{-webkit-touch-callout:default;-webkit-user-drag:auto}
+/* partage du tirage (comme chez Kyara) */
+#tcShare{border-radius:999px;padding:12px 20px;font-weight:800}
+.tcsharebox .shareimg{display:block;width:100%;max-width:420px;margin:0 auto 12px;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.tcsharebox .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.tcopen .oend{display:grid;gap:10px;width:min(100%,380px);margin:0 auto}
+.tcopen .oend #tcAgain{width:100%;display:flex;justify-content:center;align-items:center;gap:10px;padding:15px 20px;font-size:17px}
+.tcopen .oend .ogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tcopen .oend .ogrid button{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 10px;border-radius:14px;font-weight:700;font-size:14.5px}
+.tcopen .oend .ogrid i{font-style:normal;font-size:17px;opacity:.85}
+.tcopen .oend .oexit{border-radius:999px;padding:11px 16px;font-size:14px;color:var(--muted);text-align:center;justify-content:center;display:flex}
+</style>
+<script>
+// pas de glisser-déposer ni de menu « enregistrer l'image » sur les cartes et les images du jeu
+document.addEventListener("dragstart", e => { if (e.target.closest && !e.target.closest("img.shareimg") && (e.target.tagName === "IMG" || e.target.closest(".tc,.tcview,.tccine"))) e.preventDefault(); }, true);
+document.addEventListener("contextmenu", e => { if (e.target.closest && !e.target.closest("img.shareimg") && (e.target.tagName === "IMG" || e.target.closest(".tc,.tcview,.tccine"))) e.preventDefault(); }, true);
+
+/* ---- Partager son tirage : une image 1080×1350 avec les cartes obtenues, à envoyer à ses amis ---- */
+(() => {
+  const RANK = ["C", "P", "R", "E", "L", "M", "X", "S"];
+  const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  const rr = (g, x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+  const fit = (g, t, max, size, weight, fam) => { let s = size; do { g.font = `${weight} ${s}px ${fam}`; s -= 1; } while (g.measureText(t).width > max && s > 10); return t; };
+  async function render(){
+    const all = tcCards(), els = [...document.querySelectorAll(".tcopen .tcrow > .tc, .tcopen .tcrow > * > .tc")].filter((e, i, a) => a.indexOf(e) === i);
+    let L = els.map(e => { const no = +((e.textContent.match(/#(\d{3})/) || [])[1] || 0), c = all.find(x => x.id === e.dataset.tc) || all.find(x => x.no === no), im = e.querySelector("img:not(.g)"); return c ? {c, src: im && im.getAttribute("src"), fin: ([...e.classList].find(k => /^f-/.test(k)) || "").slice(2), ar: e.classList.contains("arp")} : null; }).filter(Boolean);
+    if (!L.length) return null;
+    L.sort((a, b) => RANK.indexOf(b.c.r) - RANK.indexOf(a.c.r)); const more = Math.max(0, L.length - 10); L = L.slice(0, 10);
+    const W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const g = cv.getContext("2d");
+    const top = L[0].c, acc = (TC_BKC[top.r] || ["#ff1e2d"])[0];
+    const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#0b0a10"); bg.addColorStop(1, "#050507"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    const glow = g.createRadialGradient(W / 2, 420, 40, W / 2, 420, 700); glow.addColorStop(0, acc + "55"); glow.addColorStop(1, "transparent"); g.fillStyle = glow; g.fillRect(0, 0, W, H);
+    g.textAlign = "center"; g.fillStyle = "#fff"; g.font = "900 64px Unbounded, Inter, system-ui, sans-serif"; g.fillText("Mon tirage Hanko", W / 2, 118);
+    const title = (document.querySelector(".tcopen.res h2, .tcopen.res .otop b")?.textContent || "Booster").replace(/[^\p{Script=Latin}\d\s'’·-]/gu, "").replace(/\s+/g, " ").trim() || "Booster";
+    g.fillStyle = acc; g.font = "700 30px 'JetBrains Mono', Inter, monospace"; g.fillText(fit(g, (title + " · meilleure carte : " + top.n).toUpperCase(), W - 120, 30, 700, "'JetBrains Mono', Inter, monospace"), W / 2, 170);
+    const n = L.length, cols = n <= 3 ? n : n <= 6 ? 3 : 5, rows = Math.ceil(n / cols), gap = cols === 5 ? 18 : 28;
+    const cw = Math.min(n <= 3 ? 300 : 300, (W - 120 - gap * (cols - 1)) / cols), ch = cw * 666 / 450, areaH = H - 230 - 150, scale = Math.min(1, (areaH - gap * (rows - 1)) / (rows * ch));
+    const w = cw * scale, h = ch * scale, y0 = 230 + (areaH - (rows * h + gap * (rows - 1))) / 2;
+    for (let i = 0; i < n; i++){ const {c, src, fin, ar} = L[i], row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols), x0 = (W - (inRow * w + gap * (inRow - 1))) / 2, x = x0 + (i - row * cols) * (w + gap), y = y0 + row * (h + gap);
+      const col = (TC_BKC[c.r] || ["#888"])[0];
+      g.save(); g.shadowColor = col; g.shadowBlur = RANK.indexOf(c.r) >= 3 ? 34 : 12; rr(g, x, y, w, h, 18); g.fillStyle = "#111"; g.fill(); g.restore();
+      g.save(); rr(g, x, y, w, h, 18); g.clip(); const im = src ? await load(src) : null;
+      if (im){ const s = Math.max(w / im.naturalWidth, h / im.naturalHeight), iw = im.naturalWidth * s, ih = im.naturalHeight * s; g.drawImage(im, x + (w - iw) / 2, y + (h - ih) * .12, iw, ih); }
+      const sh = g.createLinearGradient(0, y + h * .55, 0, y + h); sh.addColorStop(0, "transparent"); sh.addColorStop(1, "rgba(0,0,0,.88)"); g.fillStyle = sh; g.fillRect(x, y, w, h);
+      g.textAlign = "left"; g.fillStyle = "#fff"; fit(g, c.n, w - 28, Math.round(w * .11), 900, "Unbounded, Inter, sans-serif"); g.fillText(c.n, x + 14, y + h - 44 * (w / 300));
+      g.fillStyle = col; g.font = `700 ${Math.round(w * .068)}px 'JetBrains Mono', Inter, monospace`; g.fillText((TC_R[c.r][0] + (ar ? " · AR" : fin && TC_FIN[fin] ? " · " + TC_FIN[fin][0] : "")).toUpperCase(), x + 14, y + h - 18 * (w / 300)); g.restore();
+      g.save(); rr(g, x + 1.5, y + 1.5, w - 3, h - 3, 17); g.lineWidth = 3; g.strokeStyle = col; g.stroke(); g.restore(); }
+    g.textAlign = "center"; g.fillStyle = "#9a96a0"; g.font = "600 28px Inter, system-ui, sans-serif";
+    g.fillText((more ? `+ ${more} autre${more > 1 ? "s" : ""} carte${more > 1 ? "s" : ""} · ` : "") + "Viens ouvrir tes boosters sur Hanko", W / 2, H - 92);
+    g.fillStyle = "#fff"; g.font = "700 30px 'JetBrains Mono', monospace"; g.fillText("traginnicolas-create.github.io/mercato-anime", W / 2, H - 46);
+    return cv; }
+  async function share(btn){
+    const t = btn.innerHTML; btn.disabled = true; btn.textContent = "Image…";
+    try { const cv = await render(); if (!cv) return;
+      const blob = await new Promise(r => cv.toBlob(r, "image/png")), file = new File([blob], "hanko-tirage.png", {type: "image/png"}), text = "Regarde mon tirage sur Hanko !";
+      if (navigator.canShare && navigator.canShare({files: [file]})){ try { await navigator.share({files: [file], title: "Mon tirage Hanko", text}); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+      // pas de partage natif (ordinateur, ou page intégrée) : l'image s'affiche, à enregistrer ou copier
+      const url = URL.createObjectURL(blob), M = document.createElement("div"); M.className = "tcview tcsharebox"; M.style.cssText = "display:grid;place-items:center;align-content:center;overflow:auto;background:rgba(5,5,7,.92)";
+      M.innerHTML = `<div style="width:min(100%,460px);padding:16px"><img class="shareimg" src="${url}" alt="Mon tirage Hanko"><p class="small" style="text-align:center;margin:0 0 12px;color:#bbb">Enregistre l'image (appui long sur téléphone) ou copie-la, puis envoie-la à tes amis.</p><div class="row"><a href="${url}" download="hanko-tirage.png" style="border-radius:999px;padding:10px 18px;text-decoration:none;font-weight:700;background:var(--accent);color:#fff">Télécharger</a><button id="tcShCopy" style="border-radius:999px">Copier l'image</button><button class="ghost" id="tcShX" style="border-radius:999px">Fermer</button></div></div>`;
+      document.body.appendChild(M);
+      const close = () => { M.remove(); URL.revokeObjectURL(url); }; M.querySelector("#tcShX").onclick = close; M.onclick = e => { if (e.target === M) close(); };
+      M.querySelector("#tcShCopy").onclick = async e => { try { await navigator.clipboard.write([new ClipboardItem({"image/png": blob})]); e.currentTarget.textContent = "Copiée ✔"; } catch { e.currentTarget.textContent = "Copie impossible ici"; } };
+    } finally { btn.disabled = false; btn.innerHTML = t; } }
+  // bouton « Partager mon tirage » sous les cartes obtenues
+  const add = () => { const O = document.querySelector(".tcopen.res"); if (!O) return; const b2 = O.querySelector("#tcShare2"); if (b2){ if (!b2.onclick) b2.onclick = e => share(e.currentTarget); return; } if (O.querySelector("#tcShare")) return; const row = O.querySelector(".tcopen .tcrow"); if (!row) return;
+    const anchor = [...O.querySelectorAll("button")].find(b => /Ouvrir un autre|Changer de booster|Retour/.test(b.textContent) && b.offsetParent && b.getBoundingClientRect().top > row.getBoundingClientRect().top) || row;
+    anchor.insertAdjacentHTML(anchor === row ? "afterend" : "beforebegin", `<div style="display:flex;justify-content:center;margin:14px 0"><button id="tcShare" class="ghost">↗ Partager mon tirage</button></div>`);
+    O.querySelector("#tcShare").onclick = e => share(e.currentTarget); };
+  let q = 0; new MutationObserver(() => { if (!q) q = requestAnimationFrame(() => { q = 0; add(); }); }).observe(document.body, {childList: true, subtree: true});
 })();
 </script>
 
@@ -17163,6 +17241,16 @@ body.tclock{position:fixed;left:0;right:0;width:100%}
       let f = parseFloat(getComputedStyle(nm).fontSize), min = Math.max(6, f * .6); while (nm.scrollWidth > nm.clientWidth + 1 && f > min){ f -= .25; nm.style.fontSize = f + "px"; } }); };
   new MutationObserver(() => { if (!q) q = requestAnimationFrame(fit); }).observe(document.body, {childList: true, subtree: true});
   addEventListener("resize", () => { document.querySelectorAll(".tc .nm[data-fw]").forEach(e => delete e.dataset.fw); fit(); }); })();
+</script>
+<style>/* 19 oct. 2026 : profil, collection : les pastilles de rareté filtrent les cartes (un clic : cette rareté seule ; re-clic : toutes) */
+.pfchips button[data-pff]{cursor:pointer}.pfchips button[data-pff][aria-pressed="true"]{color:#fff;box-shadow:inset 0 0 0 2px currentColor;background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.pfcol .tcgrid > .tc.pfoff{display:none}
+</style>
+<script>
+document.addEventListener("click", e => { const b = e.target.closest(".pfchips button[data-pff]"); if (!b) return; const box = b.closest(".pfchips"), on = b.getAttribute("aria-pressed") !== "true", d = box.nextElementSibling;
+  box.querySelectorAll("button[data-pff]").forEach(x => x.setAttribute("aria-pressed", x === b && on ? "true" : "false"));
+  if (d && d.matches("details.pfcol")){ d.open = true; d.querySelectorAll(".tcgrid > .tc").forEach(t => t.classList.toggle("pfoff", on && !t.classList.contains("r-" + b.dataset.pff)));
+    const s = d.querySelector("summary"); if (s){ s.dataset.t = s.dataset.t || s.textContent; { const t = b.textContent.trim(), n = +(t.match(/\d+$/) || [0])[0], rar = t.replace(/\s+\d+$/, ""); s.textContent = on ? `${/ mes /.test(s.dataset.t) ? "Mes" : "Ses"} cartes ${rar} (${n})` : s.dataset.t; } } } });
 </script>
 
 </body>
