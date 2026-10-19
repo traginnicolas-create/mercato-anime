@@ -10707,7 +10707,13 @@ function tcVersOf(c){ const a = tcAlt(c), r = TC_ORDER.indexOf(c.r), top = r >= 
   if (r >= 3 && r <= 5 && a[0]) v.push("A"); if (top && a[2]) v.push("B"); if (a[6]) v.push("C"); if (top && a[5]) v.push("S"); if (top && a[1] && !TC_NOK.includes(c.n)) v.push("K"); if (r === 5 && a[3]) v.push("G"); if (c.u === "op" && TC_BOUNTY[c.n]) v.push("W"); if (TC_LEG.includes(c.n) && a[4]) v.push("Z"); return v; }
 const tcBestFin = (s, c) => ["Z", "G", "K", "S", "W", "C", "B", "A", "H"].find(k => s.fin[c.id] && s.fin[c.id][k]) || "";
 // une carte que le joueur n'a pas porte un « ? » (ajouté ici pour les trois gabarits : normal, luxe, objet)
-const tcCard = (c, o = {}) => { const h = tcCard0(c, o); return o.no ? h.replace(/<\/(button|div)>\s*$/, `<span class="qm" aria-hidden="true">?</span></$1>`) : h; };
+// cadres de cartes achetés avec l'argent de la Carrière (19 oct. 2026) : posés sur MES cartes (collection, fiche), jamais sur celles des autres
+const TC_FRAMES = {champ: ["Cadre de champion", "極", "#f7c64a"], leg: ["Cadre de légende", "伝", "#ff4d6a"], uni: ["Cadre de l'univers", "界", ""]};
+const TC_FRM = (() => { let t = 0, m = {}; const f = () => { if (Date.now() - t > 1500){ try { m = ((lsGet(TC_KEY, {}) || {}).frames || {}).on || {}; } catch { m = {}; } t = Date.now(); } return m; }; f.reset = () => { t = 0; }; return f; })();
+const tcCard = (c, o = {}) => { let h = tcCard0(c, o); if (o.no) return h.replace(/<\/(button|div)>\s*$/, `<span class="qm" aria-hidden="true">?</span></$1>`);
+  const fk = o.x ? TC_FRM()[c.id] : null, F = fk && TC_FRAMES[fk];
+  if (F){ const col = F[2] || (TC_PACKS[c.u] ? TC_PACKS[c.u][2] : "#fff"); h = h.replace(/^(\s*<(?:button|div)[^>]*class=")/, `$1frm frm-${fk} `).replace(/^(\s*<(?:button|div)[^>]*?)(style=")/, `$1$2--frm:${col};`); if (!/--frm:/.test(h)) h = h.replace(/^(\s*<(?:button|div))/, `$1 style="--frm:${col}"`); h = h.replace(/<\/(button|div)>\s*$/, `<i class="tcfrm" aria-hidden="true">${F[1]}</i></$1>`); }
+  return h; };
 // cadrage propre à la carte (c.fr, calculé par tools/frame_cards.py) : seulement pour l'illustration de base, versions Normale et Holo
 const tcFr = (c, src, f) => c.fr && (!f || f === "H") && src === c.i ? ` style="inset:${c.fr[1]}% auto auto ${c.fr[0]}%;width:${c.fr[2]}%;height:${c.fr[3]}%;max-width:none${c.fr[4] ? ";box-shadow:0 -80px 0 0 " + c.fr[4] : ""}"` : "";
 // AR façon Pokémon (15 oct. 2026) : scène de l'animé bord à bord, sans cadre, nom et niveau en haut, technique et une ligne en bas (data/ar_text.json → TCARTXT).
@@ -14517,7 +14523,7 @@ const CR_DIV = [["Bronze", "銅", "#c98a4b"], ["Argent", "銀", "#cfd6e0"], ["Or
 const CR_BAND = [[0, .30], [.16, .48], [.36, .68], [.56, .86], [.74, 1]];
 // économie : réglée par simulation (tools/sim-carriere.js), voir CLAUDE.md
 // Les sommes suivent l'échelle du vrai marché des transferts du football (demande de l'utilisateur) : un personnage moyen vaut 1 à 20M, un crack plusieurs centaines de millions, jamais un milliard.
-const CR_ECO = {start: 6, pay: [2, 4, 8, 14, 22], loss: .5, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .38, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
+const CR_ECO = {start: 6, pay: [2, 4, 8, 14, 22], loss: .5, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .38, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 100], [.90, 50], [.80, 20]]};   /* prestige DÉPENSÉ à l'achat d'une star (19 oct. 2026) */
 // noms des clubs IA : des groupes qui existent dans chaque univers (leur effectif, lui, est tiré selon la division)
 const CR_NAMES = {
   op: ["Pirates du Clown", "Baroque Works", "Équipage d'Arlong", "Marine de Loguetown", "Pirates de Krieg", "Pirates du Chat Noir", "CP9", "Thriller Bark", "Pirates de Foxy", "Brigade de Wapol", "Pirates de Bellamy", "Garnison d'Impel Down", "Armée de Dressrosa", "Pirates du Soleil", "Germa 66", "Pirates aux Cent Bêtes", "Marine de G-5", "Tontattas de Green Bit"],
@@ -14823,8 +14829,13 @@ function crSeasonEnd(S){
   S.season++; S.out = {}; crNewSeason(S); crMissions(S); return out;
 }
 // achat à prix fixe, vente, enchère gagnée
-function crCanBuy(S, i, price){ return S.squad.length >= CR_MAXSQ ? "Effectif complet" : S.prestige < crGate(S.u, i) ? `Prestige ${crGate(S.u, i)} requis` : S.money < price ? "Pas assez d'argent" : ""; }
-function crBuy(S, i, price, viaBid){ if (crCanBuy(S, i, price)) return false; S.money -= price; S.squad.push(i); S.shop = S.shop.filter(x => x !== i); if (S.stat) S.stat.buy = Math.max(S.stat.buy || 0, price); crMis(S, "buy"); if (viaBid) crMis(S, "bid"); return true; }
+/* stars (19 oct. 2026, validé) : une star ne se recrute qu'à partir du rang où son niveau apparaît, et elle COÛTE du prestige (dépensé à l'achat,
+   à regagner ensuite : victoires, montées, titres). Coûts : 20 / 50 / 100 de prestige selon le niveau de la star (simulé : titre en 364 à 421 combats). */
+const crRankName = r => CR_DIV[Math.floor(r / 3)][0] + " " + (r % 3 + 1);
+function crGateRank(S, i){ if (!crGate(S.u, i) || !CR_RANK.on) return 0; const q = crQ(S.u, i), r = Math.ceil((q - CR_RANK.w / 2 - CR_RANK.m0) / (CR_RANK.m1 - CR_RANK.m0) * 14 - CR_RANK.ahead); return Math.max(0, Math.min(14, r)); }
+function crGateNo(S, i){ const g = crGate(S.u, i); if (!g) return ""; const r = crGateRank(S, i); return crRank(S) < r ? `Dès ${crRankName(r)}` : S.prestige < g ? `Prestige ${g} requis` : ""; }
+function crCanBuy(S, i, price){ return S.squad.length >= CR_MAXSQ ? "Effectif complet" : crGateNo(S, i) || (S.money < price ? "Pas assez d'argent" : ""); }
+function crBuy(S, i, price, viaBid){ if (crCanBuy(S, i, price)) return false; S.money -= price; S.prestige = Math.max(0, S.prestige - crGate(S.u, i));   /* le prestige d'une star est dépensé */ S.squad.push(i); S.shop = S.shop.filter(x => x !== i); if (S.stat) S.stat.buy = Math.max(S.stat.buy || 0, price); crMis(S, "buy"); if (viaBid) crMis(S, "bid"); return true; }
 function crSell(S, i){ if (S.squad.length <= 5 || !S.squad.includes(i)) return 0; const v = crR5(crSellVal(S, i)); S.squad = S.squad.filter(x => x !== i); delete S.out[i]; S.money += v; if (S.stat) S.stat.sale = Math.max(S.stat.sale || 0, v); return v; }
 // ce qu'il faut miser pour battre les clubs IA sur la vedette du jour (sert au robot de simulation et à l'achat immédiat)
 const crLotInc = p => Math.max(1, crR5(p * .06));
@@ -14836,7 +14847,7 @@ function crCount(S, res){ const r = crLoad(); if (!r.cap || r.cap.d !== tcDay())
   return true; }
 
 /* ---------- affichage ---------- */
-const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div"; return `<${tag} class="crc ${o.cls || ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${img(c)}<span class="tr">${TIER[c.t]}</span><i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(c.n)}" data-crinf="${i}">i</i></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
+const crTile = (S, i, o = {}) => { const c = crCard(S.u, i), tag = o.btn ? "button" : "div", lk = S.squad && S.squad.includes(i) && S.look && S.look.on && S.look.on[i] ? crLookSrc(S, i, S.look.on[i]) : null; return `<${tag} class="crc ${o.cls || ""} ${lk ? "look" : ""}" data-t="${c.t}" ${o.attr || ""}><div class="pic">${lk ? `<img src="${lk}" alt="">` : img(c)}<span class="tr">${TIER[c.t]}</span><i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(c.n)}" data-crinf="${i}">i</i></div><span class="pw ${o.up ? "up" : ""}">${c.p + (o.up === true ? 4 : o.up || 0)}</span>${o.ord ? `<span class="ord">${o.ord}</span>` : ""}<div class="t"><b>${esc(c.n)}</b>${o.sub ?? "Valeur " + crVal(S.u, i) + "M"}</div>${o.foot || ""}</${tag}>`; };
 function crShow(){ const r = crLoad(); if (!CR.S && r.cur && r.saves[r.cur]) CR.S = r.saves[r.cur]; if (!CR.S) return; crFix(CR.S); CR.view = "hub"; show("cr"); crRender(); const S = CR.S; if (S.tuto >= 5) gtBackOffer("carriere", (S.stat.played || 0) < 40, () => crTourStart(S, true)); }
 const CR_TUTO = [
   ["Ton objectif", "Tu diriges un club qui part de tout en bas. Gagne des matchs, monte de division en division (Bronze, Argent, Or, Diamant, Élite) et deviens champion d'Élite.", "Compris"],
@@ -14854,8 +14865,8 @@ function crRender(){
   let body = "";
   if (CR.view === "compose") body = crComposeHTML(S);
   else if (CR.view === "result") body = crResultHTML(S);
-  else { const tabs = [["match", S.cup.pend ? "Coupe" : "Match"], ["squad", "Effectif", S.squad.length + "/" + CR_MAXSQ], ["shop", bmOpen(S) ? `Mercato<i class="bmw" aria-label="Marché noir ouvert">!</i>` : "Mercato"], ["table", "Classement"], ["mis", "Missions", S.mis.filter(m => !m.done).length || ""], ["club", "Palmarès"]];
-    body = `<div class="crtabs" role="tablist">${tabs.map(([k, t, n]) => `<button role="tab" class="${CR.tab === k ? "sel" : ""} ${S.tuto < 5 && CR_TUTO[S.tuto][3] === k && CR.tab !== k ? "crpulse" : ""}" data-crtab="${k}">${t}${n ? `<small>${n}</small>` : ""}</button>`).join("")}</div>${({match: crMatchHTML, squad: crSquadHTML, shop: crShopHTML, table: crTableHTML, mis: crMisHTML, club: crClubHTML})[CR.tab](S)}`; }
+  else { const tabs = [["match", S.cup.pend ? "Coupe" : "Match"], ["squad", "Effectif", S.squad.length + "/" + CR_MAXSQ], ["shop", bmOpen(S) ? `Mercato<i class="bmw" aria-label="Marché noir ouvert">!</i>` : "Mercato"], ["table", "Classement"], ["mis", "Missions", S.mis.filter(m => !m.done).length || ""], ["prize", "Récompenses"], ["club", "Palmarès"]];
+    body = `<div class="crtabs" role="tablist">${tabs.map(([k, t, n]) => `<button role="tab" class="${CR.tab === k ? "sel" : ""} ${S.tuto < 5 && CR_TUTO[S.tuto][3] === k && CR.tab !== k ? "crpulse" : ""}" data-crtab="${k}">${t}${n ? `<small>${n}</small>` : ""}</button>`).join("")}</div>${({match: crMatchHTML, squad: crSquadHTML, shop: crShopHTML, table: crTableHTML, mis: crMisHTML, prize: crPrizeHTML, club: crClubHTML})[CR.tab](S)}`; }
   const tu = false && S.tuto < 5 && (CR.view === "compose" ? S.tuto === 3 : CR.view === "hub" && S.tuto !== 3) ? CR_TUTO[S.tuto] : null;
   el.style.setProperty("--dc", dv[2]);
   const _crKeep = crImgPool(el);   /* 19 oct. 2026 : images déjà décodées réutilisées (sinon elles clignotent sur téléphone à chaque toucher) */
@@ -14946,7 +14957,7 @@ function crFicheHTML(S, i){ const u = S.u, F = crFicheData(u, i), a = F.a, inf =
   return `<div class="crfiche" role="dialog" aria-modal="true" aria-label="Fiche de ${esc(a.n)}"><div class="crfin">
     <button class="crfx" aria-label="Fermer">✕</button>
     <div class="crfh"><div class="crfp">${img(a)}</div><div><p class="crfe">${esc(TIER[a.t] || "")}${ln.length ? " · " + esc(ln.join(" · ")) : ""}</p><h2>${esc(a.n)}</h2>
-      <div class="crfs"><div><small>Niveau</small><b>${a.p}</b></div><div><small>Valeur</small><b>${crVal(u, i)}M</b></div><div><small>Prestige requis</small><b>${crGate(u, i) || "—"}</b></div></div></div></div>
+      <div class="crfs"><div><small>Niveau</small><b>${a.p}</b></div><div><small>Valeur</small><b>${crVal(u, i)}M</b></div><div><small>Star</small><b>${crGate(u, i) ? `${crGate(u, i)} prestige · dès ${crRankName(crGateRank(CR.S || {u, div: 0, sub: 0}, i))}` : "—"}</b></div></div></div></div>
     ${inf ? `<p class="crfbio">${esc(inf[0])}</p><dl class="crfdl"><dt>${u === "op" ? "Fruit du démon" : "Pouvoirs"}</dt><dd>${esc(inf[1])}</dd>${u === "op" ? `<dt>Haki</dt><dd>${esc(hakiText(u, a))}</dd>` : ""}</dl>` : ""}
     ${F.koOn.length ? `<h3>Victoire immédiate</h3><p class="crfk">Met K.-O. d'un coup ${F.koOn.length > 4 ? F.koOn.length + " adversaires" : esc(F.koOn.join(", "))} (si son niveau le permet).</p>` : ""}
     ${F.atk.length || F.atkD.length ? `<h3>Atouts en combat</h3><ul class="crfl">${F.atk.map(x => li(x)).join("")}${duelL(F.atkD)}</ul>` : `<h3>Atouts en combat</h3><p class="crfk">Aucun pouvoir particulier : il compte sur son niveau.</p>`}
@@ -14965,9 +14976,39 @@ const fightSummaryCr = r => { const f = r.g.fight; return `${f.survivors.length}
 function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.${CR_ANTI.wage ? ` <b>Salaires : ${crMoney(S, crWages(S))} par match</b> (plus l'effectif vaut cher, plus il coûte).` : ""}</p></div></div>
     <div class="crgrid">${[...S.squad].sort((a, b) => crCard(u, b).p - crCard(u, a).p).map(i => crTile(S, i, {cls: S.out[i] ? "off" : "", sub: S.out[i] ? `Indisponible (${S.out[i]} match${S.out[i] > 1 ? "s" : ""})` : "Valeur " + crVal(u, i) + "M",
       foot: S.squad.length > 5 ? (CR.ask === "s" + i ? `<button class="crbuy red" data-crsell="${i}" data-ok="1">Confirmer +${crR5(crSellVal(S, i))}M</button>` : `<button class="crbuy ghost" data-crsell="${i}">Vendre</button>`) : ""})).join("")}</div>`; }
+/* ---------- récompenses (19 oct. 2026) : l'argent de la Carrière s'échange contre des boosters de cartes (limite hebdomadaire) et des cadres de cartes.
+   Prix à l'échelle de l'Élite (la caisse y dépasse vite le milliard) ; 3 boosters par semaine dont 1 Divin au plus, pour toutes les carrières du compte. */
+const CR_PRIZE = {packs: [[1, 150], [2, 400], [3, 1200]], week: 3, divine: 1, look: {A: 250, B: 250, C: 250, K: 400, G: 600, Z: 900}};
+const crWeek = () => Math.floor((Date.now() - new Date(2026, 0, 5).getTime()) / 6048e5);   // semaine commencée le lundi
+const crPrizeUse = s => { const w = crWeek(); if (!s.crShop || s.crShop.w !== w) s.crShop = {w, n: 0, d: 0}; return s.crShop; };
+function crPrizeHTML(S){ const s = tcLoad(), q = crPrizeUse(s), pu = TC_PACKS[S.u] ? S.u : "mix", left = CR_PRIZE.week - q.n;
+  const pk = ([tier, price]) => { const k = tcKey(pu, tier), divi = tier === 3, no = left <= 0 ? "Limite de la semaine atteinte" : divi && q.d >= CR_PRIZE.divine ? "1 Divin par semaine" : S.money < price ? "Pas assez d'argent" : "";
+    return `<div class="crprz"><div class="pk">${typeof tcPouch3D === "function" ? tcPouch3D(k, "sm") : ""}</div><div><b>${esc(tcName(k))}</b><small>${TC_T[tier].g} garantie</small></div><button class="${no ? "ghost" : "primary"}" data-crprz="${tier}" ${no ? "disabled" : ""}>${no || crMoney(S, price)}</button></div>`; };
+  return `<div class="crbox"><div class="crrow"><div><h3>Boosters de cartes <small style="font-weight:600;color:var(--muted)">${Math.max(0, left)}/${CR_PRIZE.week} cette semaine</small></h3><p>Ton argent de Carrière contre des boosters de ${esc(TC_PACKS[pu][0])}. Trois par semaine au plus (un seul Divin), toutes carrières confondues ; nouvelle semaine le lundi.</p></div></div>${CR_PRIZE.packs.map(pk).join("")}</div>
+    ${crLookHTML(S)}
+    <p class="small" style="margin:10px 0 0">Caisse : ${crMoney(S, S.money)}</p>`; }
+document.addEventListener("click", e => { const b = e.target.closest("[data-crprz]"); if (!b || b.disabled || !CR.S) return; const S = CR.S, s = tcLoad();
+  if (b.dataset.crprz){ const tier = +b.dataset.crprz, price = CR_PRIZE.packs.find(x => x[0] === tier)[1], q = crPrizeUse(s); if (q.n >= CR_PRIZE.week || (tier === 3 && q.d >= CR_PRIZE.divine) || S.money < price) return;
+    S.money -= price; q.n++; if (tier === 3) q.d++; const k = tcKey(TC_PACKS[S.u] ? S.u : "mix", tier); tcGive(s, k); tcSave(s); crSave(); try { tabDot(); SFX.play("win"); frToast(`${tcName(k)} ajouté à tes boosters`, "Ouvrir", () => tcShow("packs")); } catch {} return crRender(); }
+  });
+/* apparences (19 oct. 2026, demande de l'utilisateur) : avec l'argent de la Carrière, un personnage de l'équipe prend l'illustration d'une de ses versions
+   de carte (AR, Red Blood, UR, Légende). Purement esthétique et seulement dans la Carrière : rien n'est ajouté à la collection de cartes. */
+const CR_LOOKN = {A: "AR", B: "AR 2", C: "AR 3", K: "Red Blood", G: "UR", Z: "Légende"}, CR_LOOKIMG = {};
+function crLookCard(S, i){ const c = crCard(S.u, i); return (typeof tcCards === "function" ? tcCards() : []).find(x => x.u === S.u && x.n === c.n) || null; }
+function crLookSrc(S, i, v){ const k = S.u + "|" + i + "|" + v; if (CR_LOOKIMG[k] === undefined){ let src = null; try { const card = crLookCard(S, i); if (card){ const sv = h => (h.match(/<img[^>]*src="([^"]+)"/) || [])[1] || ""; const a = sv(tcCard0(card, {f: v})), b = sv(tcCard0(card, {f: ""})); src = a && a !== b ? a : null; } } catch {} CR_LOOKIMG[k] = src; } return CR_LOOKIMG[k]; }
+const crLookVers = (S, i) => { const card = crLookCard(S, i); return card ? tcVersOf(card).filter(v => CR_PRIZE.look[v] && crLookSrc(S, i, v)) : []; };
+function crLookHTML(S){ const L = S.look || {owned: [], on: {}}, l = crByP(S, S.squad, true).filter(i => crLookVers(S, i).length);
+  return `<div class="crbox" style="margin-top:12px"><div class="crrow"><div><h3>Apparences de tes combattants</h3><p>Fais jouer un combattant avec l'illustration d'une de ses versions de carte (AR, Red Blood…). Purement esthétique, seulement dans la Carrière : la carte n'est pas ajoutée à ta collection.</p></div></div>
+    ${l.length ? l.slice(0, 12).map(i => `<div class="crprz"><div class="pk"><img class="crlookp" src="${crLookSrc(S, i, (L.on || {})[i]) || (img(crCard(S.u, i)).match(/src="([^"]+)"/) || [])[1] || ""}" alt=""></div><div><b>${esc(crCard(S.u, i).n)}</b><small>${(L.on || {})[i] ? "Apparence : " + CR_LOOKN[L.on[i]] : "Apparence normale"}</small></div>
+      <div class="crlookb">${crLookVers(S, i).map(v => { const k = i + "|" + v, own = L.owned.includes(k), on = (L.on || {})[i] === v; return `<button class="${on ? "primary" : "ghost"}" data-crlook="${k}" ${!own && S.money < CR_PRIZE.look[v] ? "disabled" : ""}>${CR_LOOKN[v]}${own ? (on ? " ✔" : "") : " · " + crMoney(S, CR_PRIZE.look[v])}</button>`; }).join("")}</div></div>`).join("") : `<p class="muted">Aucun de tes combattants n'a encore de version spéciale (AR, Red Blood…).</p>`}</div>`; }
+document.addEventListener("click", e => { const b = e.target.closest("[data-crlook]"); if (!b || b.disabled || !CR.S) return; const S = CR.S, [i0, v] = b.dataset.crlook.split("|"), i = +i0;
+  S.look = S.look || {owned: [], on: {}}; S.look.on = S.look.on || {}; const k = i + "|" + v;
+  if (!S.look.owned.includes(k)){ const p = CR_PRIZE.look[v]; if (S.money < p) return; S.money -= p; S.look.owned.push(k); S.look.on[i] = v; try { SFX.play("win"); } catch {} }
+  else if (S.look.on[i] === v) delete S.look.on[i]; else S.look.on[i] = v;
+  crSave(); crRender(); });
 function crShopHTML(S){ const u = S.u, L = S.lot;
   const lot = !L ? `<p class="muted" style="margin:0">Aucune vedette sur le marché aujourd'hui.</p>` : L.done ? `<p class="muted" style="margin:0">${esc(L.done)}</p>`
-    : `<div class="crlot">${crTile(S, L.i)}<div><p class="muted" style="margin:0 0 4px">Mise de départ</p><div class="big">${crMoney(S, L.start)}</div><p class="small" style="margin:6px 0 10px">Valeur estimée ${crMoney(S, crVal(u, L.i))}. Les ${S.clubs.length} clubs de ta division peuvent surenchérir.${crGate(u, L.i) > S.prestige ? ` <b style="color:#ff8f9a">Prestige ${crGate(u, L.i)} requis.</b>` : ""}</p>
+    : `<div class="crlot">${crTile(S, L.i)}<div><p class="muted" style="margin:0 0 4px">Mise de départ</p><div class="big">${crMoney(S, L.start)}</div><p class="small" style="margin:6px 0 10px">Valeur estimée ${crMoney(S, crVal(u, L.i))}. Les ${S.clubs.length} clubs de ta division peuvent surenchérir.${crGate(u, L.i) ? ` <b style="color:${crGateNo(S, L.i) ? "#ff8f9a" : "var(--accent)"}">Star : ${crGateNo(S, L.i) || `coûte ${crGate(u, L.i)} prestige (dépensé)`}.</b>` : ""}</p>
         <div class="row"><button class="primary" id="crBid" ${crCanBuy(S, L.i, L.start) ? "disabled" : ""}>Entrer dans l'enchère</button><button id="crNow" ${crCanBuy(S, L.i, L.now) ? "disabled" : ""}>Achat immédiat · ${L.now}M</button></div>
         ${crCanBuy(S, L.i, L.start) ? `<p class="small" style="margin-top:8px">${crCanBuy(S, L.i, L.start)}.</p>` : ""}</div></div>`;
   return bmBanner(S) + (bmOpen(S) ? "" : `<div class="crbox"><div class="crrow"><div><h3>Boutique · prix fixe</h3><p>Des personnages du niveau de ta division, renouvelés après chaque match. Caisse : ${crMoney(S, S.money)}.</p></div></div>
@@ -17514,6 +17555,23 @@ document.addEventListener("click", e => { const b = e.target.closest(".pfchips b
   if (d && d.matches("details.pfcol")){ d.open = true; d.querySelectorAll(".tcgrid > .tc").forEach(t => t.classList.toggle("pfoff", on && !t.classList.contains("r-" + b.dataset.pff)));
     const s = d.querySelector("summary"); if (s){ s.dataset.t = s.dataset.t || s.textContent; { const t = b.textContent.trim(), n = +(t.match(/\d+$/) || [0])[0], rar = t.replace(/\s+\d+$/, ""); s.textContent = on ? `${/ mes /.test(s.dataset.t) ? "Mes" : "Ses"} cartes ${rar} (${n})` : s.dataset.t; } } } });
 </script>
+<style>/* 19 oct. 2026 : récompenses de Carrière (boosters, cadres) et cadres posés sur les cartes */
+.crprz{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.crprz .pk{width:64px;display:grid;place-items:center}.crprz .pk .pk3d{width:56px}.crprz b{display:block}.crprz small{color:var(--muted);font-size:12.5px;line-height:1.35}
+.crprz button{border-radius:999px;padding:9px 14px;white-space:nowrap;font-size:13.5px}
+@media (max-width:480px){.crprz{grid-template-columns:52px minmax(0,1fr)}.crprz button{grid-column:1/-1;justify-self:stretch}}
+.crfrm{display:grid;place-items:center;width:44px;height:62px;border-radius:7px;box-shadow:inset 0 0 0 3px var(--frm),0 0 14px color-mix(in srgb,var(--frm) 60%,transparent);background:#111}
+.crfrm i{font-style:normal;font:900 15px var(--title);color:var(--frm)}
+.tc.frm{box-shadow:0 0 0 3px var(--frm),0 0 0 5px color-mix(in srgb,var(--frm) 30%,#000),0 0 22px color-mix(in srgb,var(--frm) 55%,transparent)!important}
+.tc.frm-leg{box-shadow:0 0 0 3px var(--frm),0 0 0 6px #120308,0 0 0 8px color-mix(in srgb,var(--frm) 60%,#000),0 0 30px color-mix(in srgb,var(--frm) 65%,transparent)!important}
+.tc .tcfrm{position:absolute;z-index:12;top:-1px;left:50%;transform:translateX(-50%);padding:1px 7px 2px;border-radius:0 0 7px 7px;background:var(--frm);color:#0b0a0e;font:900 10px/1.2 var(--title);font-style:normal;pointer-events:none}
+</style>
+<style>/* apparences de Carrière */
+.crprz .pk .crlookp{width:48px;height:68px;object-fit:cover;object-position:50% 15%;border-radius:7px}
+.crlookb{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.crlookb button{border-radius:999px;padding:7px 11px;font-size:12.5px}
+@media (max-width:480px){.crlookb{grid-column:1/-1;justify-content:flex-start}}
+.crc.look .pic{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 70%,#fff)}
+</style>
 
 </body>
 </html>
