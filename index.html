@@ -343,7 +343,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
   </section>
   <section class="cat" id="cat2">
     <div class="cath"><div class="eyebrow">Famille 02 <i>· 知識</i></div><h2>Connaissance</h2><small>Tu crois tout connaître ? Voyons ce qu'il te reste quand l'image est floue et le chrono lancé.</small></div>
-    <div class="gcards"><button class="mode" data-g="guess"><i class="k" aria-hidden="true">像</i><b>Perso pixelisé</b><span>L'image se précise seconde après seconde. À quel moment le reconnais-tu ?</span></button><button class="mode" data-g="sil"><i class="k" aria-hidden="true">影</i><b>Silhouettes</b><span>Rien qu'une ombre. Sauras-tu mettre un nom dessus ?</span></button><button class="mode" data-g="top"><i class="k" aria-hidden="true">十</i><b>Top 10</b><span>Dix noms d'un classement officiel. Combien en retrouves-tu ?</span></button><button class="mode" data-g="fx"><i class="k" aria-hidden="true">顔</i><b>Visages superposés</b><span>Plusieurs visages fondus en un seul. Qui se cache dedans ?</span></button></div>
+    <div class="gcards"><button class="mode" data-g="guess"><i class="k" aria-hidden="true">像</i><b>Perso pixelisé</b><span>L'image se précise seconde après seconde. À quel moment le reconnais-tu ?</span></button><button class="mode" data-g="sil"><i class="k" aria-hidden="true">影</i><b>Silhouettes</b><span>Rien qu'une ombre. Sauras‑tu mettre un nom dessus ?</span></button><button class="mode" data-g="top"><i class="k" aria-hidden="true">十</i><b>Top 10</b><span>Dix noms d'un classement officiel. Combien en retrouves-tu ?</span></button><button class="mode" data-g="fx"><i class="k" aria-hidden="true">顔</i><b>Visages superposés</b><span>Plusieurs visages fondus en un seul. Qui se cache dedans ?</span></button></div>
   </section>
   <section class="cat" id="cat3">
     <div class="cath"><div class="eyebrow">Famille 03 <i>· 協力</i></div><h2>Complicité</h2><small>Ici, personne ne perd tout seul. On gagne en pensant pareil, on rit quand on se trompe.</small></div>
@@ -12380,7 +12380,7 @@ function frShow(msg){
     ${typeof msg === "string" && msg && FR_TAB === "list" ? `<p class="frok">${esc(msg)}</p>` : ""}
     ${typeof msg === "string" && msg && FR_TAB === "req" ? `<p class="frok">${esc(msg)}</p>` : ""}
     ${FR_TAB === "add" ? add() : FR_TAB === "share" ? share() : FR_TAB === "req" && SV ? reqs() : list()}
-    <p class="small frfoot">${SV ? "Une demande attend la réponse de ton ami, même s'il n'est pas connecté. Pastille verte : en ligne en ce moment. Profil, invitation et échange se font quand vous avez tous les deux le site ouvert." : "Crée un compte (menu ☰) pour envoyer des demandes d'ami et voir quand tes amis sont en ligne. Sans compte, profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert."}</p></div>`;
+    <p class="small frfoot">${SV ? "Une demande ou une invitation attend ton ami même s'il n'est pas connecté (une invitation reste valable 5 minutes). Son profil s'affiche à tout moment. Pastille verte : en ligne en ce moment. L'échange de cartes se fait quand vous avez tous les deux le site ouvert." : "Crée un compte (menu ☰) pour envoyer des demandes d'ami et voir quand tes amis sont en ligne. Sans compte, profil, invitation et échange ne marchent que si vous avez tous les deux le site ouvert."}</p></div>`;
   M.classList.remove("hidden"); M.scrollTo(0, 0);
   const close = () => { M.classList.add("hidden"); M.innerHTML = ""; frHome(); };
   $("#frX").onclick = close; M.onclick = e => { if (e.target === M) close(); };
@@ -13480,6 +13480,105 @@ function hvTuto(i){ const n = HV_TUTO.length, [ill, t, p] = HV_TUTO[i];
     <div class="hv-row"><button class="ghost" id="hvTS">${i ? "Précédent" : "Passer"}</button><button class="primary" id="hvTN">${i < n - 1 ? "Suivant" : "C'est parti !"}</button></div></div>`, () => lsSet("mercato-hv-tuto", true));
   M.querySelector("#hvTS").onclick = () => { if (i) hvTuto(i - 1); else close(); };
   M.querySelector("#hvTN").onclick = () => { if (i < n - 1) hvTuto(i + 1); else close(); }; }
+</script>
+
+<style>
+/* Amis en direct (19 oct. 2026) : invitation reçue en haut de l'écran, « Rejoindre » / « Plus tard » (design validé) */
+.frinvite{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:140;width:min(calc(100% - 24px),520px);display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:#151419;border:1px solid #2c2a33;box-shadow:0 14px 40px rgba(0,0,0,.55);animation:frinvIn .35s cubic-bezier(.2,.8,.2,1)}
+.frinvite > i{font-style:normal;font-size:20px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 22%,#151419);color:var(--accent);flex:none}
+.frinvite > div{flex:1 1 180px;min-width:0;display:grid;gap:2px}.frinvite b{font-size:14.5px;overflow-wrap:break-word}.frinvite small{color:#9a96a0;font-size:12.5px}
+.frinvite .row{display:flex;gap:8px;flex:none;margin-left:auto}.frinvite button{border-radius:999px;padding:8px 14px;font-size:13.5px}
+@keyframes frinvIn{from{opacity:0;transform:translate(-50%,-14px)}}
+.frrow .row [data-frinv]{white-space:nowrap}
+</style>
+<script>
+/* =====================================================================
+   AMIS EN DIRECT (19 oct. 2026), avec amis-direct-supabase.sql :
+   - les demandes d'ami arrivent tout de suite (Supabase Realtime sur friend_requests, filtré par les règles d'accès) ;
+   - le profil (players.profile) est enregistré sur le serveur : « Voir » l'affiche même quand l'ami n'est pas connecté ;
+   - « Inviter » : invitation enregistrée (game_invites, valable 5 min), reçue en direct, « Rejoindre » ou « Plus tard ».
+   Le code de partie reste disponible pour les autres joueurs.
+   ===================================================================== */
+(() => {
+  const AM = {ch: null, last: "", lastT: 0, shown: new Set()};
+  // ma fiche publique, allégée pour tenir dans 8 Ko (réglages de confidentialité du profil déjà appliqués par frCard)
+  const prof = () => { try { const c = frCard(); c.own = (c.own || []).map(([n, f]) => f ? n + ":" + f : String(n)).join(","); c.tr = (c.tr || []).slice(0, 60).join(","); c.rec = (c.rec || []).slice(0, 12);   // listes en texte : un tableau JSON de 400 cartes dépasse 8 Ko dans la base
+      if (JSON.stringify(c).length > 7400){ c.ownN = c.own.length; c.own = []; c.hc = 1; } return c; } catch { return null; } };
+  const base = frsHello;
+  frsHello = async function(){ const r = await base(); try { if (r && frsOn()){ const p = prof(), j = p && JSON.stringify(p);
+        if (j && (j !== AM.last || Date.now() - AM.lastT > 6e5)){ const {error} = await CP.sb.from("players").update({profile: p}).eq("user_id", CP.user.id); if (!error){ AM.last = j; AM.lastT = Date.now(); } } } } catch {} return r; };
+
+  // « Voir » : si l'ami n'est pas en ligne, son profil enregistré s'affiche tout de suite (plus d'attente de 9 s)
+  const view = frView;
+  frView = async function(id){
+    try { const f = FRS.data && FRS.data.friends.find(x => x.id === id);
+      if (f && frsOn()){ const {data} = await CP.sb.from("players").select("profile,last_seen").eq("user_id", f.uid).maybeSingle();
+        if (data && data.profile && data.profile.id){ const P = data.profile;
+          if (typeof P.own === "string") P.own = P.own ? P.own.split(",").map(x => { const [n, f] = x.split(":"); return f ? [+n, f] : [+n]; }) : [];
+          if (typeof P.tr === "string") P.tr = P.tr ? P.tr.split(",").map(Number) : []; const L = frList(), e = L.find(x => x.id === id);
+          lsSet(FR_KEY, e ? L.map(x => x.id === id ? {...x, last: data.profile, seen: Date.parse(data.last_seen)} : x) : [...L, {id, name: f.name, tag: f.tag, last: data.profile, seen: Date.parse(data.last_seen)}].slice(0, 80));
+          if (!frsOnline(f)){ const keep = NET.room; NET.room = null; try { return view(id); } finally { NET.room = keep; } } } } } catch {}
+    return view(id); };
+
+  // ---- invitations ----
+  const gameName = () => { const h = document.querySelector("#lobbyBox h2"); return (h ? h.textContent : "une partie").replace(/\s+/g, " ").trim().slice(0, 40) || "une partie"; };
+  const myCode = () => { const c = document.querySelector("#lobbyBox .code"), t = c && c.textContent.trim(); return /^[A-Z0-9]{4}$/.test(t || "") ? t : null; };
+  async function invSend(f, btn){
+    const code = myCode();
+    if (!code){ frToast("Ouvre d'abord une partie en ligne (« Créer une partie »), puis invite ton ami : il rejoindra ton salon d'un geste."); return; }
+    btn.disabled = true; btn.textContent = "Envoi…";
+    const {error} = await CP.sb.from("game_invites").insert({from_id: CP.user.id, to_id: f.uid, game: gameName(), code});
+    if (error){ btn.disabled = false; btn.textContent = /Trop/.test(error.message) ? "Trop d'invitations" : "Échec"; return; }
+    try { frInvite(f.id, code, {set textContent(v){}, set disabled(v){}}); } catch {}   // s'il a le site ouvert sans compte connecté : ancien canal
+    btn.textContent = "Invité ✔"; SFX.play("pop"); }
+  window.invSend = invSend;
+
+  async function invShow(r){
+    if (!r || AM.shown.has(r.id) || r.status !== "pending" || Date.parse(r.expires_at) < Date.now() || r.to_id !== CP.user?.id) return;
+    AM.shown.add(r.id);
+    let who = (FRS.data && FRS.data.friends.find(x => x.uid === r.from_id)) || null;
+    if (!who){ try { const {data} = await CP.sb.from("players").select("handle").eq("user_id", r.from_id).maybeSingle(); who = data && frParse(data.handle); } catch {} }
+    document.querySelector(".frinvite")?.remove();
+    document.body.insertAdjacentHTML("beforeend", `<div class="frinvite" role="alertdialog" aria-label="Invitation"><i aria-hidden="true">友</i><div><b>${esc(who ? who.id : "Un ami")} t'invite à jouer</b><small>${esc(r.game || "une partie")} · son salon t'attend · <span class="frinvt"></span></small></div><div class="row"><button class="primary" data-a="go">Rejoindre</button><button class="ghost" data-a="no">Plus tard</button></div></div>`);
+    const el = document.querySelector(".frinvite"), end = Date.parse(r.expires_at);
+    const tick = () => { const s = Math.max(0, Math.round((end - Date.now()) / 1000)); const t = el.querySelector(".frinvt"); if (t) t.textContent = s ? `invitation valable encore ${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")}` : "invitation expirée"; if (!s){ clearInterval(iv); setTimeout(() => el.remove(), 2500); } };
+    const iv = setInterval(tick, 1000); tick(); SFX.play("win");
+    el.querySelector('[data-a="no"]').onclick = () => { clearInterval(iv); el.remove(); CP.sb.from("game_invites").update({status: "later"}).eq("id", r.id).then(() => {}, () => {}); };
+    el.querySelector('[data-a="go"]').onclick = () => { clearInterval(iv); el.remove(); CP.sb.from("game_invites").update({status: "joined"}).eq("id", r.id).then(() => {}, () => {});
+      const me = frMe(); try { document.querySelectorAll("#modal").forEach(m => { m.classList.add("hidden"); m.innerHTML = ""; }); } catch {}
+      show("home"); const c = $("#qjCode"), n = $("#qjName"); if (c){ c.value = r.code; if (n && !n.value) n.value = me ? me.name : ""; $("#qjGo") && $("#qjGo").click(); } };
+  }
+  async function invPending(){ if (!frsOn()) return; try { const {data} = await CP.sb.from("game_invites").select("*").eq("to_id", CP.user.id).eq("status", "pending").gt("expires_at", new Date().toISOString()).order("created_at", {ascending: false}).limit(1);
+      if (data && data[0]) invShow(data[0]); } catch {} }
+
+  // ---- temps réel : demandes d'ami et invitations ----
+  function live(){ if (!frsOn() || AM.ch) return; const uid = CP.user.id;
+    try { AM.ch = CP.sb.channel("hanko-amis-" + uid)
+        .on("postgres_changes", {event: "*", schema: "public", table: "friend_requests"}, () => { FRS.data = null; setTimeout(() => frsTick(), 300); })
+        .on("postgres_changes", {event: "INSERT", schema: "public", table: "game_invites", filter: "to_id=eq." + uid}, p => invShow(p.new))
+        .subscribe(); } catch { AM.ch = null; }
+    invPending(); }
+  // déconnexion du compte : on ferme le canal
+  setInterval(() => { if (AM.ch && !frsOn()){ try { CP.sb.removeChannel(AM.ch); } catch {} AM.ch = null; } else if (!AM.ch && frsOn()) live(); }, 3000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") invPending(); });
+
+  // ---- bouton « Inviter » dans la liste d'amis, et dans le salon d'attente ----
+  const show0 = frShow;
+  frShow = function(msg){ const r = show0(msg);
+    try { if (frsOn() && FRS.data){ document.querySelectorAll("#modal .frrow").forEach(row => { const v = row.querySelector(".row [data-frv]"); if (!v || row.querySelector("[data-frinv]")) return;
+          const f = FRS.data.friends.find(x => x.id === v.dataset.frv); if (!f) return;
+          v.insertAdjacentHTML("afterend", `<button data-frinv="${esc(f.id)}" title="${myCode() ? "Inviter dans ton salon" : "Ouvre d'abord une partie en ligne"}">Inviter</button>`);
+          row.querySelector("[data-frinv]").onclick = e => invSend(f, e.currentTarget); }); } } catch {}
+    return r; };
+  const ib = inviteBtn;
+  inviteBtn = function(){ ib();
+    try { if (!frsOn() || !myCode()) return; const go = () => { if (!FRS.data || document.querySelector("#frInvS")) return; const L = FRS.data.friends; if (!L.length) return;
+        document.querySelector("#frInv")?.remove();
+        const at = document.querySelector("#inviteBtn") || document.querySelector("#lobbyBox .code");
+        at && at.insertAdjacentHTML("afterend", `<div class="frinv" id="frInvS"><span>Inviter un ami :</span>${L.slice(0, 10).map(f => `<button data-frs="${esc(f.id)}">${frsOnline(f) ? "● " : ""}${esc(f.name)}</button>`).join("")}</div>`);
+        document.querySelectorAll("[data-frs]").forEach(b => b.onclick = () => invSend(L.find(f => f.id === b.dataset.frs), b)); };
+      if (FRS.data) go(); else frsLoad().then(go); } catch {} };
+})();
 </script>
 
 <style>
@@ -17039,6 +17138,20 @@ body.tclock{position:fixed;left:0;right:0;width:100%}
   const run = () => document.querySelectorAll(".tcopen .tcrow").forEach(fit);
   new MutationObserver(() => requestAnimationFrame(run)).observe(document.body, {childList: true, subtree: true});
   addEventListener("resize", run); })();
+</script>
+<style>/* 19 oct. 2026 : onglets des amis sur téléphone : les 4 tiennent sans couper « Partager » */
+@media (max-width:420px){.frtabs{gap:0}.frtabs button{padding:10px 9px;font-size:13.5px}}
+</style>
+<style>/* 19 oct. 2026 : mots coupés au format téléphone. Noms des petites cartes (profil, échanges, marché…) : plus jamais coupés en plein mot,
+   la taille du nom se réduit jusqu'à tenir (script ci-dessous). Cases « Trophée » de la vitrine : texte plus petit, qui tient dans la case. */
+.tc .nm{overflow-wrap:normal!important;word-break:normal!important;hyphens:none}
+@media (max-width:640px){.vtshow .tro .slot{font-size:8.5px;line-height:1.1;padding:1px;letter-spacing:-.01em;overflow-wrap:normal;word-break:normal}}
+</style>
+<script>
+(() => { let q = 0; const fit = () => { q = 0; document.querySelectorAll(".tc .nm").forEach(nm => { if (nm.closest(".tcopen .tcrow")) return; const w = nm.clientWidth; if (!w || nm.dataset.fw === String(w)) return; nm.dataset.fw = w; nm.style.fontSize = "";
+      let f = parseFloat(getComputedStyle(nm).fontSize), min = Math.max(6, f * .6); while (nm.scrollWidth > nm.clientWidth + 1 && f > min){ f -= .25; nm.style.fontSize = f + "px"; } }); };
+  new MutationObserver(() => { if (!q) q = requestAnimationFrame(fit); }).observe(document.body, {childList: true, subtree: true});
+  addEventListener("resize", () => { document.querySelectorAll(".tc .nm[data-fw]").forEach(e => delete e.dataset.fw); fit(); }); })();
 </script>
 
 </body>
