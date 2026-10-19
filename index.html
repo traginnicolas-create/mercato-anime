@@ -11030,7 +11030,7 @@ function tcRender(){
       <p class="tcsecp">Les plus dures, pour les joueurs très actifs (plusieurs heures par jour) : boosters Divin et Or, gros lots d'éclats. Huit missions tirées chaque mois dans une réserve ; elles changent le 1er du mois.</p><div class="tcms">${mos.map(m => row(m, mo.claimed.includes(m.k), "data-tcmo")).join("")}${bonusRow("Bonus : toutes les missions du mois", "mix:3", dn(mos, mo.claimed), mos.length, mo.bonus, "tcBonusM")}</div>
       <details class="tchelp"><summary>Comment gagner des boosters</summary><p style="margin:8px 0 0"><button class="linkq" data-helpon="tc">Revoir le didacticiel des cartes</button></p><ul class="rules" style="margin-top:8px"><li><b>Gagne une partie</b> : ${TC_GAIN.win} éclats (◆), à dépenser dans la boutique. Les ${TC_GAIN.cap} premières victoires du jour comptent.</li><li><b>Coup de chance</b> : une victoire sur quatre lâche en plus un booster de l'univers joué. Son niveau est tiré au sort : Classique, Argent, Or ou Divin. ${TC_WINCAP} par jour au maximum.</li><li><b>Enchaîne les victoires</b> : chaque victoire de suite ajoute ${TC_GAIN.streak} ◆, 5 % de chance de booster et de meilleures chances d'un bon niveau. La série ne compte que les parties en ligne contre d'autres joueurs : une défaite en ligne la remet à zéro, le solo n'y touche pas.</li><li><b>Bats un record</b> : +${TC_GAIN.record} ◆ et un booster garanti.</li><li><b>Boosters gratuits</b> : un toutes les 45 minutes, jusqu'à ${TC_FREE.max} en réserve.</li><li><b>Niveau de collectionneur</b> : chaque nouvelle carte donne de l'expérience ; chaque niveau offre un booster Argent, Or tous les 5 niveaux, Divin tous les 10.</li><li><b>Doublons</b> : recycle-les en éclats, pour acheter un booster ou une carte précise au <b>marché</b> (onglet Marché).</li></ul></details>`;
   }
-  $("#tcBoard").innerHTML = html;
+  { const keep = typeof crImgPool === "function" ? crImgPool($("#tcBoard")) : null; $("#tcBoard").innerHTML = html; if (keep) crImgReuse($("#tcBoard"), keep); }   /* images réutilisées : pas de clignotement */
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
   if (TC_TAB === "market") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), hvBind());
   document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); });
@@ -13716,6 +13716,18 @@ document.addEventListener("contextmenu", e => { if (e.target.closest && !e.targe
   let q = 0; new MutationObserver(() => { if (!q) q = requestAnimationFrame(() => { q = 0; add(); }); }).observe(document.body, {childList: true, subtree: true});
 })();
 </script>
+<style>/* 19 oct. 2026 : sur téléphone, un appui long ne propose plus d'enregistrer une image ni de sélectionner / copier du texte (ça gênait la navigation).
+   Les champs de saisie gardent leur fonctionnement normal (nom du club, pseudo, recherche…), et l'image de partage du tirage reste enregistrable. */
+@media (hover:none) and (pointer:coarse){
+  html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea,select,[contenteditable="true"],[contenteditable="true"] *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+  img.shareimg{-webkit-touch-callout:default}
+}
+</style>
+<script>
+// menu contextuel (appui long) bloqué sur téléphone, sauf dans les champs de saisie et sur l'image de partage
+if (matchMedia("(hover: none) and (pointer: coarse)").matches) document.addEventListener("contextmenu", e => { const t = e.target; if (t.closest && (t.closest("input,textarea,select,[contenteditable='true']") || t.closest("img.shareimg"))) return; e.preventDefault(); }, true);
+</script>
 
 <style>
 /* Parrainage (19 oct. 2026, sur le modèle de Kyara) : onglet dans la fenêtre Amis */
@@ -14539,6 +14551,18 @@ const crVal = (u, i) => crR5(CR_ECO.valA * Math.pow(CR_ECO.valB, crQ(u, i)));
 const crGate = (u, i) => { const q = crQ(u, i); for (const [lim, pr] of CR_ECO.gate) if (q >= lim) return pr; return 0; };
 const crMoney = (S, v) => `${v}M ${UNI[S.u].cur}`;
 const crWinPay = S => CR_ECO.pay[S.div];
+/* anti boule de neige (19 oct. 2026) — réglé par simulation (tools/sim-lot19.js) :
+   1) une vente ou une offre de rachat ne rapporte jamais plus qu'un très bon joueur de la division (valeur plafonnée au haut de la tranche + 10 %) ;
+   2) une victoire contre un adversaire nettement plus faible rapporte moins (jusqu'à 35 % de la prime) ;
+   3) au-delà de 25 primes de victoire en caisse, les gains des matchs et de fin de saison sont divisés par deux. */
+const CR_ANTI = {capUp: .10, weakLo: .75, weakSpan: .2, weakMin: .35, rich: 25, richK: .5, ease: [.36, .18, .07], resSub: null, resDiv: null};   /* réserve de montée désactivée (19 oct. 2026) : en simulation elle ralentissait le titre de 30 % sans réduire l'abus (joueurs au-dessus de la division : ~2 par carrière avec ou sans) */   /* réserve : prix du meilleur joueur du niveau en montant d'un niveau, prix médian en changeant de division */   /* clubs de Bronze 1 / 2 / 3 un peu plus faibles : un joueur moyen gagne environ un match sur deux au début */
+const crCapVal = S => crR5(CR_ECO.valA * Math.pow(CR_ECO.valB, Math.min(1, CR_BAND[S.div][1] + CR_ANTI.capUp)));
+function crSellVal(S, i){ return Math.min(crVal(S.u, i), crCapVal(S)) * CR_ECO.sell; }
+/* 4) réserve de montée : à chaque montée (niveau ou division), on garde au plus le prix d'un joueur moyen du niveau d'arrivée (prix médian de la tranche) ;
+      le surplus devient du prestige (1 point pour 2 primes de victoire). L'argent ne s'accumule plus d'un niveau à l'autre. */
+function crReserve(S, sub){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), l = P.ix.filter(i => P.q[i] >= lo && P.q[i] <= hi).map(i => crVal(S.u, i)).sort((a, b) => a - b), r = sub ? CR_ANTI.resSub : CR_ANTI.resDiv, k = Array.isArray(r) ? r[S.div] : r;
+  if (!l.length) return crWinPay(S) * 5; return k > 1 ? crR5(l[l.length - 1] * k) : l[Math.min(l.length - 1, Math.floor(l.length * k))]; }   /* k ≤ 1 : quantile des prix du niveau ; k > 1 : k fois le prix du meilleur */
+const crRich = S => S.money > CR_ANTI.rich * crWinPay(S) ? CR_ANTI.richK : 1;
 // n personnages dont le rang est proche de c (avec un peu de hasard), hors liste d'exclus
 function crNear(u, c, n, excl = [], spread = .09){ const P = crPool(u); return P.ix.filter(i => !excl.includes(i)).map(i => [i, Math.abs(P.q[i] - c) + Math.random() * spread]).sort((a, b) => a[1] - b[1]).slice(0, n).map(x => x[0]); }
 function crLoad(){ const r = lsGet(CR_KEY, null); if (!(r && r.v === 1 && r.saves)) return {v: 1, cur: null, saves: {}, cap: {d: "", n: 0}};
@@ -14555,7 +14579,7 @@ const crSub = S => S.sub || 0, crDivN = (S, d = S.div, b = crSub(S)) => CR_DIV[d
 const crUpN = S => crSub(S) < 2 ? CR_SUB.up : S.div < 4 ? 2 : 1, crDnN = S => crSub(S) > 0 ? CR_SUB.down : S.div > 0 ? 2 : 0;
 const crUpTxt = S => crSub(S) < 2 ? `Les ${CR_SUB.up === 2 ? "deux" : CR_SUB.up} premiers montent en ${crDivN(S, S.div, crSub(S) + 1)}` : S.div < 4 ? `Les deux premiers montent en ${crDivN(S, S.div + 1, 0)}` : "Le premier est champion";
 const crDnTxt = S => crDnN(S) === 1 ? ", le dernier redescend" : crDnN(S) === 2 ? ", les deux derniers descendent" : "";
-function crMkClub(S, name, s, rival){ const [lo, hi] = CR_BAND[S.div], c = lo + (hi - lo) * (CR_ECO.clubLo + CR_ECO.clubUp * s - (2 - crSub(S)) * CR_SUB.k), D = DATA[S.u]; return {name, s, rival: !!rival, pts: 0, team: crNear(S.u, c, 5, S.squad).sort((a, b) => D[a].p - D[b].p)}; }
+function crMkClub(S, name, s, rival){ const [lo, hi] = CR_BAND[S.div], c = lo + (hi - lo) * (CR_ECO.clubLo + CR_ECO.clubUp * s - (2 - crSub(S)) * CR_SUB.k - (S.div === 0 ? CR_ANTI.ease[crSub(S)] : 0)),   /* Bronze un peu plus accessible (19 oct. 2026) */ D = DATA[S.u]; return {name, s, rival: !!rival, pts: 0, team: crNear(S.u, c, 5, S.squad).sort((a, b) => D[a].p - D[b].p)}; }
 function crNewSeason(S){
   const names = crShuffle(CR_NAMES[S.u].filter(n => n !== S.rival)).slice(0, 6), str = crShuffle([.02, .2, .38, .55, .72, .9]);
   S.clubs = names.map((n, k) => crMkClub(S, n, str[k]));
@@ -14656,6 +14680,8 @@ function crRuleOk(S, pick){ const r = crRule(S), n = crN(S), u = S.u, av = crByP
   if (r.k === "nostar" && pick.includes(av[av.length - 1])) return `${crCard(u, av[av.length - 1]).n} est suspendu pour ce match`;
   if (r.k === "bench" && pick.filter(i => av.slice(0, 3).includes(i)).length < 2) return "Il faut au moins deux de tes trois plus faibles";
   if (r.k === "cap" && crSum(u, pick) > r.x) return `Niveau cumulé ${crSum(u, pick)} : la limite est ${r.x}`; return ""; }
+/* Forme olympique (19 oct. 2026, solution B validée) : +4 jusqu'à 85 de note, +3 de 86 à 90, +2 de 91 à 95, +1 au-delà, et jamais plus de 100 */
+const crBoostAmt = (u, i) => { const p = crCard(u, i).p; return Math.max(0, Math.min(p <= 85 ? 4 : p <= 90 ? 3 : p <= 95 ? 2 : 1, 100 - p)); };
 // meilleure équipe permise par la règle, du plus faible au plus fort (bouton « Remplir » et robot de simulation)
 function crAutoLineup(S){ const r = crRule(S), n = crN(S), u = S.u; let av = crByP(S, crAvail(S), true); if (r && r.k === "nostar") av = av.slice(1); let pick = av.slice(0, n);
   if (r && r.k === "bench"){ const weak = crByP(S, crAvail(S)).slice(0, 3), two = crByP(S, weak, true).slice(0, 2); pick = [...av.filter(i => !two.includes(i)).slice(0, n - 2), ...two]; }
@@ -14704,16 +14730,31 @@ function crFight(S, mine, boost, opp, oppOrd, rule){
   if (rule && rule.k === "random"){ mine = crShuffle(mine); oo = crShuffle(oo); }
   const af = [crAff(S.u, mine), crAff(S.u, ot)], bonus = (a, i) => a && a.ids.includes(i) ? a.b : 0;
   const g = {u: S.u, mode: "live", id: "cr" + Math.random().toString(36).slice(2, 9), round: 0, cur: null, log: [], over: true, phase: {k: "over"}, opts: {anim: true}, event: null, drawer: 0, aff: af, ot,
-    players: [{name: S.club, budget: 0, team: mine.map(i => [i, 0, -(bonus(af[0], i) + (i === boost ? 4 : 0))])}, {name: opp.name, budget: 0, team: ot.map(i => [i, 0, -bonus(af[1], i)])}], orders: [mine.map((_, k) => k), oo]};
+    players: [{name: S.club, budget: 0, team: mine.map(i => [i, 0, -(bonus(af[0], i) + (i === boost ? crBoostAmt(S.u, i) : 0))])}, {name: opp.name, budget: 0, team: ot.map(i => [i, 0, -bonus(af[1], i)])}], orders: [mine.map((_, k) => k), oo]};
   const keep = G; G = g; let f; try { f = simulateFight(); } finally { G = keep; } g.fight = f; return g;
 }
+/* combats du didacticiel (19 oct. 2026) : les deux premiers combats de chaque carrière sont très serrés mais toujours gagnés, quelle que soit l'équipe.
+   On rejoue le combat en coulisses jusqu'à une victoire avec un seul survivant (sinon la plus courte) ; au besoin l'adversaire est un peu affaibli. */
+const crTutoWin = S => !S.bot && S.season === 1 && S.div === 0 && (S.stat.played || 0) < 2 && !(S.cup && S.cup.pend);
+function crTutoFight(S, mine, boost, opp, rule){ const P = crPool(S.u), D = DATA[S.u], q = mine.reduce((a, i) => a + P.q[i], 0) / mine.length;
+  opp.team = crNear(S.u, Math.max(0, q - .02), 5, S.squad, .03).sort((a, b) => D[a].p - D[b].p);   // adversaire au niveau du joueur : combat serré
+  // ajuste l'adversaire d'un cran : plus faible (dir < 0) en remplaçant son meilleur, plus fort (dir > 0) en remplaçant son moins bon
+  const step = dir => { const t = [...opp.team].sort((a, b) => D[a].p - D[b].p), who = dir < 0 ? t[t.length - 1] : t[0], l = P.ix.filter(x => !S.squad.includes(x) && !opp.team.includes(x) && (dir < 0 ? D[x].p < D[who].p : D[x].p > D[who].p));
+    if (l.length) opp.team = opp.team.map(i => i === who ? (dir < 0 ? l[l.length - 1] : l[0]) : i).sort((a, b) => D[a].p - D[b].p); };
+  let best = null, bestTeam = null, lose = 0, wide = 0;
+  for (let k = 0; k < 300; k++){ const g = crFight(S, mine, boost, opp, S.oppOrd, rule), f = g.fight;
+    if (f.winner === 0){ const n = f.survivors.length; if (!best || n < best.fight.survivors.length){ best = g; bestTeam = [...opp.team]; } if (n === 1) return g; if (n > 2 && ++wide >= 6){ wide = 0; step(1); } }
+    else if (++lose >= 8){ lose = 0; step(-1); } }
+  if (bestTeam) opp.team = bestTeam; return best || crFight(S, mine, boost, opp, S.oppOrd, rule); }
 // joue le match du moment (championnat ou coupe) : résultat, argent, points, missions, puis la suite (coupe, journée suivante ou fin de saison)
 function crPlay(S, mine, boost){
-  const cup = !!(S.cup && S.cup.pend && S.cup.opp), opp = crOpp(S), rule = crRule(S), g = crFight(S, mine, boost, opp, S.oppOrd, rule), u = S.u, sumO = crSum(u, g.ot), sumM = crSum(u, mine);
+  const cup = !!(S.cup && S.cup.pend && S.cup.opp), opp = crOpp(S), rule = crRule(S), g = crTutoWin(S) ? crTutoFight(S, mine, boost, opp, rule) : crFight(S, mine, boost, opp, S.oppOrd, rule), u = S.u, sumO = crSum(u, g.ot), sumM = crSum(u, mine);
   let w = g.fight.winner; if (cup && w < 0) w = sumM <= sumO ? 0 : 1;   /* coupe : pas de match nul, l'équipe au plus petit niveau cumulé passe */
   const won = w === 0, draw = w < 0, base = crWinPay(S), pay = crR5(base * (rule ? 1.5 : 1) * (cup ? CR_CUP.pay[S.cup.r] : 1));
   const res = {div: S.div, dvn: crDivN(S), day: S.day + 1, g, won, draw, opp: opp.name, rival: !cup && opp.rival, gains: [], mis: [], cap: false, cup: cup ? CR_CUP.names[S.cup.r] : "", rule: rule ? CR_RULES[rule.k][0] : ""};
-  const gain = draw ? crR5(pay * .6) : won ? pay : crR5(base * CR_ECO.loss); S.money += gain; res.gains.push([(won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match") + (cup ? " · coupe" : "") + (rule && won ? " · règle spéciale" : ""), "+" + crMoney(S, gain)]);
+  const weak = sumM > 0 ? Math.max(CR_ANTI.weakMin, Math.min(1, (sumO / sumM - CR_ANTI.weakLo) / CR_ANTI.weakSpan + CR_ANTI.weakMin)) : 1, rich = crRich(S);
+  const gain = Math.max(1, crR5((draw ? pay * .6 : won ? pay * weak : base * CR_ECO.loss) * rich)); S.money += gain;
+  if (won && weak < 1) res.gains.push(["Adversaire bien plus faible", "prime réduite"]); if (rich < 1) res.gains.push(["Caisse déjà bien remplie", "gains divisés par 2"]); res.gains.push([(won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match") + (cup ? " · coupe" : "") + (rule && won ? " · règle spéciale" : ""), "+" + crMoney(S, gain)]);
   S.stat.played++; setTimeout(() => { try { tcSave(tcLoad()); } catch {} }, 600);
   if (won){ S.stat.wins++; S.streak++; S.stat.best = Math.max(S.stat.best || 0, S.streak); S.prestige += 2 + S.div; res.gains.push(["Prestige", "+" + (2 + S.div)]); if (sumO - sumM > (S.stat.ex || 0)){ S.stat.ex = sumO - sumM; S.stat.exN = opp.name; } } else S.streak = 0;
   if (!cup){ if (won){ S.pts += 3; S.sw++; } else if (draw){ S.pts++; opp.pts++; } else { opp.pts += 3; S.sl++; }
@@ -14743,15 +14784,15 @@ function crPlay(S, mine, boost){
 // événement entre deux matchs : indisponibilité, offre de rachat, sponsor
 function crEvent(S){ if (S.tuto < 5 || Math.random() > .3) return; const r = Math.random(), u = S.u;
   /* plus d'indisponibilité tirée au hasard (15 oct. 2026) : elle pouvait bloquer un petit effectif */
-  if (r < .5 && S.squad.length >= 6){ const best = S.squad.reduce((a, i) => crCard(u, i).p > crCard(u, a).p ? i : a, S.squad[0]), club = S.clubs[Math.floor(Math.random() * S.clubs.length)].name; S.ev = {k: "offer", i: best, price: crR5(crVal(u, best) * 1.35), club}; }
-  else { const m = crR5(crWinPay(S) * crRnd(.8, 1.6)); S.money += m; S.ev = {k: "sponsor", m}; crNews(S, "sponsor", {m: crMoney(S, m)}); } }
+  if (r < .5 && S.squad.length >= 6){ const best = S.squad.reduce((a, i) => crCard(u, i).p > crCard(u, a).p ? i : a, S.squad[0]), club = S.clubs[Math.floor(Math.random() * S.clubs.length)].name; S.ev = {k: "offer", i: best, price: crR5(Math.min(crVal(u, best), crCapVal(S)) * 1.2), club}; }
+  else { const m = crR5(crWinPay(S) * crRnd(.8, 1.6) * crRich(S)); S.money += m; S.ev = {k: "sponsor", m}; crNews(S, "sponsor", {m: crMoney(S, m)}); } }
 const CR_OBJ = {top: S => ["Termine dans les 4 premiers", (S, r) => r <= 4], cash: S => [`Finis la saison avec au moins ${crMoney(S, crWinPay(S) * 4)} en caisse`, (S) => S.money >= crWinPay(S) * 4],
   young: S => ["Gagne 3 matchs en alignant ton combattant le plus faible", S => S.young >= 3], rival: S => ["Bats ton rival", S => S.beatRival]};
 const crObjPrime = S => crR5(crWinPay(S) * CR_ECO.objK);
 function crSeasonEnd(S){
   const table = [...S.clubs.map(c => ({name: c.name, pts: c.pts, rival: c.rival})), {name: S.club, pts: S.pts, me: true}].sort((a, b) => b.pts - a.pts || (b.me ? 1 : 0) - (a.me ? 1 : 0));
   const rank = table.findIndex(t => t.me) + 1, div0 = S.div, out = {table, rank, div0, gains: [], obj: []};
-  const prize = crR5(crWinPay(S) * CR_ECO.prizeK * [1, .7, .5, .38, .28, .2, .14, .1][rank - 1]); S.money += prize; out.gains.push([`Recettes de fin de saison (${rank}${rank === 1 ? "er" : "e"})`, "+" + crMoney(S, prize)]);
+  const prize = crR5(crWinPay(S) * CR_ECO.prizeK * [1, .7, .5, .38, .28, .2, .14, .1][rank - 1] * crRich(S)); S.money += prize; out.gains.push([`Recettes de fin de saison (${rank}${rank === 1 ? "er" : "e"})`, "+" + crMoney(S, prize)]);
   for (const o of S.obj){ const [t, ok] = CR_OBJ[o.k](S), done = ok(S, rank); out.obj.push({t, done}); if (done){ const p = crObjPrime(S); S.money += p; out.gains.push(["Objectif rempli", "+" + crMoney(S, p)]); } }
   S.stat.top = Math.max(S.stat.top, S.div);
   const sub = crSub(S), upN = crUpN(S), dnN = crDnN(S); out.upN = upN; out.dnN = dnN; out.dn0 = crDivN(S);
@@ -14762,6 +14803,8 @@ function crSeasonEnd(S){
   else if (dnN && rank > 8 - dnN){ out.move = "down"; S.div--; S.sub = 2; S.prestige = Math.max(0, S.prestige - 5); crNews(S, "down"); }
   else { out.move = "stay"; crNews(S, "stay"); }
   out.dn = crDivN(S);
+  if (((out.move === "up" && CR_ANTI.resDiv != null) || (out.move === "sup" && CR_ANTI.resSub != null)) && !window.CR_NORES){ const keep = crReserve(S, out.move === "sup"), over = S.money - keep;
+    if (over > 0){ const pr = Math.floor(over / (2 * crWinPay(S))); S.money = keep; S.prestige += pr; out.gains.push([`Réserve de montée : caisse ramenée à ${crMoney(S, keep)}`, pr ? "+" + pr + " prestige" : "—"]); } }
   /* jalons : un booster de cartes à la première accession à chaque division, et au premier titre (une seule fois par carrière) */
   S.reach = S.reach || {}; const key = out.move === "title" ? "t" : out.move === "up" ? "d" + S.div : "";
   if (key && !S.reach[key]){ S.reach[key] = 1; const t = key === "t" ? 3 : S.div - 1, pk = tcKey(TC_PACKS[S.u] ? S.u : "mix", t); out.gift = `Booster ${tcName(pk)} offert : ${key === "t" ? "premier titre d'Élite" : "première montée en division " + CR_DIV[S.div][0]}`; out.pk = pk; if (key !== "t") out.promo = S.div; if (!S.bot) try { const s = tcLoad(); tcGive(s, pk); tcSave(s); } catch {} }   /* booster de l'univers joué (14 oct. 2026) */
@@ -14771,7 +14814,7 @@ function crSeasonEnd(S){
 // achat à prix fixe, vente, enchère gagnée
 function crCanBuy(S, i, price){ return S.squad.length >= CR_MAXSQ ? "Effectif complet" : S.prestige < crGate(S.u, i) ? `Prestige ${crGate(S.u, i)} requis` : S.money < price ? "Pas assez d'argent" : ""; }
 function crBuy(S, i, price, viaBid){ if (crCanBuy(S, i, price)) return false; S.money -= price; S.squad.push(i); S.shop = S.shop.filter(x => x !== i); if (S.stat) S.stat.buy = Math.max(S.stat.buy || 0, price); crMis(S, "buy"); if (viaBid) crMis(S, "bid"); return true; }
-function crSell(S, i){ if (S.squad.length <= 5 || !S.squad.includes(i)) return 0; const v = crR5(crVal(S.u, i) * CR_ECO.sell); S.squad = S.squad.filter(x => x !== i); delete S.out[i]; S.money += v; if (S.stat) S.stat.sale = Math.max(S.stat.sale || 0, v); return v; }
+function crSell(S, i){ if (S.squad.length <= 5 || !S.squad.includes(i)) return 0; const v = crR5(crSellVal(S, i)); S.squad = S.squad.filter(x => x !== i); delete S.out[i]; S.money += v; if (S.stat) S.stat.sale = Math.max(S.stat.sale || 0, v); return v; }
 // ce qu'il faut miser pour battre les clubs IA sur la vedette du jour (sert au robot de simulation et à l'achat immédiat)
 const crLotInc = p => Math.max(1, crR5(p * .06));
 
@@ -14790,6 +14833,11 @@ const CR_TUTO = [
   ["Ton adversaire", "Chaque match t'oppose à un club. Regarde ses cinq combattants, puis prépare ton équipe.", "", "match"],
   ["Compose ton équipe", "Touche cinq combattants dans l'ordre où ils entreront. Le vainqueur d'un duel reste en jeu, fatigué : l'ordre compte autant que les notes."],
   ["Recrute", "Chaque match rapporte de l'argent. Dans le Mercato, la boutique vend à prix fixe, et les vedettes partent aux enchères contre les autres clubs.", "C'est parti", "shop"]];
+// ---- anti-clignotement (19 oct. 2026) : quand un écran est redessiné, chaque image déjà affichée (même adresse) est remise à sa place
+// au lieu d'être recréée ; le téléphone n'a plus à redécoder les images à chaque toucher (sélection de l'ordre de combat, etc.)
+function crImgPool(el){ const m = new Map(); if (el) el.querySelectorAll("img[src]").forEach(im => { const k = im.getAttribute("src"); if (!m.has(k)) m.set(k, []); m.get(k).push(im); }); return m; }
+function crImgReuse(el, m){ if (!el || !m || !m.size) return; el.querySelectorAll("img[src]").forEach(im => { const l = m.get(im.getAttribute("src")); if (!l || !l.length) return; const old = l.shift();
+    for (const a of [...old.attributes]) if (a.name !== "src" && !im.hasAttribute(a.name)) old.removeAttribute(a.name); for (const a of [...im.attributes]) if (a.name !== "src" && old.getAttribute(a.name) !== a.value) old.setAttribute(a.name, a.value); im.replaceWith(old); }); }
 function crRender(){
   const el = $("#cr"), S = CR.S; if (!el || !S) return; const dv = CR_DIV[S.div], cap = crCapLeft();
   let body = "";
@@ -14799,11 +14847,13 @@ function crRender(){
     body = `<div class="crtabs" role="tablist">${tabs.map(([k, t, n]) => `<button role="tab" class="${CR.tab === k ? "sel" : ""} ${S.tuto < 5 && CR_TUTO[S.tuto][3] === k && CR.tab !== k ? "crpulse" : ""}" data-crtab="${k}">${t}${n ? `<small>${n}</small>` : ""}</button>`).join("")}</div>${({match: crMatchHTML, squad: crSquadHTML, shop: crShopHTML, table: crTableHTML, mis: crMisHTML, club: crClubHTML})[CR.tab](S)}`; }
   const tu = false && S.tuto < 5 && (CR.view === "compose" ? S.tuto === 3 : CR.view === "hub" && S.tuto !== 3) ? CR_TUTO[S.tuto] : null;
   el.style.setProperty("--dc", dv[2]);
+  const _crKeep = crImgPool(el);   /* 19 oct. 2026 : images déjà décodées réutilisées (sinon elles clignotent sur téléphone à chaque toucher) */
   el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="helpq" id="crHelpQ" aria-label="Revoir le didacticiel" title="Revoir le didacticiel">?</button><button class="ghost" id="crQuit">✕ Accueil</button></div>
     <div class="crhead"><div class="crid">${crBadge(S.div)}<div><div class="eb">${crDivN(S)} · Saison ${S.season} · Match ${Math.min(S.day + 1, CR_DAYS)}/${CR_DAYS}</div><h2>${esc(S.club)}</h2></div></div>
       <div class="crstats"><span><i>Caisse</i>${crMoney(S, S.money)}</span><span><i>Prestige</i>${S.prestige}</span><span><i>Points</i>${S.pts}</span><span title="Matchs de carrière qui rapportent encore des éclats et des boosters aujourd'hui"><i>Cartes · jour</i>${CR_CAP - cap}/${CR_CAP}</span></div></div>
     ${tu ? `<div class="crcoach"><div><i>Didacticiel · ${S.tuto + 3}/7</i><b>${tu[0]}</b><p>${tu[1]}</p></div>${tu[2] ? `<button class="primary" id="crTuNext">${tu[2]}</button>` : ""}</div>` : S.news && CR.view === "hub" ? `<div class="crnews">${esc(S.news)}</div>` : ""}
     ${body}`;
+  crImgReuse(el, _crKeep);
   $("#crQuit").onclick = () => { crSave(); show("home"); };
   el.querySelectorAll("[data-crtab]").forEach(b => b.onclick = () => { CR.tab = b.dataset.crtab; CR.ask = null; crRender(); });
   $("#bmBan") && ($("#bmBan").onclick = () => { if (!S.bm.seen){ S.bm.seen = true; crSave(); bmCine(S); } else bmShow(S); });
@@ -14823,8 +14873,8 @@ function crMatchHTML(S){ const cup = S.cup.pend, opp = crOpp(S), u = S.u, n = cr
       <div class="crrow" style="margin:14px 0 0"><div class="crit">${S.items.spy && !S.spy && !(rule && rule.k === "random") ? `<button id="crSpy">Envoyer un espion (${S.items.spy})</button>` : ""}</div><button class="primary ${S.tuto === 2 ? "crpulse" : ""}" id="crPrep" style="font-size:16px;padding:12px 22px">Préparer le match</button></div></div>`; }
 function crComposeHTML(S){ const u = S.u, opp = crOpp(S), av = crAvail(S), n = CR.pick.length, need = crN(S), bad = crRuleOk(S, CR.pick), af = crAff(u, CR.pick), rule = crRule(S), best = crByP(S, av, true)[0];
   const tiles = crByP(S, S.squad, true).map(i => { const k = CR.pick.indexOf(i), off = !av.includes(i) || (rule && rule.k === "nostar" && i === best), ln = crLinksOf(u, i)[0];
-    return crTile(S, i, {btn: !off, cls: (k >= 0 ? "sel " : "") + (off ? "off" : ""), ord: k >= 0 ? k + 1 : 0, up: (CR.boost === i ? 4 : 0) + (af && af.ids.includes(i) ? af.b : 0), attr: `data-crpick="${i}"`, sub: !av.includes(i) ? "Indisponible" : off ? "Suspendu" : ln ? esc(ln) : undefined}); }).join("");
-  return `<div class="crbox">${crRuleBox(S)}<div class="crrow"><div><h3>Ton équipe contre ${esc(opp.name)}</h3><p>${CR.useBoost ? "Touche le combattant qui recevra la Forme olympique (+4 pour ce match)." : `Touche ${need} combattants dans leur ordre de passage (${n}/${need}). Le premier touché entre en premier.`}</p></div><button class="ghost" id="crBackHub">Retour</button></div>
+    return crTile(S, i, {btn: !off, cls: (k >= 0 ? "sel " : "") + (off ? "off" : ""), ord: k >= 0 ? k + 1 : 0, up: (CR.boost === i ? crBoostAmt(S.u, i) : 0) + (af && af.ids.includes(i) ? af.b : 0), attr: `data-crpick="${i}"`, sub: !av.includes(i) ? "Indisponible" : off ? "Suspendu" : ln ? esc(ln) : undefined}); }).join("");
+  return `<div class="crbox">${crRuleBox(S)}<div class="crrow"><div><h3>Ton équipe contre ${esc(opp.name)}</h3><p>${CR.useBoost ? "Touche le combattant qui recevra la Forme olympique (+4 pour ce match, moins sur un combattant déjà très fort, jamais au-delà de 100)." : `Touche ${need} combattants dans leur ordre de passage (${n}/${need}). Le premier touché entre en premier.`}</p></div><button class="ghost" id="crBackHub">Retour</button></div>
       <div class="crgrid">${tiles}</div>
       <p class="small" style="margin:12px 0 0">${af ? `<b style="color:var(--accent)">Affinité : ${esc(af.name)}, +${af.b} à la note de ${af.ids.length} combattants.</b>` : "Affinité : aligne au moins trois combattants d'un même groupe (indiqué sous leur nom) pour un bonus de note."}${n === need && bad ? ` <b style="color:#ff8f9a">${esc(bad)}.</b>` : ""}</p>
       <div class="crrow" style="margin:12px 0 0"><div class="crit"><button id="crAuto">Remplir : meilleure équipe permise</button>${n ? `<button id="crClear">Vider</button>` : ""}${S.items.boost ? `<button id="crBoost" class="${CR.useBoost || CR.boost != null ? "sel" : ""}">Forme olympique (${S.items.boost})</button>` : ""}</div>
@@ -14903,7 +14953,7 @@ document.addEventListener("keydown", e => { const b = e.target.closest && e.targ
 const fightSummaryCr = r => { const f = r.g.fight; return `${f.survivors.length} combattant${f.survivors.length > 1 ? "s" : ""} encore debout contre ${esc(r.opp)}${f.mvp ? " · meilleur combattant : " + esc(f.mvp.n) : ""}.`; };
 function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.</p></div></div>
     <div class="crgrid">${[...S.squad].sort((a, b) => crCard(u, b).p - crCard(u, a).p).map(i => crTile(S, i, {cls: S.out[i] ? "off" : "", sub: S.out[i] ? `Indisponible (${S.out[i]} match${S.out[i] > 1 ? "s" : ""})` : "Valeur " + crVal(u, i) + "M",
-      foot: S.squad.length > 5 ? (CR.ask === "s" + i ? `<button class="crbuy red" data-crsell="${i}" data-ok="1">Confirmer +${crR5(crVal(u, i) * CR_ECO.sell)}M</button>` : `<button class="crbuy ghost" data-crsell="${i}">Vendre</button>`) : ""})).join("")}</div>`; }
+      foot: S.squad.length > 5 ? (CR.ask === "s" + i ? `<button class="crbuy red" data-crsell="${i}" data-ok="1">Confirmer +${crR5(crSellVal(S, i))}M</button>` : `<button class="crbuy ghost" data-crsell="${i}">Vendre</button>`) : ""})).join("")}</div>`; }
 function crShopHTML(S){ const u = S.u, L = S.lot;
   const lot = !L ? `<p class="muted" style="margin:0">Aucune vedette sur le marché aujourd'hui.</p>` : L.done ? `<p class="muted" style="margin:0">${esc(L.done)}</p>`
     : `<div class="crlot">${crTile(S, L.i)}<div><p class="muted" style="margin:0 0 4px">Mise de départ</p><div class="big">${crMoney(S, L.start)}</div><p class="small" style="margin:6px 0 10px">Valeur estimée ${crMoney(S, crVal(u, L.i))}. Les ${S.clubs.length} clubs de ta division peuvent surenchérir.${crGate(u, L.i) > S.prestige ? ` <b style="color:#ff8f9a">Prestige ${crGate(u, L.i)} requis.</b>` : ""}</p>
@@ -14937,7 +14987,7 @@ function crMisHTML(S){ return `<div class="crbox"><div class="crrow"><div><h3>Mi
       <div class="crmis">${S.mis.map(m => { const T = CR_MIS[m.k]; return `<div class="crmi ${m.done ? "ok" : ""}"><b>${T.t}</b><span>${m.done ? "Récompense reçue" : crRwTxt(S, T.rw)}</span><i><u style="width:${Math.min(100, m.cur / T.g * 100)}%"></u></i></div>`; }).join("")}</div></div>
     <div class="crbox"><div class="crrow"><div><h3>Objectifs de la saison</h3><p>Prime de ${crMoney(S, crObjPrime(S))} par objectif rempli, versée en fin de saison.</p></div></div>
       <div class="crmis">${S.obj.map(o => `<div class="crmi"><b>${CR_OBJ[o.k](S)[0]}</b><span></span></div>`).join("")}</div></div>
-    <div class="crbox"><div class="crrow"><div><h3>Tes atouts</h3><p><b>Espion (${S.items.spy})</b> : révèle l'ordre de passage de l'adversaire avant le match. <b>Forme olympique (${S.items.boost})</b> : +4 à la note d'un combattant, pour un match.</p></div></div></div>`; }
+    <div class="crbox"><div class="crrow"><div><h3>Tes atouts</h3><p><b>Espion (${S.items.spy})</b> : révèle l'ordre de passage de l'adversaire avant le match. <b>Forme olympique (${S.items.boost})</b> : +4 à la note d'un combattant pour un match (+3 au-dessus de 85, +2 au-dessus de 90, +1 au-dessus de 95, jamais plus de 100).</p></div></div></div>`; }
 function crWire(S){
   const el = $("#cr"), u = S.u, save = () => { crSave(); crRender(); };
   $("#crSpy") && ($("#crSpy").onclick = () => { if (!S.items.spy) return; S.items.spy--; S.spy = true; save(); });
@@ -14948,7 +14998,7 @@ function crWire(S){
   el.querySelectorAll("button[data-crpick]").forEach(b => b.onclick = () => { const i = +b.dataset.crpick, k = CR.pick.indexOf(i);
     if (CR.useBoost){ if (k < 0 && CR.pick.length < crN(S)) CR.pick.push(i); if (CR.pick.includes(i)){ CR.boost = i; CR.useBoost = false; } return crRender(); }
     if (k >= 0){ CR.pick.splice(k, 1); if (CR.boost === i) CR.boost = null; } else if (CR.pick.length < crN(S)) CR.pick.push(i); crRender(); });
-  $("#crAuto") && ($("#crAuto").onclick = () => { CR.pick = crAutoLineup(S); if (!CR.pick.includes(CR.boost)) CR.boost = null; crRender(); });
+  $("#crAuto") && ($("#crAuto").onclick = () => { CR.pick = crByP(S, crAutoLineup(S), true);   /* 19 oct. 2026 : le meilleur en 1re position, puis ordre décroissant */ if (!CR.pick.includes(CR.boost)) CR.boost = null; crRender(); });
   el.querySelectorAll("[data-crpk]").forEach(b => b.onclick = () => { const i = +b.dataset.crpk; if (S.squad.length >= CR_MAXSQ || !(S.pick || []).includes(i)) return; S.squad.push(i); S.pick = null; S.news = `${crCard(u, i).n} rejoint ${S.club} : c'est la récompense de la coupe.`; try { SFX.play("fanfare"); } catch {} save(); });
   $("#crClear") && ($("#crClear").onclick = () => { CR.pick = []; CR.boost = null; CR.useBoost = false; crRender(); });
   $("#crBoost") && ($("#crBoost").onclick = () => { if (CR.boost != null){ CR.boost = null; CR.useBoost = false; } else CR.useBoost = !CR.useBoost; crRender(); });
@@ -15211,7 +15261,10 @@ html:has(.bmov),html:has(.bmov) body,html:has(.bmcine),html:has(.bmcine) body{ov
    Ouvert 1 heure réelle (le compte continue jeu fermé), contenu fixe : une vedette nettement au-dessus de l'équipe (+15 % sur sa valeur),
    trois personnages meilleurs que tous les titulaires (quatre au rang « Client »), une caisse mystère. Prestige non exigé.
    Réputation : Inconnu → Client (2 achats) → Habitué (5 achats : vedette un peu plus forte, 65 min). */
-const BM = {on: true, troc: .7, base: .04, step: .005, max: .10, dur: 36e5, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
+const BM = {on: true, troc: .7, base: .01, step: 0, max: .01, dur: 6e5, one: true, star: .30, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
+/* 19 oct. 2026 (demande de l'utilisateur, titre d'Élite plié en 35 min) : ouvert 10 minutes au plus, UN seul achat (au choix, caisse comprise),
+   apparition rare (1 % après un combat, sans augmentation, toujours au plus un par jour — demande de l'utilisateur),
+   vedette moins écrasante (+30 % de l'écart au maximum au lieu de +45 %), autres offres juste au-dessus des titulaires, caisse mystère : un seul personnage, rarement de niveau vedette */
 const BM_UNI = {   /* décor de la ruelle selon l'univers : enseignes, lanternes, couleur des néons */
   op: {s: ["酒場", "海賊", "港", "宿", "質屋", "賭場", "地図", "酒"], l: "海", n: ["#34e1ff", "#ff3d5a", "#ff9a2e", "#7df0c8"]},
   na: {s: ["一楽", "木ノ葉", "忍", "団子", "宿", "酒", "居酒屋", "質屋"], l: "火", n: ["#ff9a2e", "#ff3d5a", "#34e1ff", "#ffd23d"]},
@@ -15229,11 +15282,13 @@ function bmTeam(S){ const D = DATA[S.u], top = [...S.squad].sort((a, b) => D[b].
 function bmNear(S, target, n, not){ const D = DATA[S.u]; const l = D.map((_, i) => i).filter(i => !S.squad.includes(i) && !not.includes(i));
   return crShuffle(l).sort((a, b) => Math.abs(D[a].p - target) - Math.abs(D[b].p - target)).slice(0, n); }
 function bmMake(S){ const {avg, max} = bmTeam(S), rk = bmRep(S), D = DATA[S.u];
-  const vt = Math.min(100, avg + (100 - avg) * .45 + (rk >= 2 ? 2 : 0)), ved = bmNear(S, vt, 3, [])[Math.floor(Math.random() * 3)];
+  const vt = Math.min(100, avg + (100 - avg) * BM.star + (rk >= 2 ? 2 : 0)), ved = bmNear(S, vt, 3, [])[Math.floor(Math.random() * 3)];
   if (ved == null) return null;
-  const ot = Math.max(max + 2, avg + 10), oth = bmNear(S, Math.min(99, ot), rk >= 1 ? 4 : 3, [ved]).filter(i => D[i].p > max);
+  const ot = Math.max(max + 1, avg + 6), oth = bmNear(S, Math.min(99, ot), rk >= 1 ? 4 : 3, [ved]).filter(i => D[i].p > max);
   const boxP = Math.max(1, Math.round(crVal(S.u, bmNear(S, ot, 1, [ved])[0] ?? ved) * .8));
-  return {at: Date.now(), end: Date.now() + BM.dur + (rk >= 2 ? 5 * 6e4 : 0), ved, vp: Math.round(crVal(S.u, ved) * 1.15), oth, box: {p: boxP, got: null}, sold: [], seen: false, avg: Math.round(avg)}; }
+  return {at: Date.now(), end: Date.now() + BM.dur, ved, vp: Math.round(crVal(S.u, ved) * 1.15), oth, box: {p: boxP, got: null}, sold: [], seen: false, avg: Math.round(avg)}; }
+/* caisse mystère : un seul personnage ; 5 % de niveau vedette, 35 % un peu au-dessus de l'équipe, 60 % de son niveau */
+function bmBox(S, B){ const {avg} = bmTeam(S), r = Math.random(), tg = r < .05 ? avg + (100 - avg) * BM.star : r < .4 ? avg + 6 : avg + 2; return bmNear(S, Math.min(99, tg), 3, [B.ved, ...B.oth])[0]; }
 /* tirage après chaque combat de carrière (pas pendant le tutoriel) */
 function bmRoll(S){ if (!BM.on || S.bot || S.tuto < 5 || bmOpen(S)) return false; const day = tcDay();
   if (S.bmDay === day){ return false; }
@@ -15345,28 +15400,30 @@ function bmScene(ph, U, st){ const T = window.THREE; if (!T) return null;
    on touche une carte pour la choisir, la barre du bas résume le choix et l'achète. --- */
 function bmShow(S, pick){ if (!bmOpen(S)) { try { tcToast("Le contrebandier est parti."); } catch {} return crRender(); }
   const D = DATA[S.u], B = S.bm, rk = bmRep(S), n = (S.stat && S.stat.bm) || 0, nxt = BM.rep[rk + 1], U = BM_UNI[S.u] || BM_UNI.op;
-  const tr = B.troc != null && S.squad.includes(B.troc) ? B.troc : null, cred = tr != null ? Math.round(crVal(S.u, tr) * BM.troc) : 0, net = p => Math.max(0, p - cred);
+  const tr = B.troc != null && S.squad.includes(B.troc) ? B.troc : null, cred = tr != null ? Math.round(Math.min(crVal(S.u, tr), crCapVal(S)) * BM.troc) : 0, net = p => Math.max(0, p - cred);
   const full = S.squad.length >= CR_MAXSQ && tr == null, why = p0 => { const p = net(p0); return full ? "Effectif complet : vends un joueur ou propose-le en troc." : S.money < p ? `Il te manque <b>${p - S.money}M</b> : vends un joueur, propose un troc ou enchaîne les matchs. Ouvert jusqu'à ${new Date(B.end).toLocaleTimeString("fr-FR", {hour: "2-digit", minute: "2-digit"})}, même jeu fermé.` : ""; };
   const sel = pick ?? bmShow.sel ?? B.ved; bmShow.sel = sel;
-  const price = k => k === "box" ? B.box.p : k === B.ved ? B.vp : crVal(S.u, k), sold = k => k === "box" ? B.box.got != null : B.sold.includes(k);
+  const price = k => k === "box" ? B.box.p : k === B.ved ? B.vp : crVal(S.u, k), done1 = BM.one && (B.sold.length > 0 || B.box.got != null), sold = k => (k === "box" ? B.box.got != null : B.sold.includes(k)) || done1;
   const mc = (i, v) => `<div class="mc ${v ? "v" : ""} ${B.sold.includes(i) ? "sold" : ""}"><img src="${bmSrc(D[i])}" alt=""><span class="lv">${D[i].p}</span><i class="crinf" role="button" tabindex="0" aria-label="Fiche de ${esc(D[i].n)}" data-crinf="${i}">i</i></div>`;
   const hang = (i, cls, r) => `<button class="hg ${cls} ${sel === i ? "on" : ""}" style="--r:${r}deg" data-bmsel="${i}" aria-label="${esc(D[i].n)}"><i class="clip"></i>${mc(i, cls.includes("v"))}<span class="pt">${B.sold.includes(i) ? "Acheté" : price(i) + "M"}</span></button>`;
   const gb = B.box.got, boxH = `<button class="hg s box ${sel === "box" ? "on" : ""}" style="--r:3deg" data-bmsel="box" aria-label="Caisse mystère"><i class="clip"></i>${gb != null ? mc(gb) : `<div class="mc mys"><b>闇</b></div>`}<span class="pt">${gb != null ? "Ouverte" : B.box.p + "M"}</span></button>`;
   const o = B.oth, l1 = `${o[0] != null ? hang(o[0], "s", -5) : ""}${hang(B.ved, "v ved", 0)}${o[1] != null ? hang(o[1], "s", 4) : ""}`, l2 = `${o[2] != null ? hang(o[2], "s oth", -3) : ""}${boxH}${o[3] != null ? hang(o[3], "s", -2) : ""}`;
   const sn = sel === "box" ? (gb != null ? D[gb].n : "Caisse mystère") : D[sel].n, sp = price(sel), w = sold(sel) ? "" : why(sp);
   const lab = sel === "box" ? "Caisse mystère · une carte au hasard" : sel === B.ved ? `Vedette · +15 % · ${esc(sn)}` : `Sous le manteau · ${esc(sn)}`;
+  const _bmKeep = crImgPool(document.querySelector(".bmov"));   /* images gardées : pas de clignotement à chaque choix */
   document.querySelector(".bmov")?.remove();
   document.body.insertAdjacentHTML("beforeend", `<div class="bmov" role="dialog" aria-modal="true" aria-label="Marché noir"><div class="bmsc silk" style="--un:${U.n[0]}"><div class="veil"></div>
     <button class="x" aria-label="Fermer">✕</button>
-    <div class="stop"><em>闇市</em><span class="rep">${BM.rep[rk][1]} · ${n} achat${n > 1 ? "s" : ""}${nxt ? ` · ${BM.rep[rk + 1][1]} à ${nxt[0]}` : ""}</span><div class="tm"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="tr"/><circle cx="22" cy="22" r="19" class="tv" data-bmring style="stroke-dasharray:119.4"/></svg><b data-bmt>${bmClock(bmLeft(S))}</b></div></div>
+    <div class="stop"><em>闇市</em><span class="rep">Un seul achat · ${BM.rep[rk][1]} · ${n} achat${n > 1 ? "s" : ""}${nxt ? ` · ${BM.rep[rk + 1][1]} à ${nxt[0]}` : ""}</span><div class="tm"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="tr"/><circle cx="22" cy="22" r="19" class="tv" data-bmring style="stroke-dasharray:119.4"/></svg><b data-bmt>${bmClock(bmLeft(S))}</b></div></div>
     <svg class="cord" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M-2 3 Q50 22 102 3"/></svg>
     <div class="line">${l1}</div><div class="line l2">${l2}</div>
     ${tr != null ? `<p class="tnote">Troc : <b>${esc(D[tr].n)}</b> · ${cred}M déduits <button data-bmtr="-1">Annuler</button></p>` : ""}
     ${w ? `<p class="why">${w}</p>` : ""}
-    <div class="bar"><div class="bi"><small>${lab}</small><b>${sold(sel) ? "—" : net(sp) + "M"}</b></div><button class="buy" data-bmgo ${sold(sel) || w ? "disabled" : ""}>${sold(sel) ? (sel === "box" ? "Ouverte" : "Acheté") : sel === "box" ? "Ouvrir" : "Acheter"}</button></div>
+    <div class="bar"><div class="bi"><small>${lab}</small><b>${sold(sel) ? "—" : net(sp) + "M"}</b></div><button class="buy" data-bmgo ${sold(sel) || w ? "disabled" : ""}>${sold(sel) ? ((sel === "box" ? B.box.got != null : B.sold.includes(sel)) ? (sel === "box" ? "Ouverte" : "Acheté") : "Un seul achat par visite") : sel === "box" ? "Ouvrir" : "Acheter"}</button></div>
     <div class="sub"><button class="troc" data-bmtrl>⇄ Troc</button><span>Caisse <b>${crMoney(S, S.money)}</b></span></div>
-    <div class="trl" hidden><p>Le contrebandier reprend un joueur à ${Math.round(BM.troc * 100)} % de sa valeur, déduit de ton achat.</p>${crByP(S, S.squad).map(i => `<button data-bmtr="${i}">${esc(D[i].n)} · niv. ${D[i].p}<b>${Math.round(crVal(S.u, i) * BM.troc)}M</b></button>`).join("")}</div>
+    <div class="trl" hidden><p>Le contrebandier reprend un joueur à ${Math.round(BM.troc * 100)} % de sa valeur, déduit de ton achat.</p>${crByP(S, S.squad).map(i => `<button data-bmtr="${i}">${esc(D[i].n)} · niv. ${D[i].p}<b>${Math.round(Math.min(crVal(S.u, i), crCapVal(S)) * BM.troc)}M</b></button>`).join("")}</div>
   </div></div>`);
+  crImgReuse(document.querySelector(".bmov"), _bmKeep);
   const ov = document.querySelector(".bmov"), sc = ov.querySelector(".bmsc"), bye = () => { try { bmShow.scn && bmShow.scn.stop(); } catch {} bmShow.scn = null; bmShow.sel = null; ov.remove(); crRender(); };
   const calm = (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
   const put3d = () => { if (!ov.isConnected) return; if (!bmShow.scn && window.THREE && !calm){ bmShow.scn = bmScene(sc, U, {z: -8, y: 1.7, door: 1}); if (bmShow.scn){ bmShow.scn.goldL.intensity = 6; bmShow.scn.glowM.color.setRGB(1, 1, 1); } }
@@ -15378,7 +15435,7 @@ function bmShow(S, pick){ if (!bmOpen(S)) { try { tcToast("Le contrebandier est 
   ov.querySelectorAll("[data-bmtr]").forEach(b => b.onclick = () => { const i = +b.dataset.bmtr; B.troc = i < 0 ? null : i; crSave(); bmShow(S); });
   const pay = p0 => { const p = net(p0); if (!bmOpen(S) || S.money < p || (S.squad.length >= CR_MAXSQ && tr == null)) return false; S.money -= p; if (tr != null){ S.squad = S.squad.filter(x => x !== tr); delete S.out[tr]; B.troc = null; } return true; };
   ov.querySelector("[data-bmgo]").onclick = () => { if (sold(sel)) return;
-    if (sel === "box"){ const {avg} = bmTeam(S), r = Math.random(), tg = r < .25 ? avg + (100 - avg) * .45 : r < .75 ? avg + 10 : avg + 3, pk = bmNear(S, Math.min(99, tg), 3, [B.ved, ...B.oth])[0]; if (pk == null || !pay(B.box.p)) return;
+    if (sel === "box"){ const pk = bmBox(S, B); if (pk == null || !pay(B.box.p)) return;
       S.squad.push(pk); B.box.got = pk; S.stat.bm = (S.stat.bm || 0) + 1; crSave(); try { tcSave(tcLoad()); BMS.gong(); } catch {} return bmShow(S, "box"); }
     if (!pay(price(sel))) return; S.squad.push(sel); B.sold.push(sel); S.stat.bm = (S.stat.bm || 0) + 1; S.stat.buy = Math.max(S.stat.buy || 0, price(sel)); if (sel === B.ved) S.news = `${D[sel].n} rejoint ${S.club} par la porte de derrière du marché noir.`;
     crSave(); try { tcSave(tcLoad()); SFX.play(sel === B.ved ? "fanfare" : "win"); } catch {} bmShow(S, sel); };
