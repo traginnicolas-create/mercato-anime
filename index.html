@@ -10975,7 +10975,9 @@ function tcRender(){
     const nz = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), qq = nz(f.q);
     const list = inV.filter(e => (f.r === "all" || tcER(e[0], e[1]) === f.r) && (!f.own || hasV(e)) && (!qq || nz(e[0].n).includes(qq) || String(e[0].no) === qq.replace(/^#/, "")));
     { const RK = "XSMLEPRC", rk = e => RK.indexOf(tcER(e[0], e[1])), S = f.sort || "no";   /* tri (19 oct. 2026) */
-      list.sort(S === "rar" ? (a, b) => rk(a) - rk(b) || a[0].no - b[0].no : S === "nom" ? (a, b) => a[0].n.localeCompare(b[0].n, "fr") : S === "nb" ? (a, b) => (s.own[b[0].id] || 0) - (s.own[a[0].id] || 0) || a[0].no - b[0].no : S === "new" ? (a, b) => (hasV(a) ? 1 : 0) - (hasV(b) ? 1 : 0) || a[0].no - b[0].no : (a, b) => a[0].no - b[0].no); }
+      const px = e => { const v = e[1] === "*" ? tcBestFin(s, e[0]) || "" : e[1] || ""; return ((window.TC_MED || {})[e[0].id + "|" + v]) || TC_R[tcER(e[0], e[1])][2] || 0; };
+      if (S === "prix" && !window.TC_MED && !window.__tcMedAsk){ window.__tcMedAsk = 1; try { CP.sb && CP.user && CP.sb.rpc("market_medians").then(r => { window.TC_MED = r.data || {}; if (TC_TAB === "album" && (TC_F.sort || "") === "prix") tcRender(); }); } catch {} }
+      list.sort(S === "prix" ? (a, b) => px(b) - px(a) || a[0].no - b[0].no : S === "rar" ? (a, b) => rk(a) - rk(b) || a[0].no - b[0].no : S === "nom" ? (a, b) => a[0].n.localeCompare(b[0].n, "fr") : S === "nb" ? (a, b) => (s.own[b[0].id] || 0) - (s.own[a[0].id] || 0) || a[0].no - b[0].no : S === "new" ? (a, b) => (hasV(a) ? 1 : 0) - (hasV(b) ? 1 : 0) || a[0].no - b[0].no : (a, b) => a[0].no - b[0].no); }
     const gain = all.reduce((a, c) => a + tcDups(s, c).g, 0), fins = all.reduce((a, c) => a + Object.keys(s.fin[c.id] || {}).length, 0);
     html += `${s.taint ? `<p class="note-off" style="margin-bottom:12px">Cette collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, tes amis le voient et les échanges sont bloqués. <button class="ghost" id="tcWipe" style="margin-left:6px">Repartir de zéro</button></p>` : ""}${(() => { /* en-tête de collection façon Kyara, version Hanko C2 (17 oct. 2026) : set complet = chaque personnage au moins une fois ; master set = toutes les versions */
         const M = TC_SET === "master", cnt = cs => M ? [cs.reduce((a, c) => a + tcVersOf(c).filter(v => tcHas(s, c, v)).length, 0), cs.reduce((a, c) => a + tcVersOf(c).length, 0)] : [cs.filter(c => s.own[c.id]).length, cs.length];
@@ -10992,7 +10994,7 @@ function tcRender(){
           <label><span>Version</span><select id="tcSelV" class="${(f.f ?? "*") === "*" ? "" : "on"}">${[["*", "Ma meilleure version"], ["", "Normale"], ["H", "Holo"], ["A", "AR"], ["W", "Wanted"], ["S", "SAR"], ["K", "Red Blood"], ["G", "UR"], ["Z", "Légende"]].filter(([k]) => k === "*" || all.some(c => tcVersOf(c).includes(k))).map(([k, n]) => { const ks = k === "A" ? ["A", "B", "C"] : [k]; return `<option value="${k}" ${(f.f ?? "*") === k ? "selected" : ""}>${n}${k === "*" ? "" : " · " + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x) && tcHas(s, c, x)).length, 0) + "/" + all.reduce((a, c) => a + ks.filter(x => tcVersOf(c).includes(x)).length, 0)}</option>`; }).join("")}</select></label>
           <label><span>Rareté</span><select id="tcSelR" class="${f.r === "all" ? "" : "on"}"><option value="all" ${f.r === "all" ? "selected" : ""}>Toutes · ${inV.filter(hasV).length}/${inV.length}</option>${[...TC_ORDER].reverse().filter(r => inV.some(([c, v]) => tcER(c, v) === r)).map(r => `<option value="${r}" ${f.r === r ? "selected" : ""}>${TC_R[r][0]} · ${inV.filter(e => tcER(e[0], e[1]) === r && hasV(e)).length}/${inV.filter(e => tcER(e[0], e[1]) === r).length}</option>`).join("")}</select></label>
           <label class="tcfb-q"><span>Rechercher</span><input type="search" id="tcQ" placeholder="Nom ou numéro" value="${esc(f.q || "")}" autocomplete="off"></label>
-          <label><span>Trier</span><select id="tcSort" class="${(f.sort || "no") === "no" ? "" : "on"}">${[["no", "Numéro"], ["rar", "Rareté"], ["nom", "Nom (A → Z)"], ["nb", "Exemplaires"], ["new", "Manquantes d'abord"]].map(([k, n]) => `<option value="${k}" ${(f.sort || "no") === k ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+          <label><span>Trier</span><select id="tcSort" class="${(f.sort || "no") === "no" ? "" : "on"}">${[["no", "Numéro"], ["rar", "Rareté"], ["prix", "Prix (marché)"], ["nom", "Nom (A → Z)"], ["nb", "Exemplaires"], ["new", "Manquantes d'abord"]].map(([k, n]) => `<option value="${k}" ${(f.sort || "no") === k ? "selected" : ""}>${n}</option>`).join("")}</select></label>
           <label class="tcfb-own ${f.own ? "on" : ""}"><input type="checkbox" id="tcOwn" ${f.own ? "checked" : ""}>Obtenues seulement</label>
           ${f.u !== "all" || (f.f ?? "*") !== "*" || f.r !== "all" || f.own || f.q || (f.sort || "no") !== "no" ? `<button class="ghost lk" id="tcFReset">Réinitialiser</button>` : ""}
         </div>
@@ -11718,7 +11720,12 @@ function tcOpening(key, got){
         mid.querySelectorAll(".tcback").forEach(b => b.onclick = () => flip(+b.dataset.k));
         tcSnd("deal");
         if (G) G.from(mid.querySelectorAll(".tcback"), {y: 140, opacity: 0, scale: .5, rotation: () => Math.random() * 50 - 25, duration: .6, stagger: got.length > 5 ? .025 : .07, ease: "back.out(1.6)", clearProps: "transform,opacity"});
-        bot.innerHTML = `<button id="tcAll">Tout retourner</button>`; $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (const k of [...got.keys()].filter(k => k !== bestK).concat(bestK)){ while (busy) await new Promise(r => setTimeout(r, 120)); await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : got.length > 5 ? 90 : 260)); } }; }, calm ? 0 : 1500); }, calm || fast ? 0 : 800); };
+        bot.innerHTML = `<button id="tcAll">Tout retourner</button>${got.length >= 10 && got.some(c => TC_ORDER.indexOf(c.r) >= TC_ORDER.indexOf("E")) ? `<button id="tcNext">⏭ Prochaine Épique ou mieux</button>` : ""}`;
+        // 19 oct. 2026 (comme Kyara, 10 cartes et plus) : retourne d'un coup les cartes jusqu'à la prochaine Épique, Légendaire, Mythique ou Éveil
+        $("#tcNext") && ($("#tcNext").onclick = async () => { const b = $("#tcNext"); b.disabled = true; const E = TC_ORDER.indexOf("E");
+          for (const k of got.keys()){ if (seen[k]) continue; while (busy) await new Promise(r => setTimeout(r, 120)); await flip(k); if (TC_ORDER.indexOf(got[k].r) >= E) break; await new Promise(r => setTimeout(r, calm ? 0 : 60)); }
+          if (!b.isConnected) return; const left = [...got.keys()].some(k => !seen[k] && TC_ORDER.indexOf(got[k].r) >= E); b.disabled = !left; if (!left) b.remove(); });
+        $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (const k of [...got.keys()].filter(k => k !== bestK).concat(bestK)){ while (busy) await new Promise(r => setTimeout(r, 120)); await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : got.length > 5 ? 90 : 260)); } }; }, calm ? 0 : 1500); }, calm || fast ? 0 : 800); };
   // ouverture façon TCG Pocket (17 oct. 2026) : on glisse le long de la ligne du haut, d'un côté ou de l'autre, et la languette part de ce côté.
   // Le sachet garde son rendu 3D et s'incline sous le doigt sans faire défiler l'écran. Après 3 essais ratés, toucher le sachet suffit.
   { const w = O.querySelector(".tearw"), band = w.querySelector(".cutband"), line = band.querySelector(".cutl"), hint = mid.querySelector(":scope > p.muted"); let dr = null, tries = 0;
@@ -13567,7 +13574,7 @@ function hvTuto(i){ const n = HV_TUTO.length, [ill, t, p] = HV_TUTO[i];
       if (f && frsOn()){ const M = $("#modal"); M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${esc(f.name)}</h2><button class="ghost" id="frBack">← Amis</button></div>${waitHTML("Chargement du profil…")}</div>`; M.classList.remove("hidden"); $("#frBack").onclick = () => frShow();
         const {data} = await CP.sb.from("players").select("profile,last_seen").eq("user_id", f.uid).maybeSingle();
         let card = data && data.profile && data.profile.id ? unpack(data.profile) : null;
-        if (!card){ const r = await CP.sb.rpc("friend_profile", {target: f.uid}); if (r.data) card = fromSave(r.data); }
+        if (!card){ const r = await CP.sb.rpc("friend_profile", {target: f.uid}); if (r.data){ card = fromSave(r.data); try { const raw = JSON.parse(r.data["mercato-cartes"] || "{}"); if (card && raw._ownN){ card.ownN = raw._ownN; card.hc = 1; } } catch {} } }
         if (card){ const L = frList(), e = L.find(x => x.id === id), seen = data ? Date.parse(data.last_seen) : 0;
           lsSet(FR_KEY, e ? L.map(x => x.id === id ? {...x, last: card, seen} : x) : [...L, {id, name: f.name, tag: f.tag, last: card, seen}].slice(0, 80));
           if (!frsOnline(f)){ const keep = NET.room; NET.room = null; try { return view(id); } finally { NET.room = keep; } } } } } catch {}
@@ -13742,10 +13749,11 @@ document.addEventListener("contextmenu", e => { if (e.target.closest && !e.targe
   // paliers (19 oct. 2026) : éclats + booster à 1, 3, 5 et 10 filleuls validés ; les titres Recruteur (3) et Ambassadeur (10) se débloquent dans les cartes de visite
   // [filleuls, éclats, boosters, libellé, titre, booster Or au choix]
   const TIERS = [[1, 0, ["mix:1", "mix:1", "mix:1"], "3 boosters Argent"], [3, 0, ["mix:2"], "1 booster Or", "titre Recruteur"], [5, 500, [], "+500 ◆ et 1 booster Or au choix", "", 1], [10, 0, ["mix:3"], "1 booster Divin", "titre Ambassadeur"]];
-  const tiers = ok => { const s = tcLoad(); s.refT = s.refT || []; let got = []; const was = s.refN || 0; s.refN = Math.max(was, ok);
-    TIERS.forEach(([n, g, P, pl, t, ch]) => { if (s.refN >= n && !s.refT.includes(n)){ s.refT.push(n); s.gems += g; P.forEach(k => tcGive(s, k)); if (ch) s.refChoice = (s.refChoice || 0) + 1; got.push(`${n} filleul${n > 1 ? "s" : ""} : ${pl}${t ? " + " + t : ""}`); } });
-    if (got.length || s.refN !== was){ tcSave(s); try { tabDot(); } catch {} }
-    if (got.length){ SFX.play("fanfare"); frToast("Palier de parrainage ! " + got.join(" · "), (tcLoad().refChoice ? "Choisir mon booster" : "Voir"), () => { FR_TAB = "ref"; frShow(); }); } };
+  // paliers : décidés et comptés par le serveur (referral_claim renvoie ceux à verser, une seule fois) ; ici on ne fait que créditer
+  const grantTiers = list => { if (!list || !list.length) return; const s = tcLoad(), got = [];
+    TIERS.forEach(([n, g, P, pl, t, ch]) => { if (!list.includes(n)) return; s.gems += g; P.forEach(k => tcGive(s, k)); if (ch) s.refChoice = (s.refChoice || 0) + 1; got.push(`${n} filleul${n > 1 ? "s" : ""} : ${pl}${t ? " + " + t : ""}`); });
+    tcSave(s); try { tabDot(); } catch {} SFX.play("fanfare"); frToast("Palier de parrainage ! " + got.join(" · "), (tcLoad().refChoice ? "Choisir mon booster" : "Voir"), () => { FR_TAB = "ref"; frShow(); }); };
+  const setRefN = ok => { const s = tcLoad(); if ((s.refN || 0) !== ok){ s.refN = ok; tcSave(s); } };   // nombre de filleuls validés (titres Recruteur / Ambassadeur)
   // booster Or au choix (palier 5) : Mélange ou un univers
   const pick = () => { const M = document.createElement("div"); M.className = "tcview"; M.style.cssText = "display:grid;place-items:center;align-content:center;background:rgba(5,5,7,.92)";
     M.innerHTML = `<div class="box" style="max-width:420px;width:calc(100% - 32px)"><div class="head"><h2>Ton booster Or</h2><button class="ghost" id="rfX">Plus tard</button></div><p class="muted" style="margin:0 0 12px">Palier de 5 filleuls : choisis l'univers de ton booster Or.</p><div class="refpick">${Object.keys(TC_PACKS).map(u => `<button data-u="${u}">${esc(TC_PACKS[u][0])}</button>`).join("")}</div></div>`;
@@ -13768,10 +13776,11 @@ document.addEventListener("contextmenu", e => { if (e.target.closest && !e.targe
           if (data === "ok") frToast(`Parrainage enregistré avec ${pend} : ouvre 20 boosters et vous recevez chacun 3 boosters.`);
           else if (why) frToast(`Le lien de parrainage de ${pend} n'a pas été pris en compte : ${why}.`); } }   /* comme Kyara : on dit pourquoi */
       const {data: st} = await CP.sb.rpc("referral_state"); if (st) RF.st = st;
-      if (st && st.todo > 0){ const {data: n} = await CP.sb.rpc("referral_claim");
-        if (n > 0){ const s = tcLoad(); tcGive(s, "mix:0", n); tcSave(s); try { tabDot(); } catch {} SFX.play("win");
-          frToast(`Parrainage validé : +${n} boosters Mélange !`, "Ouvrir", () => tcShow("packs")); const r = await CP.sb.rpc("referral_state"); if (r.data) RF.st = r.data; } }
-      if (RF.st) tiers((RF.st.mine || []).filter(x => x.ok).length);
+      if (st && st.todo > 0){ const {data: R} = await CP.sb.rpc("referral_claim"); const n = R && R.boosters || 0;
+        if (n > 0){ const s = tcLoad(); tcGive(s, "mix:0", n); tcSave(s); try { tabDot(); } catch {} SFX.play("win"); frToast(`Parrainage validé : +${n} boosters Mélange !`, "Ouvrir", () => tcShow("packs")); }
+        if (R && R.tiers && R.tiers.length) setTimeout(() => grantTiers(R.tiers), n > 0 ? 2500 : 0);
+        const r = await CP.sb.rpc("referral_state"); if (r.data) RF.st = r.data; }
+      if (RF.st) setRefN((RF.st.mine || []).filter(x => x.ok).length);
       if (document.querySelector("#modal .frbox [data-refpanel]")) paint();
     } catch {} finally { RF.busy = false; } }
   setInterval(sync, 9e4); document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") sync(); });
