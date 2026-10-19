@@ -12410,7 +12410,7 @@ async function frView(id){
   const M = $("#modal"), f = frList().find(x => x.id === id) || frParse(id), all = tcCards();
   const draw = (c, live) => { const ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]), s = tcLoad(), mine = frTradeable(s).map(n => all.find(x => x.no === n)).filter(Boolean), his = (c.tr || []).map(n => all.find(x => x.no === n)).filter(Boolean);
     const by = r => c.own.filter(([n]) => all.find(x => x.no === n)?.r === r).length;
-    M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><span class="small" style="color:${live ? "var(--ok)" : "var(--muted)"}">${live ? "En ligne" : "Hors ligne : dernière fiche connue"}</span></div><button class="ghost" id="frBack">← Amis</button></div>
+    M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><span class="small" style="color:${live ? "var(--ok)" : "var(--muted)"}">${live ? "En ligne" : "Hors ligne · profil enregistré"}</span></div><button class="ghost" id="frBack">← Amis</button></div>
       ${pfBody(f.name, f.tag, c, {live})}
       <div class="tierh" style="--tc:var(--accent)">Échange</div>
       ${!live ? `<p class="muted">Ton ami doit être en ligne pour échanger.</p>` : c.v === false || s.taint ? `<p class="muted">Échange bloqué : ${s.taint ? "ta collection" : "sa collection"} a été modifiée en dehors du jeu.</p>` : !mine.length || !his.length ? `<p class="muted">Un échange porte sur des doublons : ${!mine.length ? "tu n'en as pas" : "ton ami n'en a pas"} pour l'instant.</p>`
@@ -13508,15 +13508,26 @@ function hvTuto(i){ const n = HV_TUTO.length, [ill, t, p] = HV_TUTO[i];
   frsHello = async function(){ const r = await base(); try { if (r && frsOn()){ const p = prof(), j = p && JSON.stringify(p);
         if (j && (j !== AM.last || Date.now() - AM.lastT > 6e5)){ const {error} = await CP.sb.from("players").update({profile: p}).eq("user_id", CP.user.id); if (!error){ AM.last = j; AM.lastT = Date.now(); } } } } catch {} return r; };
 
-  // « Voir » : si l'ami n'est pas en ligne, son profil enregistré s'affiche tout de suite (plus d'attente de 9 s)
+  // profil d'un ami calculé depuis sa sauvegarde en ligne (fonction friend_profile, amis seulement) : on rejoue frCard() en lisant SES clés au lieu des miennes.
+  // Pendant ce calcul, aucune écriture n'atteint mon stockage (setItem / removeItem neutralisés), puis tout est remis en place.
+  const fromSave = keys => { const K = {}; for (const [k, v] of Object.entries(keys || {})) K[k] = typeof v === "string" ? v : JSON.stringify(v);
+    const P = Storage.prototype, g = P.getItem, st = P.setItem, rm = P.removeItem, mine = (o, k) => o === localStorage && typeof k === "string" && k.startsWith("mercato-");
+    P.getItem = function(k){ return mine(this, k) ? (k in K ? K[k] : null) : g.call(this, k); };
+    P.setItem = function(k, v){ if (!mine(this, k)) return st.call(this, k, v); };
+    P.removeItem = function(k){ if (!mine(this, k)) return rm.call(this, k); };
+    try { return frCard(); } catch { return null; } finally { P.getItem = g; P.setItem = st; P.removeItem = rm; } };
+  const unpack = P => { if (typeof P.own === "string") P.own = P.own ? P.own.split(",").map(x => { const [n, f] = x.split(":"); return f ? [+n, f] : [+n]; }) : [];
+    if (typeof P.tr === "string") P.tr = P.tr ? P.tr.split(",").map(Number) : []; return P; };
+  // « Voir » : le profil enregistré (ou calculé depuis la sauvegarde) s'affiche tout de suite quand l'ami n'est pas en ligne
   const view = frView;
   frView = async function(id){
     try { const f = FRS.data && FRS.data.friends.find(x => x.id === id);
-      if (f && frsOn()){ const {data} = await CP.sb.from("players").select("profile,last_seen").eq("user_id", f.uid).maybeSingle();
-        if (data && data.profile && data.profile.id){ const P = data.profile;
-          if (typeof P.own === "string") P.own = P.own ? P.own.split(",").map(x => { const [n, f] = x.split(":"); return f ? [+n, f] : [+n]; }) : [];
-          if (typeof P.tr === "string") P.tr = P.tr ? P.tr.split(",").map(Number) : []; const L = frList(), e = L.find(x => x.id === id);
-          lsSet(FR_KEY, e ? L.map(x => x.id === id ? {...x, last: data.profile, seen: Date.parse(data.last_seen)} : x) : [...L, {id, name: f.name, tag: f.tag, last: data.profile, seen: Date.parse(data.last_seen)}].slice(0, 80));
+      if (f && frsOn()){ const M = $("#modal"); M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${esc(f.name)}</h2><button class="ghost" id="frBack">← Amis</button></div>${waitHTML("Chargement du profil…")}</div>`; M.classList.remove("hidden"); $("#frBack").onclick = () => frShow();
+        const {data} = await CP.sb.from("players").select("profile,last_seen").eq("user_id", f.uid).maybeSingle();
+        let card = data && data.profile && data.profile.id ? unpack(data.profile) : null;
+        if (!card){ const r = await CP.sb.rpc("friend_profile", {target: f.uid}); if (r.data) card = fromSave(r.data); }
+        if (card){ const L = frList(), e = L.find(x => x.id === id), seen = data ? Date.parse(data.last_seen) : 0;
+          lsSet(FR_KEY, e ? L.map(x => x.id === id ? {...x, last: card, seen} : x) : [...L, {id, name: f.name, tag: f.tag, last: card, seen}].slice(0, 80));
           if (!frsOnline(f)){ const keep = NET.room; NET.room = null; try { return view(id); } finally { NET.room = keep; } } } } } catch {}
     return view(id); };
 
