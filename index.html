@@ -9683,8 +9683,10 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tccine .rays{background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--yc) 46%,transparent) 0 5deg,transparent 5deg 16deg)}
 .tccine .ring{border-color:var(--yc)}.tccine .sp i{background:var(--yc);box-shadow:0 0 10px var(--yc)}.tccine .lab{color:var(--yc);text-shadow:0 0 22px var(--yc)}
 .tccine .seal{color:color-mix(in srgb,var(--yc) 22%,transparent)}
-/* 19 oct. 2026 : en 3D (vue en grand, cinématique) la carte isole ses calques, sinon les fusions (color-dodge…) ne s'appliquent plus et les reflets assombrissent l'image */
+/* 19 oct. 2026 : en 3D (vue en grand, cinématique) la carte isole ses calques, sinon les fusions (color-dodge…) ne s'appliquent plus et les reflets assombrissent l'image ;
+   carte retournée : la face est entièrement masquée (sur téléphone, des calques de la face traversaient le dos) */
 .tcview .vf .tc,.tccine .cardw .tc{isolation:isolate}
+.tcview .vf{transition:visibility 0s}.tcview .vcard.bk .vf{visibility:hidden;transition:visibility 0s .28s}.tcview .vcard.bk .vf *{animation-play-state:paused!important}
 /* styles : orage (Mythique, Éveil), cases de manga (SAR), pluie d'or (UR) */
 .tccine .bolts,.tccine .pans,.tccine .rain{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .tccine .bolts i{position:absolute;top:0;height:min(64%,560px);width:min(30vw,170px);background:linear-gradient(180deg,#fff,var(--yc));clip-path:polygon(46% 0,62% 0,40% 38%,70% 38%,22% 100%,44% 52%,18% 52%);opacity:0;filter:drop-shadow(0 0 14px var(--yc))}
@@ -10912,7 +10914,7 @@ function tcHome(s){
   box.innerHTML = `<div><b>Cartes à collectionner · 札</b><span>${own}/${tcCards().length} cartes · niveau ${tcLvl(s.xp)} · ${n ? n + " booster" + (n > 1 ? "s" : "") + " à ouvrir" : "gagne des parties pour des éclats et des boosters"}${todo ? " · " + todo + " récompense" + (todo > 1 ? "s" : "") + " à réclamer" : ""}</span></div><button class="${n || todo ? "primary" : ""}" id="tcHomeGo">${n ? "Ouvrir" : todo ? "Réclamer" : "Voir ma collection"}</button>`;
   document.querySelector("#tcHomeGo").onclick = () => tcShow(n ? "packs" : todo ? "missions" : "album");
 }
-function tcShow(tab){ if (tab) TC_TAB = tab; show("tcg"); tcRender(); setTimeout(() => { try { tcTourMaybe(); } catch {} try { const s = tcLoad(); if (s.tuto && s.tuto.tour) gtBackOffer("cartes", (s.opened || 0) < 60, () => { TC_TAB = "packs"; tcRender(); tcTourMaybe(true); }); } catch {} }, 350); }
+function tcShow(tab){ try { localStorage.removeItem("hanko-cartes-new"); window.tabDot && tabDot(); } catch {} if (tab) TC_TAB = tab; show("tcg"); tcRender(); setTimeout(() => { try { tcTourMaybe(); } catch {} try { const s = tcLoad(); if (s.tuto && s.tuto.tour) gtBackOffer("cartes", (s.opened || 0) < 60, () => { TC_TAB = "packs"; tcRender(); tcTourMaybe(true); }); } catch {} }, 350); }
 document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#tcHelpQ")){ TC_TAB = "packs"; tcRender(); setTimeout(() => tcTourMaybe(true), 100); } });
 function tcRender(){
   tcLibs();
@@ -11116,8 +11118,13 @@ function tcView(c, want){
   const face = () => { V.querySelector(".vf").innerHTML = tcCard(c, {f, x: s.own[c.id]}); V.querySelector(".tcfiche-w").innerHTML = tcSheet(c, s, f); queueMicrotask(() => { try { ficheEdge(); } catch {} });   /* contour du dos posé dans la même image que la face : animations (Légende) synchronisées */ V.querySelectorAll("[data-tcf]").forEach(b => b.classList.toggle("sel", b.dataset.tcf === f)); };
   const tilt = (rx, ry, mx = 50, my = 50) => { card.style.setProperty("--rx", rx + "deg"); card.style.setProperty("--ry", (ry + (back ? 180 : 0)) + "deg"); card.style.setProperty("--mx", mx + "%"); card.style.setProperty("--my", my + "%"); card.style.setProperty("--px", mx + "%"); card.style.setProperty("--py", my + "%"); card.style.setProperty("--ph", Math.min(1, Math.hypot(mx - 50, my - 50) / 50).toFixed(2)); card.style.setProperty("--ex", (-ry * .15).toFixed(2) + "px"); card.style.setProperty("--ey", (rx * .15).toFixed(2) + "px"); };   // --ex/--ey : tranche de la carte, du côté qui s'éloigne
   face(); tilt(0, 0);
-  box.onpointermove = e => { const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; card.classList.add("live"); tilt((.5 - y) * 44, (x - .5) * 56, x * 100, y * 100); };   // inclinaison plus ample (17 oct. 2026) : ±22° / ±28°
+  box.onpointermove = e => { if (back) return;   /* 19 oct. 2026 : le dos (la fiche) ne s'incline pas */
+    const r = card.getBoundingClientRect(), k = e.pointerType === "touch" ? 1.5 : 1, cl = v => Math.max(0, Math.min(1, v)), x = cl(.5 + ((e.clientX - r.left) / r.width - .5) * k), y = cl(.5 + ((e.clientY - r.top) / r.height - .5) * k);   /* au doigt, un petit geste suffit pour incliner autant qu'à la souris */
+    card.classList.add("live"); tilt((.5 - y) * 44, (x - .5) * 56, x * 100, y * 100); };   // inclinaison plus ample (17 oct. 2026) : ±22° / ±28°
   box.onpointerleave = () => { card.classList.remove("live"); tilt(0, 0); };
+  // 19 oct. 2026 : au doigt, la carte suit le geste même s'il sort du cadre (capture), et revient à plat au lâcher
+  box.onpointerdown = e => { if (e.pointerType === "touch" && !back) try { box.setPointerCapture(e.pointerId); } catch {} };
+  box.onpointerup = box.onpointercancel = e => { if (e.pointerType === "touch"){ card.classList.remove("live"); tilt(0, 0); } };
   // la fiche (dos) reprend le contour de la face : prisme aux couleurs de l'illustration pour une AR, « verre » pour une Holo (17 oct. 2026)
   const ficheEdge = () => { const t = V.querySelector(".vf .tc"), F = V.querySelector(".tcfiche"); if (!t || !F) return; const cs = getComputedStyle(t), q = k => (t.style.getPropertyValue(k) || cs.getPropertyValue(k)).trim();
     F.classList.toggle("fa", t.classList.contains("arp")); F.classList.toggle("fq", t.classList.contains("arp") && t.classList.contains("h3") && !!q("--q1")); F.classList.toggle("fgl", t.classList.contains("f-H") && t.classList.contains("h3") && !!q("--qe"));
@@ -11694,6 +11701,9 @@ function tcOpening(key, got){
     const up = () => { if (!dr) return; if (dr.sp > .03 && Math.abs(dr.lx - dr.x0) > .3){ const d = dr.lx >= dr.x0 ? 1 : -1; dr.zip && dr.zip.done(); dr = null; line.style.left = "0"; line.style.width = "100%"; try { navigator.vibrate?.(25); } catch {} openP(true, d); return; }   /* doigt levé en plein élan : on ouvre quand même */
       dr.zip && dr.zip.end(); dr = null; band.classList.remove("on"); GL && GL.hold(false); line.style.width = "0"; if (++tries >= 3 && hint) hint.textContent = "Glisse le long de la ligne, ou touche le sachet pour l'ouvrir"; };
     band.onpointerup = up; band.onpointercancel = up;
+    // 19 oct. 2026 : le geste peut commencer à côté du sachet, à la hauteur de la languette (plus intuitif au doigt)
+    O.addEventListener("pointerdown", e => { if (O.dataset.torn || !w.classList.contains("ready") || e.target.closest(".cutband,button,a")) return; const r = w.getBoundingClientRect(), bt = r.top + r.height * .24;
+      if (e.clientY < r.top - 70 || e.clientY > bt + 40) return; band.onpointerdown(e); });
     // booster secret (proposition A4, sans ruban) : le sachet fait un tour, montre son dos lumineux, revient recouvert de sa couleur ; titre, chances et garantie s'affichent
     const ready = () => { w.classList.add("ready"); O.classList.add("secdone"); };
     if ((got.secs || []).length){ const sx = TC_SECRET.find(x => x[0] === got.secs[0]); let ok = false; const fin = () => { if (ok) return; ok = true; O.classList.add("secmid"); ready(); };
@@ -11764,12 +11774,13 @@ function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T
   const tg = st.sel ? st.sel() : null, [a, b, c, d] = T.el.querySelectorAll("i"), ring = T.el.querySelector(".ring"), tip = T.el.querySelector(".tip"), W = innerWidth, H = innerHeight;
   if (st.sel && !tg){ if (st.pre) try { st.pre(); } catch {} }
   if (!tg){ a.style.cssText = "left:0;top:0;right:0;bottom:0"; [b, c, d].forEach(x => x.style.cssText = "display:none"); ring.style.display = "none"; tip.style.top = "50%"; tip.style.bottom = "auto"; tip.style.translate = "-50% -50%"; return; }
-  let r = tg.getBoundingClientRect(); if (!T.scrolled || r.top < 70 || r.bottom > H - 150){ T.scrolled = true; tg.scrollIntoView({block: "center"}); r = tg.getBoundingClientRect(); }
+  { const sx = tg.closest(".tctabs"); if (sx){ const a = tg.getBoundingClientRect(), b = sx.getBoundingClientRect(); if (a.left < b.left || a.right > b.right) sx.scrollLeft += a.left - b.left - (b.width - a.width) / 2; } }   /* onglet caché dans la barre qui défile (étape « Collection ») : on le ramène au centre avant de mesurer */
+  let r = tg.getBoundingClientRect(); if (!T.scrolled || r.top < 70 || r.bottom > H - 150){ T.scrolled = true; tg.scrollIntoView({block: "center", inline: "nearest"}); r = tg.getBoundingClientRect(); }
   const m = 6, x0 = Math.max(0, r.left - m), y0 = Math.max(0, r.top - m), x1 = Math.min(W, r.right + m), y1 = Math.min(H, r.bottom + m);
   a.style.cssText = `left:0;top:0;width:100%;height:${y0}px`; b.style.cssText = `left:0;top:${y1}px;width:100%;bottom:0`; c.style.cssText = `left:0;top:${y0}px;width:${x0}px;height:${y1 - y0}px`; d.style.cssText = `left:${x1}px;top:${y0}px;right:0;height:${y1 - y0}px`;
   ring.style.cssText = `display:block;left:${x0}px;top:${y0}px;width:${x1 - x0}px;height:${y1 - y0}px`; tip.style.translate = "-50% 0";
   if (y1 + 190 < H){ tip.style.top = (y1 + 14) + "px"; tip.style.bottom = "auto"; } else { tip.style.top = "auto"; tip.style.bottom = (H - y0 + 14) + "px"; } }
-function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; if (T.replay) gift = false;   /* revoir le didacticiel ne redonne pas le cadeau */ setTimeout(() => { try { if (!document.querySelector('.gtour')) gtStart([gtKeepStep("en haut de l'écran Cartes")], {title: "Cartes"}); } catch {} }, gift ? 2600 : 300); clearInterval(T.timer); T.el.remove(); document.querySelector(".tcfinger")?.remove(); TC_TOUR = null; const s = tcLoad(); s.tuto = s.tuto || {claimed: []}; s.tuto.tour = 1; if (gift) tcGive(s, "mix:1"); tcSave(s); TC_F.own = false; TC_TAB = "packs"; tcRender(); window.scrollTo(0, 0); if (gift){ SFX.play("fanfare"); tcCele("Didacticiel terminé", "1 booster Argent offert", "学", "#dfe5ee"); } }
+function tcTourEnd(gift){ const T = TC_TOUR; if (!T) return; if (T.replay) gift = false;   /* revoir le didacticiel ne redonne pas le cadeau */ try { localStorage.removeItem("hanko-helpq"); document.body.classList.remove("nohelpq"); } catch {}   /* 19 oct. 2026 : plus de question sur le « ? » ; il reste toujours affiché pour revoir le didacticiel */ clearInterval(T.timer); T.el.remove(); document.querySelector(".tcfinger")?.remove(); TC_TOUR = null; const s = tcLoad(); s.tuto = s.tuto || {claimed: []}; s.tuto.tour = 1; if (gift) tcGive(s, "mix:1"); tcSave(s); TC_F.own = false; TC_TAB = "packs"; tcRender(); window.scrollTo(0, 0); if (gift){ SFX.play("fanfare"); tcCele("Didacticiel terminé", "1 booster Argent offert", "学", "#dfe5ee"); } }
 </script>
 
 <style>
@@ -12565,7 +12576,7 @@ function cpRender(){ const box = $("#cpBox"); if (!box) return;
   const run = async fn => { const t = setTimeout(() => cpSet("ko", "Le serveur ne répond pas. Vérifie ta connexion internet, puis réessaie."), 15000);
     try { cpSet("run", "Un instant…"); const sb = await cpClient(); if (!sb) return cpSet("ko", "Connexion impossible."); await fn(sb); } catch (e){ cpSet("ko", cpErr(e)); } finally { clearTimeout(t); } };
   $("#cpIn") && ($("#cpIn").onclick = () => { const c = cred(); if (c) run(async sb => { const {error} = await sb.auth.signInWithPassword(c); if (error) cpSet("ko", /Invalid login/i.test(String(error.message)) ? "E-mail ou mot de passe incorrect. Pas encore de compte ? Touche « Créer un compte »." : cpErr(error)); }); });
-  $("#cpUp") && ($("#cpUp").onclick = () => { const c = cred(); if (c) run(async sb => { const {data, error} = await sb.auth.signUp({...c, options: {emailRedirectTo: FR_SITE}}); if (error) return cpSet("ko", /already registered|already been registered/i.test(String(error.message)) ? "Un compte existe déjà avec cet e-mail : touche « Se connecter »." : cpErr(error)); cpSet("ok", data.session ? "Compte créé, bienvenue !" : "Compte créé : ouvre le lien reçu par e-mail pour le confirmer, puis connecte-toi."); }); });
+  $("#cpUp") && ($("#cpUp").onclick = () => { const c = cred(); if (c) run(async sb => { const {data, error} = await sb.auth.signUp({...c, options: {emailRedirectTo: FR_SITE}}); if (error) return cpSet("ko", /already registered|already been registered/i.test(String(error.message)) ? "Un compte existe déjà avec cet e-mail : touche « Se connecter »." : cpErr(error)); try { if (data.user){ localStorage.setItem("hanko-welcome-due", "1"); localStorage.setItem("hanko-cartes-new", "1"); } } catch {} cpSet("ok", data.session ? "Compte créé, bienvenue !" : "Compte créé : ouvre le lien reçu par e-mail pour le confirmer, puis connecte-toi."); }); });
   $("#cpForgot") && ($("#cpForgot").onclick = () => { const mail = $("#cpMail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(mail)) return cpSet("ko", "Écris d'abord ton e-mail ci-dessus."); run(async sb => { const {error} = await sb.auth.resetPasswordForEmail(mail, {redirectTo: FR_SITE}); cpSet(error ? "ko" : "ok", error ? cpErr(error) : "Si un compte existe, un lien de réinitialisation vient d'être envoyé."); }); });
   $("#cpNewGo") && ($("#cpNewGo").onclick = () => { const p = $("#cpNew").value; if (p.length < 8) return cpSet("ko", "Le mot de passe doit faire au moins 8 caractères."); run(async sb => { const {error} = await sb.auth.updateUser({password: p}); if (error) return cpSet("ko", cpErr(error)); CP.recov = false; cpRender(); cpSet("ok", "Mot de passe changé."); }); });
   $("#cpSaveNow") && ($("#cpSaveNow").onclick = () => cpPush());
@@ -12609,6 +12620,7 @@ function cpGate(loading){ if (!cpReady() || !cpOnSite() || window.__INVITE) retu
   g.querySelectorAll("[data-cgm]").forEach(b => b.onclick = () => setMode(b.dataset.cgm)); setMode(mode);
   const signUp = c => run(async sb => { const {data, error} = await sb.auth.signUp({...c, options: {emailRedirectTo: FR_SITE}});
     if (error){ if (/already registered|already been registered/i.test(String(error.message))){ setMode("in"); return st("ko", "Un compte existe déjà avec cet e-mail : entre ton mot de passe et touche « Se connecter »."); } return st("ko", cpErr(error)); }
+    if (data.user) try { localStorage.setItem("hanko-welcome-due", "1"); localStorage.setItem("hanko-cartes-new", "1"); } catch {}   /* 19 oct. 2026 : bienvenue à la 1re connexion après l'inscription, pastille sur Cartes */
     st("ok", data.session || data.user ? (data.session ? "Compte créé, bienvenue !" : "Compte créé : ouvre le lien reçu par e-mail pour le confirmer, puis connecte-toi.") : "Réponse inattendue du serveur : réessaie dans un instant."); });
   const signIn = c => run(async sb => { const {error} = await sb.auth.signInWithPassword(c); if (!error) return;
     if (/Invalid login/i.test(String(error.message))){ st("ko", "E-mail ou mot de passe incorrect. Pas encore de compte ?"); const e = $("#cgSt"); e.insertAdjacentHTML("beforeend", ` <button type="button" class="lk" id="cgMk">Créer un compte avec cet e-mail</button>`); $("#cgMk").onclick = () => { setMode("up"); const c2 = cred(); if (c2) signUp(c2); }; return; }
@@ -12759,7 +12771,7 @@ try { document.querySelector("#home .sitebar")?.insertAdjacentHTML("beforeend", 
 .pfhead{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin:4px 0 14px}
 @media (max-width:520px){.pfhead{grid-template-columns:1fr;justify-items:start;gap:12px}}
 .pfav{--sz:96px;--ring:linear-gradient(135deg,#3fe0a8,#c9f26b);position:relative;flex:none;width:var(--sz);aspect-ratio:1;border-radius:50%;padding:calc(var(--sz) * .045);background:var(--ring);box-shadow:0 8px 22px rgba(0,0,0,.5)}
-.pfav > img,.pfav > b{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 14%;background:#10151a;font-family:var(--title);font-weight:900;font-size:calc(var(--sz) * .4);color:#eafff4;box-shadow:inset 0 0 0 2px #0b0a0e}
+.pfav > img,.pfav > b{display:grid;place-items:center;text-align:center;line-height:1;padding:0;margin:0;box-sizing:border-box;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 14%;background:#10151a;font-family:var(--title);font-weight:900;font-size:calc(var(--sz) * .4);color:#eafff4;box-shadow:inset 0 0 0 2px #0b0a0e}
 .pfav.fr-b{--ring:linear-gradient(135deg,#e7c08f,#8a5a2b)}.pfav.fr-a{--ring:linear-gradient(135deg,#fff,#8e99a8 60%,#e3e8ef)}.pfav.fr-o{--ring:linear-gradient(135deg,#fff3c2,#f2c230 45%,#a8730a)}
 .pfav.fr-l{--ring:conic-gradient(#c9a2ff,#7de3ff,#ff9ac1,#c9a2ff)}.pfav.fr-m{--ring:linear-gradient(135deg,#ffd9a0,#ff5a36 50%,#7a0a2e)}.pfav.fr-p{--ring:conic-gradient(#ff5a8a,#ffcf3d,#6ee7a8,#5ac8fa,#b07cff,#ff5a8a)}
 .pfav.fr-n10{--ring:linear-gradient(135deg,#bff3ff,#2aa7d8)}.pfav.fr-n25{--ring:repeating-conic-gradient(#7de3ff 0 12deg,#1b5f86 12deg 24deg)}.pfav.fr-s{--ring:conic-gradient(from 200deg,#ffb347,#ff3b3b,#ffe08a,#ff3b3b,#ffb347)}
@@ -15532,18 +15544,20 @@ const HOME_ON = {games: ["mercato", "uc", "guess", "sil"], fams: ["cat1", "cat2"
       document.querySelector("#resGo").onclick = () => { sessionStorage.removeItem("mercato-reprise"); document.querySelector(".resume")?.remove(); const n = document.querySelector("#qjName"); if (!n.value) n.value = r.name || ""; document.querySelector("#qjCode").value = r.code; document.querySelector("#qjGo").click(); };
       document.querySelector("#resNo").onclick = () => { sessionStorage.removeItem("mercato-reprise"); document.querySelector(".resume").remove(); }; } } catch {}
   // premier lancement : trois phrases, une seule fois
-  let seen = true; try { seen = !!localStorage.getItem("mercato-bienvenue"); } catch {}
-  if (!seen && !hashOk){
-    document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Hanko, en trois gestes</h2>
-      <ol><li><i>01</i><span><b>Choisis un jeu</b>17 jeux rangés par famille : duel, connaissance, complicité, voix.</span></li>
-      <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien avec un code à quatre caractères.</span></li>
-      <li><i>03</i><span><b>Remplis ta collection</b>Chaque partie rapporte des boosters. Ouvre-les dans l'onglet Cartes et complète ta collection, carte après carte.</span></li></ol>
+  // 19 oct. 2026 : le message ne s'affiche plus à la première visite, mais à la première connexion après l'inscription (drapeau posé par l'inscription)
+  window.hkWelcome = () => { let due = false; try { due = localStorage.getItem("hanko-welcome-due") === "1"; } catch {} if (!due || !CP.user || document.querySelector(".welcome") || document.querySelector(".cpgate:not(.hidden)")) return false;
+    try { localStorage.removeItem("hanko-welcome-due"); } catch {}
+    document.body.insertAdjacentHTML("beforeend", `<div class="welcome" role="dialog" aria-modal="true" aria-label="Bienvenue"><div><div class="eyebrow">Bienvenue <i>· ようこそ</i></div><h2>Hanko, en quatre gestes</h2>
+      <ol><li><i>01</i><span><b>Choisis un jeu</b>4 jeux en 2 familles : Duel (Mercato, Undercover) et Connaissance (Perso pixelisé, Silhouettes).</span></li>
+      <li><i>02</i><span><b>Joue à plusieurs</b>Sur un seul téléphone qu'on se passe, ou chacun sur le sien : invite tes amis en un geste, ou partage un code à quatre caractères.</span></li>
+      <li><i>03</i><span><b>Lance ta Carrière</b>Le mode solo : choisis ton univers, recrute tes combattants avec ton budget, joue les combats de la saison, remplis tes objectifs et monte de division en division jusqu'au sommet.</span></li>
+      <li><i>04</i><span><b>Collectionne les cartes</b>Chaque partie rapporte des boosters : ouvre-les dans l'onglet Cartes, complète ta collection, puis échange ou vends au marché.</span></li></ol>
       <button class="primary" id="welGo">C'est parti</button></div></div>`);
     const close = () => { try { localStorage.setItem("mercato-bienvenue", "1"); } catch {} document.querySelector(".welcome")?.remove(); };
     document.querySelector("#welGo").onclick = close; document.querySelector(".welcome").onclick = e => { if (e.target.classList.contains("welcome")) close(); };
     document.addEventListener("keydown", e => { if (e.key === "Escape") close(); }, {once: true});
-    document.querySelector("#welGo").focus();
-  }
+    document.querySelector("#welGo").focus(); return true; };
+  { let k = 0; const t = setInterval(() => { if (++k > 400 || hkWelcome()) clearInterval(t); }, 1500); }
   // règles repliables : un clic sur l'en-tête les ouvre
   document.querySelectorAll(".panel.rules").forEach(p => { const h = p.querySelector(":scope > b:first-child"); if (!h) return; p.classList.add("fold");
     h.setAttribute("role", "button"); h.tabIndex = 0; const tog = () => p.classList.toggle("open"); h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
@@ -15554,7 +15568,8 @@ const HOME_ON = {games: ["mercato", "uc", "guess", "sil"], fams: ["cat1", "cat2"
   /* « Cartes » ouvre toujours les boosters : ceux à ouvrir s'il y en a (gratuits ou gagnés), sinon la boutique */
   document.querySelector("#tabTcg").onclick = e => { e.preventDefault(); try { const s = tcLoad(), n = s.free.n, won = Object.keys(s.packs).find(k => s.packs[k] > 0); TC_SUB = n || won ? "mine" : "shop"; if (n) TC_PICK = "free"; else if (won) TC_PICK = won; } catch {} tcShow("packs"); window.scrollTo(0, 0); };
   /* pastille rouge sur « Cartes » tant qu'il reste des boosters gratuits à ouvrir (ils reviennent avec le temps : on revérifie régulièrement) */
-  const tabDot = () => { try { const a = document.querySelector("#tabTcg"), n = tcLoad().free.n; let d = a.querySelector(".tdot"); if (!n){ d && d.remove(); a.setAttribute("aria-label", "Cartes"); return; } if (!d){ a.querySelector("i").insertAdjacentHTML("beforeend", `<b class="tdot"></b>`); d = a.querySelector(".tdot"); } d.textContent = n; a.setAttribute("aria-label", "Cartes, " + n + (n > 1 ? " boosters gratuits à ouvrir" : " booster gratuit à ouvrir")); } catch {} };
+  const tabDot = () => { try { const a = document.querySelector("#tabTcg"); { let nw = false; try { nw = localStorage.getItem("hanko-cartes-new") === "1"; } catch {} let q = a.querySelector(".tnew"); if (nw && !q) a.querySelector("i").insertAdjacentHTML("beforeend", `<b class="tnew" aria-hidden="true"></b>`); else if (!nw && q) q.remove(); }   /* 19 oct. 2026 : point rouge clignotant après la création du compte */
+    const n = tcLoad().free.n; let d = a.querySelector(".tdot"); if (!n){ d && d.remove(); a.setAttribute("aria-label", "Cartes"); return; } if (!d){ a.querySelector("i").insertAdjacentHTML("beforeend", `<b class="tdot"></b>`); d = a.querySelector(".tdot"); } d.textContent = n; a.setAttribute("aria-label", "Cartes, " + n + (n > 1 ? " boosters gratuits à ouvrir" : " booster gratuit à ouvrir")); } catch {} };
   tabDot(); setInterval(tabDot, 5000); window.tabDot = tabDot;
   { const sc = () => document.body.classList.toggle("scrolled", (window.scrollY || document.documentElement.scrollTop || 0) > 6); addEventListener("scroll", sc, {passive: true}); sc(); }
   // le logo ramène à l'accueil : celui de l'accueil remonte en haut de page, celui des autres écrans passe par leur bouton « Accueil » (pour quitter proprement)
@@ -16986,6 +17001,45 @@ body #game #board .act #passBtn:hover:not(:disabled){background:#f0364a!importan
 <style>.tcview .tcfiche.fa{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--al) 85%,transparent),inset 0 0 10px color-mix(in srgb,var(--al) 35%,transparent),var(--fsh,0 0 18px color-mix(in srgb,var(--am) 55%,transparent))!important}
 .tcview .tcfiche.fa.fq{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--q1) 85%,transparent),inset 0 0 10px color-mix(in srgb,var(--q1) 35%,transparent),var(--fsh,0 0 18px color-mix(in srgb,var(--q2) 55%,transparent))!important}
 .tcview .tcfiche.fgl{box-shadow:var(--fsh,0 0 18px color-mix(in srgb,var(--q2) 50%,transparent))!important}</style>
+<style>/* 19 oct. 2026 : message de bienvenue toujours rouge ; point rouge clignotant sur Cartes après l'inscription */
+.welcome{--hc:#ff1e2d}
+#tabTcg i{position:relative}#tabTcg .tnew{position:absolute;top:-3px;right:-7px;width:11px;height:11px;border-radius:50%;background:#ff2a3a;box-shadow:0 0 0 2px #0b0a0e,0 0 10px #ff2a3a}
+#tabTcg i:has(.tnew) .tdot{display:none}   /* nouveau compte : le point rouge sans chiffre remplace le compteur, jusqu'à la première visite des Cartes */
+@media (prefers-reduced-motion:no-preference){#tabTcg .tnew{animation:hknew 1.1s ease-in-out infinite}}
+@keyframes hknew{50%{opacity:.25;transform:scale(.8)}}
+</style>
+<style>/* 19 oct. 2026 : après l'ouverture d'un booster, sur téléphone, les petites cartes avaient un texte trop grand (nom sur 2 lignes, rareté sur l'image) : même taille que pour 10 cartes */
+@media (max-width:640px){.tcopen .tcrow .tc .nm{font-size:9.5px;padding:0 5px}.tcopen .tcrow .tc .tp{font-size:7.5px;padding:4px 5px}.tcopen .tcrow .tc .ft{font-size:7.5px;padding:2px 5px 5px}.tcopen .tcrow .tc .nw{top:16px;left:4px;font-size:9px;padding:1px 4px}}
+</style>
+<style>/* 19 oct. 2026 : carte en grand ouverte : la page derrière ne défile plus (au téléphone, incliner la carte vers le haut ou le bas faisait défiler la collection) */
+.tcview{overscroll-behavior:contain;touch-action:none}.tcview .tcfiche-w,.tcview .tcfiche{touch-action:pan-y}
+html.tclock,html.tclock body{overflow:hidden!important;overscroll-behavior:none}
+body.tclock{position:fixed;left:0;right:0;width:100%}
+</style>
+<script>
+// verrou du défilement tant qu'une carte est ouverte en grand (.tcview) : body figé à sa position, rendu à la fermeture
+(() => { let y = 0, on = false;
+  const sync = () => { const v = !!document.querySelector(".tcview"); if (v === on) return; on = v;
+    if (v){ y = window.scrollY; document.documentElement.classList.add("tclock"); document.body.classList.add("tclock"); document.body.style.top = -y + "px"; }
+    else { document.documentElement.classList.remove("tclock"); document.body.classList.remove("tclock"); document.body.style.top = ""; window.scrollTo(0, y); } };
+  new MutationObserver(sync).observe(document.body, {childList: true});
+  // Safari iOS : un glissé dans la vue ne doit jamais faire défiler la page (sauf dans la fiche, qui peut défiler)
+  document.addEventListener("touchmove", e => { if (on && !e.target.closest(".tcfiche-w")) e.preventDefault(); }, {passive: false});
+})();
+</script>
+<style>/* 19 oct. 2026 : aperçus après ouverture (1 ou plusieurs boosters) : nom sur une seule ligne, texte à l'échelle de la carte (réglé par le script ci-dessous) */
+.tcopen .tcrow .tc .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:640px){.tcopen .tcrow.many{gap:8px}.tcopen .tcrow.many > *{flex:0 0 calc((100% - 16px) / 3);max-width:none}}
+</style>
+<script>
+(() => { const fit = row => { row.querySelectorAll(".tc").forEach(t => { const w = t.getBoundingClientRect().width; if (!w) return; const k = Math.min(1.25, w / 102);
+    const set = (s, px) => t.querySelectorAll(":scope > " + s + ", :scope " + s).forEach(e => e.style.fontSize = (px * k).toFixed(2) + "px");
+    set(".tp", 7.5); set(".ft", 7.5);
+    const nm = t.querySelector(".nm"); if (nm){ let f = 9.5 * k; nm.style.fontSize = f + "px"; while (nm.scrollWidth > nm.clientWidth + 1 && f > 7.5 * k){ f -= .25; nm.style.fontSize = f + "px"; } } }); };
+  const run = () => document.querySelectorAll(".tcopen .tcrow").forEach(fit);
+  new MutationObserver(() => requestAnimationFrame(run)).observe(document.body, {childList: true, subtree: true});
+  addEventListener("resize", run); })();
+</script>
 
 </body>
 </html>
