@@ -14517,7 +14517,7 @@ const CR_DIV = [["Bronze", "銅", "#c98a4b"], ["Argent", "銀", "#cfd6e0"], ["Or
 const CR_BAND = [[0, .30], [.16, .48], [.36, .68], [.56, .86], [.74, 1]];
 // économie : réglée par simulation (tools/sim-carriere.js), voir CLAUDE.md
 // Les sommes suivent l'échelle du vrai marché des transferts du football (demande de l'utilisateur) : un personnage moyen vaut 1 à 20M, un crack plusieurs centaines de millions, jamais un milliard.
-const CR_ECO = {start: 6, pay: [2, 4, 7, 12, 18], loss: .5, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .38, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
+const CR_ECO = {start: 6, pay: [2, 4, 8, 14, 22], loss: .5, sell: .6, prizeK: 5, objK: 3, valA: 1, valB: 400, cupUp: .08, scoutK: 1.15, star: .7, clubLo: .38, clubUp: .78, aiA: .66, aiB: .48, now: 1.8, lotUp: .03, gate: [[.96, 300], [.90, 150], [.80, 60]]};
 // noms des clubs IA : des groupes qui existent dans chaque univers (leur effectif, lui, est tiré selon la division)
 const CR_NAMES = {
   op: ["Pirates du Clown", "Baroque Works", "Équipage d'Arlong", "Marine de Loguetown", "Pirates de Krieg", "Pirates du Chat Noir", "CP9", "Thriller Bark", "Pirates de Foxy", "Brigade de Wapol", "Pirates de Bellamy", "Garnison d'Impel Down", "Armée de Dressrosa", "Pirates du Soleil", "Germa 66", "Pirates aux Cent Bêtes", "Marine de G-5", "Tontattas de Green Bit"],
@@ -14550,18 +14550,28 @@ const crQ = (u, i) => crPool(u).q[i], crCard = (u, i) => DATA[u][i];
 const crVal = (u, i) => crR5(CR_ECO.valA * Math.pow(CR_ECO.valB, crQ(u, i)));
 const crGate = (u, i) => { const q = crQ(u, i); for (const [lim, pr] of CR_ECO.gate) if (q >= lim) return pr; return 0; };
 const crMoney = (S, v) => `${v}M ${UNI[S.u].cur}`;
-const crWinPay = S => CR_ECO.pay[S.div];
+/* 15 rangs linéaires (19 oct. 2026, idée de l'utilisateur) : de Bronze 1 (rang 0) à Élite 3 (rang 14), le niveau des clubs, de la boutique et du recrutement
+   monte du même écart à chaque promotion, et la prime de victoire suit (×g par rang) : il faut recruter à chaque rang, l'argent ne s'entasse plus. */
+const CR_RANK = {on: true, m0: .15, m1: .87, w: .30, pay0: 1.2, g: 1.22, ahead: 1};   /* prime : 1,2M en Bronze 1, +22 % par rang (≈ 19M en Élite 3) */
+const crRank = S => Math.min(14, (S.div || 0) * 3 + (S.sub || 0));
+function crBand(S, ahead = 0){ if (!CR_RANK.on) return CR_BAND[S.div]; const m = CR_RANK.m0 + (CR_RANK.m1 - CR_RANK.m0) * Math.min(14, crRank(S) + ahead) / 14; return [Math.max(0, m - CR_RANK.w / 2), Math.min(1, m + CR_RANK.w / 2)]; }
+const crWinPay = S => CR_RANK.on ? crR5(CR_RANK.pay0 * Math.pow(CR_RANK.g, crRank(S))) : CR_ECO.pay[S.div];
 /* anti boule de neige (19 oct. 2026) — réglé par simulation (tools/sim-lot19.js) :
    1) une vente ou une offre de rachat ne rapporte jamais plus qu'un très bon joueur de la division (valeur plafonnée au haut de la tranche + 10 %) ;
    2) une victoire contre un adversaire nettement plus faible rapporte moins (jusqu'à 35 % de la prime) ;
    3) au-delà de 25 primes de victoire en caisse, les gains des matchs et de fin de saison sont divisés par deux. */
-const CR_ANTI = {capUp: .10, weakLo: .75, weakSpan: .2, weakMin: .35, rich: 25, richK: .5, ease: [.36, .18, .07], resSub: null, resDiv: null};   /* réserve de montée désactivée (19 oct. 2026) : en simulation elle ralentissait le titre de 30 % sans réduire l'abus (joueurs au-dessus de la division : ~2 par carrière avec ou sans) */   /* réserve : prix du meilleur joueur du niveau en montant d'un niveau, prix médian en changeant de division */   /* clubs de Bronze 1 / 2 / 3 un peu plus faibles : un joueur moyen gagne environ un match sur deux au début */
-const crCapVal = S => crR5(CR_ECO.valA * Math.pow(CR_ECO.valB, Math.min(1, CR_BAND[S.div][1] + CR_ANTI.capUp)));
+const CR_ANTI = {capUp: .10, weakLo: .75, weakSpan: .2, weakMin: .35, rich: 25, richK: .5, wage: 0, ease: [.46, .22, .08], easeU: {mha: .04}, resSub: null, resDiv: null};   /* réserve de montée désactivée (19 oct. 2026) : en simulation elle ralentissait le titre de 30 % sans réduire l'abus (joueurs au-dessus de la division : ~2 par carrière avec ou sans) */   /* réserve : prix du meilleur joueur du niveau en montant d'un niveau, prix médian en changeant de division */   /* clubs de Bronze 1 / 2 / 3 un peu plus faibles : un joueur moyen gagne environ un match sur deux au début */
+const crCapVal = S => crR5(CR_ECO.valA * Math.pow(CR_ECO.valB, Math.min(1, crBand(S)[1] + CR_ANTI.capUp)));
 function crSellVal(S, i){ return Math.min(crVal(S.u, i), crCapVal(S)) * CR_ECO.sell; }
 /* 4) réserve de montée : à chaque montée (niveau ou division), on garde au plus le prix d'un joueur moyen du niveau d'arrivée (prix médian de la tranche) ;
       le surplus devient du prestige (1 point pour 2 primes de victoire). L'argent ne s'accumule plus d'un niveau à l'autre. */
-function crReserve(S, sub){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), l = P.ix.filter(i => P.q[i] >= lo && P.q[i] <= hi).map(i => crVal(S.u, i)).sort((a, b) => a - b), r = sub ? CR_ANTI.resSub : CR_ANTI.resDiv, k = Array.isArray(r) ? r[S.div] : r;
+function crReserve(S, sub){ const [lo, hi] = crBand(S), P = crPool(S.u), l = P.ix.filter(i => P.q[i] >= lo && P.q[i] <= hi).map(i => crVal(S.u, i)).sort((a, b) => a - b), r = sub ? CR_ANTI.resSub : CR_ANTI.resDiv, k = Array.isArray(r) ? r[S.div] : r;
   if (!l.length) return crWinPay(S) * 5; return k > 1 ? crR5(l[l.length - 1] * k) : l[Math.min(l.length - 1, Math.floor(l.length * k))]; }   /* k ≤ 1 : quantile des prix du niveau ; k > 1 : k fois le prix du meilleur */
+/* 5) salaires (19 oct. 2026) : chaque match, l'effectif coûte k primes de victoire × (valeur de l'effectif ÷ valeur de 10 joueurs moyens de la division).
+      Un effectif normal coûte environ k primes ; empiler des stars ou des joueurs coûte cher. Jamais en dessous de zéro. */
+const CR_MED = {};
+function crMedVal(S){ const key = S.u + ":" + crRank(S); if (CR_MED[key] == null){ const [lo, hi] = crBand(S), P = crPool(S.u), l = P.ix.filter(i => P.q[i] >= lo && P.q[i] <= hi).map(i => crVal(S.u, i)).sort((a, b) => a - b); CR_MED[key] = l.length ? l[l.length >> 1] : 1; } return CR_MED[key]; }
+function crWages(S){ if (!CR_ANTI.wage) return 0; const v = S.squad.reduce((a, i) => a + crVal(S.u, i), 0); return Math.round(CR_ANTI.wage * crWinPay(S) * v / (10 * crMedVal(S))); }
 const crRich = S => S.money > CR_ANTI.rich * crWinPay(S) ? CR_ANTI.richK : 1;
 // n personnages dont le rang est proche de c (avec un peu de hasard), hors liste d'exclus
 function crNear(u, c, n, excl = [], spread = .09){ const P = crPool(u); return P.ix.filter(i => !excl.includes(i)).map(i => [i, Math.abs(P.q[i] - c) + Math.random() * spread]).sort((a, b) => a[1] - b[1]).slice(0, n).map(x => x[0]); }
@@ -14579,7 +14589,7 @@ const crSub = S => S.sub || 0, crDivN = (S, d = S.div, b = crSub(S)) => CR_DIV[d
 const crUpN = S => crSub(S) < 2 ? CR_SUB.up : S.div < 4 ? 2 : 1, crDnN = S => crSub(S) > 0 ? CR_SUB.down : S.div > 0 ? 2 : 0;
 const crUpTxt = S => crSub(S) < 2 ? `Les ${CR_SUB.up === 2 ? "deux" : CR_SUB.up} premiers montent en ${crDivN(S, S.div, crSub(S) + 1)}` : S.div < 4 ? `Les deux premiers montent en ${crDivN(S, S.div + 1, 0)}` : "Le premier est champion";
 const crDnTxt = S => crDnN(S) === 1 ? ", le dernier redescend" : crDnN(S) === 2 ? ", les deux derniers descendent" : "";
-function crMkClub(S, name, s, rival){ const [lo, hi] = CR_BAND[S.div], c = lo + (hi - lo) * (CR_ECO.clubLo + CR_ECO.clubUp * s - (2 - crSub(S)) * CR_SUB.k - (S.div === 0 ? CR_ANTI.ease[crSub(S)] : 0)),   /* Bronze un peu plus accessible (19 oct. 2026) */ D = DATA[S.u]; return {name, s, rival: !!rival, pts: 0, team: crNear(S.u, c, 5, S.squad).sort((a, b) => D[a].p - D[b].p)}; }
+function crMkClub(S, name, s, rival){ const [lo, hi] = crBand(S), c = lo + (hi - lo) * (CR_ECO.clubLo + CR_ECO.clubUp * s - (CR_RANK.on ? 0 : (2 - crSub(S)) * CR_SUB.k) - (S.div === 0 ? CR_ANTI.ease[crSub(S)] + (crSub(S) === 0 ? (CR_ANTI.easeU[S.u] || 0) : 0) : 0)),   /* Bronze un peu plus accessible (19 oct. 2026) */ D = DATA[S.u]; return {name, s, rival: !!rival, pts: 0, team: crNear(S.u, c, 5, S.squad).sort((a, b) => D[a].p - D[b].p)}; }
 function crNewSeason(S){
   const names = crShuffle(CR_NAMES[S.u].filter(n => n !== S.rival)).slice(0, 6), str = crShuffle([.02, .2, .38, .55, .72, .9]);
   S.clubs = names.map((n, k) => crMkClub(S, n, str[k]));
@@ -14597,7 +14607,7 @@ function crNewSeason(S){
 }
 const CR_AIORD = [[0, 1, 2, 3, 4], [4, 3, 2, 1, 0], [4, 0, 1, 2, 3], [0, 4, 1, 3, 2], [2, 0, 4, 1, 3]];
 function crNewDay(S){
-  const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), star = lo + (hi - lo) * crStar(S.u), own = S.squad;
+  const [lo, hi] = crBand(S, CR_RANK.ahead), P = crPool(S.u), star = lo + (hi - lo) * crStar(S.u), own = S.squad;   /* boutique : un rang en avance, pour pouvoir monter */
   S.oppOrd = S.div === 0 && S.season === 1 && S.day < 2 ? CR_AIORD[0] : CR_AIORD[Math.floor(Math.random() * CR_AIORD.length)];
   S.spy = false; S.scouted = false;
   S.rule = null; if (S.tuto >= 5 && S.stat.played >= 3 && Math.random() < .3){ const k = crShuffle(Object.keys(CR_RULES))[0]; S.rule = {k}; if (k === "cap"){ const b = crByP(S, crAvail(S), true).slice(0, 5); S.rule.x = crSum(S.u, b) - 6 - Math.floor(Math.random() * 8); } }
@@ -14690,7 +14700,7 @@ function crAutoLineup(S){ const r = crRule(S), n = crN(S), u = S.u; let av = crB
 /* ---------- cellule de recrutement : on paie une mission, le recruteur ramène un personnage tiré au sort (une mission par match). Pas de garantie : c'est un pari, chances affichées ---------- */
 const CR_SCOUT = {loc: ["Mission locale", "Le recruteur fait le tour des environs.", [55, 40, 4.5, .5]], nat: ["Mission nationale", "Il sillonne tout le pays.", [30, 55, 13, 2]], mon: ["Mission mondiale", "Il part à l'autre bout du monde.", [10, 50, 32, 8]]};
 const CR_TIERN = ["Un cran en dessous de ta division", "Du niveau de ta division", "Un cran au-dessus", "Vedette"];
-function crScoutPools(S){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u), w = hi - lo, star = lo + w * crStar(S.u), top = Math.min(hi + .04, .93), f = (a, b) => P.ix.filter(i => !S.squad.includes(i) && P.q[i] > a && P.q[i] <= b);
+function crScoutPools(S){ const [lo, hi] = crBand(S, CR_RANK.ahead), P = crPool(S.u), w = hi - lo, star = lo + w * crStar(S.u), top = Math.min(hi + .04, .93), f = (a, b) => P.ix.filter(i => !S.squad.includes(i) && P.q[i] > a && P.q[i] <= b);
   return [f(lo - .14, lo + w * .3), f(lo + w * .3, star), f(star, top), f(top, Math.min(1, hi + .18))]; }
 // chances réelles (une tranche vide reporte sa part sur la tranche du dessous, sinon du dessus) et prix : un peu plus que ce que la mission rapporte en moyenne
 function crScoutInfo(S, k){ const pools = crScoutPools(S), odds = [...CR_SCOUT[k][2]];
@@ -14706,7 +14716,7 @@ function crScout(S, k){ if (crScoutNo(S, k)) return null; const I = crScoutInfo(
 const CR_CUP = {names: ["Quart de finale", "Demi-finale", "Finale"], pay: [2, 3, 6], after: [2, 4, 6]};
 function crCupClub(S){ const r = S.cup.r, used = S.clubs.map(c => c.name), name = crShuffle(CR_NAMES[S.u].filter(n => !used.includes(n) && n !== S.rival))[0] || "Sélection de la coupe";
   return r === 2 ? (S.div < 4 ? crMkClub({...S, div: S.div + 1}, name, .4) : crMkClub(S, name, 1)) : crMkClub(S, name, r === 0 ? .5 : .88); }
-function crCupPick(S){ const [lo, hi] = CR_BAND[S.div], P = crPool(S.u); return crShuffle(P.ix.filter(i => !S.squad.includes(i) && P.q[i] > hi - .05 && P.q[i] <= Math.min(1, hi + CR_ECO.cupUp))).slice(0, 3); }
+function crCupPick(S){ const [lo, hi] = crBand(S, CR_RANK.ahead), P = crPool(S.u); return crShuffle(P.ix.filter(i => !S.squad.includes(i) && P.q[i] > hi - .05 && P.q[i] <= Math.min(1, hi + CR_ECO.cupUp))).slice(0, 3); }
 const crOpp = S => S.cup && S.cup.pend && S.cup.opp ? S.cup.opp : S.clubs[S.order[S.day]];
 // carrières commencées avant l'arrivée de la coupe, des règles spéciales et du palmarès : champs manquants ajoutés
 function crFix(S){ if (!S) return S; S.out = {}; if (S.sub == null) S.sub = S.season > 1 || S.div > 0 ? 2 : 0; S.cup = S.cup || {r: 0, alive: S.day < 2, pend: false, opp: null}; S.stat = Object.assign({played: 0, wins: 0, titles: 0, top: 0, ups: 0, cups: 0, best: 0, sale: 0, buy: 0, ex: 0, exN: ""}, S.stat || {}); S.reach = S.reach || {}; return S; }
@@ -14754,6 +14764,7 @@ function crPlay(S, mine, boost){
   const res = {div: S.div, dvn: crDivN(S), day: S.day + 1, g, won, draw, opp: opp.name, rival: !cup && opp.rival, gains: [], mis: [], cap: false, cup: cup ? CR_CUP.names[S.cup.r] : "", rule: rule ? CR_RULES[rule.k][0] : ""};
   const weak = sumM > 0 ? Math.max(CR_ANTI.weakMin, Math.min(1, (sumO / sumM - CR_ANTI.weakLo) / CR_ANTI.weakSpan + CR_ANTI.weakMin)) : 1, rich = crRich(S);
   const gain = Math.max(1, crR5((draw ? pay * .6 : won ? pay * weak : base * CR_ECO.loss) * rich)); S.money += gain;
+  { const w = Math.min(S.money, crWages(S)); if (w > 0){ S.money -= w; res.gains.push(["Salaires de l'effectif", "−" + crMoney(S, w)]); } }
   if (won && weak < 1) res.gains.push(["Adversaire bien plus faible", "prime réduite"]); if (rich < 1) res.gains.push(["Caisse déjà bien remplie", "gains divisés par 2"]); res.gains.push([(won ? "Prime de victoire" : draw ? "Prime de match nul" : "Prime de match") + (cup ? " · coupe" : "") + (rule && won ? " · règle spéciale" : ""), "+" + crMoney(S, gain)]);
   S.stat.played++; setTimeout(() => { try { tcSave(tcLoad()); } catch {} }, 600);
   if (won){ S.stat.wins++; S.streak++; S.stat.best = Math.max(S.stat.best || 0, S.streak); S.prestige += 2 + S.div; res.gains.push(["Prestige", "+" + (2 + S.div)]); if (sumO - sumM > (S.stat.ex || 0)){ S.stat.ex = sumO - sumM; S.stat.exN = opp.name; } } else S.streak = 0;
@@ -14902,7 +14913,7 @@ const CR_PROMO_TXT = ["", "Le marché s'ouvre aux personnages du top 50 % de l'u
 function crPromo(S, se){ const d = se.promo, dv = CR_DIV[d]; if (!d || document.querySelector(".crpov")) return;
   document.body.insertAdjacentHTML("beforeend", `<div class="crpov" role="dialog" aria-modal="true" aria-label="Montée en division ${dv[0]}"><div class="crpromo d${d}" style="--c:${dv[2]}"><div class="fx"></div>
     <div class="ct"><i class="eb">Promotion · Saison ${S.season - 1}</i><div class="bw">${crBadge(d, "bdg")}</div><h2>Bienvenue en<br><b>Division ${dv[0]}</b></h2>
-    <ul><li>Recettes : ${CR_ECO.pay[d]}M par victoire.</li><li>${CR_PROMO_TXT[d]}</li>${se.pk ? `<li class="gift">Booster ${esc(tcName(se.pk))} offert</li>` : ""}</ul>
+    <ul><li>Recettes : ${crWinPay(S)}M par victoire.</li><li>${CR_PROMO_TXT[d]}</li>${se.pk ? `<li class="gift">Booster ${esc(tcName(se.pk))} offert</li>` : ""}</ul>
     <button id="crPromoGo">Entrer en ${dv[0]}</button><small>Première montée · cette page ne s'affiche qu'une fois</small></div></div></div>`);
   const el = document.querySelector(".crpov"), b = el.querySelector("#crPromoGo"); b.onclick = () => el.remove();
   try { SFX.play("fanfare"); navigator.vibrate?.([40, 30, 90]); } catch {} }
@@ -14951,7 +14962,7 @@ function crFiche(S, i){ document.querySelector(".crfiche")?.remove(); document.b
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-crinf]"); if (!b || !CR.S) return; e.preventDefault(); e.stopPropagation(); crFiche(CR.S, +b.dataset.crinf); }, true);
 document.addEventListener("keydown", e => { const b = e.target.closest && e.target.closest("[data-crinf]"); if (!b || !CR.S || (e.key !== "Enter" && e.key !== " ")) return; e.preventDefault(); e.stopPropagation(); crFiche(CR.S, +b.dataset.crinf); }, true);
 const fightSummaryCr = r => { const f = r.g.fight; return `${f.survivors.length} combattant${f.survivors.length > 1 ? "s" : ""} encore debout contre ${esc(r.opp)}${f.mvp ? " · meilleur combattant : " + esc(f.mvp.n) : ""}.`; };
-function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.</p></div></div>
+function crSquadHTML(S){ const u = S.u; return `<div class="crrow"><div><h3>Ton effectif · ${S.squad.length}/${CR_MAXSQ}</h3><p>Cinq combattants jouent chaque match. Une revente rapporte ${Math.round(CR_ECO.sell * 100)} % de la valeur ; il faut garder au moins 5 personnages.${CR_ANTI.wage ? ` <b>Salaires : ${crMoney(S, crWages(S))} par match</b> (plus l'effectif vaut cher, plus il coûte).` : ""}</p></div></div>
     <div class="crgrid">${[...S.squad].sort((a, b) => crCard(u, b).p - crCard(u, a).p).map(i => crTile(S, i, {cls: S.out[i] ? "off" : "", sub: S.out[i] ? `Indisponible (${S.out[i]} match${S.out[i] > 1 ? "s" : ""})` : "Valeur " + crVal(u, i) + "M",
       foot: S.squad.length > 5 ? (CR.ask === "s" + i ? `<button class="crbuy red" data-crsell="${i}" data-ok="1">Confirmer +${crR5(crSellVal(S, i))}M</button>` : `<button class="crbuy ghost" data-crsell="${i}">Vendre</button>`) : ""})).join("")}</div>`; }
 function crShopHTML(S){ const u = S.u, L = S.lot;
@@ -15261,9 +15272,9 @@ html:has(.bmov),html:has(.bmov) body,html:has(.bmcine),html:has(.bmcine) body{ov
    Ouvert 1 heure réelle (le compte continue jeu fermé), contenu fixe : une vedette nettement au-dessus de l'équipe (+15 % sur sa valeur),
    trois personnages meilleurs que tous les titulaires (quatre au rang « Client »), une caisse mystère. Prestige non exigé.
    Réputation : Inconnu → Client (2 achats) → Habitué (5 achats : vedette un peu plus forte, 65 min). */
-const BM = {on: true, troc: .7, base: .01, step: 0, max: .01, dur: 6e5, one: true, star: .30, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
+const BM = {on: true, troc: .7, base: .02, step: 0, max: .02, dur: 6e5, one: true, star: .30, rep: [[0, "Inconnu"], [2, "Client"], [5, "Habitué"]]};
 /* 19 oct. 2026 (demande de l'utilisateur, titre d'Élite plié en 35 min) : ouvert 10 minutes au plus, UN seul achat (au choix, caisse comprise),
-   apparition rare (1 % après un combat, sans augmentation, toujours au plus un par jour — demande de l'utilisateur),
+   apparition rare (2 % après un combat, sans augmentation, toujours au plus un par jour — demande de l'utilisateur),
    vedette moins écrasante (+30 % de l'écart au maximum au lieu de +45 %), autres offres juste au-dessus des titulaires, caisse mystère : un seul personnage, rarement de niveau vedette */
 const BM_UNI = {   /* décor de la ruelle selon l'univers : enseignes, lanternes, couleur des néons */
   op: {s: ["酒場", "海賊", "港", "宿", "質屋", "賭場", "地図", "酒"], l: "海", n: ["#34e1ff", "#ff3d5a", "#ff9a2e", "#7df0c8"]},
