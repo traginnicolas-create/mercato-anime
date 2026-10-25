@@ -821,6 +821,7 @@ body[data-u="db"] .mini img,body[data-u="db"] .slot img,.uni[data-u="db"] img{ob
     <b style="color:var(--text)">Règles</b>
     <ul style="margin-top:6px">
       <li>Chaque joueur a <b>300M</b> et doit recruter <b>exactement 5 personnages</b>. On ne sait jamais qui va tomber.</li>
+      <li><b>De 3 à 8 joueurs</b> : enchères ouvertes autour de la table (surenchéris ou passe, le dernier en lice gagne). À la fin, chacun affronte tous les autres en 5 contre 5 (mêlée générale), ou chaque adversaire de l'autre équipe (2 équipes ou duos, nombre pair).</li>
       <li>Le joueur qui tire <b>ne peut pas laisser filer</b> : il doit miser au moins <b>10M</b>. Si l'adversaire ne surenchérit pas, il garde le personnage.</li>
       <li>Toutes les mises se font <b>par tranches de 10M</b> : 10, 20, 30…</li>
       <li><b>Classique</b> : après l'ouverture, chacun peut surenchérir (d'au moins 10M) à tour de rôle, sans limite, jusqu'à ce que l'un des deux passe.</li>
@@ -2043,7 +2044,7 @@ const p2pRoom = {
           const c = mqtt.connect(url, {connectTimeout: 7000, reconnectPeriod: 4000, clean: true,
             ...(asHost ? {} : {will: {topic: base + "/h", payload: JSON.stringify({m: cid + "-will", f: cid, s: "bye"}), qos: 0}})});
           st.clients.push(c);
-          c.on("connect", () => {
+          c.on("connect", () => { c._ok = true;
             c.subscribe(asHost ? [base + "/h"] : [base + "/all", base + "/g/" + cid], () => { st.relay = st.clients.filter(x => x.connected).length; if (!asHost) send({s: "hi"}); if (first){ first = false; ok(); } });
           });
           c.on("message", (t, payload) => { try { receive(JSON.parse(payload.toString()), null); } catch {} });
@@ -2051,6 +2052,9 @@ const p2pRoom = {
           setTimeout(() => { if (first){ first = false; done(); } }, 8000);
         });
       });
+      // 25 oct. 2026 : un relais qui n'a jamais répondu est fermé (sinon il réessaie toutes les 4 s pour toujours, batterie et réseau du téléphone)
+      // (attendu 12 s : la promesse se résout dès le premier relais, les autres peuvent encore être en train de se connecter)
+      setTimeout(() => { if (st.left || !st.clients.some(c => c.connected)) return; st.clients = st.clients.filter(c => { if (c.connected || c._ok) return true; try { c.end(true); } catch {} return false; }); }, 12000);
       st.relay = st.clients.filter(x => x.connected).length;
       if (!st.relay) throw new Error("relais");
     })();
@@ -3350,6 +3354,9 @@ select{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(
 .ucend{display:grid;gap:6px;margin:12px 0}
 .ucend div{display:flex;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:8px 12px;font-size:14px}
 .pairs{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:520px;margin:12px auto}
+.uccard .ucuni{color:var(--accent);font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:11px;margin:2px 0 4px}
+#ucUnis .ucmix{grid-column:1/-1;border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+#ucUnis .ucmix span{display:block;font-weight:500;opacity:.75;margin-top:2px}
 </style>
 <script>
 /* =====================================================================
@@ -3380,7 +3387,38 @@ function ucPairs(u){
   return UC_PAIR_CACHE[u] = out;
 }
 const UC_ROLE = {civil:"Civil", under:"Undercover", white:"Mr White"};
-const ucCardOf = (u, i) => DATA[u][i];
+// 25 oct. 2026 : mode « Tous les univers ». Un personnage s'y écrit « univers:index » (« op:12 »).
+// Moitié des parties : une paire d'un même anime (les paires habituelles, tirées dans un univers au hasard) ;
+// moitié : deux « personnages miroirs » d'animes différents (même rôle dans leur histoire), choisis à la main pour rester pertinents.
+const UC_CROSS = [
+  ["op:Monkey D. Luffy", "na:Naruto Uzumaki"], ["op:Monkey D. Luffy", "db:Son Goku"], ["na:Naruto Uzumaki", "mha:Izuku Midoriya"], ["jjk:Yuji Itadori", "na:Naruto Uzumaki"],
+  ["jjk:Yuji Itadori", "ds:Tanjiro Kamado"], ["db:Son Gohan", "ds:Tanjiro Kamado"], ["jjk:Yuta Okkotsu", "mha:Izuku Midoriya"],
+  ["op:Roronoa Zoro", "na:Sasuke Uchiwa"], ["na:Sasuke Uchiwa", "db:Vegeta"], ["mha:Katsuki Bakugo", "db:Vegeta"], ["mha:Katsuki Bakugo", "na:Sasuke Uchiwa"], ["jjk:Megumi Fushiguro", "na:Sasuke Uchiwa"],
+  ["jjk:Megumi Fushiguro", "ds:Giyu Tomioka"], ["jjk:Nobara Kugisaki", "na:Sakura Haruno"], ["na:Hinata Hyûga", "mha:Ochaco Uraraka"],
+  ["na:Jiraya", "db:Tortue Géniale"], ["op:Silvers Rayleigh", "db:Tortue Géniale"], ["jjk:Satoru Gojo", "na:Kakashi Hatake"], ["mha:All Might", "jjk:Satoru Gojo"],
+  ["mha:Shota Aizawa", "na:Kakashi Hatake"], ["db:Piccolo", "jjk:Kento Nanami"], ["jjk:Kento Nanami", "mha:Sir Nighteye"], ["op:Shanks", "na:Minato Namikaze"],
+  ["op:Monkey D. Garp", "na:Hiruzen Sarutobi"], ["ds:Sakonji Urokodaki", "na:Jiraya"],
+  ["op:Marshall D. Teach", "mha:All For One"], ["mha:All For One", "ds:Muzan Kibutsuji"], ["db:Freezer", "ds:Muzan Kibutsuji"], ["jjk:Kenjaku", "na:Orochimaru"],
+  ["jjk:Ryomen Sukuna", "na:Kyûbi (Kurama)"], ["jjk:Suguru Geto", "na:Obito Uchiwa"], ["jjk:Mahito", "ds:Doma"], ["na:Nagato (Pain)", "mha:Tomura Shigaraki"],
+  ["db:Majin Buu", "op:Charlotte Linlin"], ["db:Broly", "op:Kaido"], ["mha:Himiko Toga", "ds:Daki"],
+  ["op:Portgas D. Ace", "mha:Dabi"], ["op:Portgas D. Ace", "ds:Kyojuro Rengoku"], ["mha:Endeavor", "ds:Kyojuro Rengoku"], ["mha:Shoto Todoroki", "op:Kuzan (Aokiji)"], ["mha:Shoto Todoroki", "na:Haku"],
+  ["na:Gaara", "mha:Shoto Todoroki"], ["ds:Zenitsu Agatsuma", "mha:Denki Kaminari"], ["op:Usopp", "ds:Zenitsu Agatsuma"], ["jjk:Hajime Kashimo", "op:Ener"],
+  ["op:Dracule Mihawk", "ds:Kokushibo"], ["ds:Yoriichi Tsugikuni", "op:Kozuki Oden"], ["jjk:Toji Fushiguro", "na:Rock Lee"], ["jjk:Maki Zenin", "na:Tenten"],
+  ["na:Rock Lee", "mha:Eijiro Kirishima"], ["jjk:Aoi Todo", "na:Gaï Maito"], ["op:Boa Hancock", "ds:Mitsuri Kanroji"], ["mha:Hawks", "op:Marco"],
+  ["na:Shikamaru Nara", "mha:Momo Yaoyorozu"], ["na:Itachi Uchiwa", "jjk:Suguru Geto"], ["op:Sanji", "ds:Inosuke Hashibira"], ["na:Tsunade", "op:Tony Tony Chopper"],
+];
+const UC_UNIS = () => Object.keys(UNI).filter(k => DATA[k] && DATA[k].length);
+const ucUniName = u => u === "mix" ? "Tous les univers" : UNI[u].name;
+const ucRef = r => { const k = r.indexOf(":"), u = r.slice(0, k), n = r.slice(k + 1), i = DATA[u] ? DATA[u].findIndex(c => c.n === n) : -1; return i < 0 ? null : u + ":" + i; };
+let UC_CROSSOK = null;
+function ucMixPair(){
+  if (!UC_CROSSOK) UC_CROSSOK = UC_CROSS.map(([a, b]) => [ucRef(a), ucRef(b)]).filter(([a, b]) => a && b);
+  if (UC_CROSSOK.length && Math.random() < .5) return [...UC_CROSSOK[Math.floor(Math.random() * UC_CROSSOK.length)]];
+  const us = UC_UNIS(), u = us[Math.floor(Math.random() * us.length)], P = ucPairs(u), [i, j] = P[Math.floor(Math.random() * P.length)];
+  return [u + ":" + i, u + ":" + j];
+}
+// personnage d'une partie : un index dans DATA[u], ou « univers:index » en mode mélangé (la carte garde son univers dans _u)
+const ucCardOf = (u, i) => { if (typeof i === "string" && i.includes(":")){ const [uu, k] = i.split(":"); return {...DATA[uu][+k], _u: uu}; } return DATA[u][i]; };
 
 let UC = null;     // partie complète (en local, ou chez l'hôte en ligne)
 let UV = null;     // ce que voit l'invité : {pub, me, word}
@@ -3389,8 +3427,7 @@ const UCN = {role:null, game:null, code:null, peers:new Map(), myPeer:null, myNa
 
 /* ---------- moteur ---------- */
 function ucNew(u, names, white){
-  const pairs = ucPairs(u);
-  let pair = [...pairs[Math.floor(Math.random() * pairs.length)]];
+  let pair; if (u === "mix") pair = ucMixPair(); else { const pairs = ucPairs(u); pair = [...pairs[Math.floor(Math.random() * pairs.length)]]; }
   if (Math.random() < .5) pair = [pair[1], pair[0]];
   const n = names.length, nUnder = n >= 7 ? 2 : 1, nWhite = white && n >= 4 ? 1 : 0;
   const roles = [...Array(nUnder).fill("under"), ...Array(nWhite).fill("white")];
@@ -3528,10 +3565,10 @@ function ucApply(actor, a){
       break;
     case "guess":
       if (a.t === "guess" && actor === UC.last.p){
-        const text = clean(a.v), civ = DATA[UC.u][UC.pair[0]];
+        const text = clean(a.v), civ = ucCardOf(UC.u, UC.pair[0]), cu = civ._u || UC.u;
         UC.last.guess = text;
-        const mine = [civ.n, ...(ALIASES[UC.u]?.[civ.n] || [])];
-        const others = DATA[UC.u].filter(c => c.n !== civ.n).map(c => [c.n, ...(ALIASES[UC.u]?.[c.n] || [])]);
+        const mine = [civ.n, ...(ALIASES[cu]?.[civ.n] || [])];
+        const others = (UC.u === "mix" ? UC_UNIS() : [UC.u]).flatMap(uu => DATA[uu].filter(c => !(uu === cu && c.n === civ.n)).map(c => [c.n, ...(ALIASES[uu]?.[c.n] || [])]));
         if (ucAccept(text, mine, others)){ UC.last.guessOk = true; UC.winner = {side:"white", who:[actor]}; UC.phase = "over"; ucCommit(); }
         else ucAfterElim();
       }
@@ -3584,7 +3621,7 @@ function ucPublic(){
 /* ---------- affichage ---------- */
 function ucCard(u, c){
   return `<div class="card uccard" data-t="${c.t}"><div class="pic">${img(c)}<span class="tier">${TIER[c.t]}</span></div>
-    <div class="cap"><div class="n">${esc(c.n)}</div>${infoHTML(u, c)}</div></div>`;
+    <div class="cap"><div class="n">${esc(c.n)}</div>${c._u ? `<div class="small ucuni">${esc(UNI[c._u].name)}</div>` : ""}${infoHTML(c._u || u, c)}</div></div>`;
 }
 const ucWhiteCard = () => `<div class="card uccard" data-t="C"><div class="pic"><div class="fallback">?</div></div><div class="cap"><div class="n">Mr White</div>
   <div class="small">Tu n'as pas de personnage. Écoute les indices des autres, fais semblant, et si tu es éliminé, devine le personnage des civils pour gagner !</div></div></div>`;
@@ -3597,9 +3634,9 @@ function ucView(){
 function ucRender(){
   const V = ucView(); if (!V) return;
   const pub = V.pub, u = pub.u, P = pub.players, local = !!V.local;
-  document.body.dataset.u = u;
+  if (u !== "mix") document.body.dataset.u = u;
   if ($("#uc").classList.contains("hidden")) show("uc");
-  $("#ucTitle").textContent = "UNDERCOVER " + UNI[u].name.toUpperCase();
+  $("#ucTitle").textContent = "UNDERCOVER " + ucUniName(u).toUpperCase();
   const cur = pub.order[pub.pos];
   const said = new Set(pub.clues.filter(c => c.round === pub.round).map(c => c.p));
   const chips = `<div class="ucp">${pub.order.map(i => { const p = P[i];
@@ -3670,7 +3707,7 @@ function ucRender(){
   }
   else if (pub.phase === "over"){
     const W = pub.winner, civ = ucCardOf(u, pub.pair[0]), und = ucCardOf(u, pub.pair[1]);
-    histAdd("uc-" + pub.id + "-" + pub.round, "Undercover · " + UNI[u].name, P.map(p => p.name), W.side === "civil" ? "Victoire des civils" : W.side === "white" ? "Victoire de Mr White (" + P[W.who[0]].name + ")" : "Victoire des imposteurs (" + W.who.map(i => P[i].name).join(", ") + ")",
+    histAdd("uc-" + pub.id + "-" + pub.round, "Undercover · " + ucUniName(u), P.map(p => p.name), W.side === "civil" ? "Victoire des civils" : W.side === "white" ? "Victoire de Mr White (" + P[W.who[0]].name + ")" : "Victoire des imposteurs (" + W.who.map(i => P[i].name).join(", ") + ")",
       {win: W.side === "civil" ? P.filter(p => p.role === "civil").map(p => p.name) : W.who.map(i => P[i].name)});
     const title = W.side === "civil" ? "Les civils gagnent !" : W.side === "white" ? `Mr White (${esc(P[W.who[0]].name)}) gagne en devinant ${esc(civ.n)} !` : `${W.who.map(i => esc(P[i].name)).join(" et ")} ${W.who.length > 1 ? "gagnent" : "gagne"} : les imposteurs ont tenu !`;
     h = `<h2>${title}</h2>
@@ -3701,10 +3738,11 @@ function ucRender(){
 }
 
 /* ---------- accueil Undercover ---------- */
-let UC_WHERE = "local";
+let UC_WHERE = "local", UC_MIX = false;   /* UC_MIX : « Tous les univers » (sans toucher à cfg.u, partagé avec les autres jeux) */
+const ucU = () => UC_MIX ? "mix" : cfg.u;
 function ucHomeRender(){
-  $("#ucUnis").innerHTML = Object.entries(UNI).map(([k, v]) => `<button class="mode ${k === cfg.u ? "sel" : ""}" data-ucu="${k}"><b>${v.name}</b></button>`).join("");
-  document.querySelectorAll("[data-ucu]").forEach(b => b.onclick = () => { cfg.u = b.dataset.ucu; document.body.dataset.u = cfg.u; ucHomeRender(); renderHome(); });
+  $("#ucUnis").innerHTML = `<button class="mode ucmix ${UC_MIX ? "sel" : ""}" data-ucu="mix"><b>Tous les univers</b><span class="small">Personnages mélangés, paires d'un même anime ou « miroirs » d'un anime à l'autre</span></button>` + Object.entries(UNI).map(([k, v]) => `<button class="mode ${!UC_MIX && k === cfg.u ? "sel" : ""}" data-ucu="${k}"><b>${v.name}</b></button>`).join("");
+  document.querySelectorAll("[data-ucu]").forEach(b => b.onclick = () => { if (b.dataset.ucu === "mix"){ UC_MIX = true; ucHomeRender(); return; } UC_MIX = false; cfg.u = b.dataset.ucu; document.body.dataset.u = cfg.u; ucHomeRender(); renderHome(); });
   const n = +$("#ucCount").value;
   const inputs = $("#ucNames");
   const prev = [...inputs.querySelectorAll("input")].map(i => i.value);
@@ -3723,7 +3761,7 @@ function ucInitHome(){
     const names = [...document.querySelectorAll("#ucNames input")].map((i, k) => cleanName(i.value, "Joueur " + (k + 1)));
     const seen = {}; names.forEach((n, k) => { if (seen[n]) names[k] = n + " (" + (k + 1) + ")"; seen[n] = 1; });
     UCN.role = null;
-    ucNew(cfg.u, names, $("#ucWhite").checked);
+    ucNew(ucU(), names, $("#ucWhite").checked);
   };
   $("#ucHost").onclick = ucHost;
   $("#ucJoin").onclick = ucJoin;
@@ -3788,7 +3826,7 @@ function ucSendAll(){
 }
 function ucLobbyRender(){
   const L = UCN.lobby, host = UCN.role === "host";
-  lobby(`<h2>Undercover ${UNI[UCN.u].name}</h2>
+  lobby(`<h2>Undercover ${ucUniName(UCN.u)}</h2>
     ${UCN.code ? `<p class="muted">Code de la partie :</p><div class="code">${UCN.code}</div>` : ""}
     <div class="ucp" style="justify-content:center">${L.map(p => `<span>${esc(p.name)}</span>`).join("")}</div>
     <p class="small">${L.length}/8 joueurs${L.length < 3 ? " · il en faut au moins 3" : ""}</p>
@@ -3813,7 +3851,7 @@ async function ucHost(){
     try { game = await NET.room.join("uc-" + code.toLowerCase(), true); } catch (e) { if (e?.type !== "unavailable-id") break; }
   }
   if (!game) return err("Impossible de créer la partie pour le moment. Vérifie ta connexion puis réessaie.");
-  Object.assign(UCN, {role:"host", game, code, u: cfg.u, white: $("#ucWhite").checked, lobby:[{name: UCN.myName, peer: null}]});
+  Object.assign(UCN, {role:"host", game, code, u: ucU(), white: $("#ucWhite").checked, lobby:[{name: UCN.myName, peer: null}]});
   UCN.unsub.push(game.on("uhello", msg => {
     if (msg.sameTab) return;
     const name = cleanName(msg.data?.name, "Joueur");
@@ -3865,12 +3903,12 @@ async function ucJoin(){
   UCN.unsub.push(game.on("ulobby", msg => {
     if (msg.sameTab || UV) return;
     got = true;
-    UCN.lobby = (msg.data?.names || []).map(n => ({name: cleanName(n, "Joueur")})); UCN.u = DATA[msg.data?.u] ? msg.data.u : "op";
+    UCN.lobby = (msg.data?.names || []).map(n => ({name: cleanName(n, "Joueur")})); UCN.u = DATA[msg.data?.u] || msg.data?.u === "mix" ? msg.data.u : "op";
     ucLobbyRender();
   }));
   UCN.unsub.push(game.on("ustate", msg => {
     const d = msg.data;
-    if (msg.sameTab || !d?.pub || !DATA[d.pub.u]) return;
+    if (msg.sameTab || !d?.pub || !(DATA[d.pub.u] || d.pub.u === "mix")) return;
     if (d.to && d.to !== UCN.myPeer) return;
     got = true;
     UV = {pub: d.pub, me: d.me, word: d.word};
@@ -10002,7 +10040,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tcopen .otop b i{font-style:normal;font-family:var(--brand);color:var(--accent);margin-right:8px}
 .tcopen .otop .ost{justify-self:end;display:flex;gap:6px}
 .tcopen .otop .ost span{font-family:var(--mono);font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(11,10,14,.6);white-space:nowrap}
-.tcopen .owm{position:absolute;right:-.06em;bottom:-.24em;font-family:var(--brand);font-weight:900;font-size:min(70vw,560px);line-height:1;color:color-mix(in srgb,var(--accent) 5%,transparent);pointer-events:none;z-index:0}
+.tcopen .owm{position:fixed;right:-.06em;bottom:-.24em;overflow:hidden;max-height:100%;/* 25 oct. 2026 : fixe, sinon le grand « H » débordait et l'écran d'ouverture défilait de 120 px */font-family:var(--brand);font-weight:900;font-size:min(70vw,560px);line-height:1;color:color-mix(in srgb,var(--accent) 5%,transparent);pointer-events:none;z-index:0}
 .tcopen h2,.tcopen .mid,.tcopen .bot{position:relative;z-index:1}
 .tcopen.res h2{font-size:clamp(26px,7vw,54px);letter-spacing:-.03em;margin-top:6px}
 .tcopen .osum{color:#c9c5ce;font-size:15px;text-align:center}
@@ -10019,12 +10057,17 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
   .tcrow.tcfan{gap:0;align-items:center;justify-content:center;flex-wrap:nowrap;padding:26px 0 30px;max-width:1040px;margin:0 auto}
   .tcrow.tcfan > *{flex:0 0 19%;max-width:190px;margin:0 -1.2%;transform:rotate(calc(var(--k) * 6deg)) translateY(calc((var(--k) * var(--k)) * 9px));transition:transform .5s cubic-bezier(.2,.9,.3,1.1);box-shadow:0 18px 34px rgba(0,0,0,.55)}
   .tcrow.tcfan > .best{flex-basis:22%;max-width:226px;z-index:2;transform:translateY(-14px);box-shadow:0 0 0 2px var(--accent),0 0 46px color-mix(in srgb,var(--accent) 55%,transparent),0 22px 40px rgba(0,0,0,.6)}
-  .tcrow.tcfan > *:hover{transform:rotate(0) translateY(-18px) scale(1.04);z-index:3}
+  /* 25 oct. 2026 : plus de saut vers le haut au survol (la carte quittait le pointeur et tremblait) ; elle s'incline sous le pointeur, sur place */
+  .tcrow.tcfan > .tc.hl:not(.no){transform:rotate(calc(var(--k) * 6deg)) translateY(calc((var(--k) * var(--k)) * 9px)) perspective(620px) rotateX(calc(var(--tx,0deg) * .6)) rotateY(calc(var(--ty,0deg) * .6)) scale(1.04);transition:transform .14s cubic-bezier(.2,.8,.2,1);z-index:3}
+  .tcrow.tcfan > .tc.best.hl:not(.no){transform:translateY(-14px) perspective(620px) rotateX(calc(var(--tx,0deg) * .6)) rotateY(calc(var(--ty,0deg) * .6)) scale(1.04)}
 }
 @media (max-width:699px){.tcrow.tcfan > .best{box-shadow:0 0 0 2px var(--accent),0 0 30px color-mix(in srgb,var(--accent) 50%,transparent)}.tcopen .otop b{display:none}.tcopen .otop{grid-template-columns:auto 1fr}}
 /* ---- booster secret : bandeau et halo à sa couleur ---- */
 .tcopen .osec{display:inline-flex;align-items:center;gap:10px;font-family:var(--title);font-weight:900;font-size:clamp(12.5px,3.4vw,15px);background:var(--sc);color:#0e0d12;border-radius:999px;padding:9px 18px;box-shadow:0 0 30px color-mix(in srgb,var(--sc) 60%,transparent);text-align:center}
 .tcopen .osec i{font-style:normal;font-family:var(--brand)}
+.tcopen .osecs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:100%}
+.tcopen .osecs .osec{max-width:100%;border-radius:18px;text-align:left;line-height:1.25}
+.tcopen .osecs .osec span{min-width:0}
 .tearw.sec .pouch{box-shadow:0 0 0 2px var(--sc),0 0 60px color-mix(in srgb,var(--sc) 80%,transparent),0 14px 30px rgba(0,0,0,.55)}
 @media (prefers-reduced-motion:no-preference){.tcopen .osec{animation:pop .5s cubic-bezier(.2,1.3,.4,1) both}}
 /* ---- sachet en relief : ventre bombé, soudures écrasées, plis du film, grain, tranche ---- */
@@ -10246,6 +10289,63 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .pouch.px .vol{background:radial-gradient(ellipse 62% 38% at 46% 50%,rgba(255,255,255,.12),transparent 72%),linear-gradient(90deg,rgba(0,0,0,.42),rgba(0,0,0,.05) 7%,rgba(255,255,255,.2) 13%,transparent 27%,transparent 72%,rgba(0,0,0,.16) 88%,rgba(0,0,0,.5)),linear-gradient(180deg,transparent 6.6%,rgba(0,0,0,.4) 7.2%,rgba(255,255,255,.26) 8.4%,transparent 14%,transparent 86%,rgba(0,0,0,.24) 91.8%,rgba(255,255,255,.2) 92.8%,transparent 93.6%),linear-gradient(104deg,transparent 22%,rgba(255,255,255,.1) 23%,transparent 26.5%,transparent 61%,rgba(0,0,0,.12) 62%,rgba(255,255,255,.08) 63.2%,transparent 66%)}
 .pouch.px.t1 .vol::after{opacity:.3}
 .tcopen .tcrow .tc.zoom{cursor:zoom-in}
+.tcopen .tcrow:not(.tcfan) > .tc.hl:not(.no){transform:perspective(620px) rotateX(calc(var(--tx,0deg) * .6)) rotateY(calc(var(--ty,0deg) * .6)) scale(1.04);transition:transform .14s cubic-bezier(.2,.8,.2,1);z-index:3;position:relative}
+/* 25 oct. 2026 : révélation façon Kyara (pile, compteur, cases, décompte) */
+.tcopen .kcnt{margin-bottom:6px;font:700 24px var(--mono,monospace);color:#fff;font-variant-numeric:tabular-nums;text-align:center;line-height:1}
+.tcopen .kcnt small{font-size:.7em;color:rgba(255,255,255,.4)}
+.tcopen .kdeck{position:relative;width:max(150px,min(64vw,300px,calc((100dvh - 370px) * .676)));aspect-ratio:5/7.4;cursor:pointer;margin:0 auto;-webkit-tap-highlight-color:transparent}
+.kdeck .gh{position:absolute;inset:0;transition:opacity .3s;pointer-events:none}
+.kdeck .gh > *,.kdeck .kfl .bkf > *,.kdeck .kfl .fa > *{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;margin:0}
+.kdeck .kfl{position:absolute;inset:0;perspective:1400px;transition:transform .42s cubic-bezier(.5,0,.75,0),opacity .42s}
+.kdeck .kfl .in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.1,.3,1)}
+.kdeck .kfl.up .in{transform:rotateY(180deg)}
+.kdeck .kfl .fa,.kdeck .kfl .bkf{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.kdeck .kfl .fa{transform:rotateY(180deg)}
+.kdeck .kfl .bkf .tcbk2{pointer-events:none}
+.tcopen .kdeck{touch-action:none;user-select:none;-webkit-user-select:none}
+.kdeck .kfl.nofl .in{transition:none}
+.kdeck .kfl.drag{transition:none}
+.kdeck .kfl.gone[style*="translateX"]{transition:transform .38s cubic-bezier(.3,.6,.4,1),opacity .38s}
+.kdeck .kfl .fa .tc{box-shadow:0 10px 26px rgba(0,0,0,.55)}
+.tcopen .kcnt{display:flex;align-items:baseline;justify-content:center;gap:12px}
+.tcopen .kcnt .kpk{font:700 12px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);padding:4px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;display:inline-block}
+.tcopen .kcnt .kpk b{color:#fff}
+/* 25 oct. 2026 : bilan compact façon Kyara — actions toujours visibles en bas, textes resserrés */
+.tcopen.res{gap:8px}
+.tcopen.res .mid{gap:10px;align-content:start}
+.tcopen.res .bot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom,0px));z-index:5;margin:0 -16px calc(-18px - env(safe-area-inset-bottom,0px));padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,rgba(8,7,11,.92) 22%,#08070b)}
+.tcopen.res .oend{display:grid;gap:8px;width:100%;max-width:460px;margin:0 auto}
+.tcopen.res .oend .ogrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tcopen.res .oend .ogrid button{padding:10px 6px;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.tcopen.res .oend #tcAgain{padding:12px 16px}
+.tcopen.res .osum{margin:0;font-size:14px}
+.tcopen.res .obest{margin:0}
+.tcopen.res .oodds{margin:0}
+.tcopen.res .ozoom{margin:0}
+@media (max-width:640px){.tcopen.res .tcrow.many{gap:8px}.tcopen.res .tcrow.many > *{flex:0 0 calc((100% - 16px) / 3)}}
+.kdeck .kfl.gone{transform:translateY(46vh) scale(.12);opacity:0;pointer-events:none}
+.kdeck .kfl.hit::after{content:"";position:absolute;inset:-14%;border-radius:40px;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 70%,transparent),transparent);z-index:-1;opacity:0;animation:kglow 2s .45s ease-in-out infinite both}
+@keyframes kglow{0%,100%{opacity:.45}50%{opacity:.9}}
+.tcopen .kfoot{display:grid;gap:10px;justify-items:center;width:100%}
+.tcopen .kslots{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:560px}
+.tcopen .kslots i{width:28px;aspect-ratio:5/7.4;border-radius:5px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+.tcopen .kslots i:first-child:nth-last-child(n+11),.tcopen .kslots i:first-child:nth-last-child(n+11) ~ i{width:19px;border-radius:4px}
+.tcopen .kslots i img{width:100%;height:100%;object-fit:cover;display:block}
+.tcopen .kslots i.f{border-color:var(--rc);box-shadow:0 0 9px color-mix(in srgb,var(--rc) 55%,transparent);transform:translateY(-2px)}
+.tcopen .kslots i.f.lo{box-shadow:none;transform:none}
+.tcopen .ktal{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:30px}
+.tcopen .ktal span{padding:5px 11px;border-radius:999px;border:1px solid color-mix(in srgb,var(--rc) 60%,transparent);background:rgba(0,0,0,.35);color:var(--rc);font:600 12.5px var(--mono,monospace);font-variant-numeric:tabular-nums}
+.tcopen .ktal span[hidden]{display:none}.tcopen .ktal em{font-style:normal}
+.tcopen .ktal span.pop{animation:kpop .5s ease-out}
+@keyframes kpop{40%{transform:scale(1.25);box-shadow:0 0 16px var(--rc)}}
+.tcopen .kmsg{color:rgba(255,255,255,.65);font-size:13.5px;margin:0;min-height:1.4em;text-align:center}
+.tcopen .kbtns{display:flex;gap:8px;justify-content:center;width:100%;max-width:460px}
+.tcopen .kbtns button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;font-size:13.5px;padding:11px 12px}
+.tcopen .kbtns [hidden]{display:none}
+.tcopen .otally{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin:0;font-size:13px;color:rgba(255,255,255,.7)}
+.tcopen .otally span{padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--rc) 55%,transparent);color:var(--rc);font-weight:700;font-variant-numeric:tabular-nums}
+.tcopen .orest{text-align:center;color:rgba(255,255,255,.6);margin:0}
+.tcopen #tcMore{margin:4px auto 0}
 .tcopen .ozoom{color:var(--muted);text-align:center;margin:0}
 .tcview{z-index:120}
 /* Holo au repos : moins laiteux (la bande claire mangeait le visage sur les images pâles) */
@@ -11059,10 +11159,15 @@ function tcRender(){
   $("#tcSort") && ($("#tcSort").onchange = e => { TC_F.sort = e.target.value; tcRender(); });
   $("#tcQ") && ($("#tcQ").oninput = e => { clearTimeout(window.__tcQt); const v = e.target.value; window.__tcQt = setTimeout(() => { TC_F.q = v; const y = scrollY; tcRender(); scrollTo(0, y); const i = $("#tcQ"); if (i){ i.focus(); i.setSelectionRange(v.length, v.length); } }, 250); });
   // ouvrir un booster, ou plusieurs du même type d'un coup (même mise en scène, toutes les cartes à la suite)
-  const openN = q => { const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
+  const openN = q => { if (document.querySelector(".tcopen")) return;   /* 25 oct. 2026 : double appui au téléphone → deux ouvertures superposées, la seconde restait bloquée */
+    const s = tcLoad(), k = TC_PICK, real = k === "free" ? "mix:0" : k; if (!k) return;
     if (k === "free"){ if (s.free.n < q) return; if (s.free.n === TC_FREE.max) s.free.t = Date.now(); s.free.n -= q; } else { if (!((s.packs[k] || 0) >= q)) return; s.packs[k] -= q; }
-    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll(s) : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); all.push(...g); }
-    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, C: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0); all.sort((a, b) => wow(a) - wow(b)); all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs;
+    // 25 oct. 2026 : ordre d'un vrai booster TCG. On ouvre booster par booster ; dans chacun, Communes d'abord, Peu communes, puis la Rare,
+    // la carte brillante et la plus rare en dernier. Le booster qui contient la meilleure carte passe en dernier (le suspense dure jusqu'au bout).
+    const wow = c => TC_ORDER.indexOf(c.r) + ({H: .3, A: 1.5, B: 1.6, C: 1.6, W: 3, S: 3.5, K: 3.8, G: 4.5, Z: 6}[c.f] || 0) + (c.hype ? 9 : 0), packs = [];
+    let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll(s) : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); packs.push([...g].sort((a, b) => wow(a) - wow(b))); }
+    const top = p => Math.max(...p.map(wow)); packs.sort((a, b) => top(a) - top(b)); const pb = []; packs.forEach(p => { pb.push(all.length); all.push(...p); });
+    all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs; all.pb = pb;
     tcSave(s); tcOpening(real, all); };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
   // « Tout ouvrir » : tous les boosters du type choisi d'un coup (TC_ALLMAX au plus par clic, pour que l'écran de bilan reste fluide)
@@ -11163,7 +11268,9 @@ function tcView(c, want){
     card.classList.add("live"); tilt((.5 - y) * 44, (x - .5) * 56, x * 100, y * 100); };   // inclinaison plus ample (17 oct. 2026) : ±22° / ±28°
   box.onpointerleave = () => { card.classList.remove("live"); tilt(0, 0); };
   // 19 oct. 2026 : au doigt, la carte suit le geste même s'il sort du cadre (capture), et revient à plat au lâcher
-  box.onpointerdown = e => { if (e.pointerType === "touch" && !back) try { box.setPointerCapture(e.pointerId); } catch {} };
+  let p0 = null, moved = false;   /* 25 oct. 2026 : un geste d'inclinaison au doigt ne retourne plus la carte sur sa fiche au lâcher */
+  box.onpointerdown = e => { p0 = [e.clientX, e.clientY]; moved = false; if (e.pointerType === "touch" && !back) try { box.setPointerCapture(e.pointerId); } catch {} };
+  box.addEventListener("pointermove", e => { if (p0 && Math.hypot(e.clientX - p0[0], e.clientY - p0[1]) > 10) moved = true; }, {passive: true});
   box.onpointerup = box.onpointercancel = e => { if (e.pointerType === "touch"){ card.classList.remove("live"); tilt(0, 0); } };
   // la fiche (dos) reprend le contour de la face : prisme aux couleurs de l'illustration pour une AR, « verre » pour une Holo (17 oct. 2026)
   const ficheEdge = () => { const t = V.querySelector(".vf .tc"), F = V.querySelector(".tcfiche"); if (!t || !F) return; const cs = getComputedStyle(t), q = k => (t.style.getPropertyValue(k) || cs.getPropertyValue(k)).trim();
@@ -11181,7 +11288,7 @@ function tcView(c, want){
   const flip = () => { ficheEdge(); back = !back; card.classList.toggle("bk", back); card.classList.remove("live"); tilt(0, 0); SFX.play("pop"); };
   // 17 oct. 2026 : plus de dos de carte ; toucher la carte (ou le bouton) montre directement sa fiche, et inversement
   const flipS = () => { flip(); $("#tcvSheet").textContent = back ? "Voir la carte" : "Lire la fiche"; };
-  box.onclick = flipS; $("#tcvSheet").onclick = flipS;
+  box.onclick = () => { if (moved){ moved = false; return; } flipS(); }; $("#tcvSheet").onclick = flipS;
   V.querySelectorAll("[data-tcf]").forEach(b => b.onclick = () => { f = b.dataset.tcf; if (back) flipS(); face(); });
   $("#tcvX").onclick = () => V.remove(); V.onclick = e => { if (e.target === V) V.remove(); };
 }
@@ -11676,8 +11783,9 @@ function tcOpening(key, got){
   const big = c => TC_ORDER.indexOf(c.r) >= 4 || c.f === "S" || c.f === "K" || c.f === "G" || c.f === "W" || c.f === "Z", top = got.find(c => c.r === "X" || c.r === "M" || c.f === "G") || got.find(big);
   const last = got.length - 1, VB0 = {H: .5, A: 3, B: 3, C: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc0 = c => TC_ORDER.indexOf(c.r) * 2 + (VB0[c.f] || 0) + (c.hype ? 20 : 0), bestK = got.reduce((b, c, k) => sc0(c) > sc0(got[b]) ? k : b, 0);
   const {u, t} = tcParse(key), best = top ? (top.r === "L" && top.f !== "G" ? "L" : "M") : "C", bi = top ? (best === "M" ? 5 : 4) : 0, calm = tcCalm();
+  document.querySelectorAll(".tcopen").forEach(x => x.remove());   /* un écran d'ouverture resté ouvert : jamais deux à la fois (les cartes sont déjà enregistrées) */
   document.body.insertAdjacentHTML("beforeend", `<div class="tcopen t${t}" style="--pc:${TC_PACKS[u][2]}" role="dialog" aria-modal="true" aria-label="Ouverture du booster"><div class="otop"><button class="ghost" id="tcBackB">← Retour</button><b><i>${TC_PACKS[u][1]}</i>${tcName(key)}</b><span class="ost"></span></div><span class="owm" aria-hidden="true">H</span><h2>Booster ${tcName(key)}${got.packs > 1 ? " ×" + got.packs : ""}</h2><div class="mid"><div class="aura"></div>${(got.secs || []).length ? (() => { const sx = TC_SECRET.find(x => x[0] === got.secs[0]), n = got.secs.length; return `<div class="secx" style="--sc:${sx[4]}"><small>Booster secret</small><b>${n > 1 ? n + " boosters secrets" : "Booster " + sx[1]}</b>${n > 1 ? "" : `<span class="odds">1 chance sur ${sx[3]}</span>`}</div>`; })() : ""}<div class="tearw ${(got.secs || []).length ? "sec" : ""}" style="--sc:${(got.secs || []).length ? TC_SECRET.find(x => x[0] === got.secs[0])[4] : "transparent"}">${(got.secs || []).length ? `<i class="secrays" aria-hidden="true"></i>` : ""}${got.packs > 1 ? `<span class="xn">×${got.packs}</span>` : ""}${tcPouch(key)}${(got.secs || []).length ? `<i class="secfoil" aria-hidden="true"></i>` : ""}<div class="cutband" aria-hidden="true"><i class="cutg"></i><i class="cutl"></i><i class="cuth"></i></div></div>${(got.secs || []).length ? (() => { const L = [...new Set(got.secs)].map(k => TC_SECRET.find(x => x[0] === k)), sx = L[0]; return `<div class="secinf" style="--sc:${sx[4]}">${L.length > 1 ? `<span class="odds">${L.map(x => x[1]).join(" · ")}</span>` : ""}<span class="gar">${L.map(x => cap1(x[5])).join(" · ")}</span></div>`; })() : ""}<p class="muted">Glisse ton doigt le long de la ligne pour ouvrir</p></div><div class="bot"></div></div>`);
-  const O = document.querySelector(".tcopen"), mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false;
+  const O = document.body.lastElementChild, mid = O.querySelector(".mid"), bot = O.querySelector(".bot"), seen = got.map(() => false); let busy = false, fin = false;
   const G = !calm && window.gsap, lvlOf = c => c.r === "M" || c.r === "X" || c.f === "G" || c.f === "Z" ? 3 : c.r === "L" || c.f === "K" || c.f === "S" || c.f === "W" ? 2 : TC_ORDER.indexOf(c.r) === 3 || c.f ? 1 : 0;
   const GL = tcPouchGL(O, key); if (!calm) setTimeout(() => tcSnd("rustle"), 420);
   setTimeout(() => { try { tcCineWarm(); } catch {} }, 900);   /* prépare le moteur des cinématiques pendant que le joueur ouvre le sachet */
@@ -11687,8 +11795,15 @@ function tcOpening(key, got){
   // « Retour » avant d'avoir vu toutes les cartes (17 oct. 2026) : elles sont déjà dans la collection, donc on saute à l'écran de résultat
   // (cartes face visible, sans cinématique) ; un second « Retour » ramène aux boosters
   $("#tcBackB").onclick = () => { if (O.classList.contains("res") || !O.isConnected){ TC_TAB = "packs"; end(); return; }
-    O.dataset.torn = 1; GL && GL.stop(); O.querySelector(".burst")?.remove(); O.classList.add("skip"); seen.fill(true);
-    mid.innerHTML = `<div class="tcrow ${got.length > 5 ? "many" : ""}">${got.map(c => tcCard(c, {isNew: c.isNew, f: c.f})).join("")}</div>`; bot.innerHTML = ""; done(); };
+    O.dataset.torn = 1; GL && GL.stop(); O.querySelector(".burst")?.remove(); O.classList.add("skip"); seen.fill(true); fin = true;
+    mid.innerHTML = sumRow(); bot.innerHTML = ""; done(); };
+  // 25 oct. 2026 : bilan léger. Jusqu'à 10 cartes, toutes sont montrées ; au-delà, seulement les cartes qui comptent (nouvelles, Épique ou mieux,
+  // versions rares), les meilleures d'abord, par paquets de 30. 250 cartes complètes d'un coup faisaient planter les téléphones (11 Mo de page).
+  const E0 = TC_ORDER.indexOf("E"), hot = c => TC_ORDER.indexOf(c.r) >= E0 || (c.f && c.f !== "H") || c.hype, many = got.length > 10;
+  const SIDX = many ? [...got.keys()].filter(k => got[k].isNew || got[k].newFin || hot(got[k])).sort((a, b) => sc0(got[b]) - sc0(got[a])) : [...got.keys()];
+  const sumCards = (a, b) => SIDX.slice(a, b).map(k => tcCard(got[k], {isNew: got[k].isNew, f: got[k].f})).join("");
+  const sumRow = () => `<div class="tcrow ${got.length > 5 ? "many" : ""}">${sumCards(0, many ? 30 : got.length)}</div>`;
+  O._got = got;   /* les envies (kyara2) lisent le tirage complet, même les cartes non affichées */
   // écran de résultat : titre du booster, bilan, les cartes en éventail avec la meilleure au centre, puis les actions
   const done = () => { try { done0(); } catch (e){ try { bot.innerHTML = `<button class="primary" id="tcColl2">Voir la collection</button>`; $("#tcColl2").onclick = () => { TC_TAB = "album"; end(); }; } catch {} } };   /* 19 oct. 2026 : l'écran de fin ne doit jamais rester vide */
   const done0 = () => { const nw = got.filter(c => c.isNew).length, nf = got.filter(c => c.newFin && !c.isNew).length, dup = got.length - nw - nf, s = tcLoad(), all = tcCards();
@@ -11697,43 +11812,92 @@ function tcOpening(key, got){
     const VB = {H: .5, A: 3, B: 3, C: 3, W: 3.5, S: 4, K: 5, G: 8, Z: 9}, sc = c => TC_ORDER.indexOf(c.r) * 2 + (VB[c.f] || 0), bk = got.reduce((b, c, k) => sc(c) > sc(got[b]) ? k : b, 0);
     O.classList.add("res"); O.querySelector("h2").textContent = tcName(key);
     const row = mid.querySelector(".tcrow"); if (row && got.length <= 5){ row.classList.add("tcfan"); let j = 0; [...row.children].forEach((el, k) => { el.classList.remove("tcflip", "tcburst"); if (k === bk){ el.style.setProperty("--k", 0); el.style.order = 3; el.classList.add("best"); return; } el.style.setProperty("--k", j < 2 ? j - 2 : j - 1); el.style.order = j < 2 ? j + 1 : j + 2; j++; }); }
-    { const rw = mid.querySelector(".tcrow"); if (rw){ [...rw.children].forEach((el, k) => { if (!got[k]) return; el.classList.add("zoom"); el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", "Voir " + got[k].n + " en grand"); const go = () => tcView(got[k], got[k].f || ""); el.onclick = go; el.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }); rw.insertAdjacentHTML("afterend", `<p class="small ozoom">Touche une carte pour la voir en grand, l'incliner et lire sa fiche.</p>`); } }
-    if ((got.secs || []).length) mid.insertAdjacentHTML("afterbegin", `<p class="osec" style="--sc:${TC_SECRET.find(x => x[0] === got.secs[0])[4]}">${got.secs.map(k => { const sx = TC_SECRET.find(x => x[0] === k); return `<i>${sx[2]}</i>Booster ${sx[1]} : ${sx[5]}`; }).join(" · ")}</p>`);
+    { const rw = mid.querySelector(".tcrow"); if (rw){ const zoom = () => [...rw.children].forEach((el, j) => { const c = got[SIDX[j]]; if (!c || el.classList.contains("zoom")) return; el.classList.add("zoom"); el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", "Voir " + c.n + " en grand"); const go = () => tcView(c, c.f || ""); el.onclick = go; el.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }); zoom();
+      rw.insertAdjacentHTML("afterend", `<p class="small ozoom">Touche une carte pour la voir en grand, l'incliner et lire sa fiche.</p>`);
+      if (many){ const rest = got.length - SIDX.length, more = () => { const shown = rw.children.length, b = mid.querySelector("#tcMore"); if (shown >= SIDX.length){ b && b.remove(); return; } b.textContent = `Voir ${Math.min(30, SIDX.length - shown)} cartes de plus (${SIDX.length - shown} restantes)`; };
+        rw.insertAdjacentHTML("afterend", `${SIDX.length > 30 ? `<button class="ghost" id="tcMore"></button>` : ""}${rest ? `<p class="small orest">+ ${rest} carte${rest > 1 ? "s" : ""} déjà dans ta collection (Commune, Peu commune ou Rare), rangée${rest > 1 ? "s" : ""} avec les autres.</p>` : ""}`);
+        const b = mid.querySelector("#tcMore"); if (b){ more(); b.onclick = () => { rw.insertAdjacentHTML("beforeend", sumCards(rw.children.length, rw.children.length + 30)); zoom(); more(); }; }
+        // décompte par rareté de tout le tirage
+        const cnt = {}; got.forEach(c => cnt[c.r] = (cnt[c.r] || 0) + 1); rw.insertAdjacentHTML("beforebegin", `<p class="otally">${got.length} cartes ${[...TC_ORDER].reverse().filter(r => cnt[r]).map(r => `<span class="r-${r}">${cnt[r]} ${(l => cnt[r] > 1 && !/\.$/.test(l) ? l.replace(/^(\S+)/, "$1s") : l)(TC_R[r][3] || TC_R[r][0])}</span>`).join("")}</p>`); } } }
+    // 25 oct. 2026 : un badge par sorte de booster secret (×n), qui passent à la ligne ; avant, une seule pilule par-dessus le bord de l'écran
+    if ((got.secs || []).length){ const cs = {}; got.secs.forEach(k => cs[k] = (cs[k] || 0) + 1); mid.insertAdjacentHTML("afterbegin", `<div class="osecs">${Object.keys(cs).map(k => { const sx = TC_SECRET.find(x => x[0] === k); return `<p class="osec" style="--sc:${sx[4]}"><i>${sx[2]}</i><span>Booster ${sx[1]}${cs[k] > 1 ? " ×" + cs[k] : ""} : ${sx[5]}</span></p>`; }).join("")}</div>`); }
     mid.insertAdjacentHTML("afterbegin", `<p class="osum">${[nw && nw + " nouvelle" + (nw > 1 ? "s" : "") + " carte" + (nw > 1 ? "s" : ""), nf && nf + " nouvelle" + (nf > 1 ? "s" : "") + " version" + (nf > 1 ? "s" : ""), dup && dup + " doublon" + (dup > 1 ? "s" : "") + " (+" + gain + " ◆ si recyclé" + (dup > 1 ? "s" : "") + ")"].filter(Boolean).join(", ")}</p><p class="obest">Meilleure carte : ${esc(got[bk].n)}${got[bk].f && got[bk].f !== "H" ? " · " + TC_FIN[got[bk].f][1] : ""}</p>${(TC_ORDER.indexOf(got[bk].r) >= 3 || (got[bk].f && got[bk].f !== "H")) ? tcOddsOf(got[bk], key).replace('class="odds"', 'class="odds oodds"') : ""}`);
     mid.insertAdjacentHTML("beforeend", `<span class="oxn">×${got.packs || 1}</span><p class="tcxp">+${got.xp} XP${got.ups.map(([l, tt]) => ` · <b>Niveau ${l} : booster ${TC_T[tt].n} offert</b>`).join("")}</p>`);
     bot.innerHTML = `<div class="oend"><button class="primary" id="tcAgain" ${have || s.gems >= price ? "" : "disabled"}>Ouvrir un autre${have ? `<small>${have} en stock</small>` : `<small>${price} ◆</small>`}</button>
-      <div class="ogrid"><button id="tcColl"><i aria-hidden="true">札</i>Ma collection</button><button id="tcShare2"><i aria-hidden="true">↗</i>Partager</button></div>
-      <button class="ghost oexit" id="tcSwap">Terminer · retour aux Cartes</button></div>`;   /* 19 oct. 2026 : fin d'ouverture simplifiée (une action principale, deux raccourcis, une sortie claire) */
+      <div class="ogrid"><button id="tcColl"><i aria-hidden="true">札</i>Collection</button><button id="tcShare2"><i aria-hidden="true">↗</i>Partager</button><button id="tcSwap"><i aria-hidden="true">✓</i>Terminer</button></div></div>`;   /* 25 oct. 2026 : barre compacte collée en bas (plus besoin de descendre) */   /* 19 oct. 2026 : fin d'ouverture simplifiée (une action principale, deux raccourcis, une sortie claire) */
     $("#tcSwap").onclick = () => { TC_TAB = "packs"; end(); }; $("#tcColl").onclick = () => { TC_TAB = "album"; end(); };
     $("#tcAgain").onclick = () => { const s = tcLoad(); if (!((s.packs[key] || 0) + (key === "mix:0" ? s.free.n : 0))){ if (s.gems < price) return; if (!tcPaidOk(price, () => $("#tcAgain")?.click())) return; s.gems -= price; tcGive(s, key); tcSave(s); } TC_PICK = (tcLoad().packs[key] || 0) > 0 ? key : "free"; TC_TAB = "packs"; TC_SUB = "mine"; O.remove(); tcRender(); $("#tcOpen")?.click(); };
     const st = tcLoad(); O.querySelector(".otop .ost").innerHTML = `<span>${tcStock(st)} booster${tcStock(st) > 1 ? "s" : ""}</span><span>${st.gems} ◆</span>`;
     if (G){ G.from(mid.querySelectorAll(".osum,.obest,.osec,.tcxp,.oxn"), {y: 16, opacity: 0, duration: .45, stagger: .08, clearProps: "transform,opacity"}); G.from(bot.children, {y: 24, opacity: 0, duration: .4, stagger: .07, delay: .25, clearProps: "transform,opacity"});
       const bl = Math.max(...got.map(lvlOf)); if (bl >= 2) setTimeout(() => tcBoom(bl, mid.querySelector(".tcrow .best") || mid.querySelector(".tcrow")), 350); }
     if (got.ups.length){ SFX.play("fanfare"); const [l, tt] = got.ups[got.ups.length - 1]; setTimeout(() => tcCele("Niveau " + l, "Booster " + TC_T[tt].n + " offert", "昇", ["#c9a36a", "#dfe5ee", "#f2c230", "#c9a2ff"][tt]), 900); } };
-  const flip = async k => { if (seen[k] || busy) return; seen[k] = true; const c = got[k], ri = TC_ORDER.indexOf(c.r), el = mid.querySelector(`[data-k="${k}"]`);
-    const show = k === bestK && (big(c) || c.hype);   // une seule cinématique par ouverture : celle de la meilleure carte
-    try { if (show){ busy = true; await tcCine(c, {key, full: !!c.hype}); }
-      else if (k === bestK && c.f && c.f !== "H"){   /* plus de cinématique pour une simple Épique (demande du 12 oct. 2026) : seulement les versions rares */ busy = true; await tcCine(c, {mini: true, key}); } } catch {} finally { busy = false; }   /* 19 oct. 2026 : quoi qu'il arrive, les autres cartes restent retournables */
-    try { const par = el.parentElement, ix = [...par.children].indexOf(el);
-      el.outerHTML = tcCard(c, {isNew: c.isNew, f: c.f, cls: "tcflip" + (!show && (ri >= 3 || c.f) ? " tcburst" : "")}); tcSnd("flip" + lvlOf(c));
-      if (G){ const ne = par.children[ix]; G.fromTo(ne, {rotationY: -100, scale: .82, y: -14, transformPerspective: 700}, {rotationY: 0, scale: 1, y: 0, duration: .55, ease: "back.out(1.9)", clearProps: "transform"}); if (lvlOf(c)) tcBoom(Math.min(lvlOf(c), got.length > 5 ? 1 : 3), ne); } } catch {}
-    if (seen.every(Boolean)) done(); };
   const openP = (fast, dir = 1) => { if (O.dataset.torn) return; O.dataset.torn = 1; const p = O.querySelector(".pouch"); p.onclick = null; O.querySelector(".cutband")?.classList.add("gone"); if (!fast){ p.classList.add("charge"); GL && GL.charge(); tcSnd("charge"); } if (!fast) tcRiser(.78, bi >= 5 ? 1.25 : bi >= 4 ? 1.1 : .9);
     if (G && !fast){ G.killTweensOf(p); G.to(p, {keyframes: [{x: -5, rotation: -3, scale: .95}, {x: 6, rotation: 3, scale: 1.02}, {x: -8, rotation: -5, scale: .96}, {x: 10, rotation: 5, scale: 1.07}, {x: -6, rotation: -3, scale: 1.1}, {x: 0, rotation: 0, scale: 1.15}], duration: .78, ease: "power2.in"}); G.to(p, {filter: "brightness(2.3)", duration: .78, ease: "power3.in"}); } mid.querySelector("p").textContent = bi >= 5 ? "Quelque chose d'énorme arrive…" : bi >= 4 ? "Ça brille là-dedans…" : "…"; SFX.play("pop");
     setTimeout(() => { GL && GL.tear(dir); O.querySelector(".cutband")?.remove(); if (G){ G.killTweensOf(p); G.set(p, {clearProps: "transform,filter,opacity"}); } p.classList.remove("charge"); p.classList.add("torn"); const w = p.parentElement; tcBoom(bi >= 5 ? 3 : bi >= 4 ? 2 : 0, w);
       // la bande du haut part sur le côté, la lumière sort par l'ouverture, les cinq cartes montent
-      w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.slice(-5).map((c, k) => tcBackU(c.r, {u: c.u, style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
+      w.insertAdjacentHTML("beforeend", `${tcPouch(key).replace('class="pouch', 'class="strip pouch')}<i class="glowup r-${best}"></i><div class="rise">${got.slice(-5).map((c, k) => tcBackU("C", {u: c.u, style: `--n:${k};--x:${(k - 2) * 34}%;--r:${(k - 2) * 9}deg`})).join("")}</div>`);
       O.insertAdjacentHTML("beforeend", `<div class="burst r-${best}"></div>`); tcSnd("rip"); if (bi >= 4) try { navigator.vibrate?.(40); } catch {}
-      setTimeout(() => { if (O.classList.contains("res")) return;   /* « Retour » pendant la déchirure : le résultat est déjà affiché */ O.querySelector(".burst")?.remove(); mid.innerHTML = `<div class="tcrow ${got.length > 5 ? "many" : ""}">${got.map((c, k) => tcBackU(c.r, {u: c.u, btn: true, cls: "tcback", attr: `data-k="${k}" aria-label="Retourner la carte ${k + 1}"`, style: `--n:${Math.min(k, 14)}`}))   /* 20 oct. 2026 : dos de l'univers, le halo annonce la rareté avant le retournement */.join("")}</div>`;
-        mid.querySelectorAll(".tcback").forEach(b => b.onclick = () => flip(+b.dataset.k));
-        tcSnd("deal");
-        if (G) G.from(mid.querySelectorAll(".tcback"), {y: 140, opacity: 0, scale: .5, rotation: () => Math.random() * 50 - 25, duration: .6, stagger: got.length > 5 ? .025 : .07, ease: "back.out(1.6)", clearProps: "transform,opacity"});
-        bot.innerHTML = `<button id="tcAll">Tout retourner</button>${got.length >= 10 && got.some(c => TC_ORDER.indexOf(c.r) >= TC_ORDER.indexOf("E")) ? `<button id="tcNext">⏭ Prochaine Épique ou mieux</button>` : ""}`;
-        // 19 oct. 2026 (comme Kyara, 10 cartes et plus) : retourne d'un coup les cartes jusqu'à la prochaine Épique, Légendaire, Mythique ou Éveil
-        $("#tcNext") && ($("#tcNext").onclick = async () => { const b = $("#tcNext"); b.disabled = true; const E = TC_ORDER.indexOf("E");
-          for (const k of got.keys()){ if (seen[k]) continue; while (busy) await new Promise(r => setTimeout(r, 120)); await flip(k); if (TC_ORDER.indexOf(got[k].r) >= E) break; await new Promise(r => setTimeout(r, calm ? 0 : 60)); }
-          if (!b.isConnected) return; const left = [...got.keys()].some(k => !seen[k] && TC_ORDER.indexOf(got[k].r) >= E); b.disabled = !left; if (!left) b.remove(); });
-        $("#tcAll").onclick = async () => { $("#tcAll").disabled = true; for (const k of [...got.keys()].filter(k => k !== bestK).concat(bestK)){ while (busy) await new Promise(r => setTimeout(r, 120)); await flip(k); await new Promise(r => setTimeout(r, calm ? 0 : got.length > 5 ? 90 : 260)); } }; }, calm ? 0 : 1500); }, calm || fast ? 0 : 800); };
+      setTimeout(() => { if (O.classList.contains("res")) return;   /* « Retour » pendant la déchirure : le résultat est déjà affiché */ O.querySelector(".burst")?.remove(); deal(); }, calm ? 0 : 1500); }, calm || fast ? 0 : 800); };
+  // 25 oct. 2026 : révélation comme un vrai booster TCG (et l'écran de Kyara). Les cartes sont empilées face visible, booster par booster,
+  // de la plus commune à la plus rare ; on fait glisser (ou on touche) celle du dessus pour découvrir la suivante. Les Épiques et mieux, et les
+  // versions rares, arrivent face cachée, sans halo : il faut les retourner. Compteur « Booster k/q » et carte du booster ; cases en bas
+  // (au-delà de 30 cartes, un décompte par rareté). Seules la carte du dessus et la suivante sont dans la page (léger, même pour 250 cartes).
+  const N = got.length, TAL = N > 30, PB = got.pb && got.pb.length ? got.pb : [0], NP = PB.length; let i = 0, lastP = -1;
+  const packOf = k => { let p = 0; while (p + 1 < NP && PB[p + 1] <= k) p++; return p; }, packEnd = p => p + 1 < NP ? PB[p + 1] : N;
+  const cur = () => mid.querySelector(`.kfl[data-k="${i}"]:not(.gone)`);
+  const cardHTML = k => { const c = got[k], down = hot(c); return `<div class="kfl ${down ? "" : "up nofl r-" + c.r}" data-k="${k}" style="z-index:${N - k}"><div class="in"><div class="bkf">${tcBackU("C", {u: c.u, cls: "tcback", attr: `aria-label="Retourner la carte ${k + 1}"`})}</div><div class="fa">${tcCard(c, {isNew: c.isNew, f: c.f})}</div></div></div>`; };
+  const msg = t => { const m = bot.querySelector(".kmsg"); if (m) m.textContent = t; };
+  const stack = () => { const dk = mid.querySelector(".kdeck"); if (!dk) return;
+    dk.querySelectorAll(".kfl:not(.gone)").forEach(e => { if (+e.dataset.k < i) e.remove(); });
+    for (const k of [i, i + 1]) if (k < N && !dk.querySelector(`.kfl[data-k="${k}"]:not(.gone)`)) dk.insertAdjacentHTML("beforeend", cardHTML(k));
+    const left = N - i; dk.querySelectorAll(".gh").forEach((g, k) => g.style.opacity = k < left - 2 ? 1 : 0);
+    const p = packOf(i), kc = O.querySelector(".kcnt .kc"), kt = O.querySelector(".kcnt .kt"), kp = O.querySelector(".kcnt .kpk b");
+    if (kc){ kc.textContent = i - PB[p] + 1; kt.textContent = "/" + (packEnd(p) - PB[p]); } if (kp) kp.textContent = p + 1;
+    if (p !== lastP){ if (lastP >= 0 && !calm){ const e = O.querySelector(".kcnt .kpk"); e && e.animate([{transform: "scale(1.35)", color: "#fff"}, {transform: "scale(1)"}], {duration: 450, easing: "ease-out"}); tcSnd("deal"); } lastP = p; }
+    const nx = $("#tcNext"); if (nx) nx.hidden = ![...got.keys()].some(k => k > i && hot(got[k])) && !(hot(got[i]) && !cur()?.classList.contains("up"));
+    const top = cur(); msg(top && !top.classList.contains("up") ? "Touche la carte pour la retourner" : i < N - 1 ? "Glisse ou touche pour la carte suivante" : "Touche pour voir le bilan"); };
+  const fill = k => { const c = got[k]; seen[k] = true;
+    if (TAL){ const t = bot.querySelector(`.ktal [data-r="${c.r}"]`); if (t){ t.hidden = false; const n = +t.querySelector("b").textContent + 1, l = TC_R[c.r][3] || TC_R[c.r][0]; t.querySelector("b").textContent = n; t.lastChild.textContent = " " + (n > 1 && !/\.$/.test(l) ? l.replace(/^(\S+)/, "$1s") : l); if (hot(c)){ t.classList.remove("pop"); void t.offsetWidth; t.classList.add("pop"); } } return; }
+    const sl = bot.querySelectorAll(".kslots i")[k]; if (!sl) return; sl.className = "f r-" + c.r + (hot(c) ? "" : " lo"); sl.innerHTML = `<img src="${tcArt(c, c.f)}" alt="">`; };
+  const cine = async k => { const c = got[k]; if (k !== bestK) return false; const show = big(c) || c.hype; busy = true;
+    try { if (show) await tcCine(c, {key, full: !!c.hype}); else if (c.f && c.f !== "H") await tcCine(c, {mini: true, key}); } catch {} finally { busy = false; } return show; };
+  const flipC = async () => { const el = cur(); if (!el || el.classList.contains("up") || busy || fin) return; const k = +el.dataset.k, c = got[k];
+    const show = await cine(k); if (!el.isConnected || fin) return;   /* une seule cinématique par ouverture : celle de la meilleure carte */
+    el.classList.add("up", "r-" + c.r, "hit"); tcSnd("flip" + lvlOf(c));
+    if (!show && lvlOf(c) >= 2 && !calm) setTimeout(() => tcBoom(Math.min(2, lvlOf(c)), el), 280);
+    stack(); };
+  // la carte du dessus part : sur le côté si on l'a glissée, vers sa case si on l'a touchée
+  const adv = dir => { const el = cur(); if (!el || busy || fin) return; if (!el.classList.contains("up")) return flipC();
+    if (dir){ el.classList.remove("drag"); el.style.transform = `translateX(${dir * 115}vw) rotate(${dir * 24}deg)`; el.style.opacity = "0"; el.classList.add("gone"); } else el.classList.add("gone");
+    setTimeout(() => el.remove(), 450); if (!calm && !dir) tcSnd("flip0"); fill(i); i++; if (i < N) stack(); else finish(); };
+  const finish = async () => { if (fin) return; fin = true; for (; i < N; i++) fill(i);
+    setTimeout(() => { if (!O.isConnected || O.classList.contains("res")) return; mid.innerHTML = sumRow(); bot.innerHTML = ""; done(); }, calm ? 0 : 380); };
+  const deal = () => {
+    mid.innerHTML = `<div class="kcnt" aria-live="polite">${NP > 1 ? `<span class="kpk">Booster <b>1</b>/${NP}</span>` : ""}<span><b class="kc">1</b><small class="kt">/5</small></span></div><div class="kdeck">${[3, 2, 1].map(k => `<div class="gh" style="transform:translate(${k * 6}px,${-k * 5}px) rotate(${k * 1.3}deg);z-index:${-k}">${tcBackU("C", {u: got[Math.min(N - 1, k)].u})}</div>`).join("")}</div>`;
+    const cn = {}; got.forEach(c => cn[c.r] = 1);
+    bot.innerHTML = `<div class="kfoot">${TAL ? `<div class="ktal">${[...TC_ORDER].reverse().filter(r => cn[r]).map(r => `<span class="r-${r}" data-r="${r}" hidden><b>0</b><em> ${TC_R[r][3] || TC_R[r][0]}</em></span>`).join("")}</div>` : `<div class="kslots">${got.map(() => "<i></i>").join("")}</div>`}
+      <p class="kmsg"></p><div class="kbtns">${got.some(hot) && N > 1 ? `<button id="tcNext">Passer à la prochaine Épique ou +</button>` : ""}<button id="tcAll">Tout révéler</button></div></div>`;
+    stack(); tcSnd("deal");
+    // geste : on fait glisser la carte du dessus ; un petit geste vaut une touche
+    { const dk = mid.querySelector(".kdeck"); let d = null;
+      dk.onpointerdown = e => { if (busy || fin) return; const el = cur(); if (!el) return; d = {x: e.clientX, y: e.clientY, el, dx: 0}; try { dk.setPointerCapture(e.pointerId); } catch {} };
+      dk.onpointermove = e => { if (!d) return; d.dx = e.clientX - d.x; if (!d.el.classList.contains("up")) return; if (Math.abs(d.dx) > 6){ d.el.classList.add("drag"); d.el.style.transform = `translateX(${d.dx}px) rotate(${d.dx / 18}deg)`; } };
+      const up = e => { if (!d) return; const {el, dx} = d; d = null; el.classList.remove("drag");
+        if (Math.abs(dx) > 70 && el.classList.contains("up")) return adv(dx > 0 ? 1 : -1);
+        el.style.transform = ""; if (Math.abs(dx) < 10 && e.type === "pointerup") adv(0); };
+      dk.onpointerup = up; dk.onpointercancel = up;
+      dk.tabIndex = 0; dk.setAttribute("role", "button"); dk.setAttribute("aria-label", "Carte suivante"); dk.onkeydown = e => { if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight"){ e.preventDefault(); adv(0); } }; }
+    if (G) G.from(mid.querySelector(".kdeck"), {y: 120, opacity: 0, scale: .6, rotation: -8, duration: .55, ease: "back.out(1.5)", clearProps: "transform,opacity"});
+    // jusqu'à la prochaine Épique, Légendaire, Mythique, Éveil ou version rare : les cartes d'avant vont dans leurs cases, la suivante attend face cachée
+    $("#tcNext") && ($("#tcNext").onclick = () => { if (busy || fin) return; const el = cur();
+      if (el && !el.classList.contains("up")) return flipC();
+      fill(i); i++; while (i < N && !hot(got[i])) fill(i++);
+      mid.querySelectorAll(".kfl").forEach(e => e.remove());
+      if (i < N) stack(); else finish(); });
+    $("#tcAll").onclick = async () => { if (busy || fin) return; const b = $("#tcAll"); b.disabled = true;
+      // la meilleure carte garde sa cinématique si elle n'a pas encore été vue
+      if (bestK >= i && !mid.querySelector(`.kfl[data-k="${bestK}"].up.hit`)) await cine(bestK);
+      mid.querySelectorAll(".kfl").forEach(e => e.remove()); finish(); }; };
   // ouverture façon TCG Pocket (17 oct. 2026) : on glisse le long de la ligne du haut, d'un côté ou de l'autre, et la languette part de ce côté.
   // Le sachet garde son rendu 3D et s'incline sous le doigt sans faire défiler l'écran. Après 3 essais ratés, toucher le sachet suffit.
   { const w = O.querySelector(".tearw"), band = w.querySelector(".cutband"), line = band.querySelector(".cutl"), hint = mid.querySelector(":scope > p.muted"); let dr = null, tries = 0;
@@ -11811,9 +11975,9 @@ function tcTourTick(){ const T = TC_TOUR; if (!T) return; const st = TC_TSTEPS[T
   const busy = !!document.querySelector(".tcopen,.tcview,.tccine,.tccele"); T.el.classList.toggle("wait", busy);
   // pendant l'ouverture du booster : un doigt montre où toucher (le sachet, puis chaque carte face cachée, une par une)
   { let fg = document.querySelector(".tcfinger"); const O = $(".tcopen"), cine = !!$(".tccine,.tccele,.tcview");
-    const pz = O && !O.classList.contains("res") && O.querySelector(".tearw .pouch:not(.torn):not(.strip):not(.charge)"), bk0 = O && !O.classList.contains("res") && O.querySelector(".tcrow .tcback"), bk = bk0 && !O.querySelector(".tcrow .tc") ? bk0 : null, tg2 = cine ? null : bk;   /* sur le sachet, la ligne à découper montre déjà le geste (17 oct. 2026) */   // le repère ne montre que la première carte : dès qu'une carte est retournée, le joueur continue seul
+    const pz = O && !O.classList.contains("res") && O.querySelector(".tearw .pouch:not(.torn):not(.strip):not(.charge)"), bk0 = O && !O.classList.contains("res") && O.querySelector(".kdeck .kfl"), bk = bk0 && !O.querySelector(".kslots i.f,.ktal span:not([hidden])") ? bk0 : null, tg2 = cine ? null : bk;   /* sur le sachet, la ligne à découper montre déjà le geste (17 oct. 2026) */   // le repère ne montre que la première carte : dès qu'une carte est retournée, le joueur continue seul
     if (!tg2){ fg && fg.remove(); } else { if (!fg){ document.body.insertAdjacentHTML("beforeend", `<div class="tcfinger" aria-hidden="true"><span><i></i><i></i><i></i></span><b></b></div>`); fg = document.querySelector(".tcfinger"); }
-      const r2 = tg2.getBoundingClientRect(); fg.querySelector("b").textContent = bk ? "Touche une carte pour la retourner" : ""; fg.querySelector("b").style.display = bk ? "" : "none"; /* sur le sachet, la consigne est déjà écrite dessous */ { const cx = r2.left + r2.width / 2, half = fg.offsetWidth / 2 + 8, x = Math.min(innerWidth - half, Math.max(half, cx)); fg.style.left = x + "px"; fg.style.setProperty("--dx", (cx - x) + "px"); } fg.style.top = (r2.top + r2.height * .5) + "px"; } }
+      const r2 = tg2.getBoundingClientRect(); fg.querySelector("b").textContent = bk ? "Glisse ou touche la carte" : ""; fg.querySelector("b").style.display = bk ? "" : "none"; /* sur le sachet, la consigne est déjà écrite dessous */ { const cx = r2.left + r2.width / 2, half = fg.offsetWidth / 2 + 8, x = Math.min(innerWidth - half, Math.max(half, cx)); fg.style.left = x + "px"; fg.style.setProperty("--dx", (cx - x) + "px"); } fg.style.top = (r2.top + r2.height * .5) + "px"; } }
   if (st.mark && st.mark()) T.seen = true;
   if (busy) return;
   if (st.done && !st.next && st.done() && !(st.mark && !T.seen)) return tcTourGo(T.k + 1);
@@ -12267,6 +12431,7 @@ function hsZoom(id, key){
 // ouverture d'un booster de série, façon Kyara : sachet à déchirer, paquet avec compteur, cartes retournées une à une (de la plus courante à la meilleure),
 // rangée de cases qui se remplit ; aucun halo ni couleur avant qu'on retourne la carte (le suspense d'une vraie ouverture), puis bilan
 function hsOpenUI(id){
+  if (hsLayer().querySelector(".hs-open")) return;   /* 25 oct. 2026 : double appui = une seule ouverture */
   const set = hsSet(id), s = tcLoad(), st = hsSt(s, id);
   if (!st.packs) return;
   st.packs--; const {got, neu, god} = hsOpen(set, s); tcSave(s); try { mnRefresh(); } catch {}
@@ -12536,7 +12701,7 @@ function vtCheck(s){
   const more = neu.length - 1;
   // annonce : un panneau qui descend du haut de l'écran avec la carte de visite elle-même (animée), sa récompense et un accès à la vitrine.
   // Il attend la fin d'une ouverture de booster ou d'une cinématique pour ne pas passer par-dessus.
-  let tries = 0; const showIt = () => { if (document.querySelector("#arena,.crpov") || document.querySelector(".tccine,.tccele,.tcopen:not(.res)") && ++tries < 30) return setTimeout(showIt, 700);   /* jamais pendant un combat (#arena) : le résultat serait dévoilé */
+  let tries = 0; const showIt = () => { if (document.querySelector("#arena,.crpov,.tcopen:not(.res)") || (typeof HS_ROOT !== "undefined" && HS_ROOT && HS_ROOT.querySelector && HS_ROOT.querySelector(".hs-open:not(:has(.hs-sum))")) || document.querySelector(".tccine,.tccele") && ++tries < 30) return setTimeout(showIt, 700);   /* 25 oct. 2026 : jamais pendant une révélation de cartes, même longue (250 cartes), sinon elle dévoile « 1 carte UR » */   /* jamais pendant un combat (#arena) : le résultat serait dévoilé */
     document.querySelector(".vtnote")?.remove();
     document.body.insertAdjacentHTML("beforeend", `<div class="vtnote t${top[3]}" role="status" aria-live="polite"><div class="vn-in"><div class="vn-h"><span class="vn-e">Carte de visite obtenue</span><button class="vn-x" aria-label="Fermer">✕</button></div>
       ${vtCardHTML(top[0], {cls: "main"})}
@@ -14345,6 +14510,8 @@ if (matchMedia("(hover: none) and (pointer: coarse)").matches) document.addEvent
     O.querySelectorAll(".tcrow > .tc").forEach(e => { const no = +((e.textContent.match(/#(\d{3})/) || [])[1] || 0), c = all.find(x => x.no === no); if (!c) return;
       const fin = ([...e.classList].find(k => /^f-/.test(k)) || "").slice(2) || (e.classList.contains("arp") ? "A" : ""), k1 = c.id + "|" + fin, k0 = c.id + "|";
       const k = W.has(k1) ? k1 : W.has(k0) && !fin ? k0 : null; if (k){ e.classList.add("wishgot"); hits.push([c, fin, k]); } });
+    // 25 oct. 2026 : au-delà de 10 cartes, le bilan ne montre pas tout ; on lit aussi le tirage complet
+    (O._got || []).forEach(c => { const fin = c.f || "", k1 = c.id + "|" + fin, k0 = c.id + "|", k = W.has(k1) ? k1 : W.has(k0) && !fin ? k0 : null; if (k && !hits.some(h => h[2] === k)) hits.push([c, fin, k]); });
     if (!hits.length) return; SFX.play("fanfare");
     frToast(hits.length > 1 ? `${hits.length} cartes de tes envies obtenues ! Retirées de ta liste.` : `Envie obtenue : ${hits[0][0].n} ! Retirée de ta liste.`);
     for (const [c, fin, k] of hits){ try { await CP.sb.rpc("market_wish", {card: c.id, v: fin, wanted: false}); W.delete(k); if (typeof HV !== "undefined" && HV.data && HV.data.wish) HV.data.wish.delete(k); } catch {} } }
@@ -14754,6 +14921,301 @@ function gtRender(){
 </script>
 
 <style>
+/* =====================================================================
+   MERCATO À PLUSIEURS (25 oct. 2026) — 3 à 8 joueurs, en mêlée générale ou en équipes (nombre pair)
+   ===================================================================== */
+#mj{max-width:1100px;margin:0 auto}
+.mjcnt{display:flex;flex-wrap:wrap;gap:8px}
+.mjcnt button{min-width:52px;padding:11px 14px;font-weight:800;font-size:16px;border-radius:12px}
+.mjcnt button.sel{box-shadow:inset 0 0 0 2px var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel2))}
+#mjFmt{margin-top:10px}
+#mjNames{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:16px}
+#mjNames .tm{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.mjdot{display:inline-block;flex:none;width:9px;height:9px;border-radius:50%;background:var(--tc,#888)}
+.mjpl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.mjpl > div{position:relative;padding:9px 11px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);min-width:0}
+.mjpl > div.on{box-shadow:inset 0 0 0 2px var(--accent),0 0 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.mjpl > div.out{opacity:.5}
+.mjpl > div.lead::after{content:"en tête";position:absolute;top:-8px;right:8px;font:700 10px var(--mono,monospace);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--accent);color:#0b0a0e}
+.mjpl .nm{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mjpl .nm .you{margin-left:2px}
+.mjpl .mo{font-family:var(--mono,monospace);font-size:13px;margin-top:2px}
+.mjpl .sl{display:flex;gap:3px;margin-top:6px}
+.mjpl .sl i{flex:1;height:26px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden}
+.mjpl .sl i img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.mjst{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:14px;align-items:start}
+/* téléphone : carte et mise côte à côte, joueurs en petites cases (tout tient sans défiler, même à 8) */
+@media (max-width:640px){.mjst{grid-template-columns:118px minmax(0,1fr);gap:10px}
+  .mjst .card .info,.mjst .card .cap .small{display:none}.mjst .card .cap{padding:6px 8px}.mjst .card .n{font-size:13px}.mjst .card .pw{font-size:18px}.mjst .card .tier{font-size:9px;padding:2px 6px}
+  .mjst .act{padding:12px}.mjst .act h2{font-size:17px}.mjst .act .bigbid{font-size:30px}.mjst .act .mjbids button{padding:8px 10px;font-size:13px}
+  .mjpl{grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px}.mjpl > div{padding:6px 7px}.mjpl .nm{font-size:12px}.mjpl .mo{font-size:11px}.mjpl .sl{gap:2px;margin-top:4px}.mjpl .sl i{height:14px;border-radius:3px}.mjpl .nm .you{display:none}}
+.mjbids{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.mjbids button{padding:10px 14px;font-weight:800}
+.mjhist{font-size:12.5px;color:var(--muted);margin-top:8px}
+.mjrank{display:grid;gap:6px;margin:10px 0}
+.mjrank > div{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--panel2);font-variant-numeric:tabular-nums}
+.mjrank > div.w{box-shadow:inset 0 0 0 2px var(--accent)}
+.mjrank b.pos{font-family:var(--title);font-size:20px;text-align:center}
+.mjrank .who{min-width:0}.mjrank .who b{display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mjrank .who small{color:var(--muted);font-size:12px}
+.mjrank .pts{font-family:var(--title);font-weight:900;font-size:20px}
+.mjrank .pts small{font-size:11px;color:var(--muted);font-weight:600;margin-left:3px}
+.mjteams{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:10px 0}
+.mjteams > div{padding:12px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--tc) 55%,transparent)}
+.mjteams .tmini{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mjteams .tmini img{width:30px;height:40px;object-fit:cover;object-position:top;border-radius:5px}
+.mjmatch{border-radius:12px;background:var(--panel2);margin:6px 0;overflow:hidden}
+.mjmatch summary{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;padding:10px 12px;cursor:pointer;list-style:none;font-weight:700;font-size:14px}
+.mjmatch summary::-webkit-details-marker{display:none}
+.mjmatch summary span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mjmatch summary span:last-child{text-align:right}
+.mjmatch summary .w{color:var(--accent)}
+.mjmatch summary i{font-style:normal;font-size:11px;color:var(--muted);font-family:var(--mono,monospace)}
+.mjmatch .duels{padding:0 10px 10px}
+</style>
+<script>
+const MJ_TC = [["Rouge", "#ff5a5a"], ["Bleue", "#4da3ff"], ["Verte", "#3fc98a"], ["Or", "#f5c542"]];
+const MJ_FMT = {melee: "Mêlée générale", t2: "2 équipes", duo: "Duos"};
+let MJ = null;   // partie complète (en local, ou chez l'hôte en ligne)
+let MV = null;   // ce que reçoit l'invité : {st, me}
+const MJN = {role: null, game: null, code: null, lobby: [], unsub: [], timers: [], myName: "", myPeer: null, u: "op", fmt: "melee"};
+const MJ_HOME = {n: 2, fmt: "melee"};
+const mjS = () => MJN.role === "guest" ? MV && MV.st : MJ;
+const mjMe = () => MJN.role === "guest" ? MV && MV.me : MJN.role === "host" ? 0 : null;
+const mjCard = (u, i) => DATA[u][i];
+const mjFull = p => p.team.length >= MAX;
+const mjMax = p => mjFull(p) ? 0 : Math.floor(p.budget / STEP) * STEP;
+const mjMin = p => Math.min(MIN, p.budget);
+const mjTeamOf = (st, i) => st.nt ? st.players[i].t : -1;
+const mjTeamName = k => "Équipe " + MJ_TC[k % MJ_TC.length][0];
+const mjFmtOk = (fmt, n) => fmt === "melee" || (n % 2 === 0 && n >= 4 && (fmt === "t2" || (fmt === "duo" && n >= 6)));
+
+/* ---------- moteur ---------- */
+function mjNew(u, names, fmt){
+  const n = names.length; if (!mjFmtOk(fmt, n)) fmt = "melee";
+  const nt = fmt === "t2" ? 2 : fmt === "duo" ? n / 2 : 0;
+  MJ = {id: Math.random().toString(36).slice(2, 10), u, seq: 0, round: 0, fmt, nt,
+    // places alternées : en équipes, deux coéquipiers ne se suivent jamais dans l'ordre des enchères
+    players: names.map((name, i) => ({name, budget: BUDGET, team: [], t: nt ? i % nt : -1})),
+    pool: DATA[u].map((_, i) => i).filter(i => DATA[u][i].nw !== 1), drawer: Math.floor(Math.random() * n), cur: null, ph: null, log: [], over: false};
+  mjLog(`${MJ_FMT[fmt]} à ${n} joueurs${nt ? " : " + [...Array(nt).keys()].map(k => mjTeamName(k) + " (" + MJ.players.filter(p => p.t === k).map(p => esc(p.name)).join(", ") + ")").join(" · ") : ""}.`);
+  mjLog(`Tirage au sort : ${esc(MJ.players[MJ.drawer].name)} commence.`);
+  mjNext();
+}
+function mjLog(h, w){ MJ.log.unshift({h, w: !!w}); MJ.log.length = Math.min(MJ.log.length, 14); }
+function mjDraw(){ const P = MJ.pool, w = i => WEIGHT[DATA[MJ.u][i].t] * (RARE[DATA[MJ.u][i].n] || 1); let r = Math.random() * P.reduce((s, i) => s + w(i), 0);
+  for (let k = 0; k < P.length; k++){ r -= w(P[k]); if (r <= 0) return P.splice(k, 1)[0]; } return P.pop(); }
+function mjNext(){
+  const P = MJ.players, n = P.length, open = P.map((_, i) => i).filter(i => !mjFull(P[i]));
+  if (!open.length || !MJ.pool.length){ MJ.over = true; MJ.ph = {k: "over"}; MJ.cur = null; mjLog("Toutes les équipes sont complètes : place aux combats !"); return mjCommit(); }
+  let g = 0; while (mjFull(P[MJ.drawer]) && g++ < n) MJ.drawer = (MJ.drawer + 1) % n;
+  MJ.round++; MJ.cur = mjDraw();
+  MJ.ph = open.length === 1 ? {k: "solo", who: MJ.drawer} : {k: "open", who: MJ.drawer};
+  mjCommit();
+}
+// prochain joueur qui peut encore surenchérir, dans l'ordre de la table à partir de « from »
+function mjNextBidder(from, ph){ const P = MJ.players, n = P.length;
+  for (let k = 1; k <= n; k++){ const i = (from + k) % n; if (i === ph.leader || ph.out.includes(i) || mjFull(P[i]) || mjMax(P[i]) < ph.high + STEP) continue; return i; } return null; }
+function mjAward(w, price){ const p = MJ.players[w], c = mjCard(MJ.u, MJ.cur);
+  p.budget -= price; p.team.push([MJ.cur, price]);
+  mjLog(`✅ ${esc(p.name)} recrute <b>${esc(c.n)}</b> pour ${price}M.`, true);
+  MJ.ph = {k: "done", w, price}; MJ.drawer = (MJ.drawer + 1) % MJ.players.length;   /* le tirage tourne autour de la table */
+  mjCommit(); }
+function mjApply(actor, a){
+  if (!MJ || a.seq !== MJ.seq) return;
+  const ph = MJ.ph, P = MJ.players, c = MJ.cur != null ? mjCard(MJ.u, MJ.cur) : null, v = +a.v, ok = (lo, hi) => Number.isInteger(v) && v % STEP === 0 && v >= lo && v <= hi;
+  switch (ph.k){
+    case "solo": if (a.t === "ok" && actor === ph.who) mjAward(ph.who, 0); break;
+    case "open":
+      if (actor !== ph.who || a.t !== "bid" || !ok(mjMin(P[actor]), mjMax(P[actor]))) break;
+      mjLog(`${esc(P[actor].name)} tire <b>${esc(c.n)}</b> (${TIER[c.t]}, ${c.p}) et ouvre à ${v}M.`);
+      { const nb = {k: "bid", high: v, leader: actor, out: [], hist: [[actor, v]], who: null}; nb.who = mjNextBidder(actor, nb); if (nb.who == null) return mjAward(actor, v); MJ.ph = nb; mjCommit(); }
+      break;
+    case "bid": {
+      if (actor !== ph.who) break;
+      const nb = {...ph, out: [...ph.out], hist: [...ph.hist]};
+      if (a.t === "pass"){ nb.out.push(actor); mjLog(`✋ ${esc(P[actor].name)} passe.`); }
+      else if (a.t === "bid" && ok(ph.high + STEP, mjMax(P[actor]))){ nb.high = v; nb.leader = actor; nb.hist.push([actor, v]); mjLog(`⬆️ ${esc(P[actor].name)} monte à ${v}M.`); }
+      else break;
+      nb.who = mjNextBidder(actor, nb);
+      if (nb.who == null) return mjAward(nb.leader, nb.high);
+      MJ.ph = nb; mjCommit(); break; }
+    case "done": if (a.t === "ok") mjNext(); break;
+    case "over": if (a.t === "again" && actor === 0){ const names = P.map(p => p.name); mjNew(MJ.u, names, MJ.fmt); } break;
+  }
+}
+function mjCommit(){ MJ.seq++; mjRender(); if (MJN.role === "host") mjSendAll(); }
+function mjAct(t, v){ const st = mjS(); if (!st) return; const a = {t, v, seq: st.seq};
+  if (MJN.role === "guest"){ MJN.game?.emit("mact", a).catch(() => {}); return; }
+  const who = MJN.role === "host" ? 0 : (st.ph.who != null ? st.ph.who : 0); mjApply(who, a); }
+
+/* ---------- combats : chaque paire d'adversaires se rencontre une fois, en 5 contre 5 (même moteur que le duel) ---------- */
+function mjFight(st, i, j){ const save = G;
+  try { G = {u: st.u, players: [st.players[i], st.players[j]], orders: null}; const f = simulateFight();
+    return {a: i, b: j, w: f.winner < 0 ? -1 : f.winner === 0 ? i : j, surv: f.survivors.length, mvp: f.mvp, log: f.log.map(e => ({a: e.a.n, ap: e.a.p, b: e.b.n, bp: e.b.p, wi: e.wi, draw: !!e.draw, both: !!e.both, hp: e.hp, why: e.why || []}))}; }
+  finally { G = save; } }
+const MJ_RES = new Map();
+function mjResults(st){ const key = st.id + ":" + st.seq; if (MJ_RES.has(key)) return MJ_RES.get(key);
+  const n = st.players.length, M = [];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (!st.nt || st.players[i].t !== st.players[j].t) M.push(mjFight(st, i, j));
+  const lv = p => p.team.reduce((s, [k]) => s + DATA[st.u][k].p, 0);
+  const T = st.players.map((p, i) => ({i, pts: 0, w: 0, d: 0, l: 0, surv: 0, lv: lv(p)}));
+  M.forEach(m => { if (m.w < 0){ T[m.a].pts++; T[m.b].pts++; T[m.a].d++; T[m.b].d++; return; } const l = m.w === m.a ? m.b : m.a; T[m.w].pts += 3; T[m.w].w++; T[l].l++; T[m.w].surv += m.surv; });
+  const rank = [...T].sort((x, y) => y.pts - x.pts || y.surv - x.surv || y.lv - x.lv);
+  let teams = null; if (st.nt){ teams = [...Array(st.nt).keys()].map(k => { const mem = T.filter(t => st.players[t.i].t === k); return {k, pts: mem.reduce((s, t) => s + t.pts, 0), w: mem.reduce((s, t) => s + t.w, 0), surv: mem.reduce((s, t) => s + t.surv, 0), lv: mem.reduce((s, t) => s + t.lv, 0), mem: mem.map(t => t.i)}; }).sort((x, y) => y.pts - x.pts || y.surv - x.surv || y.lv - x.lv); }
+  const r = {M, rank, teams}; MJ_RES.set(key, r); return r; }
+
+/* ---------- affichage ---------- */
+function mjCardHTML(u, c){ return `<div class="card anim" data-t="${c.t}"><div class="pic">${img(c)}<span class="tier">${TIER[c.t]}</span><span class="pw">${c.p}</span></div>
+  <div class="cap"><div class="n">${esc(c.n)}</div><div class="small">Puissance ${c.p}/100</div>${infoHTML(u, c)}</div></div>`; }
+function mjPlayersHTML(st){ const ph = st.ph || {}, me = mjMe();
+  return `<div class="mjpl">${st.players.map((p, i) => { const tc = st.nt ? MJ_TC[p.t % MJ_TC.length][1] : null;
+    return `<div class="${ph.who === i && ph.k !== "done" ? "on" : ""} ${ph.k === "bid" && (ph.out.includes(i) || mjFull(p)) ? "out" : ""} ${ph.k === "bid" && ph.leader === i ? "lead" : ""}">
+      <div class="nm">${tc ? `<i class="mjdot" style="--tc:${tc}"></i>` : ""}<span>${esc(p.name)}</span>${i === me ? `<span class="you">toi</span>` : ""}</div>
+      <div class="mo">${p.budget}M · ${p.team.length}/${MAX}</div>
+      <div class="sl">${Array.from({length: MAX}, (_, k) => `<i>${p.team[k] ? img(DATA[st.u][p.team[k][0]]) : ""}</i>`).join("")}</div></div>`; }).join("")}</div>`; }
+function mjRender(){
+  const st = mjS(); if (!st) return;
+  if (st.u) document.body.dataset.u = st.u;
+  if ($("#mj").classList.contains("hidden")) show("mj");
+  const P = st.players, ph = st.ph, me = mjMe(), local = MJN.role == null, u = UNI[st.u];
+  const mine = i => local || i === me;
+  $("#mjTitle").textContent = `MERCATO À ${P.length} · ${u.name.toUpperCase()}`;
+  if (st.over) return mjRenderEnd(st);
+  const c = st.cur != null ? mjCard(st.u, st.cur) : null; let h = "", wire = null;
+  if (ph.k === "solo"){
+    h = `<h2>${esc(c.n)} pour ${esc(P[ph.who].name)}</h2><p class="muted">Tous les autres ont leurs ${MAX} ${u.units} : plus d'enchère, ${esc(c.n)} rejoint l'${u.team} de ${esc(P[ph.who].name)} gratuitement.</p>
+      ${mine(ph.who) ? `<button class="primary" id="mjOk">Ajouter ${esc(c.n)}</button>` : waitHTML(`${esc(P[ph.who].name)} ajoute ${esc(c.n)}…`)}`;
+  } else if (ph.k === "open" || ph.k === "bid"){
+    const p = P[ph.who], lo = ph.k === "open" ? mjMin(p) : ph.high + STEP, hi = mjMax(p);
+    const head = ph.k === "bid" ? `<p class="muted">Enchère la plus haute</p><div class="bigbid">${ph.high}M</div><p class="small">par ${esc(P[ph.leader].name)} · ${ph.out.length} joueur${ph.out.length > 1 ? "s ont" : " a"} passé</p>` : `<p class="muted">${esc(p.name)} vient de tirer ${esc(c.n)} et doit ouvrir l'enchère (au moins ${lo}M). Ensuite, chacun à son tour surenchérit ou passe.</p>`;
+    const hist = ph.k === "bid" ? `<p class="mjhist">${ph.hist.map(([i, v]) => `${esc(P[i].name)} ${v}M`).join(" → ")}</p>` : "";
+    if (mine(ph.who)){
+      const quick = [...new Set([lo, lo + 10, lo + 20, lo + 50].filter(v => v <= hi))];
+      h = `<h2>${local ? esc(p.name) + ", à toi" : "À toi"} !</h2>${head}
+        <div class="mjbids">${quick.map(v => `<button data-mjb="${v}">${v}M</button>`).join("")}${hi > lo + 50 ? `<button data-mjb="${hi}">Tapis · ${hi}M</button>` : ""}</div>
+        <div class="row"><input id="mjBid" type="number" inputmode="numeric" min="${lo}" max="${hi}" step="${STEP}" value="${lo}" style="flex:1;min-width:110px"><button class="primary" id="mjBidGo">Miser</button>${ph.k === "bid" ? `<button class="red" id="mjPass">Passer</button>` : ""}</div><div class="err" id="mjErr"></div>${hist}`;
+      wire = () => { const go = v => { if (!Number.isInteger(v) || v % STEP || v < lo || v > hi) return $("#mjErr").textContent = `Mise entre ${lo} et ${hi}M, par tranches de 10.`; mjAct("bid", v); };
+        document.querySelectorAll("[data-mjb]").forEach(b => b.onclick = () => go(+b.dataset.mjb)); $("#mjBidGo").onclick = () => go(parseInt($("#mjBid").value, 10));
+        $("#mjBid").onkeydown = e => { if (e.key === "Enter") go(parseInt($("#mjBid").value, 10)); }; $("#mjPass") && ($("#mjPass").onclick = () => mjAct("pass")); };
+    } else h = `<h2>${ph.k === "open" ? "Ouverture" : "Enchère en cours"}</h2>${head}${waitHTML(`${esc(p.name)} ${ph.k === "open" ? "choisit sa mise d'ouverture" : "surenchérit ou passe"}…`)}${hist}`;
+  } else if (ph.k === "done"){
+    const w = P[ph.w];
+    h = `<h2>${esc(w.name)} recrute ${esc(c.n)} !</h2><div class="banner">Prix payé : ${ph.price}M · Reste : ${w.budget}M</div>
+      <p class="muted">Prochain tirage : <b style="color:var(--text)">${esc(P[st.drawer].name)}</b></p><div class="row" style="margin-top:12px"><button class="primary" id="mjOk">Tirage suivant</button></div>`;
+  }
+  $("#mjBoard").innerHTML = `<p class="small" style="margin:0 0 8px">Tirage ${st.round} · ${Array.isArray(st.pool) ? st.pool.length : st.pool} ${u.units} dans le pool${st.nt ? " · " + MJ_FMT[st.fmt] : " · Mêlée générale"}</p>${mjPlayersHTML(st)}
+    <div class="mjst"><div>${c ? mjCardHTML(st.u, c) : ""}</div><div class="panel act">${h}</div></div>
+    <div class="panel log" style="margin-top:12px">${st.log.map(e => `<div class="${e.w ? "win" : ""}">${e.h}</div>`).join("")}</div>`;
+  $("#mjOk") && ($("#mjOk").onclick = () => mjAct("ok"));
+  wire?.();
+}
+function mjDuels(st, m){ const P = st.players, pct = hp => Math.round(hp * 100) + "%";
+  return `<div class="duels">${m.log.map(e => { if (e.draw) return `<div class="duel"><span>${esc(e.a)} (${e.ap})</span><span class="vs">KO</span><span class="r">${esc(e.b)} (${e.bp})</span></div>`;
+    return `<div class="duel"><span class="${e.wi === 0 ? "w" : ""}">${esc(e.a)} (${e.ap})</span><span class="vs">${e.both ? "KO" : "VS"}</span><span class="r ${e.wi === 1 ? "w" : ""}">${esc(e.b)} (${e.bp})</span></div>
+      <div class="small" style="text-align:${e.wi === 0 ? "left" : "right"};margin:-2px 10px 2px">${e.both ? "double K.O." : `${esc(e.wi === 0 ? e.a : e.b)} gagne (forme ${pct(e.hp)})`}</div>${e.why.length ? `<div class="why" style="text-align:${e.wi === 0 ? "left" : "right"}">${e.why.slice(0, 3).map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}`; }).join("")}</div>`; }
+function mjRenderEnd(st){
+  const P = st.players, R = mjResults(st), u = UNI[st.u], me = mjMe(), local = MJN.role == null;
+  const top = st.nt ? R.teams[0] : R.rank[0], tie = st.nt ? R.teams[1] && R.teams[1].pts === top.pts && R.teams[1].surv === top.surv && R.teams[1].lv === top.lv : R.rank[1] && R.rank[1].pts === top.pts && R.rank[1].surv === top.surv && R.rank[1].lv === top.lv;
+  const title = st.nt ? `${mjTeamName(top.k)} gagne !` : `${esc(P[top.i].name)} gagne !`;
+  if (!MJ_RES.has("h" + st.id)){ MJ_RES.set("h" + st.id, 1); try { histAdd("mj-" + st.id, "Mercato à " + P.length + " · " + u.name, P.map(p => p.name), (tie ? "Égalité en tête" : "Gagnant : " + (st.nt ? mjTeamName(top.k) : P[top.i].name)), {win: tie ? [] : st.nt ? top.mem.map(i => P[i].name) : [P[top.i].name]}); } catch {} }
+  const mini = p => p.team.map(([k]) => img(DATA[st.u][k])).join("");
+  const nm = i => `${st.nt ? `<i class="mjdot" style="--tc:${MJ_TC[P[i].t % MJ_TC.length][1]}"></i>` : ""}${esc(P[i].name)}${i === me ? ` <span class="you">toi</span>` : ""}`;
+  $("#mjBoard").innerHTML = `<div class="panel" style="text-align:center;margin-bottom:12px"><div class="bang" style="font-size:clamp(30px,8vw,44px);color:var(--accent)">${tie ? "Égalité en tête !" : title}</div>
+      <p class="muted">${st.nt ? `Chaque joueur a affronté chaque adversaire en 5 contre 5 : 3 points par victoire, 1 par égalité, cumulés par équipe.` : `Chacun a affronté tous les autres en 5 contre 5 : 3 points par victoire, 1 par égalité.`} À égalité de points : le plus de combattants encore debout, puis le niveau cumulé.</p></div>
+    ${st.nt ? `<div class="mjteams">${R.teams.map((t, k) => `<div style="--tc:${MJ_TC[t.k % MJ_TC.length][1]}"><b style="display:flex;align-items:center;gap:6px"><i class="mjdot"></i>${k + 1}. ${mjTeamName(t.k)} · ${t.pts} pts</b><small class="muted">${t.w} victoire${t.w > 1 ? "s" : ""} · ${t.mem.map(i => esc(P[i].name)).join(", ")}</small><div class="tmini">${t.mem.map(i => mini(P[i])).join("")}</div></div>`).join("")}</div>` : ""}
+    <h3 style="margin:14px 0 4px">Classement${st.nt ? " individuel" : ""}</h3>
+    <div class="mjrank">${R.rank.map((t, k) => `<div class="${k === 0 && !st.nt ? "w" : ""}"><b class="pos">${k + 1}</b><div class="who"><b>${nm(t.i)}</b><small>${t.w}V · ${t.d}N · ${t.l}D · niveau cumulé ${t.lv} · ${P[t.i].budget}M restants</small><div class="tmini" style="display:flex;gap:3px;margin-top:4px">${P[t.i].team.map(([kk]) => `<span style="width:24px;height:32px;border-radius:4px;overflow:hidden;display:block">${img(DATA[st.u][kk])}</span>`).join("")}</div></div><span class="pts">${t.pts}<small>pts</small></span></div>`).join("")}</div>
+    <h3 style="margin:14px 0 4px">Les ${R.M.length} combats</h3><p class="small">Touche un combat pour voir ses duels.</p>
+    ${R.M.map(m => `<details class="mjmatch"><summary><span class="${m.w === m.a ? "w" : ""}">${nm(m.a)}</span><i>${m.w < 0 ? "nul" : "VS"}</i><span class="${m.w === m.b ? "w" : ""}">${nm(m.b)}</span></summary>${mjDuels(st, m)}</details>`).join("")}
+    <div class="row" style="margin-top:16px;justify-content:center">${local || MJN.role === "host" ? `<button class="primary" id="mjAgain">Rejouer</button>` : waitHTML("L'hôte peut relancer une partie")}<button id="mjHome">Menu</button></div>`;
+  $("#mjAgain") && ($("#mjAgain").onclick = () => mjAct("again"));
+  $("#mjHome").onclick = () => { mjLeave(); show("home"); };
+}
+
+/* ---------- en ligne (jusqu'à 8) : l'hôte fait tourner la partie et envoie à chacun l'état et sa place ---------- */
+function mjLeave(){ MJN.timers.forEach(clearInterval); MJN.timers = []; MJN.unsub.forEach(f => { try { f(); } catch {} }); MJN.unsub = [];
+  if (MJN.game) MJN.game.leave().catch(() => {}); Object.assign(MJN, {role: null, game: null, code: null, lobby: [], myPeer: null}); MJ = null; MV = null; }
+function mjPub(){ const s = {...MJ, pool: MJ.pool.length, log: MJ.log.slice(0, 8)}; return s; }
+function mjSendTo(peer, topic, data){ if (MJN.game.emitTo) MJN.game.emitTo(peer, topic, data); else MJN.game.emit(topic, {...data, to: peer}).catch(() => {}); }
+function mjSendAll(){ if (MJN.role !== "host" || !MJ) return; const st = mjPub(); MJ.players.forEach((p, i) => { if (!i) return; const peer = MJN.lobby[i]?.peer; if (peer) mjSendTo(peer, "mstate", {st, me: i}); }); }
+function mjLobbyRender(){ const L = MJN.lobby, host = MJN.role === "host", n = L.length, fmts = ["melee", "t2", "duo"].filter(f => mjFmtOk(f, n));
+  if (!mjFmtOk(MJN.fmt, n)) MJN.fmt = "melee";
+  lobby(`<h2>Mercato à plusieurs · ${UNI[MJN.u].name}</h2>${MJN.code ? `<p class="muted">Code de la partie :</p><div class="code">${MJN.code}</div>` : ""}
+    <div class="ucp" style="justify-content:center">${L.map(p => `<span>${esc(p.name)}</span>`).join("")}</div><p class="small">${n}/8 joueurs${n < 3 ? " · il en faut au moins 3" : ""}</p>
+    ${host ? `<div class="mjcnt" style="justify-content:center">${fmts.map(f => `<button data-mjf="${f}" class="${MJN.fmt === f ? "sel" : ""}">${MJ_FMT[f]}</button>`).join("")}</div>
+      ${n % 2 ? `<p class="small">Avec un nombre pair de joueurs, vous pouvez aussi jouer en équipes.</p>` : ""}
+      <button class="primary" id="mjStart" ${n < 3 ? "disabled" : ""}>Lancer le mercato</button><p class="small" style="max-width:48ch">Tes amis ouvrent ce site, choisissent Mercato, « En ligne », puis « Rejoindre » avec le code.</p>`
+      : waitHTML("L'hôte va lancer la partie…")}<button class="ghost" id="cancelLobby">Quitter</button>`);
+  $("#cancelLobby").onclick = () => { mjLeave(); show("home"); };
+  document.querySelectorAll("[data-mjf]").forEach(b => b.onclick = () => { MJN.fmt = b.dataset.mjf; mjBroadcastLobby(); });
+  $("#mjStart") && ($("#mjStart").onclick = () => { if (MJN.lobby.length >= 3) mjNew(MJN.u, MJN.lobby.map(p => p.name), MJN.fmt); }); }
+function mjBroadcastLobby(){ if (MJN.role !== "host" || MJ) return; MJN.game.emit("mlobby", {names: MJN.lobby.map(p => p.name), u: MJN.u, code: MJN.code, fmt: MJN.fmt}).catch(() => {}); mjLobbyRender(); }
+async function mjHost(name){ const err = t => $("#onlineErr").textContent = t; err("");
+  MJN.myName = cleanName(name, "Hôte"); let game, code;
+  for (let i = 0; i < 3 && !game; i++){ code = mkCode("X"); try { game = await NET.room.join("mj-" + code.toLowerCase(), true); } catch (e) { if (e?.type !== "unavailable-id") break; } }
+  if (!game) return err("Impossible de créer la partie pour le moment. Vérifie ta connexion puis réessaie.");
+  Object.assign(MJN, {role: "host", game, code, u: cfg.u, fmt: MJ_HOME.fmt, lobby: [{name: MJN.myName, peer: null}]});
+  MJN.unsub.push(game.on("mhello", msg => { if (msg.sameTab) return; const name = cleanName(msg.data?.name, "Joueur"), L = MJN.lobby;
+    if (MJ){ const i = MJ.players.findIndex(p => p.name === name); if (i > 0){ L[i].peer = msg.peer; mjSendAll(); } return; }   /* un joueur qui revient reprend sa place */
+    if (L.some(p => p.peer === msg.peer)) return mjBroadcastLobby(); if (L.length >= 8) return;
+    let n = name, k = 2; while (L.some(p => p.name === n)) n = name + " (" + k++ + ")"; L.push({name: n, peer: msg.peer}); mjBroadcastLobby(); }));
+  MJN.unsub.push(game.on("mact", msg => { if (msg.sameTab || !MJ) return; const i = MJN.lobby.findIndex(p => p.peer === msg.peer); if (i <= 0) return; const a = msg.data || {}; mjApply(i, {t: String(a.t), v: a.v, seq: Number(a.seq)}); }));
+  MJN.unsub.push(game.onPeers(ch => { if (!MJ && ch.left.length){ MJN.lobby = MJN.lobby.filter((p, i) => i === 0 || !ch.left.some(l => l.peer === p.peer)); mjBroadcastLobby(); } }));
+  MJN.timers.push(setInterval(() => MJ ? mjSendAll() : mjBroadcastLobby(), 4000));
+  mjBroadcastLobby(); }
+async function mjJoin(code, name){ const err = t => $("#onlineErr").textContent = t; err("");
+  MJN.myName = cleanName(name, "Joueur"); let game;
+  try { game = await NET.room.join("mj-" + code.toLowerCase(), false); } catch (e) { return err("Impossible de rejoindre la partie. Vérifie ta connexion puis réessaie."); }
+  Object.assign(MJN, {role: "guest", game, code, lobby: []});
+  lobby(`<h2>Connexion à la partie ${code}</h2>${waitHTML("Recherche de l'hôte…")}<button class="ghost" id="cancelLobby">Annuler</button>`);
+  $("#cancelLobby").onclick = () => { mjLeave(); show("home"); };
+  let got = false;
+  MJN.unsub.push(game.on("mhello", msg => { if (msg.sameTab) MJN.myPeer = msg.peer; }));
+  MJN.unsub.push(game.on("mlobby", msg => { if (msg.sameTab || MV) return; got = true; const d = msg.data || {};
+    MJN.lobby = (d.names || []).map(n => ({name: cleanName(n, "Joueur")})); MJN.u = DATA[d.u] ? d.u : "op"; MJN.fmt = MJ_FMT[d.fmt] ? d.fmt : "melee"; mjLobbyRender(); }));
+  MJN.unsub.push(game.on("mstate", msg => { const d = msg.data; if (msg.sameTab || !d?.st || !DATA[d.st.u]) return; if (d.to && d.to !== MJN.myPeer) return; got = true; MV = {st: d.st, me: d.me}; mjRender(); }));
+  let tries = 0; const inLobby = () => MJN.lobby.some(p => p.name === MJN.myName || p.name.startsWith(MJN.myName + " ("));
+  const hello = () => { if (MV || inLobby()) return; if (!got && ++tries > 12){ mjLeave(); show("home"); return err(`Aucune partie trouvée avec le code ${code}.`); } game.emit("mhello", {name: MJN.myName}).catch(() => {}); };
+  hello(); MJN.timers.push(setInterval(hello, 2000)); }
+
+/* ---------- accueil du Mercato : nombre de joueurs et format ---------- */
+(function mjInit(){
+  document.querySelector("#uc")?.insertAdjacentHTML("afterend", `<section id="mj" class="hidden"><div class="topbar"><h1 id="mjTitle">MERCATO</h1><button class="ghost" id="mjQuit">✕ Quitter</button></div><div id="mjBoard"></div></section>`);
+  { const base = show; show = function(id){ base(id); const el = $("#mj"); if (el) el.classList.toggle("hidden", id !== "mj"); }; }
+  let qt = null; $("#mjQuit").onclick = () => { const b = $("#mjQuit"); if (qt){ clearTimeout(qt); qt = null; b.textContent = "✕ Quitter"; mjLeave(); show("home"); return; } b.textContent = "Quitter la partie ?"; qt = setTimeout(() => { qt = null; b.textContent = "✕ Quitter"; }, 3000); };
+  const where = document.querySelector(".mh .where"); if (!where) return; const lab = where.previousElementSibling;
+  lab.insertAdjacentHTML("beforebegin", `<label class="f step" style="margin-top:16px"><i>＋</i>Nombre de joueurs</label><div class="mjcnt" id="mjCnt">${[2, 3, 4, 5, 6, 7, 8].map(n => `<button data-mjn="${n}">${n}${n === 2 ? " · duel" : ""}</button>`).join("")}</div><div class="modes hidden" id="mjFmt"></div><p class="small hidden" id="mjNote"></p>`);
+  const grid = $("#n1")?.closest(".grid2"); grid && grid.insertAdjacentHTML("afterend", `<div id="mjNames" class="hidden"></div>`);
+  const draw = () => { const n = MJ_HOME.n, multi = n > 2;
+    document.querySelectorAll("[data-mjn]").forEach(b => b.classList.toggle("sel", +b.dataset.mjn === n));
+    if (!mjFmtOk(MJ_HOME.fmt, n)) MJ_HOME.fmt = "melee";
+    const F = $("#mjFmt"); F.classList.toggle("hidden", !multi);
+    F.innerHTML = [["melee", "Mêlée générale", "Chacun pour soi : tout le monde affronte tout le monde, un seul vainqueur."], ["t2", "2 équipes", n % 2 ? "Possible avec un nombre pair de joueurs." : `${n / 2} contre ${n / 2} : chaque joueur affronte chaque adversaire, les points vont à l'équipe.`], ["duo", "Duos", n % 2 || n < 6 ? "À partir de 6 joueurs, en nombre pair." : `${n / 2} équipes de 2.`]]
+      .map(([k, t, d]) => `<button class="mode ${MJ_HOME.fmt === k ? "sel" : ""}" data-mjfh="${k}" ${mjFmtOk(k, n) ? "" : "disabled"}><b>${t}</b><span>${d}</span></button>`).join("");
+    F.querySelectorAll("[data-mjfh]").forEach(b => b.onclick = () => { MJ_HOME.fmt = b.dataset.mjfh; draw(); });
+    const note = $("#mjNote"); note.classList.toggle("hidden", !multi); note.textContent = "À plusieurs : enchères ouvertes. Celui qui tire ouvre, puis chacun à son tour surenchérit ou passe ; le dernier en lice remporte le personnage. Le tirage tourne autour de la table.";
+    // le mode Bluff et l'ordre de combat restent réservés au duel
+    document.querySelectorAll('.mh [data-m="bluff"]').forEach(b => { b.disabled = multi; if (multi && b.classList.contains("sel")) document.querySelector('.mh [data-m="live"]')?.click(); });
+    const oo = $("#optOrder"); if (oo){ oo.disabled = multi; oo.closest(".opt")?.classList.toggle("hidden", multi); }
+    grid && grid.classList.toggle("hidden", multi);
+    const N = $("#mjNames"); N.classList.toggle("hidden", !multi);
+    if (multi){ const prev = [...N.querySelectorAll("input")].map(i => i.value), nt = MJ_HOME.fmt === "t2" ? 2 : MJ_HOME.fmt === "duo" ? n / 2 : 0;
+      N.innerHTML = Array.from({length: n}, (_, i) => `<div>${nt ? `<span class="tm"><i class="mjdot" style="--tc:${MJ_TC[(i % nt) % MJ_TC.length][1]}"></i>${mjTeamName(i % nt)}</span>` : ""}<input maxlength="16" placeholder="Joueur ${i + 1}" value="${esc(prev[i] || (i === 0 ? $("#n1").value : i === 1 ? $("#n2").value : ""))}"></div>`).join(""); }
+    const hb = $("#host"); if (hb) hb.textContent = multi ? "Créer la partie à plusieurs" : "Créer la partie"; };
+  document.querySelectorAll("[data-mjn]").forEach(b => b.onclick = () => { MJ_HOME.n = +b.dataset.mjn; draw(); });
+  draw();
+  // lancer : à plus de deux, le Mercato à plusieurs ; sinon le duel habituel
+  const go0 = $("#go").onclick; $("#go").onclick = e => { if (MJ_HOME.n <= 2) return go0.call($("#go"), e);
+    const names = [...document.querySelectorAll("#mjNames input")].map((i, k) => cleanName(i.value, "Joueur " + (k + 1))), seen = {}; names.forEach((n, k) => { if (seen[n]) names[k] = n + " (" + (k + 1) + ")"; seen[n] = 1; });
+    MJN.role = null; mjNew(cfg.u, names, MJ_HOME.fmt); };
+  const host0 = $("#host").onclick; $("#host").onclick = e => { if (MJ_HOME.n <= 2) return host0.call($("#host"), e); if (!NET.room) return; mjHost($("#myName").value); };
+  const join0 = $("#join").onclick; $("#join").onclick = e => { const code = $("#joinCode").value.trim().toUpperCase(); if (code[0] !== "X") return join0.call($("#join"), e);
+    if (!NET.room) return; if (!/^[A-Z0-9]{4}$/.test(code)) return $("#onlineErr").textContent = "Le code fait 4 caractères (lettres et chiffres)."; mjJoin(code, $("#myName").value); };
+  try { if (typeof QJ !== "undefined") QJ.X = QJ.M; } catch {}
+})();
+</script>
+
+<style>
 /* ---- Mode Carrière ---- */
 .crh{display:none}
 body:has(.gcards [data-g="cr"].sel) .crh{display:block}
@@ -14850,6 +15312,39 @@ button.crc{cursor:pointer}
 .cruni .fan{display:flex;justify-content:center;height:120px;margin-bottom:8px}.cruni .fan img{width:78px;height:112px;object-fit:cover;object-position:top;border-radius:10px;border:2px solid var(--uc);margin:0 -14px;box-shadow:0 8px 18px rgba(0,0,0,.5);background:var(--panel2)}
 .cruni .fan img:nth-child(1){transform:rotate(-9deg) translateY(6px)}.cruni .fan img:nth-child(3){transform:rotate(9deg) translateY(6px)}.cruni .fan img:nth-child(2){z-index:1}
 .cruni b{font-family:var(--title);font-weight:900;font-size:20px}.cruni small{color:var(--muted);font-size:12.5px}.cruni em{font-style:normal;margin-top:8px;padding:8px;border-radius:999px;background:var(--uc);color:#0b0a0e;font-weight:800;font-size:14px}
+/* 25 oct. 2026 : menu d'accueil de la Carrière (compact : le choix d'univers tient sous « Reprendre », sans défiler) */
+.crwel.home .crtun{width:min(100%,270px)}
+.crwel.home{padding-bottom:16px}
+.crhomeu{display:grid;gap:10px;width:100%;max-width:640px;margin-top:8px;text-align:left}
+.crhomeh h3{margin:0;font-family:var(--title);font-weight:900;font-size:17px}.crhomeh p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.crul{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.crul button{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:14px;text-align:left;min-width:0;background:radial-gradient(ellipse 90% 120% at 0 50%,color-mix(in srgb,var(--uc) 20%,transparent),transparent 70%),var(--panel2,#16151b);border:1.5px solid color-mix(in srgb,var(--uc) 30%,transparent);color:inherit}
+.crul button.cur{border-color:var(--uc);box-shadow:0 0 18px color-mix(in srgb,var(--uc) 35%,transparent)}
+.crul button.nw{opacity:.8}
+.crul .th{flex:none;width:34px;height:46px;border-radius:7px;overflow:hidden;border:1.5px solid var(--uc)}.crul .th img{width:100%;height:100%;object-fit:cover;object-position:top}
+.crul .tx{display:grid;min-width:0;flex:1}.crul .tx b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.crul .tx small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crul button > svg{flex:none;width:28px;height:28px}
+.crul .pl{position:relative;flex:none;width:26px;height:26px;border-radius:50%;background:var(--uc);padding:0;margin:0}
+.crul .pl::before,.crul .pl::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2.5px;border-radius:2px;background:#0b0a0e;transform:translate(-50%,-50%)}
+.crul .pl::after{transform:translate(-50%,-50%) rotate(90deg)}
+@media (max-width:420px){.crul{grid-template-columns:1fr 1fr}.crul .th{width:28px;height:38px}}
+.topbar .crmenu{white-space:nowrap}
+.crname{position:relative;display:grid;justify-items:center;gap:10px;text-align:center;max-width:560px;margin:0 auto;padding:22px 18px 26px;border-radius:26px;overflow:hidden;
+  background:radial-gradient(ellipse 85% 55% at 50% 0,color-mix(in srgb,var(--uc) 34%,transparent),transparent 72%),linear-gradient(180deg,color-mix(in srgb,var(--uc) 10%,#0d0c11),#09080c);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--uc) 45%,transparent),0 20px 50px rgba(0,0,0,.45)}
+.crname .crnk{position:absolute;right:-6%;bottom:-12%;font:900 clamp(180px,48vw,300px)/1 "Shippori Mincho B1","Zen Kaku Gothic New",serif;color:color-mix(in srgb,var(--uc) 12%,transparent);pointer-events:none;z-index:0}
+.crname > *{position:relative;z-index:1}
+.crnfan{display:flex;justify-content:center;height:150px;margin:4px 0 6px}
+.crnfan span{width:92px;height:132px;border-radius:12px;overflow:hidden;border:2px solid var(--uc);margin:0 -16px;box-shadow:0 12px 26px rgba(0,0,0,.6);background:#111}
+.crnfan span img{width:100%;height:100%;object-fit:cover;object-position:top}
+.crnfan span:nth-child(1){transform:rotate(-10deg) translateY(10px)}.crnfan span:nth-child(3){transform:rotate(10deg) translateY(10px)}.crnfan span:nth-child(2){z-index:1;width:104px;height:148px;margin-top:-6px;box-shadow:0 0 30px color-mix(in srgb,var(--uc) 45%,transparent),0 14px 30px rgba(0,0,0,.6)}
+.crname .eb{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--uc)}
+.crname h2{margin:0;font-family:var(--title);font-weight:900;font-size:clamp(30px,8vw,44px);letter-spacing:-.02em;line-height:1}
+.crname .lead{margin:0;max-width:42ch;color:#d9d5df;font-size:14.5px;line-height:1.5}.crname .lead b{color:#e3a86b}
+.crnf{width:100%;max-width:380px;text-align:left;margin-top:6px}
+.crnf input{width:100%;font-size:20px;font-weight:800;text-align:center;padding:14px;border-radius:14px;border:1.5px solid color-mix(in srgb,var(--uc) 55%,transparent);background:rgba(0,0,0,.45)}
+.crnf input:focus{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--uc) 35%,transparent);border-color:var(--uc)}
+.crname #crGoNew.primary{width:100%;max-width:380px;font-size:17px;padding:14px 22px;background:var(--uc)!important;border-color:var(--uc)!important;color:#0b0a0e!important;box-shadow:0 10px 30px color-mix(in srgb,var(--uc) 40%,transparent)!important}
+.crname .crnb{font-size:14px}
 .crwel{position:relative;display:grid;justify-items:center;gap:10px;text-align:center;padding:10px 0 30px;perspective:1000px;--mx:0;--my:0}
 .crwel .eb{margin:0;font-family:var(--mono);font-size:11.5px;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
 .crwel h2{margin:0;font-family:var(--title);font-weight:900;font-size:clamp(26px,6vw,40px);line-height:1.02;letter-spacing:-.02em}.crwel h2 b{font-size:1.7em;background:var(--wg,linear-gradient(120deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff)));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -15355,13 +15850,14 @@ function crRender(){
   const tu = false && S.tuto < 5 && (CR.view === "compose" ? S.tuto === 3 : CR.view === "hub" && S.tuto !== 3) ? CR_TUTO[S.tuto] : null;
   el.style.setProperty("--dc", dv[2]);
   const _crKeep = crImgPool(el);   /* 19 oct. 2026 : images déjà décodées réutilisées (sinon elles clignotent sur téléphone à chaque toucher) */
-  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="helpq" id="crHelpQ" aria-label="Revoir le didacticiel" title="Revoir le didacticiel">?</button><button class="ghost" id="crQuit">✕ Accueil</button></div>
+  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i class="tbk" style="font-style:normal"> · 道</i></h1><button class="helpq" id="crHelpQ" aria-label="Revoir le didacticiel" title="Revoir le didacticiel">?</button>${S.tuto >= 5 ? `<button class="ghost crmenu" id="crMenu" title="Menu de la Carrière : changer d'univers">☰ Univers</button>` : ""}<button class="ghost" id="crQuit" aria-label="Accueil">✕<span class="tbl"> Accueil</span></button></div>
     <div class="crhead"><div class="crid">${crBadge(S.div)}<div><div class="eb">${crDivN(S)} · Saison ${S.season} · Match ${Math.min(S.day + 1, CR_DAYS)}/${CR_DAYS}</div><h2>${esc(S.club)}</h2></div></div>
       <div class="crstats"><span><i>Caisse</i>${crMoney(S, S.money)}</span><span><i>Prestige</i>${S.prestige}</span><span><i>Points</i>${S.pts}</span><span title="Matchs de carrière qui rapportent encore des éclats et des boosters aujourd'hui"><i>Cartes · jour</i>${CR_CAP - cap}/${CR_CAP}</span></div></div>
     ${tu ? `<div class="crcoach"><div><i>Didacticiel · ${S.tuto + 3}/7</i><b>${tu[0]}</b><p>${tu[1]}</p></div>${tu[2] ? `<button class="primary" id="crTuNext">${tu[2]}</button>` : ""}</div>` : S.news && CR.view === "hub" ? `<div class="crnews">${esc(S.news)}</div>` : ""}
     ${body}`;
   crImgReuse(el, _crKeep);
   $("#crQuit").onclick = () => { crSave(); show("home"); };
+  $("#crMenu") && ($("#crMenu").onclick = () => { crSave(); crHome(); });
   el.querySelectorAll("[data-crtab]").forEach(b => b.onclick = () => { CR.tab = b.dataset.crtab; CR.ask = null; crRender(); });
   $("#bmBan") && ($("#bmBan").onclick = () => { if (!S.bm.seen){ S.bm.seen = true; crSave(); bmCine(S); } else bmShow(S); });
   if (bmOpen(S)) bmTick();
@@ -15547,7 +16043,7 @@ function crWire(S){
   el.querySelectorAll("[data-crbuy]").forEach(b => b.onclick = () => { const i = +b.dataset.crbuy; if (crBuy(S, i, crVal(u, i))){ try { SFX.play("pop"); } catch {} save(); } });
   $("#crNow") && ($("#crNow").onclick = () => { const L = S.lot; if (L && !L.done && crBuy(S, L.i, L.now, true)){ L.done = `${crCard(u, L.i).n} rejoint ${S.club} en achat immédiat (${crMoney(S, L.now)}).`; save(); } });
   $("#crBid") && ($("#crBid").onclick = () => crAuction(S));
-  $("#crOther") && ($("#crOther").onclick = () => { crSave(); CR.S = null; CR.intro = "uni"; crIntro(); window.scrollTo(0, 0); });
+  $("#crOther") && ($("#crOther").onclick = () => { crSave(); crHome(); });
   $("#crReset") && ($("#crReset").onclick = () => { CR.ask = "reset"; crRender(); }); $("#crResetNo") && ($("#crResetNo").onclick = () => { CR.ask = null; crRender(); });
   $("#crResetOk") && ($("#crResetOk").onclick = () => { const x = crLoad(); delete x.saves[S.u]; x.cur = null; lsSet(CR_KEY, x); CR.ask = null; CR.S = null; CR.introU = S.u; CR.intro = "name"; crIntro(); window.scrollTo(0, 0); });
   el.querySelectorAll("[data-crsc]").forEach(b => b.onclick = async () => { if (CR.busy) return; const r = crScout(S, b.dataset.crsc); if (!r) return; CR.busy = true; crSave(); await crCine(S, r.i, r.t); CR.busy = false; if (r.t === 3) S.news = `Coup de maître de ta cellule de recrutement : ${crCard(u, r.i).n} signe à ${S.club}.`; save(); });
@@ -15601,7 +16097,7 @@ const CR_ICON = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" str
 // « Retour au club » : la page de bienvenue aux couleurs de la division, une seule fois par jour (journée de jeu, voir tcDay), pour un joueur qui a déjà joué au moins un match
 function crReturn(S){ const el = $("#cr"); if (!el) return crShow(); try { lsSet("hanko-cr-ret", tcDay()); } catch {}
   show("cr"); document.body.classList.add("crret"); el.style.setProperty("--dc", CR_DIV[S.div][2]);
-  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>` + crWelcomeHTML();
+  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i class="tbk" style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit" aria-label="Accueil">✕<span class="tbl"> Accueil</span></button></div>` + crWelcomeHTML();
   const w = el.querySelector(".crwel"), go = () => { document.body.classList.remove("crret"); crShow(); };
   w.querySelector(".eb").textContent = S.club + " · saison " + S.season;
   w.querySelector("h2").innerHTML = "Bon retour en<br><b>" + crDivN(S) + "</b>";
@@ -15609,20 +16105,49 @@ function crReturn(S){ const el = $("#cr"); if (!el) return crShow(); try { lsSet
   w.querySelectorAll(".crwel-steps span").forEach((sp, k) => { sp.classList.toggle("cur", k === S.div); sp.classList.toggle("off", k > S.div); });
   const b = w.querySelector("#crWelGo"); b.textContent = "Reprendre"; b.onclick = go; const sm = w.querySelector(".small"); if (sm) sm.textContent = "Ta progression est sauvegardée.";
   el.querySelector("#crQuit").onclick = () => { document.body.classList.remove("crret"); show("home"); }; try { crWelcomeFx(el); } catch {} window.scrollTo(0, 0); }
-function crOpen(){ const r = crLoad(); document.body.classList.remove("crret"); if (r.cur && r.saves[r.cur]){ CR.S = r.saves[r.cur]; CR.tab = "match"; let seen = ""; try { seen = lsGet("hanko-cr-ret", ""); } catch {}
-    if ((CR.S.stat?.played || 0) >= 1 && CR.S.tuto >= 5 && seen !== tcDay()) return crReturn(CR.S); return crShow(); } CR.S = null; CR.intro = "welcome"; show("cr"); crIntro(); }
+function crOpen(){ const r = crLoad(); document.body.classList.remove("crret"); if (r.cur && r.saves[r.cur]){ CR.S = r.saves[r.cur]; CR.tab = "match";
+    if (CR.S.tuto < 5) return crShow();   /* didacticiel en cours : on le reprend directement */
+    return crHome(); } CR.S = null; CR.intro = "welcome"; show("cr"); crIntro(); }
+// 25 oct. 2026 : menu d'accueil de la Carrière (même décor que la page de première visite). « Reprendre » en grand pour la carrière en cours,
+// puis une carte par univers avec sa division, sa saison et ses points : on passe d'un univers à l'autre d'une touche (avant : caché dans Palmarès).
+function crHome(){ const el = $("#cr"); if (!el) return; const r = crLoad(), S = r.cur && r.saves[r.cur]; document.body.classList.remove("crret"); show("cr");
+  el.style.setProperty("--dc", S ? CR_DIV[S.div][2] : "var(--accent)");
+  el.innerHTML = `<div class="topbar"><h1>CARRIÈRE<i class="tbk" style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit" aria-label="Accueil">✕<span class="tbl"> Accueil</span></button></div>` + crWelcomeHTML();
+  const w = el.querySelector(".crwel");
+  if (S){ w.querySelector(".eb").textContent = UNI[S.u].name + " · " + S.club + " · saison " + S.season;
+    w.querySelector("h2").innerHTML = "Bon retour en<br><b>" + crDivN(S) + "</b>";
+    w.querySelector(".lead").textContent = "Match " + Math.min(CR_DAYS, (S.day || 0) + 1) + "/" + CR_DAYS + " · " + (S.pts || 0) + " point" + ((S.pts || 0) > 1 ? "s" : "") + ". " + (S.div === 4 && crSub(S) === 2 ? "Il ne te reste qu'un titre à aller chercher." : crUpTxt(S) + ".");
+    w.querySelectorAll(".crwel-steps span").forEach((sp, k) => { sp.classList.toggle("cur", k === S.div); sp.classList.toggle("off", k > S.div); });
+    const b = w.querySelector("#crWelGo"); b.innerHTML = "Reprendre · " + esc(UNI[S.u].name); b.onclick = () => { CR.S = S; CR.tab = "match"; crShow(); window.scrollTo(0, 0); };
+  } else { const b = w.querySelector("#crWelGo"); b.textContent = "Choisis ton univers ↓"; b.onclick = () => el.querySelector(".crhomeu")?.scrollIntoView({behavior: "smooth", block: "start"}); }
+  w.querySelector(".small")?.remove();
+  w.classList.add("home"); w.querySelector(".crwel-steps")?.remove();
+  // décor : les héros de l'univers en cours
+  if (S){ const pv = (UNI[S.u].preview || []).map(n => DATA[S.u].find(c => c.n === n)).filter(Boolean); if (pv.length === 3){ const t = w.querySelector(".trio"); if (t) t.innerHTML = [pv[1], pv[0], pv[2]].map(c => `<span>${img(c)}</span>`).join(""); } }
+  w.querySelector("#crWelGo").insertAdjacentHTML("afterend", `<div class="crhomeu"><div class="crhomeh"><h3>Changer d'univers</h3><p>Une carrière par univers, sauvegardée à part.</p></div>
+    <div class="crul">${Object.keys(UNI).map(u => { const s2 = r.saves[u], pv = (UNI[u].preview || []).map(n => DATA[u].find(c => c.n === n)).filter(Boolean), cur = S && S.u === u;
+      return `<button data-crh="${u}" class="${cur ? "cur" : ""} ${s2 ? "" : "nw"}" style="--uc:${TC_PACKS[u][2]}" aria-label="${UNI[u].name}${cur ? " (en cours)" : ""}"><span class="th">${pv[0] ? img(pv[0]) : ""}</span><span class="tx"><b>${UNI[u].name}</b><small>${s2 ? `${CR_DIV[s2.div][0]} · saison ${s2.season}` : "À commencer"}</small></span>${s2 ? crBadge(s2.div) : `<i class="pl" aria-hidden="true"></i>`}</button>`; }).join("")}</div></div>`);
+  $("#crQuit").onclick = () => { show("home"); };
+  el.querySelectorAll("[data-crh]").forEach(b => b.onclick = () => { const u = b.dataset.crh, s2 = crLoad().saves[u]; if (s2){ CR.S = s2; CR.tab = "match"; crSave(); crShow(); window.scrollTo(0, 0); return; } CR.S = null; CR.introU = u; CR.intro = "name"; crIntro(); window.scrollTo(0, 0); });
+  try { crWelcomeFx(el); } catch {} window.scrollTo(0, 0); }
 // avant la première carrière : page d'accueil du mode, puis les deux premières étapes du didacticiel (univers, nom du club). Sert aussi à changer d'univers.
-function crIntro(){ const el = $("#cr"); if (!el) return; const r = crLoad(), step = CR.intro || "welcome", top = `<div class="topbar"><h1>CARRIÈRE<i style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit">✕ Accueil</button></div>`;
+function crIntro(){ const el = $("#cr"); if (!el) return; const r = crLoad(), step = CR.intro || "welcome", top = `<div class="topbar"><h1>CARRIÈRE<i class="tbk" style="font-style:normal"> · 道</i></h1><button class="ghost" id="crQuit" aria-label="Accueil">✕<span class="tbl"> Accueil</span></button></div>`;
   el.style.removeProperty("--dc");
   if (step === "welcome") el.innerHTML = top + crWelcomeHTML();
   else if (step === "uni") el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 1/7</i><b>Choisis ton univers</b><p>Toute ta carrière se joue dans un seul univers : tu ne recrutes que ses personnages. Tu pourras lancer une autre carrière dans un autre univers plus tard.</p></div></div>
       <div class="cruni">${Object.keys(UNI).map(u => { const s = r.saves[u], pv = (UNI[u].preview || []).map(n => DATA[u].find(c => c.n === n)).filter(Boolean); return `<button data-cru="${u}" style="--uc:${TC_PACKS[u][2]}"><span class="fan">${pv.map(c => img(c)).join("")}</span><b>${UNI[u].name}</b><small>${s ? `Carrière en cours · division ${CR_DIV[s.div][0]}, saison ${s.season}` : DATA[u].length + " personnages"}</small><em>${s ? "Continuer" : "Choisir"}</em></button>`; }).join("")}</div>`;
-  else { const u = CR.introU; el.innerHTML = top + `<div class="crcoach"><div><i>Didacticiel · 2/7</i><b>Donne un nom à ton club</b><p>C'est lui qui apparaîtra au classement de ${UNI[u].name}. Tu commences en division Bronze, avec six personnages modestes et ${CR_ECO.start}M en caisse.</p></div></div>
-      <div class="crbox" style="max-width:520px;margin:0 auto"><label class="f" for="crName">Nom du club</label><input id="crName" maxlength="16" placeholder="Mon club" value="${esc(profGet()?.name || "")}"><div class="row" style="margin-top:14px;justify-content:space-between"><button class="ghost" id="crBackU">Changer d'univers</button><button class="primary" id="crGoNew" style="font-size:16px;padding:12px 22px">Lancer ma carrière</button></div></div>`; }
+  else { const u = CR.introU, pv = (UNI[u].preview || []).map(n => DATA[u].find(c => c.n === n)).filter(Boolean), P = TC_PACKS[u] || ["", "道", "var(--accent)"];
+    // 25 oct. 2026 : page aux couleurs de l'univers choisi (héros, kanji, couleur), nom du club au centre
+    el.innerHTML = top + `<div class="crname" style="--uc:${P[2]}"><span class="crnk" aria-hidden="true">${P[1]}</span>
+      <div class="crnfan">${[pv[1], pv[0], pv[2]].filter(Boolean).map(c => `<span>${img(c)}</span>`).join("")}</div>
+      <p class="eb">Nouvelle carrière · étape 2/7</p><h2>${UNI[u].name}</h2>
+      <p class="lead">Donne un nom à ton club : c'est lui qui apparaîtra au classement. Tu pars de la division <b>Bronze</b>, avec six ${UNI[u].units} modestes et ${CR_ECO.start}M en caisse.</p>
+      <div class="crnf"><label class="f" for="crName">Nom du club</label><input id="crName" maxlength="16" placeholder="Mon club" value="${esc(profGet()?.name || "")}" autocomplete="off"></div>
+      <button class="primary" id="crGoNew">Lancer ma carrière</button><button class="ghost crnb" id="crBackU">← Changer d'univers</button></div>`; }
   $("#crQuit").onclick = () => show("home");
   $("#crWelGo") && ($("#crWelGo").onclick = () => { CR.intro = "uni"; crIntro(); window.scrollTo(0, 0); });
   el.querySelectorAll("[data-cru]").forEach(b => b.onclick = () => { const u = b.dataset.cru, s = crLoad().saves[u]; if (s){ CR.S = s; CR.tab = "match"; crSave(); return crShow(); } CR.introU = u; CR.intro = "name"; crIntro(); window.scrollTo(0, 0); });
-  $("#crBackU") && ($("#crBackU").onclick = () => { CR.intro = "uni"; crIntro(); });
+  $("#crBackU") && ($("#crBackU").onclick = () => { if (Object.keys(crLoad().saves || {}).length) return crHome(); CR.intro = "uni"; crIntro(); });
   $("#crGoNew") && ($("#crGoNew").onclick = () => { CR.S = crStart(CR.introU, $("#crName").value); CR.tab = "match"; crSave(); crShow(); window.scrollTo(0, 0); });
   try { crWelcomeFx(el); } catch {} }
 // page d'accueil du mode : « le tunnel » (proposition A, choisie par l'utilisateur le 13 oct. 2026) : sol et plafond en perspective qui défilent, deux projecteurs qui balaient, trois cartes qui surgissent du fond et suivent la souris ou le doigt
@@ -18008,13 +18533,15 @@ body.tclock{position:fixed;left:0;right:0;width:100%}
 @media (max-width:640px){.tcopen .tcrow.many{gap:8px}.tcopen .tcrow.many > *{flex:0 0 calc((100% - 16px) / 3);max-width:none}}
 </style>
 <script>
-(() => { const fit = row => { row.querySelectorAll(".tc").forEach(t => { const w = t.getBoundingClientRect().width; if (!w) return; const k = Math.min(1.25, w / 102);
+(() => { const fit = row => { row.querySelectorAll(".tc").forEach(t => { const w = t.getBoundingClientRect().width; if (!w || t.dataset.fz === String(Math.round(w))) return; t.dataset.fz = Math.round(w); const k = Math.min(1.25, w / 102);
     const set = (s, px) => t.querySelectorAll(":scope > " + s + ", :scope " + s).forEach(e => e.style.fontSize = (px * k).toFixed(2) + "px");
     set(".tp", 7.5); set(".ft", 7.5);
     const nm = t.querySelector(".nm"); if (nm){ let f = 9.5 * k; nm.style.fontSize = f + "px"; while (nm.scrollWidth > nm.clientWidth + 1 && f > 7.5 * k){ f -= .25; nm.style.fontSize = f + "px"; } } }); };
   const run = () => document.querySelectorAll(".tcopen .tcrow").forEach(fit);
-  new MutationObserver(() => requestAnimationFrame(run)).observe(document.body, {childList: true, subtree: true});
-  addEventListener("resize", run); })();
+  /* 25 oct. 2026 : une fois par image au plus, et seulement quand une carte arrive (avant : à chaque changement de la page, toutes les cartes remesurées → téléphones figés) */
+  let q = 0; const tcIn = ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && (n.classList.contains("tc") || n.querySelector(".tc"))) return true; return false; };
+  new MutationObserver(ms => { if (q || !document.querySelector(".tcopen .tcrow") || !tcIn(ms)) return; q = requestAnimationFrame(() => { q = 0; run(); }); }).observe(document.body, {childList: true, subtree: true});
+  addEventListener("resize", () => { document.querySelectorAll(".tc[data-fz]").forEach(e => delete e.dataset.fz); run(); }); })();
 </script>
 <style>/* 19 oct. 2026 : onglets des amis sur téléphone : les 4 tiennent sans couper « Partager » */
 @media (max-width:420px){.frtabs{gap:0}.frtabs button{padding:10px 9px;font-size:13.5px}}
@@ -18027,7 +18554,8 @@ body.tclock{position:fixed;left:0;right:0;width:100%}
 <script>
 (() => { let q = 0; const fit = () => { q = 0; document.querySelectorAll(".tc .nm").forEach(nm => { if (nm.closest(".tcopen .tcrow")) return; const w = nm.clientWidth; if (!w || nm.dataset.fw === String(w)) return; nm.dataset.fw = w; nm.style.fontSize = "";
       let f = parseFloat(getComputedStyle(nm).fontSize), min = Math.max(6, f * .6); while (nm.scrollWidth > nm.clientWidth + 1 && f > min){ f -= .25; nm.style.fontSize = f + "px"; } }); };
-  new MutationObserver(() => { if (!q) q = requestAnimationFrame(fit); }).observe(document.body, {childList: true, subtree: true});
+  const nmIn = ms => { for (const m of ms){ if (m.target.nodeType === 1 && m.target.closest && m.target.closest(".nm")) return true; for (const n of m.addedNodes) if (n.nodeType === 1 && (n.classList.contains("nm") || n.classList.contains("tc") || n.querySelector(".nm"))) return true; } return false; };
+  new MutationObserver(ms => { if (!q && nmIn(ms)) q = requestAnimationFrame(fit); }).observe(document.body, {childList: true, subtree: true});   /* 25 oct. 2026 : seulement quand un nom de carte apparaît */
   addEventListener("resize", () => { document.querySelectorAll(".tc .nm[data-fw]").forEach(e => delete e.dataset.fw); fit(); }); })();
 </script>
 <style>/* 19 oct. 2026 : profil, collection : les pastilles de rareté filtrent les cartes (un clic : cette rareté seule ; re-clic : toutes) */
@@ -18057,6 +18585,20 @@ document.addEventListener("click", e => { const b = e.target.closest(".pfchips b
 @media (max-width:480px){.crlookb{grid-column:1/-1;justify-content:flex-start}}
 .crc.look .pic{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 70%,#fff)}
 </style>
+
+<style>/* 25 oct. 2026 : titres des barres du haut sur une seule ligne au téléphone (« CARRIÈRE » se coupait en plein mot) ;
+   la taille se réduit au besoin (script ci-dessous), le kanji décoratif et le libellé « Accueil » se replient */
+.topbar h1{white-space:nowrap;min-width:0}
+@media (max-width:480px){.topbar h1 .tbk,.topbar .tbl{display:none}.topbar > button{flex:none}}
+</style>
+<script>
+(() => { const fit = () => document.querySelectorAll(".topbar h1").forEach(h => { if (!h.offsetParent) return; const tb = h.closest(".topbar"); h.style.fontSize = ""; if (parseFloat(getComputedStyle(h).fontSize) < 4) return;   /* titres réduits au logo */ h.style.flex = "1 1 auto";
+    let f = parseFloat(getComputedStyle(h).fontSize), k = 0; while ((h.scrollWidth > h.clientWidth + 1 || tb.scrollWidth > tb.clientWidth + 1) && f > 12 && k++ < 40){ f -= .5; h.style.fontSize = f + "px"; } });
+  let q = 0; const later = () => { if (!q) q = requestAnimationFrame(() => { q = 0; fit(); }); };
+  { const base = show; show = function(id){ base(id); later(); }; }
+  new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && (n.classList.contains("topbar") || n.querySelector?.(".topbar"))) return later(); }).observe(document.body, {childList: true, subtree: true});
+  addEventListener("resize", later); later(); })();
+</script>
 
 <style>
 /* 20 oct. 2026 : dos des cartes de booster, un par univers (base « sceau doré », centre hexagone, validés sur la page d'aperçus)
