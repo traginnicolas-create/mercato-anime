@@ -10396,11 +10396,11 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
    du niveau du personnage et de sa popularité (TC_POP : estimation maison d'après les sondages de popularité connus).
    Booster = 5 cartes, la dernière est garantie (Rare, Épique ou Légendaire selon le niveau du booster : TC_T) ; garanties après une série sans gros tirage (TC_PITY).
    Gagner une partie (crochet sur histAdd) rapporte des éclats et parfois un booster ; on en obtient aussi avec les missions du jour, les boosters gratuits qui se rechargent,
-   ou en recyclant ses doublons en éclats (◆). Les éclats servent aussi à forger une carte manquante (prix dans TC_R).
+   ou en recyclant ses doublons en éclats (◆). Les éclats servent à acheter au marché ; une carte manquante s'y trouve aussi (les forges ont été retirées le 18 oct. 2026).
    ===================================================================== */
 const TC_KEY = "mercato-cartes";
 let TC_SET = "full";   // en-tête de la collection : « full » (set complet) ou « master » (toutes les versions)
-const TC_R = {C: ["Commune", 2, 25], P: ["Peu commune", 4, 50, "Peu com."], R: ["Rare", 10, 120], E: ["Épique", 30, 350], L: ["Légendaire", 100, 1200], M: ["Mythique", 300, 3500], X: ["Éveil", 100, 600]};   // nom, éclats au recyclage, prix à la forge, nom court
+const TC_R = {C: ["Commune", 2, 25], P: ["Peu commune", 4, 50, "Peu com."], R: ["Rare", 10, 120], E: ["Épique", 30, 350], L: ["Légendaire", 100, 1200], M: ["Mythique", 300, 3500], X: ["Éveil", 100, 600]};   // nom, éclats au recyclage, prix de départ proposé au marché, nom court
 // finitions façon cartes à collectionner : chaque carte peut sortir en version brillante, « art » pleine carte, « art spécial » ou dorée.
 // [nom, sigle, chance en % par carte tirée, multiplicateur de valeur au recyclage, expérience pour une première]
 const TC_FIN = {H: ["Holo", "HOLO", 8, 3, 20], A: ["Art rare", "AR", 2, 8, 60], B: ["Art rare", "AR", 1.4, 10, 80], C: ["Art rare", "AR", 1.2, 10, 80], S: ["Art spécial", "SAR", .5, 20, 150], K: ["Red Blood", "RED BLOOD", .35, 20, 220], W: ["Wanted", "WANTED", .8, 6, 120], G: ["UR", "UR", .15, 22, 300], Z: ["Légende", "LÉGENDE", .04, 30, 500]};
@@ -10566,7 +10566,7 @@ function tcLoad(){
 }
 // date de première obtention de chaque carte (17 oct. 2026) : 0 = déjà possédée avant cette mise à jour (date inconnue)
 // s.how : comment chaque carte (et chaque version, clé « id|V ») a été obtenue la première fois — [mode, prix, date] ;
-// [mode, prix, date, provenance (clé du booster, « univers:niveau », suivie de « !secret »)] ; mode b = booster, a = achetée au marché, n = enchère gagnée, e = échange, r = récompense, f = forge ; 0 = obtenue avant le 18 oct. 2026 (inconnu).
+// [mode, prix, date, provenance (clé du booster, « univers:niveau », suivie de « !secret »)] ; mode b = booster, a = achetée au marché, n = enchère gagnée, e = échange, r = récompense, f = forge (cartes forgées avant le retrait des forges, 18 oct. 2026) ; 0 = obtenue avant le 18 oct. 2026 (inconnu).
 // Le code qui ajoute une carte autrement qu'en booster pose s._how juste avant tcSave.
 const tcStamp = s => { if (!s.own) return; const now = Date.now(); if (!s.at){ s.at = {}; for (const id in s.own) if (s.own[id] > 0) s.at[id] = 0; } for (const id in s.own) if (s.own[id] > 0 && !(id in s.at)) s.at[id] = now;
   const H = Array.isArray(s._how) ? s._how : ["b"], fin = s.fin || {}; delete s._how;
@@ -10600,11 +10600,8 @@ const tcSecretRoll = s => { let r = ""; for (const sx of TC_SECRET) if (Math.ran
 // Désormais un tirage par booster : en % de chance (booster Classique, multiplié par TC_FINMUL selon le niveau) que la 4e carte soit une version rare, dont la carte est choisie parmi celles qui existent dans cette version.
 const TC_VHIT = {A: 4.8, W: 1.9, K: 1.6, G: .41, Z: .2}, TC_VW = {C: 10, P: 10, R: 10, E: 10, L: 3, M: 1, X: 1}, TC_VPITY = 100, TC_UPITY = 200;   // TC_UPITY : UR ou Légende garantie après tant de boosters sans   // TC_VW : poids par rareté dans ce choix ; TC_VPITY : Red Blood ou mieux garantie après tant de boosters sans
 const tcVList = (pool, k) => pool.flatMap(c => (k === "A" ? ["A", "B", "C"] : [k]).filter(v => tcVersOf(c).includes(v)).map(v => [c, v]));
-// tirage au hasard, doublons compris (choix de l'utilisateur : les doublons font partie du jeu, ils se recyclent en éclats qui servent à forger)
+// tirage au hasard, doublons compris (choix de l'utilisateur : les doublons font partie du jeu, ils se recyclent en éclats)
 const tcVPick = l => { let x = Math.random() * l.reduce((a, [c]) => a + TC_VW[c.r], 0); for (const e of l){ x -= TC_VW[e[0].r]; if (x <= 0) return e; } return l[l.length - 1]; };
-// forger une version rare précise avec les éclats du recyclage : prix de la version × coefficient de la rareté de la carte. Il faut déjà posséder le personnage.
-const TC_VFORGE = {H: 150, A: 600, B: 600, C: 600, W: 500, K: 4000, G: 15000, Z: 25000}, TC_VFR = {C: 1, P: 1, R: 1, E: 1, L: 1.5, M: 2, X: 1.5};
-const tcVPrice = (c, v) => Math.round(TC_VFORGE[v] * TC_VFR[c.r]);
 function tcOpenPack(s, key, sec){
   const P = tcParse(key), u = P.u, t = sec === "divin" ? 3 : sec === "dore" ? 2 : P.t, pool = tcCards().filter(c => u === "mix" || c.u === u), got = [], lv0 = tcLvl(s.xp || 0);
   const pickOf = r => { for (let k = r === "X" ? 6 : Math.min(5, TC_ORDER.indexOf(r)); k >= 0; k--){ const l = pool.filter(c => c.r === TC_ORDER[k] && !got.some(g => g.id === c.id)); if (l.length) return l[Math.floor(Math.random() * l.length)]; } return pool[0]; };
