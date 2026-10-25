@@ -15042,7 +15042,7 @@ function mjApply(actor, a){
 }
 function mjCommit(){ MJ.seq++; mjRender(); if (MJN.role === "host") mjSendAll(); }
 function mjAct(t, v){ const st = mjS(); if (!st) return; const a = {t, v, seq: st.seq};
-  if (MJN.role === "guest"){ MJN.game?.emit("mact", a).catch(() => {}); return; }
+  if (MJN.role === "guest"){ MJN.game?.emit("uact", a).catch(() => {}); return; }
   const who = MJN.role === "host" ? 0 : (st.ph.who != null ? st.ph.who : 0); mjApply(who, a); }
 
 /* ---------- combats : chaque paire d'adversaires se rencontre une fois, en 5 contre 5 (même moteur que le duel) ---------- */
@@ -15129,12 +15129,13 @@ function mjRenderEnd(st){
   $("#mjHome").onclick = () => { mjLeave(); show("home"); };
 }
 
+/* canaux : mêmes noms que l'Undercover (uhello, ulobby, uact, ustate), déclarés sur claude.ai (16 canaux au plus) ; chaque partie a son propre salon « mm-<code> », jamais mélangé à l'Undercover « uc-<code> » */
 /* ---------- en ligne (jusqu'à 8) : l'hôte fait tourner la partie et envoie à chacun l'état et sa place ---------- */
 function mjLeave(){ MJN.timers.forEach(clearInterval); MJN.timers = []; MJN.unsub.forEach(f => { try { f(); } catch {} }); MJN.unsub = [];
   if (MJN.game) MJN.game.leave().catch(() => {}); Object.assign(MJN, {role: null, game: null, code: null, lobby: [], myPeer: null}); MJ = null; MV = null; }
 function mjPub(){ const s = {...MJ, pool: MJ.pool.length, log: MJ.log.slice(0, 8)}; return s; }
 function mjSendTo(peer, topic, data){ if (MJN.game.emitTo) MJN.game.emitTo(peer, topic, data); else MJN.game.emit(topic, {...data, to: peer}).catch(() => {}); }
-function mjSendAll(){ if (MJN.role !== "host" || !MJ) return; const st = mjPub(); MJ.players.forEach((p, i) => { if (!i) return; const peer = MJN.lobby[i]?.peer; if (peer) mjSendTo(peer, "mstate", {st, me: i}); }); }
+function mjSendAll(){ if (MJN.role !== "host" || !MJ) return; const st = mjPub(); MJ.players.forEach((p, i) => { if (!i) return; const peer = MJN.lobby[i]?.peer; if (peer) mjSendTo(peer, "ustate", {st, me: i}); }); }
 function mjLobbyRender(){ const L = MJN.lobby, host = MJN.role === "host", n = L.length, fmts = ["melee", "t2", "duo"].filter(f => mjFmtOk(f, n));
   if (!mjFmtOk(MJN.fmt, n)) MJN.fmt = "melee";
   lobby(`<h2>Mercato à plusieurs · ${UNI[MJN.u].name}</h2>${MJN.code ? `<p class="muted">Code de la partie :</p><div class="code">${MJN.code}</div>` : ""}
@@ -15146,17 +15147,17 @@ function mjLobbyRender(){ const L = MJN.lobby, host = MJN.role === "host", n = L
   $("#cancelLobby").onclick = () => { mjLeave(); show("home"); };
   document.querySelectorAll("[data-mjf]").forEach(b => b.onclick = () => { MJN.fmt = b.dataset.mjf; mjBroadcastLobby(); });
   $("#mjStart") && ($("#mjStart").onclick = () => { if (MJN.lobby.length >= 3) mjNew(MJN.u, MJN.lobby.map(p => p.name), MJN.fmt); }); }
-function mjBroadcastLobby(){ if (MJN.role !== "host" || MJ) return; MJN.game.emit("mlobby", {names: MJN.lobby.map(p => p.name), u: MJN.u, code: MJN.code, fmt: MJN.fmt}).catch(() => {}); mjLobbyRender(); }
+function mjBroadcastLobby(){ if (MJN.role !== "host" || MJ) return; MJN.game.emit("ulobby", {names: MJN.lobby.map(p => p.name), u: MJN.u, code: MJN.code, fmt: MJN.fmt}).catch(() => {}); mjLobbyRender(); }
 async function mjHost(name){ const err = t => $("#onlineErr").textContent = t; err("");
   MJN.myName = cleanName(name, "Hôte"); let game, code;
   for (let i = 0; i < 3 && !game; i++){ code = mkCode("X"); try { game = await NET.room.join("mj-" + code.toLowerCase(), true); } catch (e) { if (e?.type !== "unavailable-id") break; } }
   if (!game) return err("Impossible de créer la partie pour le moment. Vérifie ta connexion puis réessaie.");
   Object.assign(MJN, {role: "host", game, code, u: cfg.u, fmt: MJ_HOME.fmt, lobby: [{name: MJN.myName, peer: null}]});
-  MJN.unsub.push(game.on("mhello", msg => { if (msg.sameTab) return; const name = cleanName(msg.data?.name, "Joueur"), L = MJN.lobby;
+  MJN.unsub.push(game.on("uhello", msg => { if (msg.sameTab) return; const name = cleanName(msg.data?.name, "Joueur"), L = MJN.lobby;
     if (MJ){ const i = MJ.players.findIndex(p => p.name === name); if (i > 0){ L[i].peer = msg.peer; mjSendAll(); } return; }   /* un joueur qui revient reprend sa place */
     if (L.some(p => p.peer === msg.peer)) return mjBroadcastLobby(); if (L.length >= 8) return;
     let n = name, k = 2; while (L.some(p => p.name === n)) n = name + " (" + k++ + ")"; L.push({name: n, peer: msg.peer}); mjBroadcastLobby(); }));
-  MJN.unsub.push(game.on("mact", msg => { if (msg.sameTab || !MJ) return; const i = MJN.lobby.findIndex(p => p.peer === msg.peer); if (i <= 0) return; const a = msg.data || {}; mjApply(i, {t: String(a.t), v: a.v, seq: Number(a.seq)}); }));
+  MJN.unsub.push(game.on("uact", msg => { if (msg.sameTab || !MJ) return; const i = MJN.lobby.findIndex(p => p.peer === msg.peer); if (i <= 0) return; const a = msg.data || {}; mjApply(i, {t: String(a.t), v: a.v, seq: Number(a.seq)}); }));
   MJN.unsub.push(game.onPeers(ch => { if (!MJ && ch.left.length){ MJN.lobby = MJN.lobby.filter((p, i) => i === 0 || !ch.left.some(l => l.peer === p.peer)); mjBroadcastLobby(); } }));
   MJN.timers.push(setInterval(() => MJ ? mjSendAll() : mjBroadcastLobby(), 4000));
   mjBroadcastLobby(); }
@@ -15167,12 +15168,12 @@ async function mjJoin(code, name){ const err = t => $("#onlineErr").textContent 
   lobby(`<h2>Connexion à la partie ${code}</h2>${waitHTML("Recherche de l'hôte…")}<button class="ghost" id="cancelLobby">Annuler</button>`);
   $("#cancelLobby").onclick = () => { mjLeave(); show("home"); };
   let got = false;
-  MJN.unsub.push(game.on("mhello", msg => { if (msg.sameTab) MJN.myPeer = msg.peer; }));
-  MJN.unsub.push(game.on("mlobby", msg => { if (msg.sameTab || MV) return; got = true; const d = msg.data || {};
+  MJN.unsub.push(game.on("uhello", msg => { if (msg.sameTab) MJN.myPeer = msg.peer; }));
+  MJN.unsub.push(game.on("ulobby", msg => { if (msg.sameTab || MV) return; got = true; const d = msg.data || {};
     MJN.lobby = (d.names || []).map(n => ({name: cleanName(n, "Joueur")})); MJN.u = DATA[d.u] ? d.u : "op"; MJN.fmt = MJ_FMT[d.fmt] ? d.fmt : "melee"; mjLobbyRender(); }));
-  MJN.unsub.push(game.on("mstate", msg => { const d = msg.data; if (msg.sameTab || !d?.st || !DATA[d.st.u]) return; if (d.to && d.to !== MJN.myPeer) return; got = true; MV = {st: d.st, me: d.me}; mjRender(); }));
+  MJN.unsub.push(game.on("ustate", msg => { const d = msg.data; if (msg.sameTab || !d?.st || !DATA[d.st.u]) return; if (d.to && d.to !== MJN.myPeer) return; got = true; MV = {st: d.st, me: d.me}; mjRender(); }));
   let tries = 0; const inLobby = () => MJN.lobby.some(p => p.name === MJN.myName || p.name.startsWith(MJN.myName + " ("));
-  const hello = () => { if (MV || inLobby()) return; if (!got && ++tries > 12){ mjLeave(); show("home"); return err(`Aucune partie trouvée avec le code ${code}.`); } game.emit("mhello", {name: MJN.myName}).catch(() => {}); };
+  const hello = () => { if (MV || inLobby()) return; if (!got && ++tries > 12){ mjLeave(); show("home"); return err(`Aucune partie trouvée avec le code ${code}.`); } game.emit("uhello", {name: MJN.myName}).catch(() => {}); };
   hello(); MJN.timers.push(setInterval(hello, 2000)); }
 
 /* ---------- accueil du Mercato : nombre de joueurs et format ---------- */
