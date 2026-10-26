@@ -10296,20 +10296,21 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tcopen .kdeck{position:relative;width:max(150px,min(64vw,300px,calc((100dvh - 370px) * .676)));aspect-ratio:5/7.4;cursor:pointer;margin:0 auto;-webkit-tap-highlight-color:transparent}
 .kdeck .gh{position:absolute;inset:0;transition:opacity .3s;pointer-events:none}
 .kdeck .gh > *,.kdeck .kfl .bkf > *,.kdeck .kfl .fa > *{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;margin:0}
-.kdeck .kfl{position:absolute;inset:0;perspective:1400px;transition:transform .42s cubic-bezier(.5,0,.75,0),opacity .42s}
-.kdeck .kfl .in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.1,.3,1)}
-.kdeck .kfl.up .in{transform:rotateY(180deg)}
-.kdeck .kfl .fa,.kdeck .kfl .bkf{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.kdeck .kfl .fa{transform:rotateY(180deg)}
+.kdeck .kfl{position:absolute;inset:0;perspective:1400px;transition:transform .34s cubic-bezier(.2,.7,.3,1),opacity .3s}
+.kdeck .kfl .in{position:absolute;inset:0}
+/* 26 oct. 2026 : retournement sans « backface-visibility » (Safari iOS l'ignore avec les filtres des cartes : dos en miroir, face jamais visible).
+   La carte pivote jusqu'à la tranche, la face remplace le dos, puis elle revient de face (script : kflip). */
+.kdeck .kfl:not(.up) .fa,.kdeck .kfl.up .bkf{visibility:hidden}
+.kdeck .kfl .fa,.kdeck .kfl .bkf{position:absolute;inset:0}
 .kdeck .kfl .bkf .tcbk2{pointer-events:none}
 .tcopen .kdeck{touch-action:none;user-select:none;-webkit-user-select:none}
-.kdeck .kfl.nofl .in{transition:none}
 .kdeck .kfl.drag{transition:none}
 .kdeck .kfl.gone[style*="translateX"]{transition:transform .38s cubic-bezier(.3,.6,.4,1),opacity .38s}
 .kdeck .kfl .fa .tc{box-shadow:0 10px 26px rgba(0,0,0,.55)}
 .tcopen .kcnt{display:flex;align-items:baseline;justify-content:center;gap:12px}
 .tcopen .kcnt .kpk{font:700 12px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);padding:4px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;display:inline-block}
 .tcopen .kcnt .kpk b{color:#fff}
+.tcopen .kcnt .kl{font:700 12px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
 /* 25 oct. 2026 : bilan compact façon Kyara — actions toujours visibles en bas, textes resserrés */
 .tcopen.res{gap:8px}
 .tcopen.res .mid{gap:10px;align-content:start}
@@ -10323,7 +10324,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tcopen.res .oodds{margin:0}
 .tcopen.res .ozoom{margin:0}
 @media (max-width:640px){.tcopen.res .tcrow.many{gap:8px}.tcopen.res .tcrow.many > *{flex:0 0 calc((100% - 16px) / 3)}}
-.kdeck .kfl.gone{transform:translateY(46vh) scale(.12);opacity:0;pointer-events:none}
+.kdeck .kfl.gone{transform:translateY(34vh) scale(.16);opacity:0;pointer-events:none;z-index:0!important}
 .kdeck .kfl.hit::after{content:"";position:absolute;inset:-14%;border-radius:40px;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 70%,transparent),transparent);z-index:-1;opacity:0;animation:kglow 2s .45s ease-in-out infinite both}
 @keyframes kglow{0%,100%{opacity:.45}50%{opacity:.9}}
 .tcopen .kfoot{display:grid;gap:10px;justify-items:center;width:100%}
@@ -11856,11 +11857,15 @@ function tcOpening(key, got){
   const fill = k => { const c = got[k]; seen[k] = true;
     if (TAL){ const t = bot.querySelector(`.ktal [data-r="${c.r}"]`); if (t){ t.hidden = false; const n = +t.querySelector("b").textContent + 1, l = TC_R[c.r][3] || TC_R[c.r][0]; t.querySelector("b").textContent = n; t.lastChild.textContent = " " + (n > 1 && !/\.$/.test(l) ? l.replace(/^(\S+)/, "$1s") : l); if (hot(c)){ t.classList.remove("pop"); void t.offsetWidth; t.classList.add("pop"); } } return; }
     const sl = bot.querySelectorAll(".kslots i")[k]; if (!sl) return; sl.className = "f r-" + c.r + (hot(c) ? "" : " lo"); sl.innerHTML = `<img src="${tcArt(c, c.f)}" alt="">`; };
+  // retournement en deux temps : jusqu'à la tranche (90°), échange dos/face, retour de face ; sans animation en mode calme
+  const kflip = (el, swap) => new Promise(done => { const inn = el.querySelector(".in"); if (calm || !inn.animate){ swap(); return done(); }
+    inn.animate([{transform: "rotateY(0deg)"}, {transform: "rotateY(90deg)"}], {duration: 190, easing: "cubic-bezier(.5,0,.9,.6)"}).onfinish = () => { swap();
+      const a = inn.animate([{transform: "rotateY(-90deg) scale(1.04)"}, {transform: "rotateY(0deg) scale(1)"}], {duration: 300, easing: "cubic-bezier(.2,.8,.3,1.15)"}); a.onfinish = a.oncancel = () => done(); }; });
   const cine = async k => { const c = got[k]; if (k !== bestK) return false; const show = big(c) || c.hype; busy = true;
     try { if (show) await tcCine(c, {key, full: !!c.hype}); else if (c.f && c.f !== "H") await tcCine(c, {mini: true, key}); } catch {} finally { busy = false; } return show; };
   const flipC = async () => { const el = cur(); if (!el || el.classList.contains("up") || busy || fin) return; const k = +el.dataset.k, c = got[k];
     const show = await cine(k); if (!el.isConnected || fin) return;   /* une seule cinématique par ouverture : celle de la meilleure carte */
-    el.classList.add("up", "r-" + c.r, "hit"); tcSnd("flip" + lvlOf(c));
+    busy = true; await kflip(el, () => el.classList.add("up", "r-" + c.r, "hit")); busy = false; if (!el.isConnected || fin) return; tcSnd("flip" + lvlOf(c));
     if (!show && lvlOf(c) >= 2 && !calm) setTimeout(() => tcBoom(Math.min(2, lvlOf(c)), el), 280);
     stack(); };
   // la carte du dessus part : sur le côté si on l'a glissée, vers sa case si on l'a touchée
@@ -11870,7 +11875,7 @@ function tcOpening(key, got){
   const finish = async () => { if (fin) return; fin = true; for (; i < N; i++) fill(i);
     setTimeout(() => { if (!O.isConnected || O.classList.contains("res")) return; mid.innerHTML = sumRow(); bot.innerHTML = ""; done(); }, calm ? 0 : 380); };
   const deal = () => {
-    mid.innerHTML = `<div class="kcnt" aria-live="polite">${NP > 1 ? `<span class="kpk">Booster <b>1</b>/${NP}</span>` : ""}<span><b class="kc">1</b><small class="kt">/5</small></span></div><div class="kdeck">${[3, 2, 1].map(k => `<div class="gh" style="transform:translate(${k * 6}px,${-k * 5}px) rotate(${k * 1.3}deg);z-index:${-k}">${tcBackU("C", {u: got[Math.min(N - 1, k)].u})}</div>`).join("")}</div>`;
+    mid.innerHTML = `<div class="kcnt" aria-live="polite">${NP > 1 ? `<span class="kpk">Booster <b>1</b>/${NP}</span>` : ""}<span>${NP > 1 ? `<small class="kl">carte </small>` : ""}<b class="kc">1</b><small class="kt">/5</small></span></div><div class="kdeck">${[3, 2, 1].map(k => `<div class="gh" style="transform:translate(${k * 6}px,${-k * 5}px) rotate(${k * 1.3}deg);z-index:${-k}">${tcBackU("C", {u: got[Math.min(N - 1, k)].u})}</div>`).join("")}</div>`;
     const cn = {}; got.forEach(c => cn[c.r] = 1);
     bot.innerHTML = `<div class="kfoot">${TAL ? `<div class="ktal">${[...TC_ORDER].reverse().filter(r => cn[r]).map(r => `<span class="r-${r}" data-r="${r}" hidden><b>0</b><em> ${TC_R[r][3] || TC_R[r][0]}</em></span>`).join("")}</div>` : `<div class="kslots">${got.map(() => "<i></i>").join("")}</div>`}
       <p class="kmsg"></p><div class="kbtns">${got.some(hot) && N > 1 ? `<button id="tcNext">Passer à la prochaine Épique ou +</button>` : ""}<button id="tcAll">Tout révéler</button></div></div>`;
@@ -12216,11 +12221,11 @@ button:disabled{opacity:.45;cursor:default}
 .hs-deck{position:relative;width:min(66vw,320px,calc((100vh - 290px) * .675));aspect-ratio:450/666}
 .hs-deck .gh{position:absolute;inset:0;border-radius:15px;transition:opacity .3s}
 .hs-deck .gh .hs-back{box-shadow:inset 0 0 0 5px #0b0507,inset 0 0 0 7px #d8b25c,0 10px 24px #0009}
-.hs-fl{position:absolute;inset:0;perspective:1400px;transition:transform .42s cubic-bezier(.5,0,.75,0),opacity .42s}
-.hs-fl .in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.1,.3,1)}
-.hs-fl.up .in{transform:rotateY(180deg)}
-.hs-fl .fa,.hs-fl .bkf{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.hs-fl .fa{transform:rotateY(180deg)}
+.hs-fl{position:absolute;inset:0;perspective:1400px;transition:transform .34s cubic-bezier(.2,.7,.3,1),opacity .3s}
+.hs-fl .in{position:absolute;inset:0}
+/* 26 oct. 2026 : retournement en deux temps (Safari iOS ignore backface-visibility avec les filtres : dos en miroir) */
+.hs-fl:not(.up) .fa,.hs-fl.up .bkf{visibility:hidden}
+.hs-fl .fa,.hs-fl .bkf{position:absolute;inset:0}
 .hs-fl.gone{transform:translateY(55vh) scale(.12);opacity:0;pointer-events:none}
 .hs-fl:not(.top){visibility:hidden}
 .hs-fl.hit::after{content:"";position:absolute;inset:-16%;border-radius:40px;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 75%,transparent),transparent);z-index:-1;opacity:0}
@@ -12450,7 +12455,9 @@ function hsOpenUI(id){
     msg.textContent = "Touche la carte pour la retourner";
     stack.forEach(el => el.onclick = step); try { tcSnd("deal"); } catch {}
   };
-  const flip = () => { const el = stack[i]; el.classList.add("up"); if (god && i === 0) setTimeout(() => { ov.classList.add("god"); try { tcSnd("cele"); } catch {} }, 450); if (hsHit(got[i])) setTimeout(() => { try { tcSnd("cele"); } catch {} }, 380); msg.textContent = i < N - 1 ? "Touche pour la carte suivante" : "Touche pour voir le bilan"; };
+  const flip = () => { const el = stack[i]; if (el._fl) return; el._fl = 1; const inn = el.querySelector(".in"), calm = matchMedia("(prefers-reduced-motion:reduce)").matches;
+    if (!calm && inn.animate) inn.animate([{transform: "rotateY(0deg)"}, {transform: "rotateY(90deg)"}], {duration: 190, easing: "cubic-bezier(.5,0,.9,.6)"}).onfinish = () => { el.classList.add("up"); inn.animate([{transform: "rotateY(-90deg) scale(1.04)"}, {transform: "rotateY(0deg) scale(1)"}], {duration: 300, easing: "cubic-bezier(.2,.8,.3,1.15)"}); };
+    else el.classList.add("up"); if (god && i === 0) setTimeout(() => { ov.classList.add("god"); try { tcSnd("cele"); } catch {} }, 450); if (hsHit(got[i])) setTimeout(() => { try { tcSnd("cele"); } catch {} }, 380); msg.textContent = i < N - 1 ? "Touche pour la carte suivante" : "Touche pour voir le bilan"; };
   const next = () => { const el = stack[i]; el.classList.add("gone"); fill(i); i++; if (i < N) show(); else end(); };
   const step = () => { const el = stack[i]; if (!el || done) return; el.classList.contains("up") ? next() : flip(); };
   const end = () => { if (done) return; done = true; if (god) ov.classList.add("god"); setTimeout(summary, 380); };
