@@ -10249,7 +10249,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
    (empreinte, paillettes : fusion + masque + filtre) ne sont pas dessinés ; sur écran tactile ou étroit, le cadre et le balayage ne s'animent pas dans les grilles */
 .tc:not(.hl):not(.vcard .tc):not(.tccine .tc) > :is(.tx,.sk){display:none!important}
 @media (hover:none),(max-width:700px){
-  .tc:not(.hl):not(.vcard .tc):not(.tccine .tc) > .lfr,.tc:not(.hl):not(.vcard .tc):not(.tccine .tc) .fx{animation:none!important}
+  .tc:not(.hl):not(.vcard .tc):not(.tccine .tc):not(.kdeck .tc) > .lfr,.tc:not(.hl):not(.vcard .tc):not(.tccine .tc):not(.kdeck .tc) .fx{animation:none!important}   /* 26 oct. 2026 : la carte du dessus de la pile d'ouverture s'anime comme en vue agrandie */
   .vtpick .tc,.vtpick .tc *{animation:none!important;transition:none!important}
 }
 @keyframes lxmetal3{to{background-position:0 0,0 0,0 0,300% 0}}
@@ -17927,7 +17927,7 @@ body.crret:has(#cr:not(.hidden)) .crwel #crWelGo,body.crret:has(#cr:not(.hidden)
 .tcview .vf .tc.tc.tc.arp,.tcview .vf .tc.tc.tc.f-H:is([style*="--hm"],.palc),.tccine .tc.tc.tc.arp,.tccine .tc.tc.tc.f-H:is([style*="--hm"],.palc){--bw:8px}
 .tc.tc.tc.arp,.tc.tc.tc.arp:has(> img.fade){background:linear-gradient(var(--ad),var(--ad)) padding-box,conic-gradient(from var(--ang),var(--am),#ff7ad9,var(--al),#7af0ff,var(--am),#ffe27a,var(--al),#b48cff,var(--am)) border-box!important}
 .tc.tc.tc.f-H:is([style*="--hm"],.palc){box-shadow:0 0 18px color-mix(in srgb,var(--hm) 50%,transparent),0 10px 24px rgba(0,0,0,.6)!important}
-@media (prefers-reduced-motion:no-preference){:is(.tcview .vf,.tccine) .tc.tc.tc.arp,.tc.tc.tc.hl.arp{animation:tcprism 7s linear infinite}}
+@media (prefers-reduced-motion:no-preference){:is(.tcview .vf,.tccine,.kdeck .kfl.up) .tc.tc.tc.arp,.tc.tc.tc.hl.arp{animation:tcprism 7s linear infinite}}
 /* ---- Brillance des Holos (17 oct. 2026, 3e baisse) : sur téléphone l'image paraissait délavée. Le reflet coloré est plus léger,
    et la tache blanche qui suit le doigt (.fx::after) et le reflet de la vue agrandie sont presque effacés sur les Holos. */
 .tc.tc.tc.f-H:is([style*="--hm"],.palc) .fx,.tc.tc.tc.lx.f-H:is([style*="--hm"],.palc) .fx{opacity:.36!important}
