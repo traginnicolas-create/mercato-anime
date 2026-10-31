@@ -10617,6 +10617,7 @@ function tcOpenPack(s, key, sec){
   for (let slot = 0; slot < 5; slot++){
     let r = tcRoll(TC_T[t].rate[slot === 4 ? 1 : 0]); if (first && TC_ORDER.indexOf(r) > 2) r = "R";
     if (slot === 4){ if (s.pity.M + 1 >= TC_PITY.M) r = "M"; else if (s.pity.L + 1 >= TC_PITY.L && r !== "M") r = "L"; }
+    if (slot === 4 && sec === "jour" && TC_ORDER.indexOf(r) < 3) r = "E";   /* pack du jour : Épique ou mieux */
     if (slot === 4 && !first && (sec === "eveil" || Math.random() * 100 < TC_XRATE[t]) && pool.some(c => c.r === "X")) r = "X";
     let c = pickOf(r), force = "", hype = false;
     if (slot === 4 && sec === "tresor"){ const l = pool.filter(x => x.obj && (x.r === "L" || x.r === "M") && !got.some(g => g.id === x.id)); if (l.length) c = l[Math.floor(Math.random() * l.length)]; }
@@ -11041,7 +11042,7 @@ function tcRender(){
   const vers = tcVers(s), versAll = all.reduce((a, c) => a + tcVersOf(c).length, 0);
   // (les quatre tuiles cartes / niveau / éclats / boosters ont été retirées : boosters gratuits, éclats et niveau sont dans la pastille de la barre du haut)
   let html = `
-    <div class="tctabs">${[["packs", "Boosters", tcStock(s)], ["album", "Collection", ""], ["missions", "Missions", claim || ""], ["series", "Séries", ""], ["vitrine", "Vitrine", ""], ["market", "Marché", typeof hvUnread === "function" ? hvUnread() || "" : ""]].map(([k, n, b]) => `<button class="${TC_TAB === k ? "sel" : ""}" data-tct="${k}">${n}${b ? `<small>${b}</small>` : ""}</button>`).join("")}</div>`;
+    <div class="tctabs">${[["packs", "Boosters", tcStock(s)], ["album", "Collection", ""], ["missions", "Missions", claim || ""], ["series", "Séries", ""], ["vitrine", "Vitrine", ""], ["rank", "Classements", ""], ["market", "Marché", typeof hvUnread === "function" ? hvUnread() || "" : ""]].map(([k, n, b]) => `<button class="${TC_TAB === k ? "sel" : ""}" data-tct="${k}">${n}${b ? `<small>${b}</small>` : ""}</button>`).join("")}</div>`;
   if (TC_TAB === "packs"){
     const keys = Object.keys(s.packs).filter(k => s.packs[k] > 0).sort((a, b) => tcParse(b).t - tcParse(a).t || a.localeCompare(b)), inv = [...(s.free.n ? ["free"] : []), ...keys];
     if (!inv.includes(TC_PICK)) TC_PICK = inv[0] || null;
@@ -11106,6 +11107,7 @@ function tcRender(){
       </div>
       <div class="tcgrid">${list.map(([c, v]) => tcCard(c, v === "*" ? {btn: true, v, no: !s.own[c.id], x: s.own[c.id], f: tcBestFin(s, c)} : {btn: true, v, no: !tcHas(s, c, v), f: v, x: v ? (s.fin[c.id] || {})[v] : 0})).join("") || `<p class="muted">${f.own ? "Tu n'as encore aucune de ces cartes. Désactive « Obtenues » pour voir toutes celles qui existent." : "Aucune carte ici pour l'instant."}</p>`}</div>`;
   } else if (TC_TAB === "series"){ html += `<div id="hsHost"></div>`;   /* séries (extensions numérotées) : src/serie.part, dans une racine fantôme */
+  } else if (TC_TAB === "rank"){ html += `<div id="kjRank"></div>`;   /* classements : src/kyara3.part */
   } else if (TC_TAB === "market"){ html += hvHTML();
   } else if (TC_TAB === "vitrine"){ html += vtHTML(s);
   } else {
@@ -11139,6 +11141,7 @@ function tcRender(){
   { const keep = typeof crImgPool === "function" ? crImgPool($("#tcBoard")) : null; $("#tcBoard").innerHTML = html; if (keep) crImgReuse($("#tcBoard"), keep); }   /* images réutilisées : pas de clignotement */
   if (TC_TAB === "vitrine") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), vtBind());
   if (TC_TAB === "series") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), hsMount($("#hsHost")));
+  if (TC_TAB === "rank") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), kjRankBind());
   if (TC_TAB === "market") return (document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); }), hvBind());
   document.querySelectorAll("[data-tct]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.tct; tcRender(); });
   document.querySelectorAll("[data-tcsub]").forEach(b => b.onclick = () => { TC_SUB = b.dataset.tcsub; tcRender(); });
@@ -13864,16 +13867,20 @@ function hvLeft(end){ const ms = Date.parse(end) - Date.now(); if (ms <= 0) retu
   return h >= 1 ? `${h} h ${String(m).padStart(2, "0")}` : m >= 1 ? `${m} min ${String(s % 60).padStart(2, "0")}` : `${s} s`; }
 function hvAgo(t){ const m = Math.round((Date.now() - Date.parse(t)) / 6e4); return m < 1 ? "à l'instant" : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} j`; }
 // historique des prix d'une carte (ventes conclues de cette version) : chiffres, petite courbe, dernières ventes
-async function hvHistory(id, v){ const sb = await hvSb(); if (!sb) return null; const {data} = await sb.from("market_listings").select("final_price,settled_at,mode").eq("card_id", id).eq("ver", v || "").eq("status", "sold").order("settled_at", {ascending: false}).limit(20); return data || []; }
-function hvHistHTML(h){ if (h == null) return `<div class="hv-hist"><h4>Historique des prix</h4><p class="hv-note">Chargement…</p></div>`;
-  if (!h.length) return `<div class="hv-hist"><h4>Historique des prix</h4><p class="hv-note">Aucune vente de cette carte dans cette version pour l'instant.</p></div>`;
-  const P = h.map(x => x.final_price), srt = [...P].sort((a, b) => a - b), med = srt[Math.floor((srt.length - 1) / 2)], mn = srt[0], mx = srt[srt.length - 1];
+/* 31 oct. 2026 : cote sur 30 jours, ventes et ordres d'achat exécutés */
+async function hvHistory(id, v){ const sb = await hvSb(); if (!sb) return null; const since = new Date(Date.now() - 30 * 864e5).toISOString();
+  const [a, b] = await Promise.all([sb.from("market_listings").select("final_price,settled_at,mode").eq("card_id", id).eq("ver", v || "").eq("status", "sold").gte("settled_at", since).order("settled_at", {ascending: false}).limit(200),
+    sb.from("market_orders").select("price,done_at").eq("card_id", id).eq("ver", v || "").eq("status", "filled").gte("done_at", since).limit(100)]);
+  return [...(a.data || []), ...(b.error ? [] : (b.data || []).map(o => ({final_price: o.price, settled_at: o.done_at, mode: "order"})))].sort((x, y) => Date.parse(y.settled_at) - Date.parse(x.settled_at)); }
+function hvHistHTML(h){ if (h == null) return `<div class="hv-hist"><h4>Cote sur 30 jours</h4><p class="hv-note">Chargement…</p></div>`;
+  if (!h.length) return `<div class="hv-hist"><h4>Cote sur 30 jours</h4><p class="hv-note">Aucune vente de cette carte dans cette version depuis 30 jours.</p></div>`;
+  const P = h.map(x => x.final_price), half = Date.now() - 15 * 864e5, cut = l => { const q = [...l].sort((a, b) => a - b); return q[Math.floor((q.length - 1) / 2)]; }, rec = h.filter(x => Date.parse(x.settled_at) >= half).map(x => x.final_price), old = h.filter(x => Date.parse(x.settled_at) < half).map(x => x.final_price), tr = rec.length && old.length ? Math.round((cut(rec) / cut(old) - 1) * 100) : null, srt = [...P].sort((a, b) => a - b), med = srt[Math.floor((srt.length - 1) / 2)], mn = srt[0], mx = srt[srt.length - 1];
   const pts = [...P].reverse(), W = 300, H = 70, pad = 6, X = i => pts.length > 1 ? pad + i * (W - 2 * pad) / (pts.length - 1) : W / 2, Y = p => mx === mn ? H / 2 : H - pad - (p - mn) / (mx - mn) * (H - 2 * pad);
   const line = pts.map((p, i) => `${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(" ");
-  return `<div class="hv-hist"><h4>Historique des prix</h4><div class="st"><div><small>Dernière vente</small><b>${hvN(P[0])} ◆</b></div><div><small>Prix médian</small><b>${hvN(med)} ◆</b></div><div><small>Moins cher</small><b>${hvN(mn)} ◆</b></div><div><small>Plus cher</small><b>${hvN(mx)} ◆</b></div></div>
+  return `<div class="hv-hist"><h4>Cote sur 30 jours</h4><div class="st"><div><small>Dernière vente</small><b>${hvN(P[0])} ◆</b></div><div><small>Cote (médiane)</small><b>${hvN(med)} ◆${tr ? ` <span style="font-size:11px;color:${tr > 0 ? "#1fae5b" : "#ff5a5a"}">${tr > 0 ? "+" : ""}${tr} %</span>` : ""}</b></div><div><small>Moins cher</small><b>${hvN(mn)} ◆</b></div><div><small>Plus cher</small><b>${hvN(mx)} ◆</b></div></div>
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Évolution des ${pts.length} derniers prix de vente"><line x1="0" x2="${W}" y1="${Y(med).toFixed(1)}" y2="${Y(med).toFixed(1)}" stroke="currentColor" stroke-opacity=".18" stroke-dasharray="4 4"/>${pts.length > 1 ? `<polyline points="${line}" fill="none" stroke="#4d9dff" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>` : ""}${pts.map((p, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(p).toFixed(1)}" r="3" fill="#4d9dff"/>`).join("")}</svg>
-    <div class="ls">${h.slice(0, 5).map(x => `<div><span>${x.mode === "auction" ? "Enchère" : "Prix fixe"} · ${hvAgo(x.settled_at)}</span><b>${hvN(x.final_price)} ◆</b></div>`).join("")}</div>
-    <p class="hv-note">${h.length} vente${h.length > 1 ? "s" : ""} conclue${h.length > 1 ? "s" : ""} prise${h.length > 1 ? "s" : ""} en compte (les 20 dernières au plus).</p></div>`; }
+    <div class="ls">${h.slice(0, 5).map(x => `<div><span>${x.mode === "order" ? "Ordre d'achat" : x.mode === "auction" ? "Enchère" : "Prix fixe"} · ${hvAgo(x.settled_at)}</span><b>${hvN(x.final_price)} ◆</b></div>`).join("")}</div>
+    <p class="hv-note">${h.length} vente${h.length > 1 ? "s" : ""} conclue${h.length > 1 ? "s" : ""} depuis 30 jours.</p></div>`; }
 // exemplaires d'une version ('' = normale : total moins les versions spéciales), comme côté serveur
 function hvCount(s, id, v){ const fin = s.fin[id] || {}; if (v) return fin[v] || 0; return Math.max(0, (s.own[id] || 0) - Object.values(fin).reduce((a, b) => a + b, 0)); }
 function hvTake(s, id, v){ s.own[id] = Math.max(0, (s.own[id] || 0) - 1); if (v && s.fin[id]){ s.fin[id][v] = Math.max(0, (s.fin[id][v] || 0) - 1); if (!s.fin[id][v]) delete s.fin[id][v]; if (!Object.keys(s.fin[id]).length) delete s.fin[id]; }
@@ -13902,7 +13909,9 @@ async function hvClaim(sb){ sb = sb || await hvSb(); if (!sb) return [];
 async function hvLoad(){ if (HV.loading) return; HV.loading = true; HV.err = ""; hvPaint();
   try { const sb = await hvSb(); if (!sb){ HV.err = "login"; return; }
     const me = hvMe(); const st = await sb.rpc("market_settle"); if (st.error && /does not exist|schema cache/.test(st.error.message || "")){ HV.err = "sql"; return; }
+    try { await sb.rpc("market_orders_settle"); } catch {}
     await hvClaim(sb);
+    const O = await sb.from("market_orders").select("*").eq("status", "open").order("price", {ascending: false}).limit(300); HV.orders = O.error ? null : O.data;   /* null : ordres d'achat pas encore ouverts sur le serveur */
     const [L, ML, B, T, N, W] = await Promise.all([
       sb.from("market_listings").select("*").eq("status", "open").order("ends_at").limit(400),
       sb.from("market_listings").select("*").eq("seller_id", me).order("created_at", {ascending: false}).limit(60),
@@ -13912,7 +13921,7 @@ async function hvLoad(){ if (HV.loading) return; HV.loading = true; HV.err = "";
       sb.from("market_wishes").select("card_id,ver")]);
     const err = [L, ML, B, T, N, W].find(x => x.error); if (err) throw err.error;
     HV.data = {list: L.data, mine: ML.data, bids: B.data, trades: T.data, notes: N.data, wish: new Set(W.data.map(w => w.card_id + "|" + w.ver))};
-    const ids = [...new Set([...L.data.flatMap(l => [l.seller_id, l.top_bidder]), ...T.data.flatMap(t => [t.from_id, t.to_id])].filter(Boolean))].filter(x => !HV.names[x]);
+    const ids = [...new Set([...L.data.flatMap(l => [l.seller_id, l.top_bidder]), ...T.data.flatMap(t => [t.from_id, t.to_id]), ...(HV.orders || []).map(o => o.buyer_id)].filter(Boolean))].filter(x => !HV.names[x]);
     if (ids.length){ const {data} = await sb.from("players").select("user_id,handle").in("user_id", ids); (data || []).forEach(p => HV.names[p.user_id] = p.handle); }
     HV.t = Date.now(); hvBadge();
   } catch (e){ HV.err = hvMsg(e); } finally { HV.loading = false; hvPaint(); } }
@@ -13956,6 +13965,8 @@ function hvNoteTxt(n){ const c = hvLbl(n.card_id, n.ver), a = n.amount != null ?
     case "sold": return [`${c} vendue`, `Pour ${a}. Tu reçois ${hvN(n.amount - hvFee(n.amount))} ◆ (commission de 5 % déduite).`];
     case "unsold": return [`${c} n'a pas trouvé preneur`, "Elle est revenue dans ta collection."];
     case "trade": return [`Échange : ${c}`, "Un échange te concerne : tu as reçu une carte, ou un joueur te fait une proposition. Regarde l'onglet Échanges."];
+    case "order": return [`Ordre d'achat exécuté : ${c}`, `Pour ${a}. La carte est dans ta collection.`];
+    case "order_end": return [`Ordre d'achat expiré : ${c}`, `Tes ${a} te sont revenus.`];
     case "wish": return [`${c} est en vente`, `Elle est dans ta liste de souhaits. ${a ? "À partir de " + a + "." : ""}`];
     default: return [c, ""]; } }
 
@@ -13963,20 +13974,22 @@ function hvNoteTxt(n){ const c = hvLbl(n.card_id, n.ver), a = n.amount != null ?
 function hvHTML(){ return `<div class="hv" id="hvRoot"></div>`; }
 function hvBind(){ hvPaint(); if (!HV.data || Date.now() - HV.t > 20000) hvLoad(); if (!lsGet("mercato-hv-tuto", false)) setTimeout(() => hvTuto(0), 300); }
 function hvPaint(){ const root = document.getElementById("hvRoot"); if (!root) return; const s = tcLoad(), d = HV.data, n = hvUnread();
-  const tabs = [["buy", "Acheter"], ["sell", "Vendre"], ["auc", "Enchères"], ["trade", "Échanges"], ["act", "Activité"]];
+  const tabs = [["buy", "Acheter"], ["sell", "Vendre"], ["auc", "Enchères"], ...(HV.orders ? [["ord", "Ordres"]] : []), ["trade", "Échanges"], ["act", "Activité"]];
   let body = "";
   if (HV.err === "login") body = `<div class="hv-empty"><b>Le marché demande un compte</b>Pour acheter, vendre et échanger avec les autres joueurs, connecte-toi à ton compte Hanko (gratuit).<div style="margin-top:12px"><button class="primary" id="hvLogin">Me connecter</button></div></div>`;
   else if (HV.err === "sql") body = `<div class="hv-empty"><b>Le marché arrive bientôt</b>Il n'est pas encore ouvert sur le serveur.</div>`;
   else if (s.taint) body = `<div class="hv-empty"><b>Marché bloqué</b>Ta collection a été modifiée en dehors du jeu : elle n'est plus vérifiée, le marché et les échanges sont bloqués.</div>`;
   else if (!d) body = `<div class="hv-empty">${HV.err ? `<b>Oups</b>${esc(HV.err)}<div style="margin-top:12px"><button id="hvRetry">Réessayer</button></div>` : "Chargement du marché…"}</div>`;
-  else body = HV.tab === "sell" ? hvSellHTML(s) : HV.tab === "trade" ? hvTradeHTML(s) : HV.tab === "act" ? hvActHTML(s) : hvBuyHTML(s, HV.tab === "auc");
+  else body = HV.tab === "sell" ? hvSellHTML(s) : HV.tab === "trade" ? hvTradeHTML(s) : HV.tab === "act" ? hvActHTML(s) : HV.tab === "ord" && HV.orders ? hvOrdersHTML(s) : hvBuyHTML(s, HV.tab === "auc");
   root.innerHTML = `<div class="hv-hd"><div><span class="ey">Hôtel des ventes · 市場</span><h3>Le marché</h3><p>Achète la carte qui te manque, vends tes cartes au plus offrant, échange avec les autres joueurs.</p></div>
     <div class="hv-me"><b title="Tes éclats">${hvN(s.gems)} ◆</b><button class="ghost" id="hvHelp" title="Revoir le didacticiel" aria-label="Revoir le didacticiel">?</button><button class="ghost" id="hvRef" title="Actualiser" aria-label="Actualiser">↻</button></div></div>
     <div class="hv-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-hvt="${k}" class="${HV.tab === k ? "sel" : ""}">${l}${k === "act" && n ? `<em>${n}</em>` : ""}</button>`).join("")}</div>${body}`;
   hvWire(root); }
 
 function hvFilters(withAuc){ const all = tcCards(), R = [...TC_ORDER].reverse();
+  const sv = lsGet("mercato-hv-saved", []);
   return `<div class="hv-f"><input type="search" id="hvQ" placeholder="Rechercher un personnage…" value="${esc(HV.q)}">
+    <div class="hv-chips">${sv.map((x, i) => `<button data-hvsv="${i}">★ ${esc(x.n)}<small data-hvsd="${i}" aria-label="Supprimer">✕</small></button>`).join("")}<button id="hvSave">+ Enregistrer cette recherche</button></div>
     <div class="hv-chips">${[["all", "Toutes"], ...R.map(r => [r, TC_R[r][0]])].map(([k, l]) => `<button data-hvr="${k}" class="${HV.r === k ? "sel" : ""}">${l}</button>`).join("")}</div>
     <div class="sels"><label>Univers<select id="hvU"><option value="all">Tous</option>${TC_UNIS.map(u => `<option value="${u}" ${HV.u === u ? "selected" : ""}>${TC_PACKS[u][0]}</option>`).join("")}</select></label>
     <label>Version<select id="hvV"><option value="all">Toutes</option>${[["", "Normale"], ...Object.keys(TC_FIN).map(k => [k, TC_FIN[k][0]])].filter(([k]) => k === "" || all.some(c => tcVersOf(c).includes(k))).map(([k, l]) => `<option value="${k}" ${HV.v === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
@@ -14023,10 +14036,36 @@ function hvTradeHTML(s){ const me = hvMe(), T = HV.data.trades.filter(t => Date.
     <div class="hv-row"><div class="hv-chips">${[["can", "Que je peux accepter"], ["miss", "Que je n'ai pas"], ["me", "Pour moi"], ["mine", "Mes offres"], ["all", "Toutes"]].map(([k, l]) => `<button data-hvts="${k}" class="${HV.tsub === k ? "sel" : ""}">${l}</button>`).join("")}</div>
     <button class="primary" id="hvNewT">+ Proposer un échange</button></div>
     ${L.length ? L.map(t => { const mine = t.from_id === me;
-      return `<div class="hv-tr" data-hvtr="${t.id}"><div class="who"><b>${mine ? "Toi" : esc(hvWho(t.from_id))}</b> ${t.to_id ? (t.to_id === me ? "te propose directement" : "propose à " + esc(hvWho(t.to_id))) : "donne"} · contre l'une de :</div>
+      return `<div class="hv-tr" data-hvtr="${t.id}"><div class="who"><b ${!mine && frParse(hvWho(t.from_id)) ? `data-kjp="${esc(hvWho(t.from_id))}" style="cursor:pointer;text-decoration:underline"` : ""}>${mine ? "Toi" : esc(hvWho(t.from_id))}</b> ${t.to_id ? (t.to_id === me ? "te propose directement" : "propose à " + esc(hvWho(t.to_id))) : "donne"} · contre l'une de :</div>
       <div class="tw">${hvMini(t.give_card, t.give_ver, 96)}<span class="arr">⇄</span><div class="ws">${t.wants.map((w, i) => `<button data-hvwi="${i}" class="${!mine && hvCount(s, w.c, w.v || "") > 0 ? "have" : ""}" aria-label="${esc(hvLbl(w.c, w.v))}">${hvMini(w.c, w.v, 58)}</button>`).join("")}</div></div>
-      <div class="ft"><span>${esc(hvLbl(t.give_card, t.give_ver))} · expire dans ${hvLeft(t.expires_at)}</span>${mine ? `<button class="ghost" data-hvtx="${t.id}">Retirer mon offre</button>` : can(t) ? `<button class="hv-g" data-hvta="${t.id}">Échanger</button>` : ""}</div></div>`; }).join("")
+      <div class="ft"><span>${esc(hvLbl(t.give_card, t.give_ver))} · expire dans ${hvLeft(t.expires_at)}</span>${mine ? `<button class="ghost" data-hvtx="${t.id}">Retirer mon offre</button>` : `${frParse(hvWho(t.from_id)) ? `<button class="ghost" data-hvtc="${t.id}">Contre-proposer</button>` : ""}${can(t) ? `<button class="hv-g" data-hvta="${t.id}">Échanger</button>` : ""}`}</div></div>`; }).join("")
       : `<div class="hv-empty"><b>Aucun échange ici</b>${HV.tsub === "can" ? "Aucune offre ne demande une carte que tu possèdes pour l'instant." : "Rien à afficher avec ce filtre."}</div>`}`; }
+
+// ---------- Ordres d'achat (31 oct. 2026) : le joueur bloque ses éclats sur une carte, le premier qui la possède peut la lui vendre ----------
+function hvOrdersHTML(s){ const me = hvMe(), O = HV.orders.filter(o => Date.parse(o.expires_at) > Date.now() && hvCard(o.card_id)), sub = HV.osub || "can", can = o => o.buyer_id !== me && hvCount(s, o.card_id, o.ver) > 0;
+  const L = O.filter(o => sub === "mine" ? o.buyer_id === me : sub === "can" ? can(o) : true);
+  return `${hvTip("orders", "Un ordre d'achat dit : « je paie ce prix pour cette carte ». Tes éclats sont bloqués pendant 7 jours au plus. Si un joueur la possède, il peut te la vendre en un geste. Tu peux retirer ton ordre à tout moment.")}
+    <div class="hv-row"><div class="hv-chips">${[["can", "Que je peux vendre"], ["mine", "Mes ordres"], ["all", "Tous"]].map(([k, l]) => `<button data-hvos="${k}" class="${sub === k ? "sel" : ""}">${l}</button>`).join("")}</div><button class="primary" id="hvNewO">+ Placer un ordre</button></div>
+    ${L.length ? L.map(o => `<div class="hv-li"><span style="flex:none">${hvMini(o.card_id, o.ver, 54)}</span><div style="flex:1;min-width:0"><b>${esc(hvLbl(o.card_id, o.ver))}</b><div style="color:var(--muted);font-size:12.5px">${o.buyer_id === me ? "Ton ordre" : esc(hvWho(o.buyer_id))} · expire dans ${hvLeft(o.expires_at)}</div></div><div style="text-align:right;display:grid;gap:5px"><b>${hvN(o.price)} ◆</b>${o.buyer_id === me ? `<button class="ghost" data-hvox="${o.id}">Retirer</button>` : can(o) ? `<button class="hv-g" data-hvof="${o.id}">Vendre</button>` : ""}</div></div>`).join("")
+      : `<div class="hv-empty"><b>Aucun ordre ici</b>${sub === "can" ? "Personne ne cherche une carte que tu possèdes pour l'instant." : "Rien à afficher avec ce filtre."}</div>`}`; }
+function hvNewOrder(pre){ const all = tcCards(); let q = "", pick = pre || null, vv = (pre && pre.v) || "", price = "";
+  const {M, close} = hvModal(`<div class="head"><h2>Placer un ordre d'achat</h2><button class="ghost" data-close>✕ Fermer</button></div><div id="hvNO"></div>`);
+  const draw = () => { const qq = q.trim().toLowerCase(), L = all.filter(c => !qq || c.n.toLowerCase().includes(qq)).filter(c => vv === "" || tcVersOf(c).includes(vv)).slice(0, 90), s = tcLoad();
+    M.querySelector("#hvNO").innerHTML = `<div class="hv-row" style="flex-wrap:nowrap"><input type="search" id="hvOQ" placeholder="Rechercher une carte…" value="${esc(q)}" style="flex:1"><select id="hvOV" style="width:auto"><option value="">Normale</option>${Object.keys(TC_FIN).map(k => `<option value="${k}" ${vv === k ? "selected" : ""}>${TC_FIN[k][0]}</option>`).join("")}</select></div>
+      <div class="pickg">${L.map(c => `<button data-oc="${esc(c.id)}" class="${pick && pick.c === c.id ? "sel" : ""}">${hvMini(c.id, vv, 92)}<small>${esc(c.n)}</small></button>`).join("")}</div>
+      ${pick ? `<div class="hv-box"><b>${esc(hvLbl(pick.c, vv))}</b><label class="hv-f"><span style="font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Je paie (◆)</span><input type="number" id="hvOP" min="1" value="${esc(String(price))}" inputmode="numeric"></label><p class="hv-note" id="hvOMed"></p></div>` : ""}
+      <p class="hv-note">Tu as ${hvN(s.gems)} ◆. Tes éclats sont bloqués jusqu'à la vente, au retrait de l'ordre ou à la fin des 7 jours.</p><p class="err" id="hvErr"></p><button class="hv-g" id="hvOGo" ${pick ? "" : "disabled"}>Placer l'ordre</button>`;
+    const Q = M.querySelector("#hvOQ"); let tm; Q.oninput = () => { clearTimeout(tm); tm = setTimeout(() => { q = Q.value; draw(); const i = M.querySelector("#hvOQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
+    M.querySelector("#hvOV").onchange = e => { vv = e.target.value; pick = null; draw(); };
+    M.querySelectorAll("[data-oc]").forEach(b => b.onclick = async () => { pick = {c: b.dataset.oc}; price = ""; draw(); try { const sb = await hvSb(), {data} = await sb.rpc("market_median", {card: pick.c, v: vv}), e = M.querySelector("#hvOMed"); if (e && data) e.textContent = "Prix médian des ventes : " + hvN(data) + " ◆."; } catch {} });
+    const P = M.querySelector("#hvOP"); if (P) P.oninput = () => price = P.value;
+    M.querySelector("#hvOGo").onclick = async e => { const v = Math.floor(+price || 0), err = t => M.querySelector("#hvErr").textContent = t; if (v < 1) return err("Indique un prix d'au moins 1 ◆."); if (tcLoad().gems < v) return err("Tu n'as pas assez d'éclats.");
+      e.target.disabled = true; try { await hvAct("market_order_place", {card: pick.c, v: vv, price: v}, (s, d) => { s.gems -= d; }); SFX.play("win"); close(); frToast("Ordre d'achat placé pour 7 jours."); HV.tab = "ord"; HV.osub = "mine"; await hvLoad(); } catch (er){ err(hvMsg(er)); e.target.disabled = false; } }; };
+  draw(); }
+function hvOrdWire($$, on){ on("#hvNewO", "click", () => hvNewOrder());
+  $$("[data-hvos]").forEach(b => b.onclick = () => { HV.osub = b.dataset.hvos; hvPaint(); });
+  $$("[data-hvox]").forEach(b => b.onclick = () => hvConfirm("Retirer cet ordre ?", "Tes éclats te reviennent.", "Retirer", async () => { await hvAct("market_order_cancel", {oid: +b.dataset.hvox}); await hvClaim(); await hvLoad(); }));
+  $$("[data-hvof]").forEach(b => b.onclick = () => { const o = HV.orders.find(x => x.id === +b.dataset.hvof), net = o.price - hvFee(o.price); hvConfirm(`Vendre ${hvLbl(o.card_id, o.ver)} ?`, `Pour ${hvN(o.price)} ◆. Tu reçois ${hvN(net)} ◆ après la commission de 5 %.`, `Vendre · ${hvN(net)} ◆`, async () => { await hvAct("market_order_fill", {oid: o.id}, s => hvTake(s, o.card_id, o.ver)); await hvClaim(); SFX.play("win"); await hvLoad(); }); }); }
 
 // ---------- Activité ----------
 function hvActHTML(s){ const d = HV.data, me = hvMe(), myBids = [...new Map(d.bids.map(b => [b.listing_id, b])).values()], byId = Object.fromEntries(d.list.map(l => [l.id, l]));
@@ -14055,6 +14094,9 @@ function hvWire(root){ const $$ = s => root.querySelectorAll(s), on = (sel, ev, 
   $$("[data-hvts]").forEach(b => b.onclick = () => { HV.tsub = b.dataset.hvts; hvPaint(); });
   on("#hvU", "change", e => { HV.u = e.target.value; hvPaint(); }); on("#hvV", "change", e => { HV.v = e.target.value; hvPaint(); }); on("#hvS", "change", e => { HV.sort = e.target.value; hvPaint(); });
   on("#hvSS", "change", e => { HV.ssort = e.target.value; hvPaint(); });
+  on("#hvSave", "click", () => { const L = lsGet("mercato-hv-saved", []), n = [HV.q.trim(), HV.r !== "all" ? TC_R[HV.r][0] : "", HV.u !== "all" ? TC_PACKS[HV.u][0] : "", HV.v !== "all" ? hvVer(HV.v) : "", HV.miss ? "que je n'ai pas" : ""].filter(Boolean).join(" · ") || "Toutes"; if (L.length >= 8) return frToast("8 recherches enregistrées au plus."); lsSet("mercato-hv-saved", [...L, {n: n.slice(0, 40), q: HV.q, r: HV.r, u: HV.u, v: HV.v, sort: HV.sort, miss: HV.miss, bin: HV.bin}]); hvPaint(); });
+  $$("[data-hvsv]").forEach(b => b.onclick = e => { const L = lsGet("mercato-hv-saved", []), i = +b.dataset.hvsv; if (e.target.dataset.hvsd != null){ L.splice(i, 1); lsSet("mercato-hv-saved", L); return hvPaint(); } const {n, ...f} = L[i]; Object.assign(HV, f); hvPaint(); });
+  hvOrdWire($$, on);
   on("#hvBin", "click", () => { HV.bin = !HV.bin; hvPaint(); }); on("#hvMiss", "click", () => { HV.miss = !HV.miss; hvPaint(); });
   $$("[data-hvtip] button").forEach(b => b.onclick = () => { lsSet("mercato-hv-tip-" + b.closest("[data-hvtip]").dataset.hvtip, true); b.closest("[data-hvtip]").remove(); });
   $$("[data-hvw]").forEach(b => b.onclick = e => { e.stopPropagation(); const [id, v] = b.dataset.hvw.split("|"); hvWish(id, v); });
@@ -14064,7 +14106,8 @@ function hvWire(root){ const $$ = s => root.querySelectorAll(s), on = (sel, ev, 
   $$("[data-hvtx]").forEach(b => b.onclick = () => hvConfirm("Retirer ton offre d'échange ?", "Ta carte revient dans ta collection.", "Retirer", async () => { await hvAct("market_trade_cancel", {tid: +b.dataset.hvtx}); await hvLoad(); }));
   $$("[data-hvta]").forEach(b => b.onclick = () => hvAccept(+b.dataset.hvta));
   $$(".hv-tr .ws > button").forEach(b => b.onclick = () => { const t = HV.data.trades.find(x => x.id === +b.closest("[data-hvtr]").dataset.hvtr), w = t.wants[+b.dataset.hvwi]; const c = hvCard(w.c); if (c) tcView(c, w.v || ""); });
-  on("#hvNewT", "click", () => hvNewTrade()); }
+  on("#hvNewT", "click", () => hvNewTrade());
+  $$("[data-hvtc]").forEach(b => b.onclick = () => { const t = HV.data.trades.find(x => x.id === +b.dataset.hvtc); hvNewTrade({to: hvWho(t.from_id), wants: [{c: t.give_card, v: t.give_ver || ""}]}); }); }
 
 async function hvWish(id, v){ const k = id + "|" + (v || ""), on = !HV.data.wish.has(k); try { const sb = await hvSb(); if (!sb) return; const {error} = await sb.rpc("market_wish", {card: id, v: v || "", wanted: on}); if (error) throw error;
     on ? HV.data.wish.add(k) : HV.data.wish.delete(k); frToast(on ? `${hvLbl(id, v)} ajoutée à tes souhaits : tu seras prévenu quand elle sera en vente.` : `${hvLbl(id, v)} retirée de tes souhaits.`); hvPaint(); } catch (e){ frToast(hvMsg(e)); } }
@@ -14079,15 +14122,16 @@ function hvConfirm(t, p, ok, fn){ const {M, close} = hvModal(`<div class="head">
 async function hvListing(id){ let l = HV.data.list.find(x => x.id === id) || HV.data.mine.find(x => x.id === id); if (!l) return; const c = hvCard(l.card_id); if (!c) return;
   const me = hvMe(), mine = l.seller_id === me, auc = l.mode === "auction";
   const {M, close} = hvModal(`<div class="head"><h2>${auc ? "Enchère" : "En vente"}</h2><button class="ghost" data-close>✕ Fermer</button></div><div id="hvLB"></div>`, () => clearInterval(tm));
-  let hist = [], amt = null, hh = null; hvHistory(l.card_id, l.ver).then(h => { hh = h || []; const e = M.querySelector("#hvHist"); if (e) e.innerHTML = hvHistHTML(hh); });
+  let hist = [], amt = null, hh = null, auto = false, maxi = 0; hvHistory(l.card_id, l.ver).then(h => { hh = h || []; const e = M.querySelector("#hvHist"); if (e) e.innerHTML = hvHistHTML(hh); });
   const draw = () => { const s = tcLoad(), open = l.status === "open" && Date.parse(l.ends_at) > Date.now(), min = l.top_bid == null ? l.price : l.top_bid + hvStep(l.top_bid), top = l.top_bidder === me;
     if (amt == null || amt < min) amt = min; const w = HV.data.wish.has(l.card_id + "|" + l.ver);
-    M.querySelector("#hvLB").innerHTML = `<div class="top">${tcCard(c, {f: l.ver})}<dl><div><dt>Carte</dt><dd>${esc(c.n)}</dd></div><div><dt>Rareté · version</dt><dd>${TC_R[tcER(c, l.ver)][0]} · ${esc(hvVer(l.ver))}</dd></div><div><dt>Univers</dt><dd>${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</dd></div><div><dt>Vendeur</dt><dd>${mine ? "Toi" : esc(hvWho(l.seller_id))}</dd></div><div><dt>Tu en as</dt><dd>${hvCount(s, c.id, l.ver)}</dd></div></dl></div>
+    M.querySelector("#hvLB").innerHTML = `<div class="top">${tcCard(c, {f: l.ver})}<dl><div><dt>Carte</dt><dd>${esc(c.n)}</dd></div><div><dt>Rareté · version</dt><dd>${TC_R[tcER(c, l.ver)][0]} · ${esc(hvVer(l.ver))}</dd></div><div><dt>Univers</dt><dd>${TC_PACKS[c.u][1]} ${TC_PACKS[c.u][0]}</dd></div><div><dt>Vendeur</dt><dd ${!mine && frParse(hvWho(l.seller_id)) ? `data-kjp="${esc(hvWho(l.seller_id))}" style="cursor:pointer;text-decoration:underline"` : ""}>${mine ? "Toi" : esc(hvWho(l.seller_id))}</dd></div><div><dt>Tu en as</dt><dd>${hvCount(s, c.id, l.ver)}</dd></div></dl></div>
       <div class="hv-row"><button class="ghost" id="hv3d">Voir la carte en 3D</button><button class="ghost" id="hvW">${w ? "★ Dans mes souhaits" : "☆ Ajouter à mes souhaits"}</button></div>
       ${auc ? `<div class="hv-box"><div class="hv-row"><div><dt>${l.top_bid == null ? "Mise de départ" : "Offre actuelle"}</dt><div class="big">${hvN(l.top_bid == null ? l.price : l.top_bid)} ◆</div><small style="color:var(--muted)">${l.top_bid == null ? "aucune offre pour l'instant" : (top ? "c'est ton offre" : "par " + esc(hvWho(l.top_bidder))) + " · " + l.bids + " offre" + (l.bids > 1 ? "s" : "")}</small></div><div style="text-align:right"><dt>Fin dans</dt><div class="tm" id="hvLeft">${hvLeft(l.ends_at)}</div></div></div>
         ${hist.length ? `<div class="hist">${hist.slice(0, 6).map(b => `<div><span>${esc(hvWho(b.bidder_id))} · ${hvAgo(b.created_at)}</span><b>${hvN(b.amount)} ◆</b></div>`).join("")}</div>` : ""}</div>
-        ${open && !mine ? (top ? `<p class="warn">Tu as la meilleure offre. Si quelqu'un te dépasse, tes éclats te reviennent et tu es prévenu.</p>` : `<label class="hv-f"><span style="font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Ta mise (minimum ${hvN(min)} ◆)</span><input type="number" id="hvAmt" min="${min}" step="${hvStep(l.top_bid || l.price)}" value="${amt}" inputmode="numeric"></label>
-          <div class="hv-row"><button class="hv-g" id="hvBid" style="flex:1">Enchérir</button>${l.buyout ? `<button class="primary" id="hvBuy" style="flex:1">Achat immédiat · ${hvN(l.buyout)} ◆</button>` : ""}</div>`) : ""}
+        ${open && !mine ? (top ? `<p class="warn">Tu as la meilleure offre${maxi ? ` et ton maximum est de ${hvN(maxi)} ◆` : ""}. Si quelqu'un te dépasse, tes éclats te reviennent et tu es prévenu.</p>` : `<label class="hv-f"><span style="font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Ta mise (minimum ${hvN(min)} ◆)</span><input type="number" id="hvAmt" min="${min}" step="${hvStep(l.top_bid || l.price)}" value="${amt}" inputmode="numeric"></label>
+          ${HV.orders ? `<label class="hv-row" style="justify-content:flex-start;gap:8px;font-size:13.5px;cursor:pointer"><input type="checkbox" id="hvAuto" ${auto ? "checked" : ""} style="width:auto"><span>Enchère automatique : ce montant devient mon maximum, le jeu surenchérit pour moi du strict nécessaire et me rend le reste.</span></label>` : ""}
+          <div class="hv-row"><button class="hv-g" id="hvBid" style="flex:1">${auto ? "Fixer mon maximum" : "Enchérir"}</button>${l.buyout ? `<button class="primary" id="hvBuy" style="flex:1">Achat immédiat · ${hvN(l.buyout)} ◆</button>` : ""}</div>`) : ""}
         <p class="hv-note">Paliers : +1 ◆ sous 50, +5 jusqu'à 200, +10 jusqu'à 1 000, +50 au-delà. Une offre dans les 30 dernières secondes relance le compte à rebours à 30 s.</p>`
       : `<div class="hv-box"><div class="hv-row"><div><dt>Prix</dt><div class="big">${hvN(l.price)} ◆</div></div><div style="text-align:right"><dt>Fin dans</dt><div class="tm" id="hvLeft">${hvLeft(l.ends_at)}</div></div></div></div>${open && !mine ? `<button class="hv-g" id="hvBuy">Acheter pour ${hvN(l.price)} ◆</button>` : ""}`}
       ${mine && open && !l.bids ? `<button class="ghost" id="hvCancel">Retirer ma vente</button>` : ""}${!open ? `<p class="warn">Cette vente est terminée.</p>` : ""}
@@ -14096,13 +14140,14 @@ async function hvListing(id){ let l = HV.data.list.find(x => x.id === id) || HV.
     const err = t => M.querySelector("#hvErr").textContent = t;
     M.querySelector("#hv3d").onclick = () => tcView(c, l.ver); M.querySelector("#hvW").onclick = async () => { await hvWish(l.card_id, l.ver); draw(); };
     const a = M.querySelector("#hvAmt"); if (a) a.oninput = () => amt = +a.value;
+    const au = M.querySelector("#hvAuto"); if (au) au.onchange = () => { auto = au.checked; draw(); };
     const bid = M.querySelector("#hvBid"); if (bid) bid.onclick = async () => { const v = Math.floor(+M.querySelector("#hvAmt").value || 0); if (v < min) return err(`L'offre minimale est de ${hvN(min)} ◆.`); if (tcLoad().gems < v) return err("Tu n'as pas assez d'éclats.");
-      bid.disabled = true; try { const r = await hvAct("market_bid", {lid: l.id, amount: v}, (s, d) => { s.gems -= d.amount; }); SFX.play("pop"); if (r && r.won){ await hvClaim(); frToast(`Achat immédiat : ${c.n} est à toi !`); } else frToast(`Offre de ${hvN(v)} ◆ posée sur ${c.n}. Tu seras prévenu si quelqu'un te dépasse.`); await refresh(); } catch (e){ err(hvMsg(e)); bid.disabled = false; } };
+      bid.disabled = true; try { const r = await hvAct(auto ? "market_auto" : "market_bid", auto ? {lid: l.id, mx: v} : {lid: l.id, amount: v}, (s, d) => { s.gems -= d.amount; }); SFX.play("pop"); if (r && r.outbid){ frToast(`Un enchérisseur automatique répond aussitôt : l'offre monte à ${hvN(r.top)} ◆. Rien ne t'a été retiré.`); } else if (auto){ frToast(`Maximum de ${hvN(v)} ◆ fixé sur ${c.n}. L'offre visible est de ${hvN(r.top)} ◆.`); } else if (r && r.won){ await hvClaim(); frToast(`Achat immédiat : ${c.n} est à toi !`); } else frToast(`Offre de ${hvN(v)} ◆ posée sur ${c.n}. Tu seras prévenu si quelqu'un te dépasse.`); await refresh(); } catch (e){ err(hvMsg(e)); bid.disabled = false; } };
     const buy = M.querySelector("#hvBuy"); if (buy) buy.onclick = () => { const p = auc ? l.buyout : l.price; if (tcLoad().gems < p) return err("Tu n'as pas assez d'éclats.");
       hvConfirm(`Acheter ${c.n} ?`, `${hvVer(l.ver)} · ${hvN(p)} ◆. La carte arrive tout de suite dans ta collection.`, `Acheter · ${hvN(p)} ◆`, async () => { await hvAct("market_buy", {lid: l.id}, (s, d) => { s.gems -= d; }); await hvClaim(); SFX.play("win"); close(); await hvLoad(); }); };
     const cc = M.querySelector("#hvCancel"); if (cc) cc.onclick = () => hvConfirm("Retirer cette vente ?", "La carte revient dans ta collection.", "Retirer", async () => { await hvAct("market_cancel", {lid: l.id}); close(); await hvLoad(); }); };
   const refresh = async () => { const sb = await hvSb(); if (!sb) return; const [a, b] = await Promise.all([sb.from("market_listings").select("*").eq("id", l.id).maybeSingle(), auc ? sb.from("market_bids").select("*").eq("listing_id", l.id).order("amount", {ascending: false}).limit(10) : {data: []}]);
-    if (a.data) l = a.data; hist = b.data || []; const ids = hist.map(h => h.bidder_id).filter(x => x && !HV.names[x]); if (ids.length){ const {data} = await sb.from("players").select("user_id,handle").in("user_id", ids); (data || []).forEach(p => HV.names[p.user_id] = p.handle); }
+    if (a.data) l = a.data; hist = b.data || []; if (auc){ try { const p = await sb.from("market_proxy").select("max_amount").eq("listing_id", l.id).maybeSingle(); maxi = p.data ? p.data.max_amount : 0; } catch {} } const ids = hist.map(h => h.bidder_id).filter(x => x && !HV.names[x]); if (ids.length){ const {data} = await sb.from("players").select("user_id,handle").in("user_id", ids); (data || []).forEach(p => HV.names[p.user_id] = p.handle); }
     if (M.isConnected){ const f = document.activeElement && document.activeElement.id === "hvAmt"; if (!f) draw(); } };
   draw(); refresh();
   let k = 0; const tm = setInterval(() => { if (!M.isConnected) return clearInterval(tm); const e = M.querySelector("#hvLeft"); if (e) e.textContent = hvLeft(l.ends_at); if (auc && ++k % 4 === 0) refresh(); }, 1000); }
@@ -14146,7 +14191,7 @@ function hvAccept(tid){ const t = HV.data.trades.find(x => x.id === tid); if (!t
   draw(); }
 
 // proposer un échange en 3 étapes : la carte donnée, les cartes voulues (1 à 5), le destinataire
-function hvNewTrade(){ const s = tcLoad(), mine = hvMyCards(s), all = tcCards(); let step = 0, give = null, wants = [], to = "all", handle = "", q = "", vv = "";
+function hvNewTrade(o = {}){ const s = tcLoad(), mine = hvMyCards(s), all = tcCards(); let step = 0, give = o.give || null, wants = [...(o.wants || [])], to = o.to ? "player" : "all", handle = o.to || "", q = "", vv = "";   /* o : contre-proposition ou échange lancé depuis une fiche joueur */
   const {M, close} = hvModal(`<div class="head"><h2>Proposer un échange</h2><button class="ghost" data-close>✕ Fermer</button></div><div id="hvNT"></div>`);
   const friends = (typeof FRS !== "undefined" && FRS.data && FRS.data.friends) || [];
   const draw = () => { const qq = q.trim().toLowerCase(); let html = `<div class="steps">${[0, 1, 2].map(i => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>`;
@@ -14561,6 +14606,7 @@ if (matchMedia("(hover: none) and (pointer: coarse)").matches) document.addEvent
 .gxf .gxl{bottom:23px;font:800 9.5px var(--mono,monospace);letter-spacing:.05em;text-transform:uppercase;color:var(--rc)}
 .gxf .gxn{bottom:7px;font-weight:800;font-size:12.5px;color:#fff}
 .gxf .gxw{display:block;margin-top:6px;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gxf .gxw[data-kjp]{cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .gxf .gxa{display:block;font:500 10.5px var(--mono,monospace);color:var(--muted)}
 .gxf .gxo{padding:0;border:0;background:none;box-shadow:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer}
 </style>
@@ -14579,7 +14625,7 @@ function gxItem(r, byId){
 }
 function gxDraw(){
   const byId = new Map(tcCards().map(c => [c.id, c])), rows = GX.rows.map(r => gxItem(r, byId)).filter(Boolean).slice(0, 20);
-  const html = rows.length ? `<div class="gxt"><i></i>En direct · Les plus belles cartes</div><h3>Gros tirages</h3><ul>${rows.map((x, k) => `<li style="--rc:${x.col}"><button class="gxc" data-k="${k}" aria-label="${esc(x.n)}"><img src="${x.img}" alt="" loading="lazy"><span class="gxl">${x.lab}</span><span class="gxn">${esc(x.n)}</span></button><span class="gxw">${esc(x.r.name)}</span><span class="gxa">${gxAgo(x.r.at)}</span></li>`).join("")}</ul>${CP.user ? `<button class="gxo">${gxOff() ? "Afficher mes tirages ici" : "Ne pas afficher mes tirages ici"}</button>` : ""}` : "";
+  const html = rows.length ? `<div class="gxt"><i></i>En direct · Les plus belles cartes</div><h3>Gros tirages</h3><ul>${rows.map((x, k) => `<li style="--rc:${x.col}"><button class="gxc" data-k="${k}" aria-label="${esc(x.n)}"><img src="${x.img}" alt="" loading="lazy"><span class="gxl">${x.lab}</span><span class="gxn">${esc(x.n)}</span></button><span class="gxw" ${x.r.handle ? `data-kjp="${esc(x.r.handle)}"` : ""}>${esc(x.r.name)}</span><span class="gxa">${gxAgo(x.r.at)}</span></li>`).join("")}</ul>${CP.user ? `<button class="gxo">${gxOff() ? "Afficher mes tirages ici" : "Ne pas afficher mes tirages ici"}</button>` : ""}` : "";
   const box = document.querySelector(".gxf"); if (!box) return; box.hidden = TC_TAB !== "packs"; if (box.dataset.h === html) return; const x = box.querySelector("ul")?.scrollLeft || 0; box.dataset.h = html; box.innerHTML = html; const u = box.querySelector("ul"); if (u) u.scrollLeft = x;
   box.querySelectorAll(".gxc").forEach(b => b.onclick = () => rows[+b.dataset.k].open());
   const o = box.querySelector(".gxo"); if (o) o.onclick = () => { const s = tcLoad(); s.noFeed = !s.noFeed; tcSave(s); delete box.dataset.h; gxDraw(); };
@@ -14593,6 +14639,97 @@ const gxPullS = (id, got) => gxSend([...new Set(got.filter(c => hsRk(c) >= 4).ma
 document.querySelector("#tcg")?.insertAdjacentHTML("beforeend", `<div class="gxf" hidden></div>`);   /* sous les boosters : le bouton Ouvrir reste en haut de l'écran */
 { const base = tcRender; tcRender = function(){ const r = base.apply(this, arguments); try { gxDraw(); if (Date.now() - GX.at > 3e4) gxTick(true); } catch {} return r; }; }
 setInterval(gxTick, 6e4);
+</script>
+
+<style>
+/* ---- « ma journée », pack du jour, classements et fiche joueur (31 oct. 2026, repris de Kyara) ---- */
+.kjd{display:grid;gap:10px;margin:0 0 12px;min-width:0}
+.kjd[hidden]{display:none}
+.kjt{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:0;padding:0 0 2px}
+.kjt::-webkit-scrollbar{display:none}
+.kjt button{all:unset;box-sizing:border-box;cursor:pointer;flex:1 0 76px;min-width:76px;display:grid;justify-items:center;gap:1px;padding:8px 5px;border:1px solid var(--line);border-radius:12px;text-align:center;background:color-mix(in srgb,var(--kc,#888) 9%,transparent)}
+.kjt button.on{border-color:var(--kc)}
+.kjt b{font:800 15px var(--mono,monospace);color:var(--kc);font-variant-numeric:tabular-nums}
+.kjt span{font-size:11px;line-height:1.15;color:var(--muted)}
+.kjt em{font:600 10px var(--mono,monospace);font-style:normal;color:var(--kc)}
+.kjp{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--kc) 60%,transparent);border-radius:14px;background:linear-gradient(100deg,color-mix(in srgb,var(--kc) 24%,transparent),transparent)}
+.kjp>i{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:var(--kc);color:#111;font:900 20px var(--title);font-style:normal}
+.kjp div{flex:1;min-width:0}
+.kjp b{display:block;font-family:var(--title);font-weight:900;font-size:15px}
+.kjp span{display:block;font-size:12.5px;color:var(--muted)}
+.kjp button{flex:none;border-radius:999px}
+.kjr{display:grid;gap:12px}
+.kjr .chips{display:flex;gap:6px;flex-wrap:wrap}
+.kjr .chips button{all:unset;cursor:pointer;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-weight:700;font-size:13px}
+.kjr .chips button.sel{background:var(--text);color:#0e0d12;border-color:var(--text)}
+.kjpod{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end}
+.kjpod button{all:unset;box-sizing:border-box;cursor:pointer;min-width:0;display:grid;justify-items:center;gap:3px;padding:12px 6px;border-radius:12px 12px 0 0;border:1px solid var(--line);border-bottom:3px solid var(--kc);background:linear-gradient(transparent,color-mix(in srgb,var(--kc) 22%,transparent));text-align:center}
+.kjpod i{font:900 24px var(--title);font-style:normal;color:var(--kc)}
+.kjpod b{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13.5px}
+.kjpod span{font:600 11.5px var(--mono,monospace);color:var(--muted)}
+.kjl{display:grid;gap:4px}
+.kjl button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:9px;border:1px solid var(--line)}
+.kjl button.me{border-color:var(--text)}
+.kjl i{font:700 12.5px var(--mono,monospace);font-style:normal;color:var(--muted)}
+.kjl b{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:14px}
+.kjl span{font:600 12.5px var(--mono,monospace)}
+.kjf{display:grid;gap:12px}
+.kjf .st{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:13.5px}
+.kjf .st b{color:var(--text)}
+.kjf h3{margin:0;font-family:var(--title);font-weight:900;font-size:16px}
+.kjf .gr{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.kjf .gr button{all:unset;cursor:pointer;flex:none;display:block}
+</style>
+<script>
+const kjDayU = () => { const d = tcDay(), h = [...d].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7); return TC_UNIS[h % TC_UNIS.length]; };
+/* pack du jour : un booster offert par jour de jeu, univers tournant, Épique ou mieux */
+function kjDaily(){ if (document.querySelector(".tcopen")) return; const s = tcLoad(); if (s.dayPack === tcDay()) return; s.dayPack = tcDay(); const key = kjDayU() + ":0", g = tcOpenPack(s, key, "jour"), all = [...g]; all.xp = g.xp; all.ups = g.ups; all.packs = 1; all.secs = []; all.pb = [0]; tcSave(s); tcOpening(key, all); try { gxPull(all); } catch {} }
+const kjClock = ms => { const m = Math.ceil(ms / 6e4); return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); };
+function kjDayDraw(){ const box = document.querySelector(".kjd"); if (!box) return; box.hidden = TC_TAB !== "packs"; if (box.hidden) return;
+  const s = tcLoad(), P = s.pity || {}, todo = tcMissions(s).filter(m => m.cur >= m.g && !s.day.claimed.includes(m.k)).length + (s.login && s.login.got ? 0 : 1), st = s.login ? (s.login.n - 1) % 7 + 1 : 0, gone = s.dayPack === tcDay(), u = kjDayU(), [nm, kj, col] = TC_PACKS[u];
+  const nxt = s.free.n < TC_FREE.max && s.free.t ? kjClock(Math.max(0, TC_FREE.every - (Date.now() - s.free.t) % TC_FREE.every)) : "";
+  const tiles = [["#ff5a5a", s.free.n + "/" + TC_FREE.max, "gratuits", nxt, "", s.free.n > 0], ["#34c97b", todo, "à récupérer", "", "missions", todo > 0], ["#a78bfa", "J" + st + "/7", "série", "", "missions", false], ["#f7c64a", Math.max(0, TC_DPITY - (P.D || 0)), "avant le Doré", "", "", false], ["#ff5f8f", Math.max(0, TC_PITY.M - (P.M || 0)), "avant Mythique sûre", "", "", false]];
+  const html = `<div class="kjp" style="--kc:${col}"><i>${kj}</i><div><b>Pack du jour · ${esc(nm)}</b><span>${gone ? "Déjà ouvert. Le prochain arrive demain à " + TC_RESET + " h." : "Gratuit, Épique ou mieux garantie."}</span></div>${gone ? "" : `<button class="primary" id="kjGo">Ouvrir</button>`}</div>
+    <div class="kjt">${tiles.map(([c, v, l, x, tab, on]) => `<button class="${on ? "on" : ""}" style="--kc:${c}" ${tab ? `data-kjtab="${tab}"` : ""}><b>${v}</b><span>${l}</span>${x ? `<em>${x}</em>` : ""}</button>`).join("")}</div>`;
+  if (box.dataset.h === html) return; box.dataset.h = html; box.innerHTML = html;
+  box.querySelector("#kjGo")?.addEventListener("click", kjDaily);
+  box.querySelectorAll("[data-kjtab]").forEach(b => b.onclick = () => { TC_TAB = b.dataset.kjtab; tcRender(); }); }
+
+// ---------- classements ----------
+const KJ = {sub: "coll", data: null, t: 0, err: false};
+const KJ_RK = [["coll", "Collection", v => hvN(v) + " cartes"], ["myth", "Mythiques", v => hvN(v) + " Mythiques"], ["ser", "Séries", v => hvN(v) + " cartes"], ["xp", "Niveau", v => "Niv. " + tcLvl(v)]];
+function kjRankDraw(){ const box = document.querySelector("#kjRank"); if (!box) return; const d = KJ.data, def = KJ_RK.find(x => x[0] === KJ.sub), fm = def[2];
+  if (KJ.err) return void (box.innerHTML = `<div class="hv-empty"><b>Les classements arrivent bientôt</b>Ils ne sont pas encore ouverts sur le serveur.</div>`);
+  if (!d) return void (box.innerHTML = `<div class="hv-empty">Chargement des classements…</div>`);
+  const L = d[KJ.sub] || [], mine = CP.user ? frMe().id : "", pod = [L[1], L[0], L[2]], cols = ["#cfd6e0", "#f7c64a", "#d58b55"], lab = [2, 1, 3], me = d.me && d.me[KJ.sub];
+  box.innerHTML = `<div class="kjr"><div class="chips">${KJ_RK.map(([k, l]) => `<button data-kjs="${k}" class="${KJ.sub === k ? "sel" : ""}">${l}</button>`).join("")}</div>
+    ${L.length ? `<div class="kjpod">${pod.map((x, i) => x ? `<button data-kjp="${esc(x.handle)}" style="--kc:${cols[i]};min-height:${i === 1 ? 118 : 98}px"><i>${lab[i]}</i><b>${esc(x.name)}</b><span>${fm(x.v)}</span></button>` : "<span></span>").join("")}</div>
+    <div class="kjl">${L.slice(3).map((x, i) => `<button data-kjp="${esc(x.handle)}" class="${x.handle === mine ? "me" : ""}"><i>${i + 4}</i><b>${esc(x.name)}</b><span>${fm(x.v)}</span></button>`).join("")}</div>` : `<div class="hv-empty"><b>Personne pour l'instant</b>Le classement se remplit toutes les 10 minutes.</div>`}
+    ${me ? `<div class="kjl"><button data-kjp="${esc(mine)}" class="me"><i>${me[0]}</i><b>Ta place, sur ${hvN(d.n)} joueurs</b><span>${fm(me[1])}</span></button></div>` : ""}
+    <p class="hv-note">Mis à jour toutes les 10 minutes. Les profils privés et les collections non vérifiées n'y figurent pas.</p></div>`;
+  box.querySelectorAll("[data-kjs]").forEach(b => b.onclick = () => { KJ.sub = b.dataset.kjs; kjRankDraw(); }); }
+async function kjRankBind(){ kjRankDraw(); if (KJ.data && Date.now() - KJ.t < 6e4) return; try { const sb = typeof cpClient === "function" ? await cpClient() : null; if (!sb){ KJ.err = true; return kjRankDraw(); } const {data, error} = await sb.rpc("card_ranks"); KJ.err = !!error || !data; if (data){ KJ.data = data; KJ.t = Date.now(); } } catch { KJ.err = true; } kjRankDraw(); }
+
+// ---------- fiche joueur ----------
+async function kjProfile(h){ if (!CP.user) return frToast("Connecte-toi à ton compte pour voir les fiches des joueurs."); const {M} = hvModal(`<div class="head"><h2>${esc((frParse(h) || {name: h}).name)}</h2><button class="ghost" data-close>✕ Fermer</button></div><div id="kjF"><div class="hv-empty">Chargement…</div></div>`), box = M.querySelector("#kjF");
+  let p = null; try { const {data} = await CP.sb.rpc("public_profile", {h}); p = data; } catch {} if (!M.isConnected) return; if (!p) return void (box.innerHTML = `<div class="hv-empty"><b>Fiche indisponible</b>Réessaie un peu plus tard.</div>`);
+  const s = tcLoad(), byId = new Map(tcCards().map(c => [c.id, c])), rk = c => TC_ORDER.indexOf(c.r), lv = p.xp != null ? "Niv. " + tcLvl(+p.xp || 0) : "";
+  const best = p.own ? Object.keys(p.own).filter(id => p.own[id] > 0).map(id => byId.get(id)).filter(Boolean).sort((a, b) => rk(b) - rk(a)) : [], sh = ((p.show && p.show.c) || []).map(id => byId.get(id)).filter(Boolean), top = [...sh, ...best.filter(c => !sh.includes(c))].slice(0, 8);
+  const miss = !p.me && p.own ? tcCards().filter(c => (s.own[c.id] || 0) >= 2 && !(p.own[c.id] > 0)).sort((a, b) => rk(b) - rk(a)).slice(0, 12) : [], ver = id => { const f = p.fin && p.fin[id]; return f ? Object.keys(f).sort((a, b) => (TC_FIN[a][2] || 9) - (TC_FIN[b][2] || 9))[0] || "" : ""; };
+  box.innerHTML = `<div class="kjf"><div class="st"><span>${esc(p.handle)}</span>${lv ? `<span><b>${lv}</b></span>` : ""}${p.n != null ? `<span><b>${hvN(p.n)}</b> cartes</span>` : ""}${p.ser ? `<span><b>${hvN(p.ser)}</b> cartes de série</span>` : ""}</div>
+    ${p.private ? `<p class="hv-note">Ce joueur garde son profil privé.</p>` : !p.own ? `<p class="hv-note">Ce joueur garde sa collection privée.</p>` : ""}
+    ${top.length ? `<h3>Sa vitrine</h3><div class="gr">${top.map(c => `<button data-kjv="${esc(c.id)}">${hvMini(c.id, ver(c.id), 92)}</button>`).join("")}</div>` : ""}
+    ${miss.length ? `<h3>Il lui manque (tes doubles)</h3><div class="gr">${miss.map(c => `<button data-kjg="${esc(c.id)}" aria-label="Proposer ${esc(c.n)}">${hvMini(c.id, "", 76)}</button>`).join("")}</div><p class="hv-note">Touche une carte pour la lui proposer en échange.</p>` : ""}
+    ${p.me ? "" : `<div class="hv-row"><button class="ghost" id="kjAdd">Ajouter en ami</button><button class="primary" id="kjTr">Proposer un échange</button></div><p class="err"></p>`}</div>`;
+  box.querySelectorAll("[data-kjv]").forEach(b => b.onclick = () => tcView(byId.get(b.dataset.kjv)));
+  box.querySelectorAll("[data-kjg]").forEach(b => b.onclick = () => hvNewTrade({to: p.handle, give: {c: b.dataset.kjg, v: ""}}));
+  const tr = box.querySelector("#kjTr"); if (tr) tr.onclick = () => hvNewTrade({to: p.handle});
+  const ad = box.querySelector("#kjAdd"); if (ad) ad.onclick = async () => { ad.disabled = true; try { const r = await frsSend(p.handle); frToast(typeof r === "string" ? r : r && (r.ok || r.err) || "Demande envoyée."); } catch { frToast("Demande impossible pour l'instant."); ad.disabled = false; } }; }
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-kjp]"); if (b){ e.preventDefault(); kjProfile(b.dataset.kjp); } });
+
+document.querySelector("#tcg .topbar")?.insertAdjacentHTML("afterend", `<div class="kjd" hidden></div>`);
+{ const base = tcRender; tcRender = function(){ const r = base.apply(this, arguments); try { kjDayDraw(); } catch {} return r; }; }
+setInterval(() => { if (TC_TAB === "packs" && document.querySelector("#tcg:not(.hidden)")) try { kjDayDraw(); } catch {} }, 3e4);
 </script>
 
 <style>
