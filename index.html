@@ -11167,7 +11167,7 @@ function tcRender(){
     let all = [], xp = 0, ups = [], secs = []; for (let i = 0; i < q; i++){ const sec = tcParse(real).t === 0 && (s.opened || 0) > 0 ? tcSecretRoll(s) : "", g = tcOpenPack(s, real, sec); if (sec) secs.push(sec); xp += g.xp; ups.push(...g.ups); packs.push([...g].sort((a, b) => wow(a) - wow(b))); }
     const top = p => Math.max(...p.map(wow)); packs.sort((a, b) => top(a) - top(b)); const pb = []; packs.forEach(p => { pb.push(all.length); all.push(...p); });
     all.xp = xp; all.ups = ups; all.packs = q; all.secs = secs; all.pb = pb;
-    tcSave(s); tcOpening(real, all); };
+    tcSave(s); tcOpening(real, all); try { gxPull(all); } catch {} };
   $("#tcOpen") && ($("#tcOpen").onclick = () => openN(1));
   // « Tout ouvrir » : tous les boosters du type choisi d'un coup (TC_ALLMAX au plus par clic, pour que l'écran de bilan reste fluide)
   document.querySelectorAll("[data-tcopen]").forEach(b => b.onclick = () => { if (b.dataset.tcopen !== "all") return openN(+b.dataset.tcopen); const s = tcLoad(), n = TC_PICK === "free" ? s.free.n : s.packs[TC_PICK] || 0; if (n >= 1) openN(Math.min(TC_ALLMAX, n)); });
@@ -14541,6 +14541,47 @@ if (matchMedia("(hover: none) and (pointer: coarse)").matches) document.addEvent
       document.querySelector("#hkUpd").onclick = () => location.reload(); document.querySelector("#hkUpdX").onclick = () => { document.querySelector(".hkupd").remove(); base = now; }; }, 3e5);
   }
 })();
+</script>
+
+<style>
+/* ---- « Gros tirages » : les Légendaires et Mythiques tirées à l'instant par tous les joueurs (31 oct. 2026, comme chez Kyara) ---- */
+.gxf{margin:0 0 14px;min-width:0}
+.gxf:empty{display:none}
+.gxf .gxt{display:flex;align-items:center;gap:8px;margin:0 0 2px;font:700 11px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gxf .gxt i{width:7px;height:7px;border-radius:50%;background:#ff4d3d;animation:gxb 1.6s ease-in-out infinite}
+@keyframes gxb{50%{opacity:.3}}
+.gxf h3{margin:0 0 8px;font-family:var(--title);font-weight:900;font-size:20px}
+.gxf ul{display:flex;gap:10px;margin:0;padding:0 0 8px;list-style:none;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.gxf ul::-webkit-scrollbar{display:none}
+.gxf li{flex:0 0 112px;min-width:0;scroll-snap-align:start}
+.gxf .gxc{position:relative;display:block;width:112px;height:157px;padding:0;overflow:hidden;border:1.5px solid var(--rc);border-radius:10px;background:#0b0a0e;box-shadow:0 0 12px color-mix(in srgb,var(--rc) 35%,transparent);cursor:pointer}
+.gxf .gxc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+.gxf .gxc::after{content:"";position:absolute;inset:40% 0 0;background:linear-gradient(transparent,#000d)}
+.gxf .gxc span{position:absolute;z-index:1;left:7px;right:7px;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gxf .gxl{bottom:23px;font:800 9.5px var(--mono,monospace);letter-spacing:.05em;text-transform:uppercase;color:var(--rc)}
+.gxf .gxn{bottom:7px;font-weight:800;font-size:12.5px;color:#fff}
+.gxf .gxw{display:block;margin-top:6px;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gxf .gxa{display:block;font:500 10.5px var(--mono,monospace);color:var(--muted)}
+.gxf .gxo{padding:0;border:0;background:none;box-shadow:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer}
+</style>
+<script>
+const GX = {rows: [], at: 0};
+const gxOff = () => !!tcLoad().noFeed;
+const gxAgo = t => { const m = Math.floor((Date.now() - Date.parse(t)) / 6e4); return m < 1 ? "à l'instant" : m < 60 ? "il y a " + m + " min" : m < 1440 ? "il y a " + Math.floor(m / 60) + " h" : "il y a " + Math.floor(m / 1440) + " j"; };
+function gxDraw(){
+  const all = tcCards(), byId = new Map(all.map(c => [c.id, c])), mine = CP.user ? frMe().name : "";
+  const rows = GX.rows.map(r => ({r, c: byId.get(r.card_id)})).filter(x => x.c && (x.c.r === "L" || x.c.r === "M")).slice(0, 20);
+  const html = rows.length ? `<div class="gxt"><i></i>En direct · Légendaires et Mythiques</div><h3>Gros tirages</h3><ul>${rows.map(({r, c}, k) => `<li style="--rc:${c.r === "M" ? "#ff5f8f" : "#f5c518"}"><button class="gxc" data-k="${k}" aria-label="${esc(c.n)}"><img src="${tcArt(c, r.fin) || tcArt(c)}" alt="" loading="lazy"><span class="gxl">${TC_R[c.r][0]}</span><span class="gxn">${esc(c.n)}</span></button><span class="gxw">${esc(r.name)}</span><span class="gxa">${gxAgo(r.at)}</span></li>`).join("")}</ul>${CP.user ? `<button class="gxo">${gxOff() ? "Afficher mes tirages ici" : "Ne pas afficher mes tirages ici"}</button>` : ""}` : "";
+  document.querySelectorAll(".gxf").forEach(box => { if (box.dataset.h === html) return; const x = box.querySelector("ul")?.scrollLeft || 0; box.dataset.h = html; box.innerHTML = html; const u = box.querySelector("ul"); if (u) u.scrollLeft = x;
+    box.querySelectorAll(".gxc").forEach(b => b.onclick = () => { const o = rows[+b.dataset.k]; tcView(o.c, o.r.fin || undefined); });
+    const o = box.querySelector(".gxo"); if (o) o.onclick = () => { const s = tcLoad(); s.noFeed = !s.noFeed; tcSave(s); gxDraw(); }; });
+}
+async function gxTick(force){ if (document.hidden && !force) return; try { const sb = typeof cpClient === "function" ? await cpClient() : null; if (!sb) return; const {data, error} = await sb.rpc("big_pulls_feed"); if (error || !data) return; GX.rows = data; gxDraw(); } catch {} }
+/* après une ouverture : on envoie d'abord la sauvegarde, car le serveur vérifie que la carte y est bien */
+async function gxPull(got){ try { if (!CP.user || gxOff()) return; const l = [...new Map(got.filter(c => c.r === "L" || c.r === "M").map(c => [c.id, c])).values()].slice(-3); if (!l.length) return; const sb = await cpClient(); if (!sb || !(await cpPush())) return; for (const c of l) await sb.rpc("report_pull", {card: c.id, f: c.f || ""}); gxTick(true); } catch {} }
+document.querySelector("#tcHome")?.insertAdjacentHTML("afterend", `<div class="gxf"></div>`);
+document.querySelector("#tcg .topbar")?.insertAdjacentHTML("afterend", `<div class="gxf"></div>`);
+setTimeout(() => gxTick(true), 2500); setInterval(gxTick, 6e4); setInterval(gxDraw, 6e4);
 </script>
 
 <style>
