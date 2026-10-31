@@ -12898,18 +12898,6 @@ document.addEventListener("pointermove", e => { const v = e.target.closest && e.
 .frbox .frfoot{margin:18px 0 0;padding-top:12px;border-top:1px solid var(--line)}
 .frrec{display:grid;grid-template-columns:1fr auto;gap:5px 14px;font-size:13.5px;margin:8px 0}
 .frrec span:nth-child(even){font-family:var(--mono);text-align:right}
-.frtrade{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
-@media (max-width:520px){.frtrade{grid-template-columns:1fr}}
-.frtrade select{width:100%}
-.frdeal{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;margin:12px 0 16px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0b0a0e}
-.frdeal .sw{font-size:26px;color:var(--accent);padding-top:22px}
-.frside{display:grid;justify-items:center;gap:5px;text-align:center}
-.frside .tc{width:100%;max-width:170px}
-.frside b{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--rc)}
-.frside small{color:var(--muted);font-size:12px;line-height:1.4}
-.frpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px}
-.frpick .tc{opacity:.6;transition:opacity .15s,transform .15s}
-.frpick .tc.pick{opacity:1;outline:2px solid var(--text);outline-offset:1px;transform:translateY(-2px)}
 .frinv{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:4px;font-size:13px;color:var(--muted)}
 .frinv button{border-radius:999px;padding:7px 13px;font-size:13px}
 .frqr{display:grid;justify-items:center;gap:8px;margin-top:12px;text-align:center}
@@ -12922,7 +12910,7 @@ document.addEventListener("pointermove", e => { const v = e.target.closest && e.
    Chaque joueur qui a un pseudo ouvre un petit salon personnel tant que le site est ouvert. Un ami s'y connecte pour lire
    son profil (statistiques, records, collection), l'inviter dans une partie ou lui proposer un échange de cartes.
    Conséquence : tout cela ne marche que si les deux ont le site ouvert en même temps. La liste d'amis reste sur l'appareil.
-   Messages du salon personnel : fq (demande de profil) / fa (réponse), finv (invitation), ftrade (proposition) / ftres (réponse).
+   Messages du salon personnel : fq (demande de profil) / fa (réponse), finv (invitation). Les échanges passent par le serveur du marché (31 oct. 2026) : l'ancien échange direct entre navigateurs permettait de créer des cartes.
    ===================================================================== */
 const FR_KEY = "mercato-amis", FR_TAG = "mercato-tag";
 const FR = {host: null, conn: null, connId: null, online: {}};
@@ -12960,21 +12948,6 @@ async function frHost(){
   room.on("fq", m => { if (m.sameTab || m.data?.to !== me.id) return; room.emit("fa", {to: m.data.from, card: frCard()}).catch(() => {}); });
   room.on("finv", m => { const d = m.data; if (m.sameTab || d?.to !== me.id || !/^[A-Z0-9]{4}$/.test(d.code || "")) return;
     frToast(`${d.from} t'invite à une partie (${d.code})`, "Rejoindre", () => { show("home"); const c = $("#qjCode"), n = $("#qjName"); c.value = d.code; if (!n.value) n.value = me.name; $("#qjGo").click(); }); });
-  room.on("ftrade", m => { const d = m.data; if (m.sameTab || d?.to !== me.id) return; frAsk(room, d); });
-}
-// une carte de l'échange, avec sa rareté écrite en clair
-const frSide = (c, note) => `<div class="frside r-${c.r}">${tcCard(c)}<b>${TC_R[c.r][0]}</b><small>${TC_PACKS[c.u][0]} · ${c.obj ? c.obj.t : "niveau " + c.p}${note ? "<br>" + note : ""}</small></div>`;
-// proposition d'échange reçue : je donne `want` (un de mes doublons) et je reçois `give`
-function frAsk(room, d){
-  const all = tcCards(), a = all.find(c => c.no === d.give), b = all.find(c => c.no === d.want), M = $("#modal"); if (!a || !b) return;
-  const s0 = tcLoad();
-  const close = () => { M.classList.add("hidden"); M.innerHTML = ""; }, answer = ok => room.emit("ftres", {to: d.from, k: d.k, ok}).catch(() => {});
-  M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>Échange proposé</h2><button class="ghost" id="frNo">✕ Refuser</button></div><p class="muted" style="margin-bottom:12px"><b>${esc(d.from)}</b> te propose cet échange.</p>
-    <div class="frdeal"><div><label class="f">Tu donnes</label>${frSide(b, "il t'en restera " + ((s0.own[b.id] || 1) - 1))}</div><span class="sw" aria-hidden="true">⇄</span><div><label class="f">Tu reçois</label>${frSide(a, s0.own[a.id] ? "tu l'as déjà" : "nouvelle carte pour toi")}</div></div><div class="row"><button class="primary" id="frYes">Accepter l'échange</button></div></div>`;
-  M.classList.remove("hidden"); SFX.play("pop");
-  $("#frNo").onclick = () => { answer(false); close(); };
-  $("#frYes").onclick = () => { const s = tcLoad(); if (!frTradeable(s).includes(b.no)){ answer(false); close(); return; }
-    s.own[b.id]--; const nw = !s.own[a.id]; s.own[a.id] = (s.own[a.id] || 0) + 1; if (nw) s.xp += TC_XP[a.r]; s.trades = (s.trades || 0) + 1; s._how = ["e"]; tcSave(s); answer(true); close(); frToast("Échange fait : " + a.n + " rejoint ta collection"); };
 }
 // se connecter au salon d'un ami et lui demander sa fiche
 async function frOpen(id){
@@ -13120,33 +13093,17 @@ function frShow(msg){
 }
 async function frView(id){
   const M = $("#modal"), f = frList().find(x => x.id === id) || frParse(id), all = tcCards();
-  const draw = (c, live) => { const ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]), s = tcLoad(), mine = frTradeable(s).map(n => all.find(x => x.no === n)).filter(Boolean), his = (c.tr || []).map(n => all.find(x => x.no === n)).filter(Boolean);
+  const draw = (c, live) => { const ratio = c.l ? (c.w / c.l).toFixed(2) : c.w ? c.w + ".00" : "—", top = c.top && all.find(x => x.no === c.top[0]), s = tcLoad();
     const by = r => c.own.filter(([n]) => all.find(x => x.no === n)?.r === r).length;
     M.innerHTML = `<div class="box" style="max-width:760px"><div class="head"><div><span class="small" style="color:${live ? "var(--ok)" : "var(--muted)"}">${live ? "En ligne" : "Hors ligne · profil enregistré"}</span></div><button class="ghost" id="frBack">← Amis</button></div>
       ${pfBody(f.name, f.tag, c, {live})}
       <div class="tierh" style="--tc:var(--accent)">Échange</div>
-      ${!live ? `<p class="muted">Ton ami doit être en ligne pour échanger.</p>` : c.v === false || s.taint ? `<p class="muted">Échange bloqué : ${s.taint ? "ta collection" : "sa collection"} a été modifiée en dehors du jeu.</p>` : !mine.length || !his.length ? `<p class="muted">Un échange porte sur des doublons : ${!mine.length ? "tu n'en as pas" : "ton ami n'en a pas"} pour l'instant.</p>`
-        : `<p class="small">Un doublon contre un doublon. Choisis une carte de chaque côté : ton ami verra les deux cartes et devra accepter sur son écran.</p>
-          <div class="frdeal"><div><label class="f">Tu donnes</label><div id="frG"></div></div><span class="sw" aria-hidden="true">⇄</span><div><label class="f">Tu reçois</label><div id="frW"></div></div></div>
-          <input type="hidden" id="frGive" value="${mine[0].no}"><input type="hidden" id="frWant" value="${his[0].no}">
-          <label class="f">Tes doublons</label><div class="frpick" id="frMine">${mine.map(x => tcCard(x, {btn: true, x: s.own[x.id]})).join("")}</div>
-          <label class="f" style="margin-top:12px">Les doublons de ${esc(f.name)}</label><div class="frpick" id="frHis">${his.map(x => tcCard(x, {btn: true, isNew: !s.own[x.id]})).join("")}</div>
-          <div class="row" style="margin-top:14px"><button class="primary" id="frSend">Proposer l'échange</button></div><div class="err" id="frTErr"></div>`}</div>`;
-    // aperçu des deux cartes de l'échange, mis à jour à chaque choix
-    const deal = () => { if (!$("#frG")) return; const a = all.find(x => x.no === +$("#frGive").value), b = all.find(x => x.no === +$("#frWant").value);
-      $("#frG").innerHTML = frSide(a, "il t'en restera " + ((s.own[a.id] || 1) - 1)); $("#frW").innerHTML = frSide(b, s.own[b.id] ? "tu l'as déjà" : "nouvelle carte pour toi");
-      document.querySelectorAll("#frMine .tc").forEach(e => e.classList.toggle("pick", e.dataset.tc === a.id)); document.querySelectorAll("#frHis .tc").forEach(e => e.classList.toggle("pick", e.dataset.tc === b.id)); };
-    document.querySelectorAll("#frMine .tc").forEach(e => e.onclick = () => { $("#frGive").value = all.find(x => x.id === e.dataset.tc).no; deal(); SFX.play("pop"); });
-    document.querySelectorAll("#frHis .tc").forEach(e => e.onclick = () => { $("#frWant").value = all.find(x => x.id === e.dataset.tc).no; deal(); SFX.play("pop"); });
-    deal();
+      ${!CP.user ? `<p class="muted">Connecte-toi à ton compte pour échanger : les échanges sont vérifiés par le serveur.</p>` : c.v === false || s.taint ? `<p class="muted">Échange bloqué : ${s.taint ? "ta collection" : "sa collection"} a été modifiée en dehors du jeu.</p>`
+        : `<p class="small">Propose une carte contre celles de ton choix. Ton ami reçoit l'offre dans le marché, onglet Échanges, même hors ligne.</p><div class="row"><button class="primary" id="frTr">Proposer un échange</button></div>`}</div>`;
+    $("#frTr") && ($("#frTr").onclick = () => hvNewTrade({to: f.id}));
     $("#frBack").onclick = () => frShow();
     document.querySelectorAll("[data-pfhide]").forEach(b => b.onclick = () => { pfMark(PF_KO, b.dataset.pfhide); draw(c, live); });
-    $("#frSend") && ($("#frSend").onclick = () => { const me = frMe(), give = +$("#frGive").value, want = +$("#frWant").value, k = Math.random().toString(36).slice(2, 8), a = all.find(x => x.no === give), b = all.find(x => x.no === want), room = FR.conn; if (!room) return;
-      $("#frSend").disabled = true; $("#frTErr").textContent = "Proposition envoyée, en attente de sa réponse…"; let done = false;
-      room.on("ftres", m => { const d = m.data; if (m.sameTab || done || d?.to !== me.id || d.k !== k) return; done = true;
-        if (!d.ok){ $("#frTErr") && ($("#frTErr").textContent = "Échange refusé."); $("#frSend") && ($("#frSend").disabled = false); return; }
-        const s = tcLoad(); s.own[a.id] = Math.max(0, (s.own[a.id] || 0) - 1); const nw = !s.own[b.id]; s.own[b.id] = (s.own[b.id] || 0) + 1; if (nw) s.xp += TC_XP[b.r]; s.trades = (s.trades || 0) + 1; s._how = ["e"]; tcSave(s); frToast("Échange fait : " + b.n + " rejoint ta collection"); frView(id); });
-      room.emit("ftrade", {to: id, from: me.id, k, give, want}).catch(() => {}); }); };
+  };
   M.innerHTML = `<div class="box" style="max-width:560px"><div class="head"><h2>${esc(f.name)}<span style="font-family:var(--mono);font-weight:500;color:var(--muted);font-size:.6em"> #${f.tag}</span></h2><button class="ghost" id="frBack">← Amis</button></div>${waitHTML("Connexion à ton ami…")}</div>`;
   M.classList.remove("hidden"); $("#frBack").onclick = () => frShow();
   const card = NET.room ? await frOpen(id) : null;
@@ -13690,7 +13647,7 @@ function pfEdit(tab = "look", draft){ const me = frMe(); if (!me) return; const 
   const seg = (k, on, a, b) => `<div class="pfopt"><button class="${on ? "on" : ""}" data-pfpv="${k}:1">${a}</button><button class="${on ? "" : "on"}" data-pfpv="${k}:0">${b}</button></div>`;
   const priv = () => `<div class="pfpv"><div><b>Mon profil</b>${seg("all", d.pv.all, "Visible par mes amis", "Privé")}<small>En privé, on ne voit plus que ton pseudo, ton avatar, ton niveau et ton titre.</small></div>
     <div><b>Ma collection</b>${seg("col", d.pv.col, "Visible par mes amis", "Privée")}<small>Raretés, univers et détail de tes cartes. Les cartes de ta vitrine restent visibles.</small></div>
-    <div><b>Mes doublons</b>${seg("tr", d.pv.tr, "Visibles par mes amis", "Privés")}<small>Ce que tu peux échanger. En privé, personne ne peut te proposer d'échange.</small></div></div>
+    <div><b>Mes doublons</b>${seg("tr", d.pv.tr, "Visibles par mes amis", "Privés")}<small>Ce que tes amis voient sur ta fiche pour te proposer un échange.</small></div></div>
     <p class="small" style="margin-top:10px">Hanko n'a pas d'annuaire public : ton profil n'est visible que par les joueurs à qui tu as donné ton identifiant ou ton lien d'ami.</p>`;
   M.innerHTML = `<div class="box pfed" style="max-width:680px"><div class="head"><div><h2>Personnaliser mon profil</h2></div><button class="ghost" id="pfCancelX">✕</button></div>
     <div class="pfprev" id="pfPrev">${pfHead(me.name, me.tag, {lv: tcLvl(s.xp || 0), since: profGet().since}, prevPf(), {me: true})}</div>
@@ -13897,7 +13854,7 @@ async function hvClaim(sb){ sb = sb || await hvSb(); if (!sb) return [];
   const s = tcLoad(); let g = 0; const got = [];
   for (const r of rows){
     if (r.kind === "gems"){ s.gems += r.amount; g += r.amount; continue; }
-    hvGive(s, r.card_id, r.ver);
+    hvGive(s, r.card_id, r.ver); if (r.reason === "trade") s.trades = (s.trades || 0) + 1;
     s._how = r.reason === "bought" ? ["a", price[r.listing_id] || 0] : r.reason === "won" ? ["n", price[r.listing_id] || 0] : r.reason === "trade" ? ["e"] : null;
     if (s._how) tcStamp(s); else delete s._how;
     got.push(hvLbl(r.card_id, r.ver)); }
