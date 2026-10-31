@@ -14983,7 +14983,7 @@ const MJ_TC = [["Rouge", "#ff5a5a"], ["Bleue", "#4da3ff"], ["Verte", "#3fc98a"],
 const MJ_FMT = {melee: "Mêlée générale", t2: "2 équipes", duo: "Duos"};
 let MJ = null;   // partie complète (en local, ou chez l'hôte en ligne)
 let MV = null;   // ce que reçoit l'invité : {st, me}
-const MJN = {role: null, game: null, code: null, lobby: [], unsub: [], timers: [], myName: "", myPeer: null, u: "op", fmt: "melee"};
+const MJN = {role: null, game: null, code: null, lobby: [], unsub: [], timers: [], myName: "", myPeer: null, u: "op", fmt: "melee", mode: "live"};
 const MJ_HOME = {n: 2, fmt: "melee"};
 const mjS = () => MJN.role === "guest" ? MV && MV.st : MJ;
 const mjMe = () => MJN.role === "guest" ? MV && MV.me : MJN.role === "host" ? 0 : null;
@@ -14996,14 +14996,15 @@ const mjTeamName = k => "Équipe " + MJ_TC[k % MJ_TC.length][0];
 const mjFmtOk = (fmt, n) => fmt === "melee" || (n % 2 === 0 && n >= 4 && (fmt === "t2" || (fmt === "duo" && n >= 6)));
 
 /* ---------- moteur ---------- */
-function mjNew(u, names, fmt){
+// mode « bluff » (31 oct. 2026, mêlée générale seulement) : seul le tireur voit le personnage, les autres enchérissent sur un mystère ; révélation à la fin de l'enchère
+function mjNew(u, names, fmt, mode){
   const n = names.length; if (!mjFmtOk(fmt, n)) fmt = "melee";
   const nt = fmt === "t2" ? 2 : fmt === "duo" ? n / 2 : 0;
-  MJ = {id: Math.random().toString(36).slice(2, 10), u, seq: 0, round: 0, fmt, nt,
+  MJ = {id: Math.random().toString(36).slice(2, 10), u, seq: 0, round: 0, fmt, nt, mode: fmt === "melee" && mode === "bluff" ? "bluff" : "live", rd: 0,
     // places alternées : en équipes, deux coéquipiers ne se suivent jamais dans l'ordre des enchères
     players: names.map((name, i) => ({name, budget: BUDGET, team: [], t: nt ? i % nt : -1})),
     pool: DATA[u].map((_, i) => i).filter(i => DATA[u][i].nw !== 1), drawer: Math.floor(Math.random() * n), cur: null, ph: null, log: [], over: false};
-  mjLog(`${MJ_FMT[fmt]} à ${n} joueurs${nt ? " : " + [...Array(nt).keys()].map(k => mjTeamName(k) + " (" + MJ.players.filter(p => p.t === k).map(p => esc(p.name)).join(", ") + ")").join(" · ") : ""}.`);
+  mjLog(`${MJ_FMT[fmt]}${MJ.mode === "bluff" ? " en bluff" : ""} à ${n} joueurs${nt ? " : " + [...Array(nt).keys()].map(k => mjTeamName(k) + " (" + MJ.players.filter(p => p.t === k).map(p => esc(p.name)).join(", ") + ")").join(" · ") : ""}.`);
   mjLog(`Tirage au sort : ${esc(MJ.players[MJ.drawer].name)} commence.`);
   mjNext();
 }
@@ -15014,10 +15015,12 @@ function mjNext(){
   const P = MJ.players, n = P.length, open = P.map((_, i) => i).filter(i => !mjFull(P[i]));
   if (!open.length || !MJ.pool.length){ MJ.over = true; MJ.ph = {k: "over"}; MJ.cur = null; mjLog("Toutes les équipes sont complètes : place aux combats !"); return mjCommit(); }
   let g = 0; while (mjFull(P[MJ.drawer]) && g++ < n) MJ.drawer = (MJ.drawer + 1) % n;
-  MJ.round++; MJ.cur = mjDraw();
-  MJ.ph = open.length === 1 ? {k: "solo", who: MJ.drawer} : {k: "open", who: MJ.drawer};
+  MJ.round++; MJ.cur = mjDraw(); MJ.rd = MJ.drawer;   /* rd : tireur de ce tour (drawer passe au suivant dès l'attribution) */
+  MJ.ph = open.length === 1 ? {k: "solo", who: MJ.drawer} : {k: "open", who: MJ.drawer, cov: mjCov(MJ.drawer)};
   mjCommit();
 }
+// bluff sur un seul appareil : écran « passe l'appareil » avant chaque tour du tireur, le seul à voir le personnage
+const mjCov = who => MJ.mode === "bluff" && MJN.role == null && who === MJ.rd;
 // prochain joueur qui peut encore surenchérir, dans l'ordre de la table à partir de « from »
 function mjNextBidder(from, ph){ const P = MJ.players, n = P.length;
   for (let k = 1; k <= n; k++){ const i = (from + k) % n; if (i === ph.leader || ph.out.includes(i) || mjFull(P[i]) || mjMax(P[i]) < ph.high + STEP) continue; return i; } return null; }
@@ -15029,12 +15032,13 @@ function mjAward(w, price){ const p = MJ.players[w], c = mjCard(MJ.u, MJ.cur);
 function mjApply(actor, a){
   if (!MJ || a.seq !== MJ.seq) return;
   const ph = MJ.ph, P = MJ.players, c = MJ.cur != null ? mjCard(MJ.u, MJ.cur) : null, v = +a.v, ok = (lo, hi) => Number.isInteger(v) && v % STEP === 0 && v >= lo && v <= hi;
+  if (ph.cov){ if (a.t === "ok" && actor === ph.who){ MJ.ph = {...ph, cov: false}; mjCommit(); } return; }
   switch (ph.k){
     case "solo": if (a.t === "ok" && actor === ph.who) mjAward(ph.who, 0); break;
     case "open":
       if (actor !== ph.who || a.t !== "bid" || !ok(mjMin(P[actor]), mjMax(P[actor]))) break;
-      mjLog(`${esc(P[actor].name)} tire <b>${esc(c.n)}</b> (${TIER[c.t]}, ${c.p}) et ouvre à ${v}M.`);
-      { const nb = {k: "bid", high: v, leader: actor, out: [], hist: [[actor, v]], who: null}; nb.who = mjNextBidder(actor, nb); if (nb.who == null) return mjAward(actor, v); MJ.ph = nb; mjCommit(); }
+      mjLog(MJ.mode === "bluff" ? `${esc(P[actor].name)} tire un ${UNI[MJ.u].unit} mystère et ouvre à ${v}M.` : `${esc(P[actor].name)} tire <b>${esc(c.n)}</b> (${TIER[c.t]}, ${c.p}) et ouvre à ${v}M.`);
+      { const nb = {k: "bid", high: v, leader: actor, out: [], hist: [[actor, v]], who: null}; nb.who = mjNextBidder(actor, nb); if (nb.who == null) return mjAward(actor, v); nb.cov = mjCov(nb.who); MJ.ph = nb; mjCommit(); }
       break;
     case "bid": {
       if (actor !== ph.who) break;
@@ -15044,9 +15048,9 @@ function mjApply(actor, a){
       else break;
       nb.who = mjNextBidder(actor, nb);
       if (nb.who == null) return mjAward(nb.leader, nb.high);
-      MJ.ph = nb; mjCommit(); break; }
+      nb.cov = mjCov(nb.who); MJ.ph = nb; mjCommit(); break; }
     case "done": if (a.t === "ok") mjNext(); break;
-    case "over": if (a.t === "again" && actor === 0){ const names = P.map(p => p.name); mjNew(MJ.u, names, MJ.fmt); } break;
+    case "over": if (a.t === "again" && actor === 0){ const names = P.map(p => p.name); mjNew(MJ.u, names, MJ.fmt, MJ.mode); } break;
   }
 }
 function mjCommit(){ MJ.seq++; mjRender(); if (MJN.role === "host") mjSendAll(); }
@@ -15073,6 +15077,7 @@ function mjResults(st){ const key = st.id + ":" + st.seq; if (MJ_RES.has(key)) r
 /* ---------- affichage ---------- */
 function mjCardHTML(u, c){ return `<div class="card anim" data-t="${c.t}"><div class="pic">${img(c)}<span class="tier">${TIER[c.t]}</span><span class="pw">${c.p}</span></div>
   <div class="cap"><div class="n">${esc(c.n)}</div><div class="small">Puissance ${c.p}/100</div>${infoHTML(u, c)}</div></div>`; }
+const mjMystery = u => `<div class="card" data-t="C"><div class="pic"><div class="fallback">?</div></div><div class="cap"><div class="n">${cap1(UNI[u].unit)} mystère</div><div class="small">Révélé après les mises</div></div></div>`;
 function mjPlayersHTML(st){ const ph = st.ph || {}, me = mjMe();
   return `<div class="mjpl">${st.players.map((p, i) => { const tc = st.nt ? MJ_TC[p.t % MJ_TC.length][1] : null;
     return `<div class="${ph.who === i && ph.k !== "done" ? "on" : ""} ${ph.k === "bid" && (ph.out.includes(i) || mjFull(p)) ? "out" : ""} ${ph.k === "bid" && ph.leader === i ? "lead" : ""}">
@@ -15088,29 +15093,34 @@ function mjRender(){
   $("#mjTitle").textContent = `MERCATO À ${P.length} · ${u.name.toUpperCase()}`;
   if (st.over) return mjRenderEnd(st);
   const c = st.cur != null ? mjCard(st.u, st.cur) : null; let h = "", wire = null;
-  if (ph.k === "solo"){
+  // bluff : pendant l'enchère, seul le tireur voit le personnage (en ligne, les autres ne le reçoivent même pas)
+  const bluff = st.mode === "bluff", enc = ph.k === "open" || ph.k === "bid", viewer = local ? ph.who : me, see = !bluff || !enc || (viewer === st.rd && !ph.cov), myst = `un ${u.unit} mystère`;
+  if (ph.cov){ const p = P[ph.who];
+    h = `<div class="cover"><p class="muted">${ph.k === "open" ? `${esc(p.name)} tire le prochain ${u.unit}.` : `Enchère actuelle : <b style="color:var(--text)">${ph.high}M</b> par ${esc(P[ph.leader].name)}.`}</p><h2 style="margin-top:6px">Passe l'appareil à ${esc(p.name)}</h2><p class="muted" style="margin:8px 0 18px">Les autres, ne regardez pas l'écran !</p><button class="primary" id="mjOk">Je suis ${esc(p.name)}, je joue</button></div>`;
+  } else if (ph.k === "solo"){
     h = `<h2>${esc(c.n)} pour ${esc(P[ph.who].name)}</h2><p class="muted">Tous les autres ont leurs ${MAX} ${u.units} : plus d'enchère, ${esc(c.n)} rejoint l'${u.team} de ${esc(P[ph.who].name)} gratuitement.</p>
       ${mine(ph.who) ? `<button class="primary" id="mjOk">Ajouter ${esc(c.n)}</button>` : waitHTML(`${esc(P[ph.who].name)} ajoute ${esc(c.n)}…`)}`;
   } else if (ph.k === "open" || ph.k === "bid"){
     const p = P[ph.who], lo = ph.k === "open" ? mjMin(p) : ph.high + STEP, hi = mjMax(p);
-    const head = ph.k === "bid" ? `<p class="muted">Enchère la plus haute</p><div class="bigbid">${ph.high}M</div><p class="small">par ${esc(P[ph.leader].name)} · ${ph.out.length} joueur${ph.out.length > 1 ? "s ont" : " a"} passé</p>` : `<p class="muted">${esc(p.name)} vient de tirer ${esc(c.n)} et doit ouvrir l'enchère (au moins ${lo}M). Ensuite, chacun à son tour surenchérit ou passe.</p>`;
+    const head = ph.k === "bid" ? `<p class="muted">Enchère la plus haute</p><div class="bigbid">${ph.high}M</div><p class="small">par ${esc(P[ph.leader].name)} · ${ph.out.length} joueur${ph.out.length > 1 ? "s ont" : " a"} passé</p>` : `<p class="muted">${esc(p.name)} vient de tirer ${see ? esc(c.n) : myst} et doit ouvrir l'enchère (au moins ${lo}M). Ensuite, chacun à son tour surenchérit ou passe.</p>`;
+    const note = !bluff ? "" : see ? `<p class="small" style="margin-top:6px">Toi seul sais que c'est <b>${esc(c.n)}</b> (puissance ${c.p}). Fais monter le prix… ou fais-le passer pour mieux qu'il n'est.</p>` : `<p class="small" style="margin-top:6px">${cap1(u.unit)} mystère : seul ${esc(P[st.rd].name)} sait qui c'est. Bluff ou pas ?</p>`;
     const hist = ph.k === "bid" ? `<p class="mjhist">${ph.hist.map(([i, v]) => `${esc(P[i].name)} ${v}M`).join(" → ")}</p>` : "";
     if (mine(ph.who)){
       const quick = [...new Set([lo, lo + 10, lo + 20, lo + 50].filter(v => v <= hi))];
-      h = `<h2>${local ? esc(p.name) + ", à toi" : "À toi"} !</h2>${head}
+      h = `<h2>${local ? esc(p.name) + ", à toi" : "À toi"} !</h2>${head}${note}
         <div class="mjbids">${quick.map(v => `<button data-mjb="${v}">${v}M</button>`).join("")}${hi > lo + 50 ? `<button data-mjb="${hi}">Tapis · ${hi}M</button>` : ""}</div>
         <div class="row"><input id="mjBid" type="number" inputmode="numeric" min="${lo}" max="${hi}" step="${STEP}" value="${lo}" style="flex:1;min-width:110px"><button class="primary" id="mjBidGo">Miser</button>${ph.k === "bid" ? `<button class="red" id="mjPass">Passer</button>` : ""}</div><div class="err" id="mjErr"></div>${hist}`;
       wire = () => { const go = v => { if (!Number.isInteger(v) || v % STEP || v < lo || v > hi) return $("#mjErr").textContent = `Mise entre ${lo} et ${hi}M, par tranches de 10.`; mjAct("bid", v); };
         document.querySelectorAll("[data-mjb]").forEach(b => b.onclick = () => go(+b.dataset.mjb)); $("#mjBidGo").onclick = () => go(parseInt($("#mjBid").value, 10));
         $("#mjBid").onkeydown = e => { if (e.key === "Enter") go(parseInt($("#mjBid").value, 10)); }; $("#mjPass") && ($("#mjPass").onclick = () => mjAct("pass")); };
-    } else h = `<h2>${ph.k === "open" ? "Ouverture" : "Enchère en cours"}</h2>${head}${waitHTML(`${esc(p.name)} ${ph.k === "open" ? "choisit sa mise d'ouverture" : "surenchérit ou passe"}…`)}${hist}`;
+    } else h = `<h2>${ph.k === "open" ? "Ouverture" : "Enchère en cours"}</h2>${head}${note}${waitHTML(`${esc(p.name)} ${ph.k === "open" ? "choisit sa mise d'ouverture" : "surenchérit ou passe"}…`)}${hist}`;
   } else if (ph.k === "done"){
     const w = P[ph.w];
-    h = `<h2>${esc(w.name)} recrute ${esc(c.n)} !</h2><div class="banner">Prix payé : ${ph.price}M · Reste : ${w.budget}M</div>
+    h = `${bluff ? `<p class="muted">Révélation : c'était <b style="color:var(--text)">${esc(c.n)}</b> (${TIER[c.t]}, puissance ${c.p}) !</p>` : ""}<h2>${esc(w.name)} recrute ${esc(c.n)} !</h2><div class="banner">Prix payé : ${ph.price}M · Reste : ${w.budget}M</div>
       <p class="muted">Prochain tirage : <b style="color:var(--text)">${esc(P[st.drawer].name)}</b></p><div class="row" style="margin-top:12px"><button class="primary" id="mjOk">Tirage suivant</button></div>`;
   }
-  $("#mjBoard").innerHTML = `<p class="small" style="margin:0 0 8px">Tirage ${st.round} · ${Array.isArray(st.pool) ? st.pool.length : st.pool} ${u.units} dans le pool${st.nt ? " · " + MJ_FMT[st.fmt] : " · Mêlée générale"}</p>${mjPlayersHTML(st)}
-    <div class="mjst"><div>${c ? mjCardHTML(st.u, c) : ""}</div><div class="panel act">${h}</div></div>
+  $("#mjBoard").innerHTML = `<p class="small" style="margin:0 0 8px">Tirage ${st.round} · ${Array.isArray(st.pool) ? st.pool.length : st.pool} ${u.units} dans le pool${st.nt ? " · " + MJ_FMT[st.fmt] : " · Mêlée générale"}${bluff ? " · Bluff" : ""}</p>${mjPlayersHTML(st)}
+    <div class="mjst"><div>${see && c ? mjCardHTML(st.u, c) : mjMystery(st.u)}</div><div class="panel act">${h}</div></div>
     <div class="panel log" style="margin-top:12px">${st.log.map(e => `<div class="${e.w ? "win" : ""}">${e.h}</div>`).join("")}</div>`;
   $("#mjOk") && ($("#mjOk").onclick = () => mjAct("ok"));
   wire?.();
@@ -15144,24 +15154,26 @@ function mjLeave(){ MJN.timers.forEach(clearInterval); MJN.timers = []; MJN.unsu
   if (MJN.game) MJN.game.leave().catch(() => {}); Object.assign(MJN, {role: null, game: null, code: null, lobby: [], myPeer: null}); MJ = null; MV = null; }
 function mjPub(){ const s = {...MJ, pool: MJ.pool.length, log: MJ.log.slice(0, 8)}; return s; }
 function mjSendTo(peer, topic, data){ if (MJN.game.emitTo) MJN.game.emitTo(peer, topic, data); else MJN.game.emit(topic, {...data, to: peer}).catch(() => {}); }
-function mjSendAll(){ if (MJN.role !== "host" || !MJ) return; const st = mjPub(); MJ.players.forEach((p, i) => { if (!i) return; const peer = MJN.lobby[i]?.peer; if (peer) mjSendTo(peer, "ustate", {st, me: i}); }); }
+function mjSendAll(){ if (MJN.role !== "host" || !MJ) return; const st = mjPub(), hide = MJ.mode === "bluff" && ["open", "bid"].includes(MJ.ph.k); MJ.players.forEach((p, i) => { if (!i) return; const peer = MJN.lobby[i]?.peer; if (peer) mjSendTo(peer, "ustate", {st: hide && i !== MJ.rd ? {...st, cur: null} : st, me: i}); }); }   /* bluff : le personnage n'est envoyé qu'au tireur tant que l'enchère dure */
 function mjLobbyRender(){ const L = MJN.lobby, host = MJN.role === "host", n = L.length, fmts = ["melee", "t2", "duo"].filter(f => mjFmtOk(f, n));
   if (!mjFmtOk(MJN.fmt, n)) MJN.fmt = "melee";
   lobby(`<h2>Mercato à plusieurs · ${UNI[MJN.u].name}</h2>${MJN.code ? `<p class="muted">Code de la partie :</p><div class="code">${MJN.code}</div>` : ""}
     <div class="ucp" style="justify-content:center">${L.map(p => `<span>${esc(p.name)}</span>`).join("")}</div><p class="small">${n}/8 joueurs${n < 3 ? " · il en faut au moins 3" : ""}</p>
     ${host ? `<div class="mjcnt" style="justify-content:center">${fmts.map(f => `<button data-mjf="${f}" class="${MJN.fmt === f ? "sel" : ""}">${MJ_FMT[f]}</button>`).join("")}</div>
+      ${MJN.fmt === "melee" ? `<div class="mjcnt" style="justify-content:center">${[["live", "Classique"], ["bluff", "Bluff"]].map(([m, t]) => `<button data-mjm="${m}" class="${MJN.mode === m ? "sel" : ""}">${t}</button>`).join("")}</div>${MJN.mode === "bluff" ? `<p class="small" style="max-width:48ch">Bluff : seul celui qui tire voit le personnage, les autres enchérissent sur un mystère.</p>` : ""}` : ""}
       ${n % 2 ? `<p class="small">Avec un nombre pair de joueurs, vous pouvez aussi jouer en équipes.</p>` : ""}
       <button class="primary" id="mjStart" ${n < 3 ? "disabled" : ""}>Lancer le mercato</button><p class="small" style="max-width:48ch">Tes amis ouvrent ce site, choisissent Mercato, « En ligne », puis « Rejoindre » avec le code.</p>`
-      : waitHTML("L'hôte va lancer la partie…")}<button class="ghost" id="cancelLobby">Quitter</button>`);
+      : (MJN.fmt === "melee" && MJN.mode === "bluff" ? `<p class="small">Mode Bluff : seul celui qui tire voit le personnage.</p>` : "") + waitHTML("L'hôte va lancer la partie…")}<button class="ghost" id="cancelLobby">Quitter</button>`);
   $("#cancelLobby").onclick = () => { mjLeave(); show("home"); };
+  document.querySelectorAll("[data-mjm]").forEach(b => b.onclick = () => { MJN.mode = b.dataset.mjm; mjBroadcastLobby(); });
   document.querySelectorAll("[data-mjf]").forEach(b => b.onclick = () => { MJN.fmt = b.dataset.mjf; mjBroadcastLobby(); });
-  $("#mjStart") && ($("#mjStart").onclick = () => { if (MJN.lobby.length >= 3) mjNew(MJN.u, MJN.lobby.map(p => p.name), MJN.fmt); }); }
-function mjBroadcastLobby(){ if (MJN.role !== "host" || MJ) return; MJN.game.emit("ulobby", {names: MJN.lobby.map(p => p.name), u: MJN.u, code: MJN.code, fmt: MJN.fmt}).catch(() => {}); mjLobbyRender(); }
+  $("#mjStart") && ($("#mjStart").onclick = () => { if (MJN.lobby.length >= 3) mjNew(MJN.u, MJN.lobby.map(p => p.name), MJN.fmt, MJN.mode); }); }
+function mjBroadcastLobby(){ if (MJN.role !== "host" || MJ) return; MJN.game.emit("ulobby", {names: MJN.lobby.map(p => p.name), u: MJN.u, code: MJN.code, fmt: MJN.fmt, mode: MJN.mode}).catch(() => {}); mjLobbyRender(); }
 async function mjHost(name){ const err = t => $("#onlineErr").textContent = t; err("");
   MJN.myName = cleanName(name, "Hôte"); let game, code;
   for (let i = 0; i < 3 && !game; i++){ code = mkCode("X"); try { game = await NET.room.join("mj-" + code.toLowerCase(), true); } catch (e) { if (e?.type !== "unavailable-id") break; } }
   if (!game) return err("Impossible de créer la partie pour le moment. Vérifie ta connexion puis réessaie.");
-  Object.assign(MJN, {role: "host", game, code, u: cfg.u, fmt: MJ_HOME.fmt, lobby: [{name: MJN.myName, peer: null}]});
+  Object.assign(MJN, {role: "host", game, code, u: cfg.u, fmt: MJ_HOME.fmt, mode: cfg.mode === "bluff" ? "bluff" : "live", lobby: [{name: MJN.myName, peer: null}]});
   MJN.unsub.push(game.on("uhello", msg => { if (msg.sameTab) return; const name = cleanName(msg.data?.name, "Joueur"), L = MJN.lobby;
     if (MJ){ const i = MJ.players.findIndex(p => p.name === name); if (i > 0){ L[i].peer = msg.peer; mjSendAll(); } return; }   /* un joueur qui revient reprend sa place */
     if (L.some(p => p.peer === msg.peer)) return mjBroadcastLobby(); if (L.length >= 8) return;
@@ -15179,7 +15191,7 @@ async function mjJoin(code, name){ const err = t => $("#onlineErr").textContent 
   let got = false;
   MJN.unsub.push(game.on("uhello", msg => { if (msg.sameTab) MJN.myPeer = msg.peer; }));
   MJN.unsub.push(game.on("ulobby", msg => { if (msg.sameTab || MV) return; got = true; const d = msg.data || {};
-    MJN.lobby = (d.names || []).map(n => ({name: cleanName(n, "Joueur")})); MJN.u = DATA[d.u] ? d.u : "op"; MJN.fmt = MJ_FMT[d.fmt] ? d.fmt : "melee"; mjLobbyRender(); }));
+    MJN.lobby = (d.names || []).map(n => ({name: cleanName(n, "Joueur")})); MJN.u = DATA[d.u] ? d.u : "op"; MJN.fmt = MJ_FMT[d.fmt] ? d.fmt : "melee"; MJN.mode = d.mode === "bluff" ? "bluff" : "live"; mjLobbyRender(); }));
   MJN.unsub.push(game.on("ustate", msg => { const d = msg.data; if (msg.sameTab || !d?.st || !DATA[d.st.u]) return; if (d.to && d.to !== MJN.myPeer) return; got = true; MV = {st: d.st, me: d.me}; mjRender(); }));
   let tries = 0; const inLobby = () => MJN.lobby.some(p => p.name === MJN.myName || p.name.startsWith(MJN.myName + " ("));
   const hello = () => { if (MV || inLobby()) return; if (!got && ++tries > 12){ mjLeave(); show("home"); return err(`Aucune partie trouvée avec le code ${code}.`); } game.emit("uhello", {name: MJN.myName}).catch(() => {}); };
@@ -15200,9 +15212,9 @@ async function mjJoin(code, name){ const err = t => $("#onlineErr").textContent 
     F.innerHTML = [["melee", "Mêlée générale", "Chacun pour soi : tout le monde affronte tout le monde, un seul vainqueur."], ["t2", "2 équipes", n % 2 ? "Possible avec un nombre pair de joueurs." : `${n / 2} contre ${n / 2} : chaque joueur affronte chaque adversaire, les points vont à l'équipe.`], ["duo", "Duos", n % 2 || n < 6 ? "À partir de 6 joueurs, en nombre pair." : `${n / 2} équipes de 2.`]]
       .map(([k, t, d]) => `<button class="mode ${MJ_HOME.fmt === k ? "sel" : ""}" data-mjfh="${k}" ${mjFmtOk(k, n) ? "" : "disabled"}><b>${t}</b><span>${d}</span></button>`).join("");
     F.querySelectorAll("[data-mjfh]").forEach(b => b.onclick = () => { MJ_HOME.fmt = b.dataset.mjfh; draw(); });
-    const note = $("#mjNote"); note.classList.toggle("hidden", !multi); note.textContent = "À plusieurs : enchères ouvertes. Celui qui tire ouvre, puis chacun à son tour surenchérit ou passe ; le dernier en lice remporte le personnage. Le tirage tourne autour de la table.";
-    // le mode Bluff et l'ordre de combat restent réservés au duel
-    document.querySelectorAll('.mh [data-m="bluff"]').forEach(b => { b.disabled = multi; if (multi && b.classList.contains("sel")) document.querySelector('.mh [data-m="live"]')?.click(); });
+    const note = $("#mjNote"); note.classList.toggle("hidden", !multi); note.textContent = "À plusieurs : celui qui tire ouvre, puis chacun à son tour surenchérit ou passe ; le dernier en lice remporte le personnage. Le tirage tourne autour de la table. En mode Bluff (mêlée générale seulement), seul celui qui tire voit le personnage.";
+    // à plusieurs, le mode Bluff n'existe qu'en mêlée générale ; l'ordre de combat reste réservé au duel
+    { const noB = multi && MJ_HOME.fmt !== "melee"; document.querySelectorAll('.mh [data-m="bluff"]').forEach(b => { b.disabled = noB; if (noB && b.classList.contains("sel")) document.querySelector('.mh [data-m="live"]')?.click(); }); }
     const oo = $("#optOrder"); if (oo){ oo.disabled = multi; oo.closest(".opt")?.classList.toggle("hidden", multi); }
     grid && grid.classList.toggle("hidden", multi);
     const N = $("#mjNames"); N.classList.toggle("hidden", !multi);
@@ -15214,7 +15226,7 @@ async function mjJoin(code, name){ const err = t => $("#onlineErr").textContent 
   // lancer : à plus de deux, le Mercato à plusieurs ; sinon le duel habituel
   const go0 = $("#go").onclick; $("#go").onclick = e => { if (MJ_HOME.n <= 2) return go0.call($("#go"), e);
     const names = [...document.querySelectorAll("#mjNames input")].map((i, k) => cleanName(i.value, "Joueur " + (k + 1))), seen = {}; names.forEach((n, k) => { if (seen[n]) names[k] = n + " (" + (k + 1) + ")"; seen[n] = 1; });
-    MJN.role = null; mjNew(cfg.u, names, MJ_HOME.fmt); };
+    MJN.role = null; mjNew(cfg.u, names, MJ_HOME.fmt, cfg.mode); };
   const host0 = $("#host").onclick; $("#host").onclick = e => { if (MJ_HOME.n <= 2) return host0.call($("#host"), e); if (!NET.room) return; mjHost($("#myName").value); };
   const join0 = $("#join").onclick; $("#join").onclick = e => { const code = $("#joinCode").value.trim().toUpperCase(); if (code[0] !== "X") return join0.call($("#join"), e);
     if (!NET.room) return; if (!/^[A-Z0-9]{4}$/.test(code)) return $("#onlineErr").textContent = "Le code fait 4 caractères (lettres et chiffres)."; mjJoin(code, $("#myName").value); };
