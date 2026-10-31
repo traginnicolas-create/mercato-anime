@@ -10291,9 +10291,9 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tcopen .tcrow .tc.zoom{cursor:zoom-in}
 .tcopen .tcrow:not(.tcfan) > .tc.hl:not(.no){transform:perspective(620px) rotateX(calc(var(--tx,0deg) * .6)) rotateY(calc(var(--ty,0deg) * .6)) scale(1.04);transition:transform .14s cubic-bezier(.2,.8,.2,1);z-index:3;position:relative}
 /* 25 oct. 2026 : révélation façon Kyara (pile, compteur, cases, décompte) */
-.tcopen .kcnt{margin-bottom:6px;font:700 24px var(--mono,monospace);color:#fff;font-variant-numeric:tabular-nums;text-align:center;line-height:1}
+.tcopen .kcnt{margin:0 0 6px;width:100%;font:700 24px var(--mono,monospace);color:#fff;font-variant-numeric:tabular-nums;text-align:center;line-height:1}
 .tcopen .kcnt small{font-size:.7em;color:rgba(255,255,255,.4)}
-.tcopen .kdeck{position:relative;width:max(150px,min(64vw,300px,calc((100dvh - 370px) * .676)));aspect-ratio:5/7.4;cursor:pointer;margin:0 auto;-webkit-tap-highlight-color:transparent}
+.tcopen .kdeck{position:relative;width:max(150px,min(64vw,300px,calc((100dvh - var(--kf,370px)) * .676)));aspect-ratio:5/7.4;cursor:pointer;margin:0 auto;-webkit-tap-highlight-color:transparent}
 .kdeck .gh{position:absolute;inset:0;transition:opacity .3s;pointer-events:none}
 .kdeck .gh > *,.kdeck .kfl .bkf > *,.kdeck .kfl .fa > *{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;margin:0}
 .kdeck .kfl{position:absolute;inset:0;perspective:1400px;transition:transform .34s cubic-bezier(.2,.7,.3,1),opacity .3s}
@@ -10307,7 +10307,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .kdeck .kfl.drag{transition:none}
 .kdeck .kfl.gone[style*="translateX"]{transition:transform .38s cubic-bezier(.3,.6,.4,1),opacity .38s}
 .kdeck .kfl .fa .tc{box-shadow:0 10px 26px rgba(0,0,0,.55)}
-.tcopen .kcnt{display:flex;align-items:baseline;justify-content:center;gap:12px}
+.tcopen .kcnt{display:flex;align-items:center;justify-content:flex-start;gap:10px}
 .tcopen .kcnt .kpk{font:700 12px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);padding:4px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;display:inline-block}
 .tcopen .kcnt .kpk b{color:#fff}
 .tcopen .kcnt .kl{font:700 12px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
@@ -10328,9 +10328,9 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .kdeck .kfl.hit::after{content:"";position:absolute;inset:-14%;border-radius:40px;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 70%,transparent),transparent);z-index:-1;opacity:0;animation:kglow 2s .45s ease-in-out infinite both}
 @keyframes kglow{0%,100%{opacity:.45}50%{opacity:.9}}
 .tcopen .kfoot{display:grid;gap:10px;justify-items:center;width:100%}
-.tcopen .kslots{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:560px}
+.tcopen .kslots{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:640px}
 .tcopen .kslots i{width:28px;aspect-ratio:5/7.4;border-radius:5px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
-.tcopen .kslots i:first-child:nth-last-child(n+11),.tcopen .kslots i:first-child:nth-last-child(n+11) ~ i{width:19px;border-radius:4px}
+.tcopen .kslots i:first-child:nth-last-child(n+11),.tcopen .kslots i:first-child:nth-last-child(n+11) ~ i{width:18px;border-radius:6px}
 .tcopen .kslots i img{width:100%;height:100%;object-fit:cover;display:block}
 .tcopen .kslots i.f{border-color:var(--rc);box-shadow:0 0 9px color-mix(in srgb,var(--rc) 55%,transparent);transform:translateY(-2px)}
 .tcopen .kslots i.f.lo{box-shadow:none;transform:none}
@@ -10339,6 +10339,7 @@ html:has(.tccine),html:has(.tccine) body,html:has(.crpov),html:has(.crpov) body,
 .tcopen .ktal span[hidden]{display:none}.tcopen .ktal em{font-style:normal}
 .tcopen .ktal span.pop{animation:kpop .5s ease-out}
 @keyframes kpop{40%{transform:scale(1.25);box-shadow:0 0 16px var(--rc)}}
+.tcopen .khint{margin:0;font:600 11px var(--mono,monospace);letter-spacing:.04em;color:rgba(255,255,255,.4);text-align:center}@media (hover:none){.tcopen .khint{display:none}}
 .tcopen .kmsg{color:rgba(255,255,255,.65);font-size:13.5px;margin:0;min-height:1.4em;text-align:center}
 .tcopen .kbtns{display:flex;gap:8px;justify-content:center;width:100%;max-width:460px}
 .tcopen .kbtns button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;font-size:13.5px;padding:11px 12px}
@@ -11840,7 +11841,7 @@ function tcOpening(key, got){
   // de la plus commune à la plus rare ; on fait glisser (ou on touche) celle du dessus pour découvrir la suivante. Les Épiques et mieux, et les
   // versions rares, arrivent face cachée, sans halo : il faut les retourner. Compteur « Booster k/q » et carte du booster ; cases en bas
   // (au-delà de 30 cartes, un décompte par rareté). Seules la carte du dessus et la suivante sont dans la page (léger, même pour 250 cartes).
-  const N = got.length, TAL = N > 30, PB = got.pb && got.pb.length ? got.pb : [0], NP = PB.length; let i = 0, lastP = -1;
+  const N = got.length, TAL = N > 60, PB = got.pb && got.pb.length ? got.pb : [0], NP = PB.length; let i = 0, lastP = -1, kfast = false;
   const packOf = k => { let p = 0; while (p + 1 < NP && PB[p + 1] <= k) p++; return p; }, packEnd = p => p + 1 < NP ? PB[p + 1] : N;
   const cur = () => mid.querySelector(`.kfl[data-k="${i}"]:not(.gone)`);
   const cardHTML = k => { const c = got[k], down = true;   /* 26 oct. 2026 : toutes les cartes arrivent de dos, comme dans un vrai booster ; on les retourne une à une */ return `<div class="kfl ${down ? "" : "up nofl r-" + c.r}" data-k="${k}" style="z-index:${N - k}"><div class="in"><div class="bkf">${tcBackU("C", {u: c.u, cls: "tcback", attr: `aria-label="Retourner la carte ${k + 1}"`})}</div><div class="fa">${tcCard(c, {isNew: c.isNew, f: c.f})}</div></div></div>`; };
@@ -11850,7 +11851,7 @@ function tcOpening(key, got){
     for (const k of [i, i + 1]) if (k < N && !dk.querySelector(`.kfl[data-k="${k}"]:not(.gone)`)) dk.insertAdjacentHTML("beforeend", cardHTML(k));
     const left = N - i; dk.querySelectorAll(".gh").forEach((g, k) => g.style.opacity = k < left - 2 ? 1 : 0);
     const p = packOf(i), kc = O.querySelector(".kcnt .kc"), kt = O.querySelector(".kcnt .kt"), kp = O.querySelector(".kcnt .kpk b");
-    if (kc){ kc.textContent = i - PB[p] + 1; kt.textContent = "/" + (packEnd(p) - PB[p]); } if (kp) kp.textContent = p + 1;
+    if (kc){ kc.textContent = i + 1; kt.textContent = "/" + N; } if (kp) kp.textContent = p + 1;
     if (p !== lastP){ if (lastP >= 0 && !calm){ const e = O.querySelector(".kcnt .kpk"); e && e.animate([{transform: "scale(1.35)", color: "#fff"}, {transform: "scale(1)"}], {duration: 450, easing: "ease-out"}); tcSnd("deal"); } lastP = p; }
     const nx = $("#tcNext"); if (nx) nx.hidden = ![...got.keys()].some(k => k > i && hot(got[k])) && !(hot(got[i]) && !cur()?.classList.contains("up"));
     const top = cur(); msg(top && !top.classList.contains("up") ? "Touche la carte pour la retourner" : i < N - 1 ? "Glisse ou touche pour la carte suivante" : "Touche pour voir le bilan"); };
@@ -11858,7 +11859,7 @@ function tcOpening(key, got){
     if (TAL){ const t = bot.querySelector(`.ktal [data-r="${c.r}"]`); if (t){ t.hidden = false; const n = +t.querySelector("b").textContent + 1, l = TC_R[c.r][3] || TC_R[c.r][0]; t.querySelector("b").textContent = n; t.lastChild.textContent = " " + (n > 1 && !/\.$/.test(l) ? l.replace(/^(\S+)/, "$1s") : l); if (hot(c)){ t.classList.remove("pop"); void t.offsetWidth; t.classList.add("pop"); } } return; }
     const sl = bot.querySelectorAll(".kslots i")[k]; if (!sl) return; sl.className = "f r-" + c.r + (hot(c) ? "" : " lo"); sl.innerHTML = `<img src="${tcArt(c, c.f)}" alt="">`; };
   // retournement en deux temps : jusqu'à la tranche (90°), échange dos/face, retour de face ; sans animation en mode calme
-  const kflip = (el, swap) => new Promise(done => { const inn = el.querySelector(".in"); if (calm || !inn.animate){ swap(); return done(); }
+  const kflip = (el, swap) => new Promise(done => { const inn = el.querySelector(".in"); if (calm || kfast || !inn.animate){ swap(); return done(); }
     inn.animate([{transform: "rotateY(0deg)"}, {transform: "rotateY(90deg)"}], {duration: 190, easing: "cubic-bezier(.5,0,.9,.6)"}).onfinish = () => { swap();
       const a = inn.animate([{transform: "rotateY(-90deg) scale(1.04)"}, {transform: "rotateY(0deg) scale(1)"}], {duration: 300, easing: "cubic-bezier(.2,.8,.3,1.15)"}); a.onfinish = a.oncancel = () => done(); }; });
   const cine = async k => { const c = got[k]; if (k !== bestK) return false; const show = big(c) || c.hype; busy = true;
@@ -11875,11 +11876,14 @@ function tcOpening(key, got){
   const finish = async () => { if (fin) return; fin = true; for (; i < N; i++) fill(i);
     setTimeout(() => { if (!O.isConnected || O.classList.contains("res")) return; mid.innerHTML = sumRow(); bot.innerHTML = ""; done(); }, calm ? 0 : 380); };
   const deal = () => {
-    mid.innerHTML = `<div class="kcnt" aria-live="polite">${NP > 1 ? `<span class="kpk">Booster <b>1</b>/${NP}</span>` : ""}<span>${NP > 1 ? `<small class="kl">carte </small>` : ""}<b class="kc">1</b><small class="kt">/5</small></span></div><div class="kdeck">${[3, 2, 1].map(k => `<div class="gh" style="transform:translate(${k * 6}px,${-k * 5}px) rotate(${k * 1.3}deg);z-index:${-k}">${tcBackU("C", {u: got[Math.min(N - 1, k)].u})}</div>`).join("")}</div>`;
+    mid.style.setProperty("--kf", (N > 30 ? 450 : N > 10 ? 395 : 370) + "px");
+    mid.innerHTML = `<div class="kcnt" aria-live="polite"><span><b class="kc">1</b><small class="kt">/${N}</small></span>${NP > 1 ? `<span class="kpk">Booster <b>1</b>/${NP}</span>` : ""}</div><div class="kdeck">${[3, 2, 1].map(k => `<div class="gh" style="transform:translate(${k * 6}px,${-k * 5}px) rotate(${k * 1.3}deg);z-index:${-k}">${tcBackU("C", {u: got[Math.min(N - 1, k)].u})}</div>`).join("")}</div>`;
     const cn = {}; got.forEach(c => cn[c.r] = 1);
     bot.innerHTML = `<div class="kfoot">${TAL ? `<div class="ktal">${[...TC_ORDER].reverse().filter(r => cn[r]).map(r => `<span class="r-${r}" data-r="${r}" hidden><b>0</b><em> ${TC_R[r][3] || TC_R[r][0]}</em></span>`).join("")}</div>` : `<div class="kslots">${got.map(() => "<i></i>").join("")}</div>`}
-      <p class="kmsg"></p><div class="kbtns">${got.some(hot) && N > 1 ? `<button id="tcNext">Passer à la prochaine Épique ou +</button>` : ""}<button id="tcAll">Tout révéler</button></div></div>`;
+      <p class="kmsg"></p><div class="kbtns">${got.some(hot) && N > 1 ? `<button id="tcNext">Passer à la prochaine Épique ou +</button>` : ""}<button id="tcAll">Tout révéler</button></div><p class="khint">Espace : suivante · maintenir : avance rapide</p></div>`;
     stack(); tcSnd("deal");
+    // clavier, comme chez Kyara : Espace pour la carte suivante, maintenu pour l'avance rapide
+    { const key = e => { if (!O.isConnected || O.classList.contains("res") || fin) return document.removeEventListener("keydown", key); if (e.code !== "Space" || /INPUT|TEXTAREA/.test(e.target.tagName)) return; e.preventDefault(); document.activeElement?.blur?.(); kfast = e.repeat; adv(0); }; document.addEventListener("keydown", key); }
     // geste : on fait glisser la carte du dessus ; un petit geste vaut une touche
     { const dk = mid.querySelector(".kdeck"); let d = null;
       dk.onpointerdown = e => { if (busy || fin) return; const el = cur(); if (!el) return; d = {x: e.clientX, y: e.clientY, el, dx: 0}; try { dk.setPointerCapture(e.pointerId); } catch {} };
@@ -12233,7 +12237,7 @@ button:disabled{opacity:.45;cursor:default}
 .hs-fl.hit::after{content:"";position:absolute;inset:-16%;border-radius:40px;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 75%,transparent),transparent);z-index:-1;opacity:0}
 .hs-fl.hit.up::after{animation:hsGlow 2s .45s ease-in-out infinite both}
 .hs-fl.hit.up .fa{animation:hsHit .9s .35s ease-out both}
-@keyframes hsHit{0%{transform:rotateY(180deg) scale(1)}35%{transform:rotateY(180deg) scale(1.07)}100%{transform:rotateY(180deg) scale(1)}}
+@keyframes hsHit{0%{transform:scale(1)}35%{transform:scale(1.07)}100%{transform:scale(1)}}
 @keyframes hsGlow{0%{opacity:0}30%{opacity:1}60%{opacity:.55}100%{opacity:1}}
 .hs-back{position:absolute;inset:0;border-radius:15px;overflow:hidden;background:radial-gradient(circle at 50% 44%,#7d1109 0,#3a0a0c 46%,#120608 100%);box-shadow:inset 0 0 0 5px #0b0507,inset 0 0 0 7px #d8b25c,0 22px 44px #000b;display:grid;place-items:center}
 .hs-back::before{content:"";position:absolute;inset:14px;border-radius:9px;border:1px solid #d8b25c66;background:radial-gradient(circle at 50% 0,transparent 9px,#d8b25c2e 10px,transparent 11px,transparent 15px,#d8b25c24 16px,transparent 17px) 0 0/26px 13px}
