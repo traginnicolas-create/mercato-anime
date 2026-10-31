@@ -12442,7 +12442,7 @@ function hsOpenUI(id){
   if (hsLayer().querySelector(".hs-open")) return;   /* 25 oct. 2026 : double appui = une seule ouverture */
   const set = hsSet(id), s = tcLoad(), st = hsSt(s, id);
   if (!st.packs) return;
-  st.packs--; const {got, neu, god} = hsOpen(set, s); tcSave(s); try { mnRefresh(); } catch {}
+  st.packs--; const {got, neu, god} = hsOpen(set, s); tcSave(s); try { mnRefresh(); } catch {} try { gxPullS(id, got); } catch {}
   const N = got.length, ov = document.createElement("div"); ov.className = "hs-open";
   const isNew = got.map((c, k) => neu.includes(hsKey(c)) && got.findIndex(x => hsKey(x) === hsKey(c)) === k);   // badge NOUVELLE sur le premier exemplaire seulement
   const back = `<div class="hs-back"><i>判</i><b>HANKO</b><small>${set.code}</small></div>`;
@@ -14545,8 +14545,8 @@ if (matchMedia("(hover: none) and (pointer: coarse)").matches) document.addEvent
 
 <style>
 /* ---- « Gros tirages » : les Légendaires et Mythiques tirées à l'instant par tous les joueurs (31 oct. 2026, comme chez Kyara) ---- */
-.gxf{margin:0 0 14px;min-width:0}
-.gxf:empty{display:none}
+.gxf{margin:18px 0 14px;min-width:0}
+.gxf:empty,.gxf[hidden]{display:none}
 .gxf .gxt{display:flex;align-items:center;gap:8px;margin:0 0 2px;font:700 11px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gxf .gxt i{width:7px;height:7px;border-radius:50%;background:#ff4d3d;animation:gxb 1.6s ease-in-out infinite}
 @keyframes gxb{50%{opacity:.3}}
@@ -14566,22 +14566,33 @@ if (matchMedia("(hover: none) and (pointer: coarse)").matches) document.addEvent
 </style>
 <script>
 const GX = {rows: [], at: 0};
+const GX_FIN = {S: "#7fd6ff", K: "#ff3b3b", W: "#d9a066", G: "#f7c64a", Z: "#ffe9a8"}, GX_COL = {L: "#f5c518", M: "#ff5f8f", X: "#b58cff"};
+const gxBig = c => "LMX".includes(c.r) || !!GX_FIN[c.f];   /* carte du jeu : Légendaire, Mythique, Éveil, ou version Art spécial, Red Blood, Wanted, UR, Légende */
 const gxOff = () => !!tcLoad().noFeed;
 const gxAgo = t => { const m = Math.floor((Date.now() - Date.parse(t)) / 6e4); return m < 1 ? "à l'instant" : m < 60 ? "il y a " + m + " min" : m < 1440 ? "il y a " + Math.floor(m / 60) + " h" : "il y a " + Math.floor(m / 1440) + " j"; };
-function gxDraw(){
-  const all = tcCards(), byId = new Map(all.map(c => [c.id, c])), mine = CP.user ? frMe().name : "";
-  const rows = GX.rows.map(r => ({r, c: byId.get(r.card_id)})).filter(x => x.c && (x.c.r === "L" || x.c.r === "M")).slice(0, 20);
-  const html = rows.length ? `<div class="gxt"><i></i>En direct · Légendaires et Mythiques</div><h3>Gros tirages</h3><ul>${rows.map(({r, c}, k) => `<li style="--rc:${c.r === "M" ? "#ff5f8f" : "#f5c518"}"><button class="gxc" data-k="${k}" aria-label="${esc(c.n)}"><img src="${tcArt(c, r.fin) || tcArt(c)}" alt="" loading="lazy"><span class="gxl">${TC_R[c.r][0]}</span><span class="gxn">${esc(c.n)}</span></button><span class="gxw">${esc(r.name)}</span><span class="gxa">${gxAgo(r.at)}</span></li>`).join("")}</ul>${CP.user ? `<button class="gxo">${gxOff() ? "Afficher mes tirages ici" : "Ne pas afficher mes tirages ici"}</button>` : ""}` : "";
-  document.querySelectorAll(".gxf").forEach(box => { if (box.dataset.h === html) return; const x = box.querySelector("ul")?.scrollLeft || 0; box.dataset.h = html; box.innerHTML = html; const u = box.querySelector("ul"); if (u) u.scrollLeft = x;
-    box.querySelectorAll(".gxc").forEach(b => b.onclick = () => { const o = rows[+b.dataset.k]; tcView(o.c, o.r.fin || undefined); });
-    const o = box.querySelector(".gxo"); if (o) o.onclick = () => { const s = tcLoad(); s.noFeed = !s.noFeed; tcSave(s); gxDraw(); }; });
+/* une ligne du fil devient une vignette ; rien pour une carte inconnue ou trop commune (le serveur ne connaît pas les raretés) */
+function gxItem(r, byId){
+  const m = String(r.card_id).match(/^s:([^:]+):(.+)$/);
+  if (m){ const c = (HS_DATA[m[1]] || []).find(x => hsKey(x) === m[2]); if (!c || hsRk(c) < 4) return null; const [lab, col] = HS_R[c[9]]; return {r, img: hsImg(c), n: c[4], lab, col, open: () => hsZoom(m[1], m[2])}; }
+  const c = byId.get(r.card_id), f = r.fin || ""; if (!c || !gxBig({r: c.r, f})) return null;
+  return {r, img: tcArt(c, f) || tcArt(c), n: c.n, lab: GX_FIN[f] ? TC_FIN[f][0] : TC_R[c.r][0], col: GX_FIN[f] || GX_COL[c.r], open: () => tcView(c, f || undefined)};
 }
-async function gxTick(force){ if (document.hidden && !force) return; try { const sb = typeof cpClient === "function" ? await cpClient() : null; if (!sb) return; const {data, error} = await sb.rpc("big_pulls_feed"); if (error || !data) return; GX.rows = data; gxDraw(); } catch {} }
+function gxDraw(){
+  const byId = new Map(tcCards().map(c => [c.id, c])), rows = GX.rows.map(r => gxItem(r, byId)).filter(Boolean).slice(0, 20);
+  const html = rows.length ? `<div class="gxt"><i></i>En direct · Les plus belles cartes</div><h3>Gros tirages</h3><ul>${rows.map((x, k) => `<li style="--rc:${x.col}"><button class="gxc" data-k="${k}" aria-label="${esc(x.n)}"><img src="${x.img}" alt="" loading="lazy"><span class="gxl">${x.lab}</span><span class="gxn">${esc(x.n)}</span></button><span class="gxw">${esc(x.r.name)}</span><span class="gxa">${gxAgo(x.r.at)}</span></li>`).join("")}</ul>${CP.user ? `<button class="gxo">${gxOff() ? "Afficher mes tirages ici" : "Ne pas afficher mes tirages ici"}</button>` : ""}` : "";
+  const box = document.querySelector(".gxf"); if (!box) return; box.hidden = TC_TAB !== "packs"; if (box.dataset.h === html) return; const x = box.querySelector("ul")?.scrollLeft || 0; box.dataset.h = html; box.innerHTML = html; const u = box.querySelector("ul"); if (u) u.scrollLeft = x;
+  box.querySelectorAll(".gxc").forEach(b => b.onclick = () => rows[+b.dataset.k].open());
+  const o = box.querySelector(".gxo"); if (o) o.onclick = () => { const s = tcLoad(); s.noFeed = !s.noFeed; tcSave(s); delete box.dataset.h; gxDraw(); };
+}
+const gxSeen = () => !document.hidden && !!document.querySelector("#tcg:not(.hidden)");
+async function gxTick(force){ if (!force && !gxSeen()) return; GX.at = Date.now(); try { const sb = typeof cpClient === "function" ? await cpClient() : null; if (!sb) return; const {data, error} = await sb.rpc("big_pulls_feed"); if (error || !data) return; GX.rows = data; gxDraw(); } catch {} }
 /* après une ouverture : on envoie d'abord la sauvegarde, car le serveur vérifie que la carte y est bien */
-async function gxPull(got){ try { if (!CP.user || gxOff()) return; const l = [...new Map(got.filter(c => c.r === "L" || c.r === "M").map(c => [c.id, c])).values()].slice(-3); if (!l.length) return; const sb = await cpClient(); if (!sb || !(await cpPush())) return; for (const c of l) await sb.rpc("report_pull", {card: c.id, f: c.f || ""}); gxTick(true); } catch {} }
-document.querySelector("#tcHome")?.insertAdjacentHTML("afterend", `<div class="gxf"></div>`);
-document.querySelector("#tcg .topbar")?.insertAdjacentHTML("afterend", `<div class="gxf"></div>`);
-setTimeout(() => gxTick(true), 2500); setInterval(gxTick, 6e4); setInterval(gxDraw, 6e4);
+async function gxSend(l){ try { if (!l.length || !CP.user || gxOff()) return; const sb = await cpClient(); if (!sb || !(await cpPush())) return; for (const [card, f] of l.slice(-3)) await sb.rpc("report_pull", {card, f}); gxTick(true); } catch {} }
+const gxPull = got => gxSend([...new Map(got.filter(gxBig).map(c => [c.id + (c.f || ""), [c.id, c.f || ""]])).values()]);
+const gxPullS = (id, got) => gxSend([...new Set(got.filter(c => hsRk(c) >= 4).map(hsKey))].map(k => ["s:" + id + ":" + k, ""]));
+document.querySelector("#tcg")?.insertAdjacentHTML("beforeend", `<div class="gxf" hidden></div>`);   /* sous les boosters : le bouton Ouvrir reste en haut de l'écran */
+{ const base = tcRender; tcRender = function(){ const r = base.apply(this, arguments); try { gxDraw(); if (Date.now() - GX.at > 3e4) gxTick(true); } catch {} return r; }; }
+setInterval(gxTick, 6e4);
 </script>
 
 <style>
